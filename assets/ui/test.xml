@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <xmlui>
-    <area x="16" y="16" w="480" h="64" border_size="1" border_color="7" fill_color="12" padding="8">
+    <area x="16" y="16" w="480" h="64">
+        <fill color="12"/>
+    </area>
+    <area x="16" y="160" w="480" h="64">
+        <fill color="11"/>
     </area>
 </xmlui>
 

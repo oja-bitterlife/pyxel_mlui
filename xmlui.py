@@ -115,6 +115,10 @@ class XMLUI:
             self.update_funcs[name](state, attr, element)
 
     def drawElement(self, name: str, state: UI_STATE, attr: UI_ATTR, element: Element):
+        # 無駄な描画は無くす
+        if "force_draw" not in attr and (state.area.w <= 0 or state.area.h <= 0):
+            return
+
         if name in self.draw_funcs:
             self.draw_funcs[name](state, attr, element)
 
