@@ -1,45 +1,31 @@
-import pyxel
-import xml.etree.ElementTree
+from xmlui import XMLUI
 from xml.etree.ElementTree import Element
 
+import pyxel
 
-class XMLUI_PYXEL():
-    root: Element
+def intAttr(attr: dict[str,str], name: str, default: int) -> int:
+    return int(attr[name]) if name in attr else default
 
-    @classmethod
-    def createFromFile(cls, fileName: str):
-        with open(fileName, "r") as f:
-            data = f.read()
-            return XMLUI_PYXEL(xml.etree.ElementTree.fromstring(data))
+def strAttr(attr: dict[str,str], name: str, default: str) -> str:
+    return attr[name] if name in attr else default
 
-    def __init__(self, dom: xml.etree.ElementTree.Element):
-        # 最上位がxmluiでなくてもいい
-        if dom.tag == "xmlui":
-            self.root = dom
-        else:
-            # 最上位でないときは子から探す
-            xmlui = dom.find("xmlui")
-            if xmlui is None:
-                raise Exception("<xmlui> not found")
-            else:
-                self.root = xmlui
+def drawArea(attr: dict[str,str], state: Element | None, element: Element):
+    width = intAttr(attr, "width", pyxel.width)
+    height = intAttr(attr, "height", pyxel.height)
+    border_size = intAttr(attr, "border_size", 1)
+    border_color = intAttr(attr, "border_color", 7)
+    fill_color = intAttr(attr, "fill_color", 11)
+    padding = intAttr(attr, "padding", 8)
 
-    def update(self):
-        self.root.iter
-        pass
+    pyxel.rect(0, 0, width, height, fill_color)
 
-    def draw(self):
-        pass
+# 処理関数テーブル
+defaultFuncs= {
+    "area": drawArea,
+}
 
 
-class UIElement(Element):
-    def __init__(self, element: xml.etree.ElementTree.Element):
-        self.element = element
-        print(element)
-
-    def updateElement(self):
-        pass
-
-    def drawElement(self):
-        pass
-
+# 処理関数の登録
+def setDefaults(xmlui: XMLUI):
+    for key in defaultFuncs:
+        xmlui.setDrawFunc(key, defaultFuncs[key])

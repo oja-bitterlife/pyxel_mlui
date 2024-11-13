@@ -6,13 +6,19 @@ def update(): # フレームの更新処理
     if pyxel.btnp(pyxel.KEY_Q):
         pyxel.quit()
 
+    xmlui.update()
+
 def draw(): # 描画処理
     pyxel.cls(0)
-    pyxel.rect(1, 1, 158, 118, 11)
 
+    xmlui.draw()
 
-from xmlui_pyxel import XMLUI_PYXEL
-xmlui = XMLUI_PYXEL.createFromFile("assets/ui/test.xml")
+from xmlui import XMLUI
+xmlui = XMLUI.createFromFile("assets/ui/test.xml")
+
+import xmlui_pyxel
+xmlui_pyxel.setDefaults(xmlui)
+
 
 # アプリケーションの実行
 pyxel.run(update, draw)
