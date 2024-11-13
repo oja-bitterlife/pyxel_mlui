@@ -16,20 +16,35 @@ class RECT:
         top = max(self.y, other.y)
         return RECT(left, top, right-left, bottom-top)
     
+    def contains(self, x, y):
+        return self.x <= x < self.x+self.w and self.y <= y < self.y+self.h
+
     def __repr__(self) -> str:
         return f"RECT({self.x}, {self.y}, {self.w}, {self.h})"
 
-class UI_STATE(dict):
-    area: RECT
-    parent: Element
+class UI_ATTR(dict):
+    def __init__(self, attr: dict[str, str]):
+        self.attr = attr
 
+    # ユーティリティ
+    def getInt(self, name: str, default: int) -> int:
+        return int(self.attr[name]) if name in self.attr else default
+
+    def getStr(self, name: str, default: str) -> str:
+        return self.attr[name] if name in self.attr else default
+
+
+class UI_STATE(dict):
+    parent: Element
+    area: RECT
+    attr: UI_ATTR
 
 class XMLUI:
     root: Element
     state_map: dict[Element, UI_STATE]  # 状態保存用
 
-    update_funcs: dict[str, Callable[[UI_STATE, dict[str,str], Element], None]] = {}
-    draw_funcs: dict[str, Callable[[UI_STATE, dict[str,str], Element], None]] = {}
+    update_funcs: dict[str, Callable[[UI_STATE, Element], None]] = {}
+    draw_funcs: dict[str, Callable[[UI_STATE, Element], None]] = {}
 
     # ファイルから読み込み
     @classmethod
@@ -65,7 +80,8 @@ class XMLUI:
     def update(self):
         for element in self.root.iter():
             state = self.state_map[element]
-            self.updateElement(element.tag, state, element.attrib, element)
+            state.attr = UI_ATTR(element.attrib)
+            self.updateElement(element.tag, state, element)
 
         # parentの更新
         parent_map = {c: p for p in self.root.iter() for c in p}
@@ -78,31 +94,34 @@ class XMLUI:
 
         for element in self.root.iter():
             state: dict[str,Any] = self.state_map[element]
+
+            # 自分のエリアを計算
             if element != self.root:
+                # 親の中でしか活動できない
                 parent = self.state_map[element].parent
                 parent_area = self.state_map[parent].area
-
+                # 親からのオフセットで計算
                 _x = int(element.attrib["x"]) if "x" in element.attrib else 0
                 _y = int(element.attrib["y"]) if "y" in element.attrib else 0
                 w = int(element.attrib["w"]) if "w" in element.attrib else parent_area.w-_x
                 h = int(element.attrib["h"]) if "h" in element.attrib else parent_area.h-_y
                 state.area = RECT(parent_area.x+_x, parent_area.y+_y, w, h).intersect(parent_area)
 
-            self.drawElement(element.tag, state, element.attrib, element)
+            self.drawElement(element.tag, state, element)
 
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
-    def updateElement(self, name: str, state: UI_STATE, attr: dict[str,str], element: Element):
+    def updateElement(self, name: str, state: UI_STATE, element: Element):
         if name in self.update_funcs:
-            self.update_funcs[name](state, attr, element)
+            self.update_funcs[name](state, element)
 
-    def drawElement(self, name: str, state: UI_STATE, attr: dict[str,str], element: Element):
+    def drawElement(self, name: str, state: UI_STATE, element: Element):
         if name in self.draw_funcs:
-            self.draw_funcs[name](state, attr, element)
+            self.draw_funcs[name](state, element)
 
     # 個別処理登録
-    def setUpdateFunc(self, name: str, func: Callable[[UI_STATE, dict[str,str], Element], None]):
+    def setUpdateFunc(self, name: str, func: Callable[[UI_STATE, Element], None]):
         self.update_funcs[name] = func
 
-    def setDrawFunc(self, name: str, func: Callable[[UI_STATE, dict[str,str], Element], None]):
+    def setDrawFunc(self, name: str, func: Callable[[UI_STATE, Element], None]):
         self.draw_funcs[name] = func
