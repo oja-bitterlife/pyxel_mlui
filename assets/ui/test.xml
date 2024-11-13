@@ -4,8 +4,11 @@
     <area x="16" y="16" w="480" h="64">
         <fill color="12"/>
     </area>
-    <area x="16" y="160" w="480" h="64">
-        <fill color="11"/>
-    </area>
+    <offset x="8">
+        <area x="16" y="160" w="480" h="64">
+            <fill color="11"/>
+            <fill padding="2" color="1"/>
+        </area>
+    </offset>
 </xmlui>
 

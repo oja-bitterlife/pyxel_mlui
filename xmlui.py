@@ -99,11 +99,21 @@ class XMLUI:
                 # 親の中でしか活動できない
                 parent = self.state_map[element].parent
                 parent_area = self.state_map[parent].area
+
                 # 親からのオフセットで計算
                 _x = int(element.attrib["x"]) if "x" in element.attrib else 0
                 _y = int(element.attrib["y"]) if "y" in element.attrib else 0
                 w = int(element.attrib["w"]) if "w" in element.attrib else parent_area.w-_x
                 h = int(element.attrib["h"]) if "h" in element.attrib else parent_area.h-_y
+
+                # paddingも設定できるように
+                if "padding_x" in element.attrib or "padding" in element.attrib:
+                    _x += int(element.attrib["padding_x"]) if "padding_x" in element.attrib else int(element.attrib["padding"])
+                    w -= int(element.attrib["padding_x"])*2 if "padding_x" in element.attrib else int(element.attrib["padding"])*2
+                if "padding_y" in element.attrib or "padding" in element.attrib:
+                    _y += int(element.attrib["padding_y"]) if "padding_y" in element.attrib else int(element.attrib["padding"])
+                    h -= int(element.attrib["padding_y"])*2 if "padding_y" in element.attrib else int(element.attrib["padding"])*2
+
                 state.area = RECT(parent_area.x+_x, parent_area.y+_y, w, h).intersect(parent_area)
 
             self.drawElement(element.tag, state, UI_ATTR(element.attrib), element)
