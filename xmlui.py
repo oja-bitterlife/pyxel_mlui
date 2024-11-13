@@ -100,19 +100,30 @@ class XMLUI:
                 parent = self.state_map[element].parent
                 parent_area = self.state_map[parent].area
 
+                # オフセット
+                _x = 0
+                _y = 0
+                w = parent_area.w
+                h = parent_area.h
+
                 # 親からのオフセットで計算
-                _x = int(element.attrib["x"]) if "x" in element.attrib else 0
-                _y = int(element.attrib["y"]) if "y" in element.attrib else 0
-                w = int(element.attrib["w"]) if "w" in element.attrib else parent_area.w-_x
-                h = int(element.attrib["h"]) if "h" in element.attrib else parent_area.h-_y
+                if element.tag in ["area", "offset"]:
+                    _x = int(element.attrib["x"]) if "x" in element.attrib else _x
+                    _y = int(element.attrib["y"]) if "y" in element.attrib else _y
+                if element.tag in ["area"]:
+                    w = int(element.attrib["w"]) if "w" in element.attrib else w
+                    h = int(element.attrib["h"]) if "h" in element.attrib else h
 
                 # paddingも設定できるように
-                if "padding_x" in element.attrib or "padding" in element.attrib:
-                    _x += int(element.attrib["padding_x"]) if "padding_x" in element.attrib else int(element.attrib["padding"])
-                    w -= int(element.attrib["padding_x"])*2 if "padding_x" in element.attrib else int(element.attrib["padding"])*2
-                if "padding_y" in element.attrib or "padding" in element.attrib:
-                    _y += int(element.attrib["padding_y"]) if "padding_y" in element.attrib else int(element.attrib["padding"])
-                    h -= int(element.attrib["padding_y"])*2 if "padding_y" in element.attrib else int(element.attrib["padding"])*2
+                if element.tag in ["padding"]:
+                    _x += int(element.attrib["x"]) if "x" in element.attrib else 0
+                    _x += int(element.attrib["size"]) if "size" in element.attrib else 0
+                    w -= int(element.attrib["x"])*2 if "x" in element.attrib else 0
+                    w -= int(element.attrib["size"])*2 if "size" in element.attrib else 0
+                    _y += int(element.attrib["y"]) if "y" in element.attrib else 0
+                    _y += int(element.attrib["size"]) if "size" in element.attrib else 0  
+                    h -= int(element.attrib["y"])*2 if "y" in element.attrib else 0
+                    h -= int(element.attrib["size"])*2 if "size" in element.attrib else 0
 
                 state.area = RECT(parent_area.x+_x, parent_area.y+_y, w, h).intersect(parent_area)
 

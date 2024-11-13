@@ -7,7 +7,9 @@
     <offset x="8">
         <area x="16" y="160" w="480" h="64">
             <fill color="11"/>
-            <fill padding="2" color="1"/>
+            <padding x="3" size="2">
+                <fill color="1"/>
+            </padding>
         </area>
     </offset>
 </xmlui>
