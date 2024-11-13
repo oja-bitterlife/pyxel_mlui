@@ -37,14 +37,13 @@ class UI_ATTR(dict):
 class UI_STATE(dict):
     parent: Element
     area: RECT
-    attr: UI_ATTR
 
 class XMLUI:
     root: Element
     state_map: dict[Element, UI_STATE]  # 状態保存用
 
-    update_funcs: dict[str, Callable[[UI_STATE, Element], None]] = {}
-    draw_funcs: dict[str, Callable[[UI_STATE, Element], None]] = {}
+    update_funcs: dict[str, Callable[[UI_STATE, UI_ATTR, Element], None]] = {}
+    draw_funcs: dict[str, Callable[[UI_STATE, UI_ATTR, Element], None]] = {}
 
     # ファイルから読み込み
     @classmethod
@@ -80,8 +79,8 @@ class XMLUI:
     def update(self):
         for element in self.root.iter():
             state = self.state_map[element]
-            state.attr = UI_ATTR(element.attrib)
-            self.updateElement(element.tag, state, element)
+            attr = UI_ATTR(element.attrib)
+            self.updateElement(element.tag, state, attr, element)
 
         # parentの更新
         parent_map = {c: p for p in self.root.iter() for c in p}
@@ -107,21 +106,21 @@ class XMLUI:
                 h = int(element.attrib["h"]) if "h" in element.attrib else parent_area.h-_y
                 state.area = RECT(parent_area.x+_x, parent_area.y+_y, w, h).intersect(parent_area)
 
-            self.drawElement(element.tag, state, element)
+            self.drawElement(element.tag, state, UI_ATTR(element.attrib), element)
 
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
-    def updateElement(self, name: str, state: UI_STATE, element: Element):
+    def updateElement(self, name: str, state: UI_STATE, attr: UI_ATTR, element: Element):
         if name in self.update_funcs:
-            self.update_funcs[name](state, element)
+            self.update_funcs[name](state, attr, element)
 
-    def drawElement(self, name: str, state: UI_STATE, element: Element):
+    def drawElement(self, name: str, state: UI_STATE, attr: UI_ATTR, element: Element):
         if name in self.draw_funcs:
-            self.draw_funcs[name](state, element)
+            self.draw_funcs[name](state, attr, element)
 
     # 個別処理登録
-    def setUpdateFunc(self, name: str, func: Callable[[UI_STATE, Element], None]):
+    def setUpdateFunc(self, name: str, func: Callable[[UI_STATE, UI_ATTR, Element], None]):
         self.update_funcs[name] = func
 
-    def setDrawFunc(self, name: str, func: Callable[[UI_STATE, Element], None]):
+    def setDrawFunc(self, name: str, func: Callable[[UI_STATE, UI_ATTR, Element], None]):
         self.draw_funcs[name] = func
