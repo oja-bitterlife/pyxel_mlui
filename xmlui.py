@@ -108,22 +108,18 @@ class XMLUI:
 
                 # 親からのオフセットで計算
                 if element.tag in ["area", "offset"]:
-                    _x = int(element.attrib["x"]) if "x" in element.attrib else _x
-                    _y = int(element.attrib["y"]) if "y" in element.attrib else _y
+                    _x = int(element.attrib.get("x", _x))
+                    _y = int(element.attrib.get("y", _y))
                 if element.tag in ["area"]:
-                    w = int(element.attrib["w"]) if "w" in element.attrib else w
-                    h = int(element.attrib["h"]) if "h" in element.attrib else h
+                    w = int(element.attrib.get("w", w))
+                    h = int(element.attrib.get("h", h))
 
                 # paddingも設定できるように
                 if element.tag in ["padding"]:
-                    _x += int(element.attrib["x"]) if "x" in element.attrib else 0
-                    _x += int(element.attrib["size"]) if "size" in element.attrib else 0
-                    w -= int(element.attrib["x"])*2 if "x" in element.attrib else 0
-                    w -= int(element.attrib["size"])*2 if "size" in element.attrib else 0
-                    _y += int(element.attrib["y"]) if "y" in element.attrib else 0
-                    _y += int(element.attrib["size"]) if "size" in element.attrib else 0  
-                    h -= int(element.attrib["y"])*2 if "y" in element.attrib else 0
-                    h -= int(element.attrib["size"])*2 if "size" in element.attrib else 0
+                    _x += int(element.attrib.get("x", 0)) + int(element.attrib.get("size", 0))
+                    _y += int(element.attrib.get("y", 0)) + int(element.attrib.get("size", 0))
+                    w -= int(element.attrib.get("x", 0))*2 + int(element.attrib.get("size", 0))*2
+                    h -= int(element.attrib.get("y", 0))*2 + int(element.attrib.get("size", 0))*2
 
                 state.area = RECT(parent_area.x+_x, parent_area.y+_y, w, h).intersect(parent_area)
 
