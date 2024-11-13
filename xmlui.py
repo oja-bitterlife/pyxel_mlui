@@ -75,7 +75,7 @@ class XMLUI:
     # ファイルから読み込み
     @classmethod
     def createFromFile(cls, fileName: str):
-        with open(fileName, "r") as f:
+        with open(fileName, "r", encoding="utf8") as f:
             return cls.createFromString(f.read())
 
     # リソースから読み込み

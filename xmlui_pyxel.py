@@ -11,13 +11,14 @@ def window(state: UI_STATE, attr: UI_ATTR, element: Element):
     pyxel.rectb(state.area.x+1, state.area.y+1, state.area.w-2, state.area.h-2, fg_color)
     pyxel.rectb(state.area.x+3, state.area.y+3, state.area.w-6, state.area.h-6, fg_color)
 
-
-
-
+def text(state: UI_STATE, attr: UI_ATTR, element: Element):
+    wrap = attr.getInt("wrap", 256)
+    color = attr.getInt("color", 7)
 
 # 処理関数テーブル
 defaultFuncs= {
     "window": window,
+    "text": text,
 }
 
 
