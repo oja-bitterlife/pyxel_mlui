@@ -100,26 +100,19 @@ class XMLUI:
                 parent = self.state_map[element].parent
                 parent_area = self.state_map[parent].area
 
-                # オフセット
-                _x = 0
-                _y = 0
-                w = parent_area.w
-                h = parent_area.h
-
                 # 親からのオフセットで計算
-                if element.tag in ["area", "offset"]:
-                    _x = int(element.attrib.get("x", _x))
-                    _y = int(element.attrib.get("y", _y))
-                if element.tag in ["area"]:
-                    w = int(element.attrib.get("w", w))
-                    h = int(element.attrib.get("h", h))
+                _x = int(element.attrib.get("x", 0))
+                _y = int(element.attrib.get("y", 0))
+                w = int(element.attrib.get("w", parent_area.w))
+                h = int(element.attrib.get("h", parent_area.h))
 
                 # paddingも設定できるように
-                if element.tag in ["padding"]:
-                    _x += int(element.attrib.get("x", 0)) + int(element.attrib.get("size", 0))
-                    _y += int(element.attrib.get("y", 0)) + int(element.attrib.get("size", 0))
-                    w -= int(element.attrib.get("x", 0))*2 + int(element.attrib.get("size", 0))*2
-                    h -= int(element.attrib.get("y", 0))*2 + int(element.attrib.get("size", 0))*2
+                _x += sum([int(element.attrib.get(name, 0)) for name in ["padding_x", "padding_l", "padding_size"]])
+                w -= sum([int(element.attrib.get(name, 0)) for name in ["padding_x", "padding_size"]])*2
+                _y += sum([int(element.attrib.get(name, 0)) for name in ["padding_y", "padding_t", "padding_size"]])
+                h -= sum([int(element.attrib.get(name, 0)) for name in ["padding_y", "padding_size"]])*2
+                w -= sum([int(element.attrib.get(name, 0)) for name in ["padding_l", "padding_r"]])
+                h -= sum([int(element.attrib.get(name, 0)) for name in ["padding_t", "padding_b"]])
 
                 state.area = RECT(parent_area.x+_x, parent_area.y+_y, w, h).intersect(parent_area)
 
