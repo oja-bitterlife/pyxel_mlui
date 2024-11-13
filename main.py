@@ -11,7 +11,7 @@ def update(): # フレームの更新処理
 def draw(): # 描画処理
     pyxel.cls(0)
 
-    xmlui.draw()
+    xmlui.draw(0, 0, pyxel.width, pyxel.height)
 
 from xmlui import XMLUI
 xmlui = XMLUI.createFromFile("assets/ui/test.xml")

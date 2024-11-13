@@ -1,11 +1,35 @@
 import xml.etree.ElementTree
 from xml.etree.ElementTree import Element
-from typing import Callable
+from typing import Callable,Any
 
-class XMLUI():
+class RECT:
+    def __init__(self, x:int, y:int, w:int, h:int):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+
+    def intersect(self, other):
+        right = min(self.x+self.w, other.x+other.w)
+        left = max(self.x, other.x)
+        bottom = min(self.y+self.h, other.y+other.h)
+        top = max(self.y, other.y)
+        return RECT(left, top, right-left, bottom-top)
+    
+    def __repr__(self) -> str:
+        return f"RECT({self.x}, {self.y}, {self.w}, {self.h})"
+
+class UI_STATE(dict):
+    area: RECT
+    parent: Element
+
+
+class XMLUI:
     root: Element
-    updateFuncs: dict[str, Callable[[dict[str,str], Element|None, Element], None]] = {}
-    drawFuncs: dict[str, Callable[[dict[str,str], Element|None, Element], None]] = {}
+    state_map: dict[Element, UI_STATE]  # 状態保存用
+
+    update_funcs: dict[str, Callable[[UI_STATE, dict[str,str], Element], None]] = {}
+    draw_funcs: dict[str, Callable[[UI_STATE, dict[str,str], Element], None]] = {}
 
     # ファイルから読み込み
     @classmethod
@@ -32,32 +56,53 @@ class XMLUI():
                 self.root = xmlui
 
         # 状態保存用
+        self.state_map = {self.root: UI_STATE()}
         for element in self.root.iter():
-            element.makeelement("xmlui_state", {})
+            self.state_map[element] = UI_STATE()
 
 
     # 全体を呼び出す処理
     def update(self):
         for element in self.root.iter():
-            self.updateElement(element.tag, element.attrib, element.find("xmlui_state"), element)
+            state = self.state_map[element]
+            self.updateElement(element.tag, state, element.attrib, element)
 
-    def draw(self):
+        # parentの更新
+        parent_map = {c: p for p in self.root.iter() for c in p}
         for element in self.root.iter():
-            self.drawElement(element.tag, element.attrib, element.find("xmlui_state"), element)
+            if element != self.root:
+                self.state_map[element].parent = parent_map[element]  # 親をstateに覚えておく
+
+    def draw(self, x, y, w, h):
+        self.state_map[self.root].area = RECT(x,y,w,h)
+
+        for element in self.root.iter():
+            state: dict[str,Any] = self.state_map[element]
+            if element != self.root:
+                parent = self.state_map[element].parent
+                parent_area = self.state_map[parent].area
+
+                _x = int(element.attrib["x"]) if "x" in element.attrib else 0
+                _y = int(element.attrib["y"]) if "y" in element.attrib else 0
+                w = int(element.attrib["w"]) if "w" in element.attrib else parent_area.w-_x
+                h = int(element.attrib["h"]) if "h" in element.attrib else parent_area.h-_y
+                state.area = RECT(parent_area.x+_x, parent_area.y+_y, w, h).intersect(parent_area)
+
+            self.drawElement(element.tag, state, element.attrib, element)
 
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
-    def updateElement(self, name: str, attr: dict[str,str], state: Element | None, element: Element):
-        if name in self.updateFuncs:
-            self.updateFuncs[name](attr, state, element)
+    def updateElement(self, name: str, state: UI_STATE, attr: dict[str,str], element: Element):
+        if name in self.update_funcs:
+            self.update_funcs[name](state, attr, element)
 
-    def drawElement(self, name: str, attr: dict[str,str], state: Element | None, element: Element):
-        if name in self.drawFuncs:
-            self.drawFuncs[name](attr, state, element)
+    def drawElement(self, name: str, state: UI_STATE, attr: dict[str,str], element: Element):
+        if name in self.draw_funcs:
+            self.draw_funcs[name](state, attr, element)
 
     # 個別処理登録
-    def setUpdateFunc(self, name: str, func: Callable[[dict[str,str], Element|None, Element], None]):
-        self.updateFuncs[name] = func
+    def setUpdateFunc(self, name: str, func: Callable[[UI_STATE, dict[str,str], Element], None]):
+        self.update_funcs[name] = func
 
-    def setDrawFunc(self, name: str, func: Callable[[dict[str,str], Element|None, Element], None]):
-        self.drawFuncs[name] = func
+    def setDrawFunc(self, name: str, func: Callable[[UI_STATE, dict[str,str], Element], None]):
+        self.draw_funcs[name] = func
