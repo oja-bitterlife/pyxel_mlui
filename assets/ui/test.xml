@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <xmlui>
-    <fill x="16" y="16" w="480" h="64" color="12"/>
-    <area x="16" y="160" w="480" h="64">
-        <fill color="11"/>
-        <fill padding_size="3" color="1"/>
-    </area>
+    <window x="16" y="16" w="480" h="240"/>
 </xmlui>
 

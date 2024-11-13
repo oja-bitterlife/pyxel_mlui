@@ -22,21 +22,48 @@ class RECT:
     def __repr__(self) -> str:
         return f"RECT({self.x}, {self.y}, {self.w}, {self.h})"
 
-class UI_ATTR(dict):
+class UI_ATTR:
     def __init__(self, attr: dict[str, str]):
         self.attr = attr
 
     # ユーティリティ
-    def getInt(self, name: str, default: int) -> int:
-        return int(self.attr[name]) if name in self.attr else default
+    def getInt(self, key: str, default: int) -> int:
+        return int(self.attr.get(key, default))
 
-    def getStr(self, name: str, default: str) -> str:
-        return self.attr[name] if name in self.attr else default
+    def getStr(self, key: str, default: str) -> str:
+        return self.attr.get(key, default)
+
+    def getBool(self, key: str, default: bool) -> bool:
+        return bool(self.attr.get(key, default))
 
 
-class UI_STATE(dict):
+    # dictと同じように扱えるように
+    def get(self, key: str, default: Any) -> str:
+        return self.attr.get(key, default)
+
+    def __getitem__(self, key: str) -> str:
+        return self.attr[key]
+
+    def __setitem__(self, key: str, value: Any):
+        self.attr[key] = value
+
+    def __repr__(self) -> str:
+        return self.attr.__repr__()
+
+
+
+class UI_STATE:
+    # 共通でもつもの
     parent: Element
     area: RECT
+
+    # 個々で用意するもの
+    def set(self, key:str, value:Any):
+        setattr(self, key, value)
+
+    def get(self, key:str, default:Any):
+        getattr(self, key, default)
+
 
 class XMLUI:
     root: Element
@@ -92,7 +119,7 @@ class XMLUI:
         self.state_map[self.root].area = RECT(x,y,w,h)
 
         for element in self.root.iter():
-            state: dict[str,Any] = self.state_map[element]
+            state = self.state_map[element]
 
             # 自分のエリアを計算
             if element != self.root:
@@ -125,8 +152,12 @@ class XMLUI:
             self.update_funcs[name](state, attr, element)
 
     def drawElement(self, name: str, state: UI_STATE, attr: UI_ATTR, element: Element):
+        # 非表示
+        if attr.getBool("hide", False):
+            return
+
         # 無駄な描画は無くす
-        if "force_draw" not in attr and (state.area.w <= 0 or state.area.h <= 0):
+        if attr.getBool("force_draw", False) and (state.area.w <= 0 or state.area.h <= 0):
             return
 
         if name in self.draw_funcs:
