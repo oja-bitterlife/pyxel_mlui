@@ -16,7 +16,8 @@ def window(state: UI_STATE):
 def text(state: UI_STATE):
     wrap = state.attrInt("wrap", 256)
     color = state.attrInt("color", 7)
-    pyxel.text(state.area.x, state.area.y, state.getText(), color, font)
+    text = state.getText()
+    pyxel.text(state.area.x, state.area.y, text, color, font)
 
 # 処理関数テーブル
 defaultFuncs= {
