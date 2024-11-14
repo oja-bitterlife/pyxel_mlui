@@ -42,11 +42,6 @@ class UI_STATE:
             self.id = self.element.attrib["id"]
         self.hide = self.attrBool("hide", False)
 
-
-    # elementアクセス用
-    def find(self) -> str:
-        return self.element.tag
-
     # attribアクセス用
     def attrInt(self, key: str, default: int) -> int:
         return int(self.element.attrib.get(key, default))
@@ -120,7 +115,7 @@ class XMLUI:
                 return state
         return None
 
-    # 描画用
+    # 更新用
     # *************************************************************************
     # 全体を呼び出す処理
     def update(self):
@@ -128,12 +123,26 @@ class XMLUI:
             state = self.state_map[element]
             self.updateElement(element.tag, state)
 
+        # ツリー構造の更新
+        self._updateTree()
+
+    def _updateTree(self):
+        # 削除フラグ対応
+        for state in self.state_map.values():
+            if state.remove:
+                # XMLに反映
+                state.parent.element.remove(state.element)
+        # 辞書からも削除
+        self.state_map = {k:v for k,v in self.state_map.items() if not v.remove}
+
         # parentの更新
-        parent_map = {c: p for p in self.root.element.iter() for c in p}
+        parent_map = {child: parent for parent in self.root.element.iter() for child in parent}
         for element in self.root.element.iter():
             if element != self.root:
                 self.state_map[element].parent = self.state_map[parent_map[element]]  # 親を覚えておく
 
+    # 描画用
+    # *************************************************************************
     def draw(self):
         # 表示領域の更新
         self._updateArea()
