@@ -3,7 +3,7 @@
 <xmlui>
     <window x="16" y="16" w="480" h="240">
         <text padding_size="8" wrap="4">
-            あいうえお
+            Hello-わーるド
         </text>
     </window>
 </xmlui>

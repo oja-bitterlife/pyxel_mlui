@@ -56,6 +56,9 @@ class UI_STATE:
     def attrBool(self, key: str, default: bool) -> bool:
         return bool(self.element.attrib.get(key, default))
 
+    def getText(self) -> str:
+        return self.element.text.strip() if self.element.text != None else ""
+
     # dictと同じように扱えるように
     def get(self, key: str, default: Any) -> str:
         return self.element.attrib.get(key, default)

@@ -1,6 +1,6 @@
 import pyxel # Pyxelモジュールをインポート
 
-pyxel.init(512, 512) # 初期化(ウィンドウサイズを指定)
+pyxel.init(256, 256) # 初期化(ウィンドウサイズを指定)
 
 def update(): # フレームの更新処理
     if pyxel.btnp(pyxel.KEY_Q):

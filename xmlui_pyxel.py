@@ -2,6 +2,8 @@ from xmlui import XMLUI,UI_STATE
 from xml.etree.ElementTree import Element
 
 import pyxel
+font = pyxel.Font("assets/font/b12.bdf")
+
 
 def window(state: UI_STATE):
     bg_color = state.attrInt("bg_color", 12)
@@ -14,6 +16,7 @@ def window(state: UI_STATE):
 def text(state: UI_STATE):
     wrap = state.attrInt("wrap", 256)
     color = state.attrInt("color", 7)
+    pyxel.text(state.area.x, state.area.y, state.getText(), color, font)
 
 # 処理関数テーブル
 defaultFuncs= {
