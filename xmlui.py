@@ -71,6 +71,15 @@ class UI_STATE:
     def __setitem__(self, key: str, value: Any):
         self.element.attrib[key] = value
 
+    # Utility
+    def isVisible(self) -> bool:
+        s = self
+        # 親まで遡って調べる
+        while(s != None):
+            if  s.hide:
+                return False
+            s = s.parent
+        return True
 
 
 class XMLUI:
@@ -200,12 +209,14 @@ class XMLUI:
 
     def drawElement(self, name: str, state: UI_STATE):
         # 非表示
-        if state.hide:
+        if not state.isVisible():
             return
 
         # 無駄な描画は無くす
-        if state.attrBool("force_draw", False) and (state.area.w <= 0 or state.area.h <= 0):
-            return
+        if state.area.w <= 0 or state.area.h <= 0:
+            # 強制描画の時は無駄でも描画する
+            if  not state.attrBool("force_draw", False):
+                return
 
         if name in self.draw_funcs:
             self.draw_funcs[name](state)
