@@ -17,6 +17,9 @@ def draw(): # 描画処理
 from xmlui import XMLUI
 xmlui = XMLUI.createFromFile("assets/ui/test.xml")
 
+e = xmlui.findByID("msg")
+print(e)
+
 import xmlui_pyxel
 xmlui_pyxel.setDefaults(xmlui)
 

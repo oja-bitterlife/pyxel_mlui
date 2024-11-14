@@ -26,7 +26,7 @@ class RECT:
 class UI_STATE:
     # XML構造
     element: Element  # 自身のElement
-    parent: 'UI_STATE'  # 親Element
+    parent: 'UI_STATE|None' = None# 親Element
     id: str|None = None  # <tag id="ID">
 
     # 表示関係
@@ -127,19 +127,24 @@ class XMLUI:
         self._updateTree()
 
     def _updateTree(self):
+        # removeされたElementを親に持つ子にもremoveフラグを立てる
+
+
         # 削除フラグ対応
         for state in self.state_map.values():
-            if state.remove:
+            if state.remove and state.parent != None:
                 # XMLに反映
                 state.parent.element.remove(state.element)
         # 辞書からも削除
-        self.state_map = {k:v for k,v in self.state_map.items() if not v.remove}
+        self.state_map = {key:val for key,val in self.state_map.items() if not val.remove}
 
         # parentの更新
         parent_map = {child: parent for parent in self.root.element.iter() for child in parent}
         for element in self.root.element.iter():
-            if element != self.root:
-                self.state_map[element].parent = self.state_map[parent_map[element]]  # 親を覚えておく
+            # rootは処理しない
+            if element == self.root.element:
+                continue
+            self.state_map[element].parent = self.state_map[parent_map[element]]  # 親を覚えておく
 
     # 描画用
     # *************************************************************************
