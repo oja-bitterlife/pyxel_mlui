@@ -22,56 +22,64 @@ class RECT:
     def __repr__(self) -> str:
         return f"RECT({self.x}, {self.y}, {self.w}, {self.h})"
 
-class UI_ATTR:
-    def __init__(self, attr: dict[str, str]):
-        self.attr = attr
 
-    # ユーティリティ
-    def getInt(self, key: str, default: int) -> int:
-        return int(self.attr.get(key, default))
+class UI_STATE:
+    # XML構造
+    element: Element  # 自身のElement
+    parent: 'UI_STATE'  # 親Element
+    id: str|None = None  # <tag id="ID">
 
-    def getStr(self, key: str, default: str) -> str:
-        return self.attr.get(key, default)
+    # 表示関係
+    area: RECT  # 描画範囲
+    hide: bool  # 非表示フラグ
 
-    def getBool(self, key: str, default: bool) -> bool:
-        return bool(self.attr.get(key, default))
+    def __init__(self, element: Element):
+        self.element = element
 
+        # ステート取得
+        if "id" in self.element.attrib:
+            self.id = self.element.attrib["id"]
+        self.hide = self.attrBool("hide", False)
+
+
+    # elementアクセス用
+    def find(self) -> str:
+        return self.element.tag
+
+    # attribアクセス用
+    def attrInt(self, key: str, default: int) -> int:
+        return int(self.element.attrib.get(key, default))
+
+    def attrStr(self, key: str, default: str) -> str:
+        return self.element.attrib.get(key, default)
+
+    def attrBool(self, key: str, default: bool) -> bool:
+        return bool(self.element.attrib.get(key, default))
 
     # dictと同じように扱えるように
     def get(self, key: str, default: Any) -> str:
-        return self.attr.get(key, default)
+        return self.element.attrib.get(key, default)
+    
+    def hasKey(self, key: str) -> bool:
+        return key in self.element.attrib
 
     def __getitem__(self, key: str) -> str:
-        return self.attr[key]
+        return self.element.attrib[key]
 
     def __setitem__(self, key: str, value: Any):
-        self.attr[key] = value
+        self.element.attrib[key] = value
 
-    def __repr__(self) -> str:
-        return self.attr.__repr__()
-
-
-
-class UI_STATE:
-    # 共通でもつもの
-    parent: Element
-    area: RECT
-
-    # 個々で用意するもの
-    def set(self, key:str, value:Any):
-        setattr(self, key, value)
-
-    def get(self, key:str, default:Any):
-        getattr(self, key, default)
 
 
 class XMLUI:
     root: Element
-    state_map: dict[Element, UI_STATE]  # 状態保存用
+    state_map: dict[Element, UI_STATE] = {}  # 状態保存用
 
-    update_funcs: dict[str, Callable[[UI_STATE, UI_ATTR, Element], None]] = {}
-    draw_funcs: dict[str, Callable[[UI_STATE, UI_ATTR, Element], None]] = {}
+    update_funcs: dict[str, Callable[[UI_STATE], None]] = {}
+    draw_funcs: dict[str, Callable[[UI_STATE], None]] = {}
 
+    # 初期化
+    # *************************************************************************
     # ファイルから読み込み
     @classmethod
     def createFromFile(cls, fileName: str):
@@ -97,75 +105,87 @@ class XMLUI:
                 self.root = xmlui
 
         # 状態保存用
-        self.state_map = {self.root: UI_STATE()}
         for element in self.root.iter():
-            self.state_map[element] = UI_STATE()
+            self.state_map[element] = UI_STATE(element)
 
+    # XML操作用
+    # *************************************************************************
+    def getStateByID(self, id: str) -> UI_STATE|None:
+        for state in self.state_map.values():
+            if state.id == id:
+                return state
+        return None
 
+    # 描画用
+    # *************************************************************************
     # 全体を呼び出す処理
     def update(self):
         for element in self.root.iter():
             state = self.state_map[element]
-            attr = UI_ATTR(element.attrib)
-            self.updateElement(element.tag, state, attr, element)
+            self.updateElement(element.tag, state)
 
         # parentの更新
         parent_map = {c: p for p in self.root.iter() for c in p}
         for element in self.root.iter():
             if element != self.root:
-                self.state_map[element].parent = parent_map[element]  # 親をstateに覚えておく
+                self.state_map[element].parent = self.state_map[parent_map[element]]  # 親を覚えておく
 
-    def draw(self, x, y, w, h):
-        self.state_map[self.root].area = RECT(x,y,w,h)
+    def draw(self, x, y):
+        self._updateArea(x, y)
 
         for element in self.root.iter():
+            self.drawElement(element.tag, self.state_map[element])
+
+    def _updateArea(self, x, y):
+        # ツリーで更新
+        for element in self.root.iter():
+            # rootは画面外込みで
+            if element == self.root:
+                self.state_map[self.root].area = RECT(x, y, 4096, 4096)
+                continue
+
+            # 子のエリア設定
             state = self.state_map[element]
 
-            # 自分のエリアを計算
-            if element != self.root:
-                # 親の中でしか活動できない
-                parent = self.state_map[element].parent
-                parent_area = self.state_map[parent].area
+            # 親からのオフセットで計算
+            _x = int(element.attrib.get("x", 0))
+            _y = int(element.attrib.get("y", 0))
+            w = int(element.attrib.get("w", state.parent.area.w))
+            h = int(element.attrib.get("h", state.parent.area.h))
 
-                # 親からのオフセットで計算
-                _x = int(element.attrib.get("x", 0))
-                _y = int(element.attrib.get("y", 0))
-                w = int(element.attrib.get("w", parent_area.w))
-                h = int(element.attrib.get("h", parent_area.h))
+            # paddingも設定できるように
+            _x += sum([int(element.attrib.get(name, 0)) for name in ["padding_x", "padding_l", "padding_size"]])
+            w -= sum([int(element.attrib.get(name, 0)) for name in ["padding_x", "padding_size"]])*2
+            _y += sum([int(element.attrib.get(name, 0)) for name in ["padding_y", "padding_t", "padding_size"]])
+            h -= sum([int(element.attrib.get(name, 0)) for name in ["padding_y", "padding_size"]])*2
+            w -= sum([int(element.attrib.get(name, 0)) for name in ["padding_l", "padding_r"]])
+            h -= sum([int(element.attrib.get(name, 0)) for name in ["padding_t", "padding_b"]])
 
-                # paddingも設定できるように
-                _x += sum([int(element.attrib.get(name, 0)) for name in ["padding_x", "padding_l", "padding_size"]])
-                w -= sum([int(element.attrib.get(name, 0)) for name in ["padding_x", "padding_size"]])*2
-                _y += sum([int(element.attrib.get(name, 0)) for name in ["padding_y", "padding_t", "padding_size"]])
-                h -= sum([int(element.attrib.get(name, 0)) for name in ["padding_y", "padding_size"]])*2
-                w -= sum([int(element.attrib.get(name, 0)) for name in ["padding_l", "padding_r"]])
-                h -= sum([int(element.attrib.get(name, 0)) for name in ["padding_t", "padding_b"]])
-
-                state.area = RECT(parent_area.x+_x, parent_area.y+_y, w, h).intersect(parent_area)
-
-            self.drawElement(element.tag, state, UI_ATTR(element.attrib), element)
+            # 親の中だけ表示するようにintersect
+            state.area = RECT(state.parent.area.x+_x, state.parent.area.y+_y, w, h).intersect(state.parent.area)
 
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
-    def updateElement(self, name: str, state: UI_STATE, attr: UI_ATTR, element: Element):
+    def updateElement(self, name: str, state: UI_STATE):
         if name in self.update_funcs:
-            self.update_funcs[name](state, attr, element)
+            self.update_funcs[name](state)
 
-    def drawElement(self, name: str, state: UI_STATE, attr: UI_ATTR, element: Element):
+    def drawElement(self, name: str, state: UI_STATE):
         # 非表示
-        if attr.getBool("hide", False):
+        if state.hide:
             return
 
         # 無駄な描画は無くす
-        if attr.getBool("force_draw", False) and (state.area.w <= 0 or state.area.h <= 0):
+        if state.attrBool("force_draw", False) and (state.area.w <= 0 or state.area.h <= 0):
             return
 
         if name in self.draw_funcs:
-            self.draw_funcs[name](state, attr, element)
+            self.draw_funcs[name](state)
 
     # 個別処理登録
-    def setUpdateFunc(self, name: str, func: Callable[[UI_STATE, UI_ATTR, Element], None]):
+    def setUpdateFunc(self, name: str, func: Callable[[UI_STATE], None]):
         self.update_funcs[name] = func
 
-    def setDrawFunc(self, name: str, func: Callable[[UI_STATE, UI_ATTR, Element], None]):
+    def setDrawFunc(self, name: str, func: Callable[[UI_STATE], None]):
         self.draw_funcs[name] = func
+
