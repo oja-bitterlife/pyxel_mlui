@@ -107,6 +107,10 @@ class XMLUI:
         for element in self.root.element.iter():
             self.state_map[element] = UI_STATE(element)
 
+        # 最初のツリー更新
+        self._updateTree()
+
+
     # XML操作用
     # *************************************************************************
     def findByID(self, id: str) -> UI_STATE|None:
@@ -127,16 +131,15 @@ class XMLUI:
         self._updateTree()
 
     def _updateTree(self):
-        # removeされたElementを親に持つ子にもremoveフラグを立てる
-
-
         # 削除フラグ対応
         for state in self.state_map.values():
+            # XMLに反映
             if state.remove and state.parent != None:
-                # XMLに反映
                 state.parent.element.remove(state.element)
+
         # 辞書からも削除
-        self.state_map = {key:val for key,val in self.state_map.items() if not val.remove}
+        remain_elements = list(self.root.element.iter())  # 残ったXMLの要素だけstateも残す
+        self.state_map = {key:val for key,val in self.state_map.items() if val.element in remain_elements}
 
         # parentの更新
         parent_map = {child: parent for parent in self.root.element.iter() for child in parent}

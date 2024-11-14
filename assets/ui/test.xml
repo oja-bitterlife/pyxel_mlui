@@ -2,8 +2,8 @@
 
 <xmlui>
     <window
-     x="16" y="16" w="480" h="240">
-        <text padding_size="8" wrap="4" id="msg">
+     x="16" y="16" w="480" h="240" id="msg">
+        <text padding_size="8" wrap="4">
             Hello-\nわーるド\nかいぎょうのてすと
         </text>
     </window>
