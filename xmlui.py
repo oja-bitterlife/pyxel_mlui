@@ -26,13 +26,16 @@ class RECT:
 class UI_STATE:
     # XML構造
     element: Element  # 自身のElement
-    parent: 'UI_STATE|None' = None# 親Element
+    parent: 'UI_STATE|None' = None  # 親Element
     id: str|None = None  # <tag id="ID">
 
     # 表示関係
     area: RECT = RECT(0, 0, 4096, 4096)  # 描画範囲
     hide: bool = False # 非表示フラグ
+
+    # 制御関係
     remove: bool = False  # 削除フラグ
+    update_count : int =  0
 
     def __init__(self, element: Element):
         self.element = element

@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <xmlui>
-    <window
-     x="16" y="16" w="480" h="240" id="msg">
-        <text padding_size="8" wrap="4">
-            Hello-\nわーるド\nかいぎょうのてすと
-        </text>
-    </window>
+    <templates>
+        <msg_win x="16" y="16" w="480" h="240">
+            <msg_text padding_size="8" wrap="4">
+                Hello-\nわーるド\nかいぎょうのてすと
+            </msg_text>
+        </msg_win>
+    </templates>
 </xmlui>
 

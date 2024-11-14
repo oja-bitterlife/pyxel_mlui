@@ -5,7 +5,7 @@ import pyxel
 font = pyxel.Font("assets/font/b12.bdf")
 FONT_SIZE = 12
 
-def window(state: UI_STATE):
+def msg_win(state: UI_STATE):
     bg_color = state.attrInt("bg_color", 12)
     fg_color = state.attrInt("fg_color", 7)
     pyxel.rect(state.area.x, state.area.y, state.area.w, state.area.h, bg_color)
@@ -13,7 +13,7 @@ def window(state: UI_STATE):
     pyxel.rectb(state.area.x+1, state.area.y+1, state.area.w-2, state.area.h-2, fg_color)
     pyxel.rectb(state.area.x+3, state.area.y+3, state.area.w-6, state.area.h-6, fg_color)
 
-def text(state: UI_STATE):
+def msg_text(state: UI_STATE):
     wrap = state.attrInt("wrap", 256)
     color = state.attrInt("color", 7)
 
@@ -24,8 +24,8 @@ def text(state: UI_STATE):
 
 # 処理関数テーブル
 defaultFuncs= {
-    "window": window,
-    "text": text,
+    "msg_win": msg_win,
+    "msg_text": msg_text,
 }
 
 
