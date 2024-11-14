@@ -17,10 +17,6 @@ def draw(): # 描画処理
 from xmlui import XMLUI
 xmlui = XMLUI.createFromFile("assets/ui/test.xml")
 
-s = xmlui.findByID("msg")
-if s != None:
-    s.remove = True
-# print(s.element)
 
 import xmlui_pyxel
 xmlui_pyxel.setDefaults(xmlui)
