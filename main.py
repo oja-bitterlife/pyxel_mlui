@@ -12,7 +12,7 @@ def draw(): # 描画処理
     pyxel.cls(0)
 
     # UI描画
-    xmlui.draw(0, 0)
+    xmlui.draw()
 
 from xmlui import XMLUI
 xmlui = XMLUI.createFromFile("assets/ui/test.xml")

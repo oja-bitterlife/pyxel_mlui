@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <xmlui>
-    <window x="16" y="16" w="480" h="240">
+    <window
+     x="16" y="16" w="480" h="240">
         <text padding_size="8" wrap="4">
-            Hello-わーるド
+            Hello-\nわーるド\nかいぎょうのてすと
         </text>
     </window>
 </xmlui>

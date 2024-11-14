@@ -30,8 +30,9 @@ class UI_STATE:
     id: str|None = None  # <tag id="ID">
 
     # 表示関係
-    area: RECT  # 描画範囲
-    hide: bool  # 非表示フラグ
+    area: RECT = RECT(0, 0, 4096, 4096)  # 描画範囲
+    hide: bool = False # 非表示フラグ
+    remove: bool = False  # 削除フラグ
 
     def __init__(self, element: Element):
         self.element = element
@@ -75,7 +76,7 @@ class UI_STATE:
 
 
 class XMLUI:
-    root: Element
+    root: UI_STATE
     state_map: dict[Element, UI_STATE] = {}  # 状態保存用
 
     update_funcs: dict[str, Callable[[UI_STATE], None]] = {}
@@ -98,22 +99,22 @@ class XMLUI:
     def __init__(self, dom: xml.etree.ElementTree.Element):
         # 最上位がxmluiでなくてもいい
         if dom.tag == "xmlui":
-            self.root = dom
+            self.root = UI_STATE(dom)
         else:
             # 最上位でないときは子から探す
-            xmlui = dom.find("xmlui")
-            if xmlui is None:
+            xmlui_root = dom.find("xmlui")
+            if xmlui_root is None:
                 raise Exception("<xmlui> not found")
             else:
-                self.root = xmlui
+                self.root = UI_STATE(xmlui_root)
 
         # 状態保存用
-        for element in self.root.iter():
+        for element in self.root.element.iter():
             self.state_map[element] = UI_STATE(element)
 
     # XML操作用
     # *************************************************************************
-    def getStateByID(self, id: str) -> UI_STATE|None:
+    def findByID(self, id: str) -> UI_STATE|None:
         for state in self.state_map.values():
             if state.id == id:
                 return state
@@ -123,33 +124,37 @@ class XMLUI:
     # *************************************************************************
     # 全体を呼び出す処理
     def update(self):
-        for element in self.root.iter():
+        for element in self.root.element.iter():
             state = self.state_map[element]
             self.updateElement(element.tag, state)
 
         # parentの更新
-        parent_map = {c: p for p in self.root.iter() for c in p}
-        for element in self.root.iter():
+        parent_map = {c: p for p in self.root.element.iter() for c in p}
+        for element in self.root.element.iter():
             if element != self.root:
                 self.state_map[element].parent = self.state_map[parent_map[element]]  # 親を覚えておく
 
-    def draw(self, x, y):
-        self._updateArea(x, y)
+    def draw(self):
+        # 表示領域の更新
+        self._updateArea()
 
-        for element in self.root.iter():
+        for element in self.root.element.iter():
             self.drawElement(element.tag, self.state_map[element])
 
-    def _updateArea(self, x, y):
+    def _updateArea(self):
         # ツリーで更新
-        for element in self.root.iter():
-            # rootは画面外込みで
-            if element == self.root:
-                self.state_map[self.root].area = RECT(x, y, 4096, 4096)
+        for element in self.root.element.iter():
+            state = self.state_map[element]
+
+            # root(parent==None)は処理しない
+            if state.parent == None:
+                # 一応root以外のparentに設定ミスがないかチェックしておく
+                if(state.element != self.root.element):
+                    raise Exception(f"Element has not parent: {state.element.tag}")
                 continue
 
             # 子のエリア設定
-            state = self.state_map[element]
-
+            # ---------------------------------------------
             # 親からのオフセットで計算
             _x = int(element.attrib.get("x", 0))
             _y = int(element.attrib.get("y", 0))

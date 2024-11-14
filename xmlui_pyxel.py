@@ -3,7 +3,7 @@ from xml.etree.ElementTree import Element
 
 import pyxel
 font = pyxel.Font("assets/font/b12.bdf")
-
+FONT_SIZE = 12
 
 def window(state: UI_STATE):
     bg_color = state.attrInt("bg_color", 12)
@@ -16,8 +16,11 @@ def window(state: UI_STATE):
 def text(state: UI_STATE):
     wrap = state.attrInt("wrap", 256)
     color = state.attrInt("color", 7)
-    text = state.getText()
-    pyxel.text(state.area.x, state.area.y, text, color, font)
+
+    texts = state.getText().split("\\n")
+
+    for i, text in enumerate(texts):
+        pyxel.text(state.area.x, state.area.y + i * FONT_SIZE, text, color, font)
 
 # 処理関数テーブル
 defaultFuncs= {
