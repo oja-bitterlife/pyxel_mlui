@@ -53,7 +53,8 @@ class UI_STATE:
         return self.element.attrib.get(key, default)
 
     def attrBool(self, key: str, default: bool) -> bool:
-        return bool(self.element.attrib.get(key, default))
+        attr = self.element.attrib.get(key)
+        return default if attr == None else (True if attr.lower() == "true"else False)
 
     def getText(self) -> str:
         return self.element.text.strip() if self.element.text != None else ""
