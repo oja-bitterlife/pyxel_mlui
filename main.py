@@ -26,8 +26,8 @@ msg_win = xmlui.findByTag("msg_win")
 if msg_win != None:
     msg_win2 = msg_win.duplicate()
     msg_win2["y"] = 100
-    msg_win.parent.addChild(msg_win2)
-
+    msg_win2["w"] = 100
+    xmlui.root.append_list.append(msg_win2)
 
 # アプリケーションの実行
 pyxel.run(update, draw)

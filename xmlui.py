@@ -29,16 +29,21 @@ class UI_STATE:
     parent: 'UI_STATE'  # 親Element
 
     # 表示関係
-    area: UI_RECT = UI_RECT(0, 0, 4096, 4096)  # 描画範囲
-    hide: bool = False # 非表示フラグ
+    area: UI_RECT  # 描画範囲
+    hide: bool  # 非表示フラグ
 
     # 制御関係
-    update_count : int = 0  # 更新カウンター
-    remove: bool = False  # 削除フラグ
-    append_list: list['UI_STATE'] = []  # 追加リスト
+    update_count: int  # 更新カウンター
+    remove: bool  # 削除フラグ
+    append_list: list['UI_STATE']  # 追加リスト
 
     def __init__(self, element: Element):
         self.element = element
+        self.area = UI_RECT(0, 0, 4096, 4096)
+        self.hide = False
+        self.update_count = 0
+        self.remove = False
+        self.append_list = []
 
         # ステート取得
         if "id" in self.element.attrib:
@@ -151,13 +156,13 @@ class XMLUI:
             self.updateElement(element.tag, state)
             state.update_count += 1  # 実行後に更新
 
-        # removeがマークされたノード(以下)を削除
+        # ノードの追加と削除
         for state in self.state_map.values():
+            # removeがマークされたノードは削除
             if state.remove and state != self.root:
                 state.parent.element.remove(state.element)
 
-        # appendがマークされたノードを追加
-        for state in self.state_map.values():
+            # appendされたノードを追加
             for child in state.append_list:
                 state.element.append(child.element)
             state.append_list = []
