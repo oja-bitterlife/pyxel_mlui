@@ -17,13 +17,21 @@ def msg_text(state: UI_STATE):
     wrap = state.attrInt("wrap", 256)
     color = state.attrInt("color", 7)
 
-    texts = state.getText()
+    draw_count = state.update_count//2
 
+    # テキスト表示
     ui_text = UI_TEXT(state.getText(), {"name":"world", "age":10})
-    lines = ui_text.get(state.update_count//10+1)
+    lines = ui_text.get(draw_count)
     for i,text in enumerate(lines):
         pyxel.text(state.area.x, state.area.y+i*FONT_SIZE, text, color, font)
-    
+
+    # カーソル表示
+    if draw_count > len(ui_text):
+        tri_size = 6
+        x = state.area.x+state.area.w//2 -tri_size//2
+        y = state.area.y+state.area.h -tri_size//2 + 1
+        pyxel.tri(x, y, x+tri_size, y, x+tri_size//2, y+tri_size//2, color)
+
 
 # 処理関数テーブル
 defaultFuncs= {
