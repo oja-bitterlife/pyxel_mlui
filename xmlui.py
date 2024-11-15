@@ -25,7 +25,7 @@ class UI_RECT:
 
 class UI_STATE:
     # プロパティ定義
-    # 一度しか初期化されないので配列等オブジェクトを設定すると事故る
+    # 一度しか初期化されないので定義と同時に配列等オブジェクトを代入すると事故る
     # のでconstructorで初期化する
     # XML構造
     element: Element  # 自身のElement
