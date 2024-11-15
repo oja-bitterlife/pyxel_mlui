@@ -124,10 +124,17 @@ class XMLUI:
 
     # XML操作用
     # *************************************************************************
-    def findByID(self, id: str, rootElement:Element|None=None) -> UI_STATE|None:
-        rootElement = rootElement if rootElement != None else self.root.element
+    def findByID(self, id: str, root:UI_STATE|None=None) -> UI_STATE|None:
+        rootElement = root.element if root != None else self.root.element
         for element in rootElement.iter():
             if element.attrib.get("id") == id:
+                return self.state_map[element]
+        return None
+
+    def findByTag(self, tag: str, root:UI_STATE|None=None) -> UI_STATE|None:
+        rootElement = root.element if root != None else self.root.element
+        for element in rootElement.iter():
+            if element.tag == tag:
                 return self.state_map[element]
         return None
 

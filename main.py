@@ -22,7 +22,7 @@ import xmlui_pyxel
 xmlui_pyxel.setDefaults(xmlui)
 
 
-msg_win = xmlui.findByID("msg_win")
+msg_win = xmlui.findByTag("msg_win")
 if msg_win != None:
     msg_win2 = msg_win.duplicate()
     msg_win2["y"] = 100
