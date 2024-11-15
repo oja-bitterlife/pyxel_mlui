@@ -41,6 +41,7 @@ class UI_STATE:
     append_list: list['UI_STATE']  # 追加リスト
 
     def __init__(self, element: Element):
+        # プロパティの初期化
         self.element = element
         self.area = UI_RECT(0, 0, 4096, 4096)
         self.hide = False
