@@ -221,6 +221,7 @@ class XMLUI:
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
     def updateElement(self, name: str, state: UI_STATE):
+        # 登録済みの関数だけ実行
         if name in self.update_funcs:
             self.update_funcs[name](state)
 
@@ -231,6 +232,7 @@ class XMLUI:
             if  not state.attrBool("force_draw", False):
                 return
 
+        # 登録済みの関数だけ実行
         if name in self.draw_funcs:
             self.draw_funcs[name](state)
 

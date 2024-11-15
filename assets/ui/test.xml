@@ -6,6 +6,7 @@
             <msg_text padding_size="8" wrap="4">
                 Hello-\nわーるド\nかいぎょうのてすと
             </msg_text>
+            <msg_cur/>
         </msg_win>
     </templates>
 </xmlui>
