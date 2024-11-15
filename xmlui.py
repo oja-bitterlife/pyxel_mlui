@@ -226,10 +226,6 @@ class XMLUI:
             self.update_funcs[name](state)
 
     def drawElement(self, name: str, state: UI_STATE):
-        # 無駄な描画は無くす
-        if state.area.w <= 0 or state.area.h <= 0:
-            return
-
         # 登録済みの関数だけ実行
         if name in self.draw_funcs:
             self.draw_funcs[name](state)
