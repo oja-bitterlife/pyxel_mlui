@@ -1,4 +1,4 @@
-from xmlui import XMLUI,UI_STATE
+from xmlui import XMLUI,UI_STATE,UI_TEXT
 from xml.etree.ElementTree import Element
 
 import pyxel
@@ -17,10 +17,16 @@ def msg_text(state: UI_STATE):
     wrap = state.attrInt("wrap", 256)
     color = state.attrInt("color", 7)
 
-    texts = state.getText().split("\\n")
+#    texts = state.getText().split("\\n")
+#
+#    for i, text in enumerate(texts):
+#        pyxel.text(state.area.x, state.area.y + i * FONT_SIZE, text, color, font)
 
-    for i, text in enumerate(texts):
-        pyxel.text(state.area.x, state.area.y + i * FONT_SIZE, text, color, font)
+    ui_text = UI_TEXT("name: {name}\nage: {age}", {"name":"world", "age":10}, 4)
+    lines = ui_text.get()
+    for i,text in enumerate(lines):
+        pyxel.text(state.area.x, state.area.y+i*FONT_SIZE, text, color, font)
+    
 
 # 処理関数テーブル
 defaultFuncs= {

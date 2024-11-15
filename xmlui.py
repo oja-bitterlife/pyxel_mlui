@@ -2,6 +2,8 @@ import xml.etree.ElementTree
 from xml.etree.ElementTree import Element
 from typing import Callable,Any
 
+import re
+
 class UI_RECT:
     def __init__(self, x:int, y:int, w:int, h:int):
         self.x = x
@@ -91,7 +93,52 @@ class UI_STATE:
     def duplicate(self) -> 'UI_STATE':
         return UI_STATE(self.element.makeelement(self.element.tag, self.element.attrib.copy()))
 
+class UI_TEXT:
+    src: str  # パラメータ置換済み文字列
+    tokens: list[str]  # 行(+wrap)分割済み文字列
 
+    # 改行とwrapで分割する
+    def __init__(self, text:str, params:dict[str:Any]={}, wrap:int=1024, sepexp=r"\n|\\n"):
+        self.src = text.format(**params)
+        self.tokens = []
+
+        # 行分割
+        lines = re.split(sepexp, self.src)
+
+        # wrap分割
+        for line in lines:
+            while(len(line) > wrap):
+                self.tokens.append(line[:wrap])
+                line = line[wrap:]
+            # 残りを保存
+            if len(line) > 0:
+                self.tokens.append(line[:wrap])
+
+    # 最大文字数に減らして取得
+    def get(self, limit:int=65535):
+        out = []
+
+        count = 0
+        for token in self.tokens:
+            # limitに届いていない間はそのまま保存
+            if len(token)+count < limit:
+                out.append(token)
+                count += len(token)
+            # limitを越えそう
+            else:
+                # limitまで取得
+                over = token[:limit-count]
+                if len(over) > 0:
+                    out.append(over)
+                break
+
+        return out
+
+
+
+
+# XMLでUIライブラリ本体
+# #############################################################################
 class XMLUI:
     root: UI_STATE
     state_map: dict[Element, UI_STATE] = {}  # 状態保存用
