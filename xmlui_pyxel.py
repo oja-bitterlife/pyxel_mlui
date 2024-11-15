@@ -35,7 +35,14 @@ def msg_cur_draw(ui:XMLUI, state: UI_STATE):
 
 
 def msg_text_update(ui:XMLUI, state: UI_STATE):
-    state.setAttr("draw_count", state.update_count//2)
+    draw_count = state.update_count//2
+    state.setAttr("draw_count",  draw_count)
+
+    msg_cur = ui.findByTag("msg_cur")
+    if msg_cur != None:
+        ui_text = UI_TEXT(state.getText(), {"name":"world", "age":10})
+        msg_cur.hide = True if draw_count < len(ui_text) else False
+
 
 # 処理関数テーブル
 drawFuncs= {
