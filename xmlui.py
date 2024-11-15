@@ -4,6 +4,7 @@ from typing import Callable,Any
 
 import re
 
+# 描画領域計算用
 class UI_RECT:
     def __init__(self, x:int, y:int, w:int, h:int):
         self.x = x
@@ -25,6 +26,7 @@ class UI_RECT:
         return f"RECT({self.x}, {self.y}, {self.w}, {self.h})"
 
 
+# UIパーツの状態保存用
 class UI_STATE:
     # プロパティ定義
     # 一度しか初期化されないので定義と同時に配列等オブジェクトを代入すると事故る
@@ -93,6 +95,8 @@ class UI_STATE:
     def duplicate(self) -> 'UI_STATE':
         return UI_STATE(self.element.makeelement(self.element.tag, self.element.attrib.copy()))
 
+
+# テキスト表示用
 class UI_TEXT:
     src: str  # パラメータ置換済み文字列
     tokens: list[str]  # 行(+wrap)分割済み文字列
@@ -133,8 +137,6 @@ class UI_TEXT:
                 break
 
         return out
-
-
 
 
 # XMLでUIライブラリ本体

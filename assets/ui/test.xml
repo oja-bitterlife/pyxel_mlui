@@ -4,7 +4,7 @@
     <templates hide="False">
         <msg_win x="16" y="16" w="224" h="60">
             <msg_text padding_size="8" wrap="4">
-                Hello-\nわーるド\nかいぎょうのてすと
+                name: {name}\nage: {age}\nHello-わーるド
             </msg_text>
             <msg_cur/>
         </msg_win>
