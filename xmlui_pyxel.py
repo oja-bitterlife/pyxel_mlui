@@ -20,7 +20,7 @@ def msg_text(state: UI_STATE):
     texts = state.getText()
 
     ui_text = UI_TEXT(state.getText(), {"name":"world", "age":10})
-    lines = ui_text.get()
+    lines = ui_text.get(state.update_count//10+1)
     for i,text in enumerate(lines):
         pyxel.text(state.area.x, state.area.y+i*FONT_SIZE, text, color, font)
     

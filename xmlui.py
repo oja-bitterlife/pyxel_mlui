@@ -120,6 +120,7 @@ class UI_TEXT:
 
     # 最大文字数に減らして取得
     def get(self, limit:int=65535):
+        limit = int(limit)  # 計算式だとfloatが型チェックをスルーする
         out = []
 
         count = 0
@@ -138,6 +139,8 @@ class UI_TEXT:
 
         return out
 
+    def __len__(self) -> int:
+        return len("".join(self.tokens))
 
 # XMLでUIライブラリ本体
 # #############################################################################
