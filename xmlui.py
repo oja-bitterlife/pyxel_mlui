@@ -36,7 +36,7 @@ class UI_STATE:
     # 制御関係
     update_count : int = 0  # 更新カウンター
     remove: bool = False  # 削除フラグ
-    append_list: list[Element] = []  # 追加リスト
+    append_list: list['UI_STATE'] = []  # 追加リスト
 
     def __init__(self, element: Element):
         self.element = element
@@ -72,15 +72,6 @@ class UI_STATE:
 
     def __setitem__(self, key: str, value: Any):
         self.element.attrib[key] = value
-
-    # ツリー操作
-    def addChild(self, element:Element):
-        if self.parent == None:
-            raise Exception("root is not have a paret")
-        self.parent.append_list.append(element)
-
-    def addLast(self, element:Element):
-        self.append_list.append(element)
 
 
 class XMLUI:
@@ -129,6 +120,15 @@ class XMLUI:
             if state.id == id:
                 return state
         return None
+
+    def addChild(self, parent:UI_STATE, child:UI_STATE):
+        parent.append_list.append(child)
+
+    def addLast(self, befor:UI_STATE, child:UI_STATE):
+        if befor.parent == None:
+            raise Exception("root is not have a paret")
+        befor.parent.append_list.append(child)
+
 
     # 更新用
     # *************************************************************************
