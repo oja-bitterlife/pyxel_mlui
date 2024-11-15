@@ -26,7 +26,7 @@ class UI_RECT:
 class UI_STATE:
     # XML構造
     element: Element  # 自身のElement
-    parent: 'UI_STATE|None' = None # 親Element
+    parent: 'UI_STATE'  # 親Element
     id: str|None = None  # <tag id="ID">
 
     # 表示関係
@@ -74,12 +74,13 @@ class UI_STATE:
         self.element.attrib[key] = value
 
     # ツリー操作用
-    def addElement(self, name:str, attr:dict[str,str]={}) -> 'UI_STATE':
-        state = UI_STATE(self.element.makeelement(name, attr))
+    def addChild(self, state:'UI_STATE'):
         self.append_list.append(state)
-        return state
 
-    def duplicate(self, useDataLink = True) -> 'UI_STATE':
+    def makeElement(self, name:str, attr:dict[str,str]={}) -> 'UI_STATE':
+        return UI_STATE(self.element.makeelement(name, attr))
+
+    def duplicate(self, useDataLink=True) -> 'UI_STATE':
         return UI_STATE(self.element if useDataLink else self.element.makeelement(self.element.tag, self.element.attrib.copy()))
 
 
@@ -145,9 +146,8 @@ class XMLUI:
 
         # removeがマークされたノード(以下)を削除
         for state in self.state_map.values():
-            if state.remove and state.parent != None:
+            if state.remove and state != self.root:
                 state.parent.element.remove(state.element)
-                state.parent = None
 
         # appendがマークされたノードを追加
         for state in self.state_map.values():
@@ -189,7 +189,8 @@ class XMLUI:
             return
 
         # 親を先に描画する(子を上に描画)
-        state.area = XMLUI._updateArea(state)  # エリア更新
+        if state != self.root:  # rootは親を持たないので更新不要
+            state.area = XMLUI._updateArea(state)  # エリア更新
         self.drawElement(parent.tag, state)
 
         # 子の処理
@@ -199,10 +200,6 @@ class XMLUI:
     # 子のエリア設定(親のエリア内に収まるように)
     @classmethod
     def _updateArea(cls, state:UI_STATE) -> UI_RECT:
-        # rootの場合はなにもしない
-        if state.parent == None:
-            return state.area
-
         element = state.element
 
         # 親からのオフセットで計算

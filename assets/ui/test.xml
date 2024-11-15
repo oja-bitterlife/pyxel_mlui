@@ -2,7 +2,7 @@
 
 <xmlui>
     <templates hide="False">
-        <msg_win x="16" y="16" w="480" h="60">
+        <msg_win x="16" y="16" w="480" h="60" id="msg_win">
             <msg_text padding_size="8" wrap="4">
                 Hello-\nわーるド\nかいぎょうのてすと
             </msg_text>

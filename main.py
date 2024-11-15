@@ -22,5 +22,12 @@ import xmlui_pyxel
 xmlui_pyxel.setDefaults(xmlui)
 
 
+msg_win = xmlui.findByID("msg_win")
+if msg_win != None:
+    msg_win2 = msg_win.duplicate(useDataLink=False)
+    msg_win2["y"] = 100
+    msg_win.parent.addChild(msg_win2)
+
+
 # アプリケーションの実行
 pyxel.run(update, draw)
