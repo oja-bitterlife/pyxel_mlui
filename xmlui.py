@@ -34,8 +34,9 @@ class UI_STATE:
     hide: bool = False # 非表示フラグ
 
     # 制御関係
-    remove: bool = False  # 削除フラグ
     update_count : int = 0  # 更新カウンター
+    remove: bool = False  # 削除フラグ
+    append_list: list[Element] = []  # 追加リスト
 
     def __init__(self, element: Element):
         self.element = element
@@ -71,6 +72,15 @@ class UI_STATE:
 
     def __setitem__(self, key: str, value: Any):
         self.element.attrib[key] = value
+
+    # ツリー操作
+    def addChild(self, element:Element):
+        if self.parent == None:
+            raise Exception("root is not have a paret")
+        self.parent.append_list.append(element)
+
+    def addLast(self, element:Element):
+        self.append_list.append(element)
 
 
 class XMLUI:
@@ -132,6 +142,12 @@ class XMLUI:
         for state in self.state_map.values():
             if state.remove and state.parent != None:
                 state.parent.element.remove(state.element)
+                state.parent = None
+
+        # appendがマークされたノードを追加
+        for state in self.state_map.values():
+            for child in state.append_list:
+                state.element.append(child.element)
 
         # Treeが変更されたかもなのでstateを更新
         self.state_map = XMLUI._makeState(self.root.element, self.state_map)
