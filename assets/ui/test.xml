@@ -6,6 +6,7 @@
             <msg_text padding_size="8" wrap="4">
                 name: {name}\nage: {age}\nHello-わーるド
             </msg_text>
+            <msg_cur x="109" y="51"  size="6"/>
         </msg_win>
     </templates>
 </xmlui>

@@ -25,18 +25,21 @@ def msg_text(state: UI_STATE):
     for i,text in enumerate(lines):
         pyxel.text(state.area.x, state.area.y+i*FONT_SIZE, text, color, font)
 
-    # カーソル表示
-    if draw_count > len(ui_text):
-        tri_size = 6
-        x = state.area.x+state.area.w//2 -tri_size//2
-        y = state.area.y+state.area.h -tri_size//2 + 1
-        pyxel.tri(x, y, x+tri_size, y, x+tri_size//2, y+tri_size//2, color)
 
+def msg_cur(state: UI_STATE):
+    tri_size = state.attrInt("size", 6)
+    color = state.attrInt("color", 7)
+
+    # カーソル表示
+    x = state.area.x
+    y = state.area.y
+    pyxel.tri(x, y, x+tri_size, y, x+tri_size//2, y+tri_size//2, color)
 
 # 処理関数テーブル
 defaultFuncs= {
     "msg_win": msg_win,
     "msg_text": msg_text,
+    "msg_cur": msg_cur,
 }
 
 
