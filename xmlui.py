@@ -2,7 +2,7 @@ import xml.etree.ElementTree
 from xml.etree.ElementTree import Element
 from typing import Callable,Any
 
-class RECT:
+class UI_RECT:
     def __init__(self, x:int, y:int, w:int, h:int):
         self.x = x
         self.y = y
@@ -14,7 +14,7 @@ class RECT:
         left = max(self.x, other.x)
         bottom = min(self.y+self.h, other.y+other.h)
         top = max(self.y, other.y)
-        return RECT(left, top, right-left, bottom-top)
+        return UI_RECT(left, top, right-left, bottom-top)
     
     def contains(self, x, y):
         return self.x <= x < self.x+self.w and self.y <= y < self.y+self.h
@@ -26,16 +26,16 @@ class RECT:
 class UI_STATE:
     # XML構造
     element: Element  # 自身のElement
-    parent: 'UI_STATE|None' = None  # 親Element
+    parent: 'UI_STATE|None' = None # 親Element
     id: str|None = None  # <tag id="ID">
 
     # 表示関係
-    area: RECT = RECT(0, 0, 4096, 4096)  # 描画範囲
+    area: UI_RECT = UI_RECT(0, 0, 4096, 4096)  # 描画範囲
     hide: bool = False # 非表示フラグ
 
     # 制御関係
     remove: bool = False  # 削除フラグ
-    update_count : int =  0
+    update_count : int = 0  # 更新カウンター
 
     def __init__(self, element: Element):
         self.element = element
@@ -97,21 +97,19 @@ class XMLUI:
     def __init__(self, dom: xml.etree.ElementTree.Element):
         # 最上位がxmluiでなくてもいい
         if dom.tag == "xmlui":
-            self.root = UI_STATE(dom)
+            xmlui_root = dom
         else:
             # 最上位でないときは子から探す
             xmlui_root = dom.find("xmlui")
+            # 見つからなかったら未対応のXML
             if xmlui_root is None:
                 raise Exception("<xmlui> not found")
-            else:
-                self.root = UI_STATE(xmlui_root)
 
-        # 状態保存用
-        for element in self.root.element.iter():
-            self.state_map[element] = UI_STATE(element)
+        # state_mapの作成
+        self.state_map = XMLUI._makeState(xmlui_root, {})
 
-        # 最初のツリー更新
-        self._updateTree()
+        # rootを取り出しておく
+        self.root = self.state_map[xmlui_root]
 
 
     # XML操作用
@@ -126,43 +124,42 @@ class XMLUI:
     # *************************************************************************
     # 全体を呼び出す処理
     def update(self):
+        # 各ノードのUpdate
         for element in self.root.element.iter():
-            state = self.state_map[element]
-            self.updateElement(element.tag, state)
+            self.updateElement(element.tag, self.state_map[element])
 
-        # ツリー構造の更新
-        self._updateTree()
-
-    def _updateTree(self):
-        # 削除フラグ対応
+        # removeがマークsされたノード(以下)を削除
         for state in self.state_map.values():
-            # XMLに反映
             if state.remove and state.parent != None:
                 state.parent.element.remove(state.element)
 
-        # 辞書からも削除
-        remain_elements = list(self.root.element.iter())  # 残ったXMLの要素だけstateも残す
-        self.state_map = {key:val for key,val in self.state_map.items() if val.element in remain_elements}
+        # Treeが変更されたかもなのでstateを更新
+        self.state_map = XMLUI._makeState(self.root.element, self.state_map)
 
-        # parentの更新
-        parent_map = {child: parent for parent in self.root.element.iter() for child in parent}
-        for element in self.root.element.iter():
-            # rootは処理しない
-            if element == self.root.element:
-                continue
-            self.state_map[element].parent = self.state_map[parent_map[element]]  # 親を覚えておく
+    # stateの更新
+    @classmethod
+    def _makeState(cls, root_element: Element, old_map: dict[Element,UI_STATE]) -> dict[Element,UI_STATE]:
+        # state_mapの更新
+        state_map = {element: old_map.get(element, UI_STATE(element)) for element in root_element.iter()}
+
+        # state_mapのparentを更新
+        def _updateStateParentRec(parent: Element):
+            for child in parent:
+                state_map[child].parent = state_map[parent]
+                _updateStateParentRec(child)
+        _updateStateParentRec(root_element)
+
+        return state_map
+
 
     # 描画用
     # *************************************************************************
     def draw(self):
-        # 表示領域の更新
-        self._updateArea()
-
         # ツリーの描画
-        self._drawTree(self.root.element)
+        self._drawTreeRec(self.root.element)
 
     # ツリーのノード以下を再帰処理
-    def _drawTree(self, parent: Element):
+    def _drawTreeRec(self, parent: Element):
         state = self.state_map[parent]
 
         # 非表示なら子も含めて描画しない
@@ -170,42 +167,38 @@ class XMLUI:
             return
 
         # 親を先に描画する(子を上に描画)
+        state.area = XMLUI._updateArea(state)  # エリア更新
         self.drawElement(parent.tag, state)
 
         # 子の処理
         for node in parent:
-            self._drawTree(node)
+            self._drawTreeRec(node)
 
-    def _updateArea(self):
-        # ツリーで更新
-        for element in self.root.element.iter():
-            state = self.state_map[element]
+    # 子のエリア設定(親のエリア内に収まるように)
+    @classmethod
+    def _updateArea(cls, state:UI_STATE) -> UI_RECT:
+        # rootの場合はなにもしない
+        if state.parent == None:
+            return state.area
 
-            # root(parent==None)は処理しない
-            if state.parent == None:
-                # 一応root以外のparentに設定ミスがないかチェックしておく
-                if(state.element != self.root.element):
-                    raise Exception(f"Element has not parent: {state.element.tag}")
-                continue
+        element = state.element
 
-            # 子のエリア設定
-            # ---------------------------------------------
-            # 親からのオフセットで計算
-            _x = int(element.attrib.get("x", 0))
-            _y = int(element.attrib.get("y", 0))
-            w = int(element.attrib.get("w", state.parent.area.w))
-            h = int(element.attrib.get("h", state.parent.area.h))
+        # 親からのオフセットで計算
+        _x = int(element.attrib.get("x", 0))
+        _y = int(element.attrib.get("y", 0))
+        w = int(element.attrib.get("w", state.parent.area.w))
+        h = int(element.attrib.get("h", state.parent.area.h))
 
-            # paddingも設定できるように
-            _x += sum([int(element.attrib.get(name, 0)) for name in ["padding_x", "padding_l", "padding_size"]])
-            w -= sum([int(element.attrib.get(name, 0)) for name in ["padding_x", "padding_size"]])*2
-            _y += sum([int(element.attrib.get(name, 0)) for name in ["padding_y", "padding_t", "padding_size"]])
-            h -= sum([int(element.attrib.get(name, 0)) for name in ["padding_y", "padding_size"]])*2
-            w -= sum([int(element.attrib.get(name, 0)) for name in ["padding_l", "padding_r"]])
-            h -= sum([int(element.attrib.get(name, 0)) for name in ["padding_t", "padding_b"]])
+        # paddingも設定できるように
+        _x += sum([int(element.attrib.get(name, 0)) for name in ["padding_x", "padding_l", "padding_size"]])
+        w -= sum([int(element.attrib.get(name, 0)) for name in ["padding_x", "padding_size"]])*2
+        _y += sum([int(element.attrib.get(name, 0)) for name in ["padding_y", "padding_t", "padding_size"]])
+        h -= sum([int(element.attrib.get(name, 0)) for name in ["padding_y", "padding_size"]])*2
+        w -= sum([int(element.attrib.get(name, 0)) for name in ["padding_l", "padding_r"]])
+        h -= sum([int(element.attrib.get(name, 0)) for name in ["padding_t", "padding_b"]])
 
-            # 親の中だけ表示するようにintersect
-            state.area = RECT(state.parent.area.x+_x, state.parent.area.y+_y, w, h).intersect(state.parent.area)
+        # 親の中だけ表示するようにintersect
+        return UI_RECT(state.parent.area.x+_x, state.parent.area.y+_y, w, h).intersect(state.parent.area)
 
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
