@@ -73,6 +73,13 @@ class UI_STATE:
     def __setitem__(self, key: str, value: Any):
         self.element.attrib[key] = value
 
+    # ツリー操作用
+    def addElement(self, name:str, attr:dict[str,str]) -> 'UI_STATE':
+        if self.parent == None:
+            raise Exception("parent is None")
+        state = UI_STATE(self.parent.element.makeelement(name, attr))
+        self.append_list.append(state)
+        return state
 
 class XMLUI:
     root: UI_STATE
@@ -120,9 +127,6 @@ class XMLUI:
             if state.id == id:
                 return state
         return None
-
-    def addChild(self, parent:UI_STATE, child:UI_STATE):
-        parent.append_list.append(child)
 
 
     # 更新用
