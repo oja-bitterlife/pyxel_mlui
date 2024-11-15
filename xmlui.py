@@ -74,10 +74,8 @@ class UI_STATE:
         self.element.attrib[key] = value
 
     # ツリー操作用
-    def addElement(self, name:str, attr:dict[str,str]) -> 'UI_STATE':
-        if self.parent == None:
-            raise Exception("parent is None")
-        state = UI_STATE(self.parent.element.makeelement(name, attr))
+    def addElement(self, name:str, attr:dict[str,str]={}) -> 'UI_STATE':
+        state = UI_STATE(self.element.makeelement(name, attr))
         self.append_list.append(state)
         return state
 
