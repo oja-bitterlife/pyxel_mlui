@@ -124,11 +124,6 @@ class XMLUI:
     def addChild(self, parent:UI_STATE, child:UI_STATE):
         parent.append_list.append(child)
 
-    def addLast(self, befor:UI_STATE, child:UI_STATE):
-        if befor.parent == None:
-            raise Exception("root is not have a paret")
-        befor.parent.append_list.append(child)
-
 
     # 更新用
     # *************************************************************************
