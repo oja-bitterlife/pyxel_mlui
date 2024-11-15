@@ -228,9 +228,7 @@ class XMLUI:
     def drawElement(self, name: str, state: UI_STATE):
         # 無駄な描画は無くす
         if state.area.w <= 0 or state.area.h <= 0:
-            # 強制描画の時は無駄でも描画する
-            if  not state.attrBool("force_draw", False):
-                return
+            return
 
         # 登録済みの関数だけ実行
         if name in self.draw_funcs:
