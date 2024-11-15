@@ -27,7 +27,6 @@ class UI_STATE:
     # XML構造
     element: Element  # 自身のElement
     parent: 'UI_STATE'  # 親Element
-    id: str|None = None  # <tag id="ID">
 
     # 表示関係
     area: UI_RECT = UI_RECT(0, 0, 4096, 4096)  # 描画範囲
@@ -80,8 +79,8 @@ class UI_STATE:
     def makeElement(self, name:str, attr:dict[str,str]={}) -> 'UI_STATE':
         return UI_STATE(self.element.makeelement(name, attr))
 
-    def duplicate(self, useDataLink=True) -> 'UI_STATE':
-        return UI_STATE(self.element if useDataLink else self.element.makeelement(self.element.tag, self.element.attrib.copy()))
+    def duplicate(self) -> 'UI_STATE':
+        return UI_STATE(self.element.makeelement(self.element.tag, self.element.attrib.copy()))
 
 
 class XMLUI:
@@ -125,10 +124,11 @@ class XMLUI:
 
     # XML操作用
     # *************************************************************************
-    def findByID(self, id: str) -> UI_STATE|None:
-        for state in self.state_map.values():
-            if state.id == id:
-                return state
+    def findByID(self, id: str, rootElement:Element|None=None) -> UI_STATE|None:
+        rootElement = rootElement if rootElement != None else self.root.element
+        for element in rootElement.iter():
+            if element.attrib.get("id") == id:
+                return self.state_map[element]
         return None
 
 
