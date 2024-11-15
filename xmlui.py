@@ -79,6 +79,10 @@ class UI_STATE:
         self.append_list.append(state)
         return state
 
+    def duplicate(self, useDataLink = True) -> 'UI_STATE':
+        return UI_STATE(self.element if useDataLink else self.element.makeelement(self.element.tag, self.element.attrib.copy()))
+
+
 class XMLUI:
     root: UI_STATE
     state_map: dict[Element, UI_STATE] = {}  # 状態保存用
