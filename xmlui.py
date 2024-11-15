@@ -148,7 +148,7 @@ class XMLUI:
         # appendがマークされたノードを追加
         for state in self.state_map.values():
             for child in state.append_list:
-                state.element.append(child)
+                state.element.append(child.element)
             state.append_list = []
 
         # Treeが変更されたかもなのでstateを更新
