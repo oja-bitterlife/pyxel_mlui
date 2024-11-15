@@ -128,7 +128,7 @@ class XMLUI:
         for element in self.root.element.iter():
             self.updateElement(element.tag, self.state_map[element])
 
-        # removeがマークsされたノード(以下)を削除
+        # removeがマークされたノード(以下)を削除
         for state in self.state_map.values():
             if state.remove and state.parent != None:
                 state.parent.element.remove(state.element)
