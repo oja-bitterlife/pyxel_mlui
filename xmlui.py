@@ -72,16 +72,6 @@ class UI_STATE:
     def __setitem__(self, key: str, value: Any):
         self.element.attrib[key] = value
 
-    # Utility
-    def isVisible(self) -> bool:
-        s = self
-        # 親まで遡って調べる
-        while(s != None):
-            if  s.hide:
-                return False
-            s = s.parent
-        return True
-
 
 class XMLUI:
     root: UI_STATE
@@ -168,8 +158,23 @@ class XMLUI:
         # 表示領域の更新
         self._updateArea()
 
-        for element in self.root.element.iter():
-            self.drawElement(element.tag, self.state_map[element])
+        # ツリーの描画
+        self._drawTree(self.root.element)
+
+    # ツリーのノード以下を再帰処理
+    def _drawTree(self, parent: Element):
+        state = self.state_map[parent]
+
+        # 非表示なら子も含めて描画しない
+        if state.hide:
+            return
+
+        # 親を先に描画する(子を上に描画)
+        self.drawElement(parent.tag, state)
+
+        # 子の処理
+        for node in parent:
+            self._drawTree(node)
 
     def _updateArea(self):
         # ツリーで更新
@@ -209,10 +214,6 @@ class XMLUI:
             self.update_funcs[name](state)
 
     def drawElement(self, name: str, state: UI_STATE):
-        # 非表示
-        if not state.isVisible():
-            return
-
         # 無駄な描画は無くす
         if state.area.w <= 0 or state.area.h <= 0:
             # 強制描画の時は無駄でも描画する
