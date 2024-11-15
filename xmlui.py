@@ -72,17 +72,10 @@ class UI_STATE:
     def getText(self) -> str:
         return self.element.text.strip() if self.element.text != None else ""
 
-    # dictと同じように扱えるように
-    def get(self, key: str, default: Any) -> str:
-        return self.element.attrib.get(key, default)
-    
-    def hasKey(self, key: str) -> bool:
+    def hasAttr(self, key: str) -> bool:
         return key in self.element.attrib
 
-    def __getitem__(self, key: str) -> str:
-        return self.element.attrib[key]
-
-    def __setitem__(self, key: str, value: Any):
+    def setAttr(self, key: str, value: str):
         self.element.attrib[key] = value
 
     # ツリー操作用

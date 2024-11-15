@@ -25,8 +25,8 @@ xmlui_pyxel.setDefaults(xmlui)
 msg_win = xmlui.findByTag("msg_win")
 if msg_win != None:
     msg_win2 = msg_win.duplicate()
-    msg_win2["y"] = 100
-    msg_win2["w"] = 100
+    msg_win2.setAttr("y", 100)
+    msg_win2.setAttr("w", 100)
     xmlui.root.append_list.append(msg_win2)
 
 # アプリケーションの実行
