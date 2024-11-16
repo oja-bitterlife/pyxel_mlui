@@ -19,7 +19,7 @@ class UI_RECT:
         top = max(self.y, other.y)
         return UI_RECT(left, top, right-left, bottom-top)
     
-    def contains(self, x, y):
+    def contains(self, x, y) -> bool:
         return self.x <= x < self.x+self.w and self.y <= y < self.y+self.h
 
     def __repr__(self) -> str:
@@ -27,7 +27,7 @@ class UI_RECT:
 
 
 # UIパーツの状態保存用
-class UI_STATE():
+class UI_STATE:
     # プロパティ定義
     # 一度しか初期化されないので定義と同時に配列等オブジェクトを代入すると事故る
     # のでconstructorで初期化する
@@ -136,8 +136,55 @@ class UI_TEXT:
 
         return out
 
-    def __len__(self) -> int:
+    @property
+    def length(self) -> int:
         return len("".join(self.tokens))
+
+
+# 表内移動Wrap付き
+class UI_GRID_CURSOR:
+    grid: list[list[Any]]  # グリッド
+    cur_x: int  # 現在位置x
+    cur_y: int  # 現在位置y
+
+    def __init__(self, grid:list[list[Any]], x:int=0, y:int=0) -> None:
+        self.grid = grid
+        self.cur_x = x
+        self.cur_y = y
+
+    # 範囲限定付き座標設定
+    def setPos(self, x:int, y:int, wrap:bool=False):
+        self.cur_x, self.cur_y = ((x + self.width) % self.width, (y + self.height) % self.height) if wrap else (max(min(x, self.width-1), 0), max(min(y, self.height-1), 0))
+        return self
+
+    def moveUp(self, wrap:bool=False):
+        return self.setPos(self.cur_x, self.cur_y-1, wrap)
+
+    def moveDown(self, wrap:bool=False):
+        return self.setPos(self.cur_x, self.cur_y+1, wrap)
+
+    def moveLeft(self, wrap:bool=False):
+        return self.setPos(self.cur_x-1, self.cur_y, wrap)
+
+    def moveRight(self, wrap:bool=False):
+        return self.setPos(self.cur_x+1, self.cur_y, wrap)
+
+    # girdの内容取得
+    def get(self) -> Any:
+        return self.grid[self.cur_y][self.cur_x]
+
+    @property
+    def width(self) -> int:
+        return len(self.grid[self.cur_y])
+
+    @property
+    def height(self) -> int:
+        return len(self.grid)
+
+    @property
+    def length(self) -> int:
+        return sum([len(line) for line in self.grid])
+
 
 # XMLでUIライブラリ本体
 # #############################################################################
