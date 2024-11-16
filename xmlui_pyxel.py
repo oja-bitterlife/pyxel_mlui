@@ -49,11 +49,28 @@ def msg_cur_draw(ui:XMLUI, state: UI_STATE):
     y = state.area.y
     pyxel.tri(x, y, x+tri_size, y, x+tri_size//2, y+tri_size//2, color)
 
+def menu_win_draw(ui:XMLUI, state: UI_STATE):
+    bg_color = state.attrInt("bg_color", 12)
+    fg_color = state.attrInt("fg_color", 7)
+    title  = state.attrStr("title", "")
+
+    pyxel.rect(state.area.x, state.area.y, state.area.w, state.area.h, bg_color)
+    pyxel.rectb(state.area.x, state.area.y, state.area.w, state.area.h, fg_color)
+    pyxel.rectb(state.area.x+1, state.area.y+1, state.area.w-2, state.area.h-2, fg_color)
+
+    if title:
+        str_w = FONT_SIZE*len(title)
+        text_x = state.area.x+(state.area.w-str_w)/2
+        pyxel.rect(text_x,state.area.y, str_w, FONT_SIZE, bg_color)
+        pyxel.text(text_x, state.area.y-2, title, 7, font)
+
+
 # draw関数テーブル
 drawFuncs= {
     "msg_win": msg_win_draw,
     "msg_text": msg_text_draw,
     "msg_cur": msg_cur_draw,
+    "menu_win": menu_win_draw,
 }
 
 
