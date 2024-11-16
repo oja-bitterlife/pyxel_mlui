@@ -10,7 +10,7 @@
             <msg_cur x="109" y="51" size="6"/>
         </msg_win>
 
-        <menu_item>
+        <menu_item title="コマンド">
             <menu_cursor/>
             <menu_text x="16">item</menu_text>
         </menu_item>
