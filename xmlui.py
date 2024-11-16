@@ -142,7 +142,7 @@ class UI_TEXT:
 
 
 # 表内移動Wrap付き
-class UI_GRID_CURSOR:
+class UI_GRID:
     grid: list[list[Any]]  # グリッド
     cur_x: int  # 現在位置x
     cur_y: int  # 現在位置y
