@@ -149,8 +149,7 @@ class UI_GRID:
 
     def __init__(self, grid:list[list[Any]], x:int=0, y:int=0):
         self.grid = grid
-        self.cur_x = x
-        self.cur_y = y
+        self.cur_x, self.cur_y = (x, y)
 
     # 範囲限定付き座標設定
     def setPos(self, x:int, y:int, wrap:bool=False) -> 'UI_GRID':
