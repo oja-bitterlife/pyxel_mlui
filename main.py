@@ -35,6 +35,12 @@ def update(): # フレームの更新処理
     if pyxel.btnp(pyxel.KEY_DOWN):
         command_items.moveDown()
 
+    if pyxel.btnp(pyxel.KEY_SPACE):
+        if command_items.get() == "speak":
+            msg_text = xmlui.findByTag("msg_text")
+            if msg_text:
+                msg_text.update_count = 0
+
     xmlui.update()
 
 def draw(): # 描画処理
