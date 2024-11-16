@@ -39,7 +39,6 @@ class UI_STATE:
 
     # 表示関係
     area: UI_RECT  # 描画範囲
-    hide: bool  # 非表示フラグ
 
     # 追加パラメータ
     update_count: int  # 更新カウンター
@@ -52,7 +51,6 @@ class UI_STATE:
         self.append_list = []
 
         self.area = UI_RECT(0, 0, 4096, 4096)
-        self.hide = False
 
         self.update_count = 0
         self.userData = {}
@@ -60,7 +58,6 @@ class UI_STATE:
         # ステート取得
         if "id" in self.element.attrib:
             self.id = self.element.attrib["id"]
-        self.hide = self.attrBool("hide", False)
 
     # attribアクセス用
     def attrInt(self, key: str, default: int) -> int:
@@ -79,8 +76,8 @@ class UI_STATE:
     def hasAttr(self, key: str) -> bool:
         return key in self.element.attrib
 
-    def setAttr(self, key: str, value: str):
-        self.element.attrib[key] = value
+    def setAttr(self, key: str, value: Any):
+        self.element.attrib[key] = str(value)  # attribはdict[str,str]なのでstrで保存する
 
     # ツリー操作用
     def addChild(self, state:'UI_STATE'):
@@ -296,7 +293,7 @@ class XMLUI:
         state = self.state_map[parent]
 
         # 非表示なら子も含めて描画しない
-        if state.hide:
+        if not state.attrBool("visible", True):
             return
 
         # 親を先に描画する(子を上に描画)

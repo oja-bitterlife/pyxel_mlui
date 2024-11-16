@@ -13,7 +13,7 @@ def msg_text_update(ui:XMLUI, state: UI_STATE):
     msg_cur = ui.findByTag("msg_cur")
     if msg_cur != None:
         ui_text = UI_TEXT(state.getText(), {"name":"world", "age":10})
-        msg_cur.hide = True if draw_count < ui_text.length else False
+        msg_cur.setAttr("visible", True if draw_count < ui_text.length else False)
 
 # update関数テーブル
 updateFuncs= {
