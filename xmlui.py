@@ -147,26 +147,26 @@ class UI_GRID:
     cur_x: int  # 現在位置x
     cur_y: int  # 現在位置y
 
-    def __init__(self, grid:list[list[Any]], x:int=0, y:int=0) -> None:
+    def __init__(self, grid:list[list[Any]], x:int=0, y:int=0):
         self.grid = grid
         self.cur_x = x
         self.cur_y = y
 
     # 範囲限定付き座標設定
-    def setPos(self, x:int, y:int, wrap:bool=False):
+    def setPos(self, x:int, y:int, wrap:bool=False) -> 'UI_GRID':
         self.cur_x, self.cur_y = ((x + self.width) % self.width, (y + self.height) % self.height) if wrap else (max(min(x, self.width-1), 0), max(min(y, self.height-1), 0))
         return self
 
-    def moveUp(self, wrap:bool=False):
+    def moveUp(self, wrap:bool=False) -> 'UI_GRID':
         return self.setPos(self.cur_x, self.cur_y-1, wrap)
 
-    def moveDown(self, wrap:bool=False):
+    def moveDown(self, wrap:bool=False) -> 'UI_GRID':
         return self.setPos(self.cur_x, self.cur_y+1, wrap)
 
-    def moveLeft(self, wrap:bool=False):
+    def moveLeft(self, wrap:bool=False) -> 'UI_GRID':
         return self.setPos(self.cur_x-1, self.cur_y, wrap)
 
-    def moveRight(self, wrap:bool=False):
+    def moveRight(self, wrap:bool=False) -> 'UI_GRID':
         return self.setPos(self.cur_x+1, self.cur_y, wrap)
 
     # girdの内容取得
