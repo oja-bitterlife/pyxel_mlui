@@ -5,6 +5,22 @@ import pyxel
 font = pyxel.Font("assets/font/b12.bdf")
 FONT_SIZE = 12
 
+
+def msg_text_update(ui:XMLUI, state: UI_STATE):
+    draw_count = state.update_count//2
+    state.userData["draw_count"] = draw_count
+
+    msg_cur = ui.findByTag("msg_cur")
+    if msg_cur != None:
+        ui_text = UI_TEXT(state.getText(), {"name":"world", "age":10})
+        msg_cur.hide = True if draw_count < len(ui_text) else False
+
+# update関数テーブル
+updateFuncs= {
+    "msg_text": msg_text_update,
+}
+
+
 def msg_win_draw(ui:XMLUI, state: UI_STATE):
     bg_color = state.attrInt("bg_color", 12)
     fg_color = state.attrInt("fg_color", 7)
@@ -16,7 +32,7 @@ def msg_win_draw(ui:XMLUI, state: UI_STATE):
 def msg_text_draw(ui:XMLUI, state: UI_STATE):
     wrap = state.attrInt("wrap", 256)
     color = state.attrInt("color", 7)
-    draw_count = state.attrInt("draw_count", 0)
+    draw_count: int = state.userData.get("draw_count", 0)
 
     # テキスト表示
     ui_text = UI_TEXT(state.getText(), {"name":"world", "age":10})
@@ -33,27 +49,13 @@ def msg_cur_draw(ui:XMLUI, state: UI_STATE):
     y = state.area.y
     pyxel.tri(x, y, x+tri_size, y, x+tri_size//2, y+tri_size//2, color)
 
-
-def msg_text_update(ui:XMLUI, state: UI_STATE):
-    draw_count = state.update_count//2
-    state.setAttr("draw_count",  draw_count)
-
-    msg_cur = ui.findByTag("msg_cur")
-    if msg_cur != None:
-        ui_text = UI_TEXT(state.getText(), {"name":"world", "age":10})
-        msg_cur.hide = True if draw_count < len(ui_text) else False
-
-
-# 処理関数テーブル
+# draw関数テーブル
 drawFuncs= {
     "msg_win": msg_win_draw,
     "msg_text": msg_text_draw,
     "msg_cur": msg_cur_draw,
 }
 
-updateFuncs= {
-    "msg_text": msg_text_update,
-}
 
 # 処理関数の登録
 def setDefaults(xmlui: XMLUI):

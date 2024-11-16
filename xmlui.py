@@ -27,31 +27,35 @@ class UI_RECT:
 
 
 # UIパーツの状態保存用
-class UI_STATE:
+class UI_STATE():
     # プロパティ定義
     # 一度しか初期化されないので定義と同時に配列等オブジェクトを代入すると事故る
     # のでconstructorで初期化する
     # XML構造
     element: Element  # 自身のElement
     parent: 'UI_STATE'  # 親Element
+    remove: bool  # 削除フラグ
+    append_list: list['UI_STATE']  # 追加リスト
 
     # 表示関係
     area: UI_RECT  # 描画範囲
     hide: bool  # 非表示フラグ
 
-    # 制御関係
+    # 追加パラメータ
     update_count: int  # 更新カウンター
-    remove: bool  # 削除フラグ
-    append_list: list['UI_STATE']  # 追加リスト
+    userData: dict[str, Any]  # その他ユーザーパラメータ
 
     def __init__(self, element: Element):
         # プロパティの初期化
         self.element = element
-        self.area = UI_RECT(0, 0, 4096, 4096)
-        self.hide = False
-        self.update_count = 0
         self.remove = False
         self.append_list = []
+
+        self.area = UI_RECT(0, 0, 4096, 4096)
+        self.hide = False
+
+        self.update_count = 0
+        self.userData = {}
 
         # ステート取得
         if "id" in self.element.attrib:
