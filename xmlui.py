@@ -144,9 +144,9 @@ class UI_GRID:
     cur_x: int  # 現在位置x
     cur_y: int  # 現在位置y
 
-    def __init__(self, grid:list[list[Any]], x:int=0, y:int=0):
+    def __init__(self, grid:list[list[Any]], init_cur_x:int=0, init_cur_y:int=0):
         self.grid = grid
-        self.cur_x, self.cur_y = (x, y)
+        self.cur_x, self.cur_y = (init_cur_x, init_cur_y)
 
     # 範囲限定付き座標設定
     def setPos(self, x:int, y:int, wrap:bool=False) -> 'UI_GRID':
@@ -332,8 +332,7 @@ class XMLUI:
         w -= sum([int(element.attrib.get(name, 0)) for name in ["padding_l", "padding_r"]])
         h -= sum([int(element.attrib.get(name, 0)) for name in ["padding_t", "padding_b"]])
 
-        # 親の中だけ表示するようにintersect
-        return UI_RECT(state.parent.area.x+_x, state.parent.area.y+_y, w, h).intersect(state.parent.area)
+        return UI_RECT(state.parent.area.x+_x, state.parent.area.y+_y, w, h)
 
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい

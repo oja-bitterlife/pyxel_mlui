@@ -1,4 +1,4 @@
-from xmlui import XMLUI,UI_STATE,UI_TEXT
+from xmlui import XMLUI,UI_STATE,UI_TEXT,UI_GRID
 from xml.etree.ElementTree import Element
 
 import pyxel
@@ -19,13 +19,24 @@ def menu_win_update(ui:XMLUI, state: UI_STATE):
     item_w = state.attrInt("item_w", 0)
     item_h = state.attrInt("item_h", 0)
 
+    item_data: UI_GRID  = state.userData["item_data"]
+
+    # アイテムを並べる
     rows = ui.findByTagAll("menu_row", state)
     for y,row in enumerate(rows):
-        row.setAttr("y", y*item_h)
+        item_y = y*item_h
+        row.setAttr("y", item_y)
 
         items = ui.findByTagAll("menu_item", row)
         for x,item in enumerate(items):
-            item.setAttr("x", x*item_w)
+            item_x = x*item_w
+            item.setAttr("x",item_x )
+
+            if x == item_data.cur_x and y == item_data.cur_y:
+                cursor = ui.findByTag("menu_cur", state)
+                if cursor:
+                    cursor.setAttr("x", item_x -6)
+                    cursor.setAttr("y", item_y+2)
 
 # update関数テーブル
 updateFuncs= {
@@ -75,12 +86,22 @@ def menu_win_draw(ui:XMLUI, state: UI_STATE):
         str_w = FONT_SIZE*len(title)
         text_x = state.area.x+(state.area.w-str_w)/2
         pyxel.rect(text_x,state.area.y, str_w, FONT_SIZE, bg_color)
-        pyxel.text(text_x, state.area.y-2, title, 7, font)
+        pyxel.text(text_x, state.area.y-2, title, fg_color, font)
 
 def menu_item_draw(ui:XMLUI, state: UI_STATE):
     title  = state.attrStr("title", "")
+    color = state.attrInt("color", 7)
     if title:
-        pyxel.text(state.area.x, state.area.y, title, 7, font)
+        pyxel.text(state.area.x, state.area.y, title, color, font)
+
+def menu_cur_draw(ui:XMLUI, state: UI_STATE):
+    tri_size = state.attrInt("size", 6)
+    color = state.attrInt("color", 7)
+
+    # カーソル表示
+    x = state.area.x
+    y = state.area.y
+    pyxel.tri(x, y, x, y+tri_size, x+tri_size//2, y+tri_size//2, color)
 
 # draw関数テーブル
 drawFuncs= {
@@ -89,6 +110,7 @@ drawFuncs= {
     "msg_cur": msg_cur_draw,
     "menu_win": menu_win_draw,
     "menu_item": menu_item_draw,
+    "menu_cur": menu_cur_draw,
 }
 
 
