@@ -43,7 +43,7 @@ class UI_STATE():
 
     # 追加パラメータ
     update_count: int  # 更新カウンター
-    userData: dict[str, Any]  # その他ユーザーパラメータ
+    userData: dict[str, Any]  # XMLを操作しないユーザーデータ。update/draw間受け渡し用
 
     def __init__(self, element: Element):
         # プロパティの初期化
