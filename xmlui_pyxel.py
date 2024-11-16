@@ -15,9 +15,22 @@ def msg_text_update(ui:XMLUI, state: UI_STATE):
         ui_text = UI_TEXT(state.getText(), {"name":"world", "age":10})
         msg_cur.setAttr("visible", False if draw_count < ui_text.length else True)
 
+def menu_win_update(ui:XMLUI, state: UI_STATE):
+    item_w = state.attrInt("item_w", 0)
+    item_h = state.attrInt("item_h", 0)
+
+    rows = ui.findByTagAll("menu_row", state)
+    for y,row in enumerate(rows):
+        row.setAttr("y", y*item_h)
+
+        items = ui.findByTagAll("menu_item", row)
+        for x,item in enumerate(items):
+            item.setAttr("x", x*item_w)
+
 # update関数テーブル
 updateFuncs= {
     "msg_text": msg_text_update,
+    "menu_win": menu_win_update,
 }
 
 
@@ -64,6 +77,10 @@ def menu_win_draw(ui:XMLUI, state: UI_STATE):
         pyxel.rect(text_x,state.area.y, str_w, FONT_SIZE, bg_color)
         pyxel.text(text_x, state.area.y-2, title, 7, font)
 
+def menu_item_draw(ui:XMLUI, state: UI_STATE):
+    title  = state.attrStr("title", "")
+    if title:
+        pyxel.text(state.area.x, state.area.y, title, 7, font)
 
 # draw関数テーブル
 drawFuncs= {
@@ -71,6 +88,7 @@ drawFuncs= {
     "msg_text": msg_text_draw,
     "msg_cur": msg_cur_draw,
     "menu_win": menu_win_draw,
+    "menu_item": menu_item_draw,
 }
 
 

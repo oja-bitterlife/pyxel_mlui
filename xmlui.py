@@ -239,6 +239,14 @@ class XMLUI:
                 return self.state_map[element]
         return None
 
+    def findByTagAll(self, tag: str, root:UI_STATE|None=None) -> list[UI_STATE]:
+        out = []
+        rootElement = root.element if root != None else self.root.element
+        for element in rootElement.iter():
+            if element.tag == tag:
+                out.append(self.state_map[element])
+        return out
+
 
     # 更新用
     # *************************************************************************

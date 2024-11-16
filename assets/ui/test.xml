@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <xmlui>
-    <templates hide="False">
+    <templates visible="True">
 
         <msg_win x="16" y="16" w="224" h="60">
             <msg_text padding_size="8" wrap="4">
@@ -10,15 +10,18 @@
             <msg_cur x="109" y="51" size="6"/>
         </msg_win>
 
-        <menu_win title="コマンド" x="16" y="100" w="128"  h="64" item_w="64" item_h="16">
-            <menu_row>
-                <menu_item title="はなす"/>
-                <menu_item title="どうぐ"/>
-            </menu_row>
-            <menu_row>
-                <menu_item title="つよさ"/>
-                <menu_item title="しらべる"/>
-            </menu_row>
+        <menu_win title="コマンド" x="16" y="100" w="128"  h="52" item_w="58" item_h="18">
+            <menu_grid x="12" y="14">
+                <menu_row>
+                    <menu_item title="はなす"/>
+                    <menu_item title="どうぐ"/>
+                </menu_row>
+                <menu_row>
+                    <menu_item title="つよさ"/>
+                    <menu_item title="しらべる"/>
+                </menu_row>
+                <menu_cur  size="6"/>
+            </menu_grid>
         </menu_win>
 
     </templates>
