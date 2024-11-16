@@ -95,7 +95,7 @@ class UI_TEXT:
     tokens: list[str]  # 行(+wrap)分割済み文字列
 
     # 改行とwrapで分割する
-    def __init__(self, text:str, params:dict[str:Any]={}, wrap:int=1024, sepexp=r"\n|\\n"):
+    def __init__(self, text:str, params:dict[str,Any]={}, wrap:int=1024, sepexp=r"\n|\\n"):
         self.src = text.format(**params)
         self.tokens = []
 
