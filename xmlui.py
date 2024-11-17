@@ -98,6 +98,7 @@ class UI_STATE:
     def duplicate(self, new_id:str|None) -> 'UI_STATE':
         # まずは複製
         dup_state =  UI_STATE(self._xmlui, self.element.makeelement(self.element.tag, self.element.attrib.copy()))
+        dup_state.element.text = self.element.text
         if new_id is None:
             # Noneならidを消す(無名化)
             if new_id in dup_state.element.attrib:
