@@ -39,7 +39,7 @@ def update(): # フレームの更新処理
 
         if pyxel.btnp(pyxel.KEY_SPACE):
             if active_menu.getData() == "speak":
-                msg_text = xmlui.findByTag("msg_text")
+                msg_text = xmlui.findByTag("msg_text")[0]
                 if msg_text:
                     msg_text.update_count = 0
 

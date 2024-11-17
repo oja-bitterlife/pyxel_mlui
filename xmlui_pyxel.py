@@ -9,7 +9,7 @@ FONT_SIZE = 12
 def msg_text_update(ui:XMLUI, state: UI_STATE):
     draw_count = state.update_count//2
 
-    msg_cur = ui.findByTag("msg_cur")
+    msg_cur = ui.findByTag("msg_cur")[0]
     if msg_cur != None:
         ui_text = UI_TEXT(state.getText(), {"name":"world", "age":10})
         msg_cur.setAttr("visible", False if draw_count < ui_text.length else True)
@@ -23,18 +23,18 @@ def menu_grid_update(ui:XMLUI, state: UI_STATE):
         return
 
     # アイテムを並べる
-    rows = ui.findByTagAll("menu_row", state)
+    rows = ui.findByTag("menu_row", state)
     for y,row in enumerate(rows):
         item_y = y*item_h
         row.setAttr("y", item_y)
 
-        items = ui.findByTagAll("menu_item", row)
+        items = ui.findByTag("menu_item", row)
         for x,item in enumerate(items):
             item_x = x*item_w
             item.setAttr("x",item_x )
 
             if x == item_data.cur_x and y == item_data.cur_y:
-                cursor = ui.findByTag("menu_cur", state)
+                cursor = ui.findByTag("menu_cur", state)[0]
                 if cursor:
                     cursor.setAttr("x", item_x -6)
                     cursor.setAttr("y", item_y+2)

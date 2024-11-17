@@ -238,13 +238,14 @@ class UI_MENU_GROUP:
                 return menu
         return None
 
-    def findByTag(self, tag:str) -> UI_MENU|None:
+    def findByTag(self, tag:str) -> list[UI_MENU]:
+        out = []
         for menu in self.stack:
             if isinstance(menu, UI_MENU_GROUP):
-                return menu.findByTag(tag)
-            if menu.state.element.tag == tag:
-                return menu
-        return None
+                out += menu.findByTag(tag)
+            elif menu.state.element.tag == tag:
+                out.append(menu)
+        return out
 
     @property
     def remove(self) -> bool:
@@ -317,14 +318,7 @@ class XMLUI:
                 return self.state_map[element]
         return None
 
-    def findByTag(self, tag:str, root:UI_STATE|None=None) -> UI_STATE|None:
-        rootElement = root.element if root != None else self.root.element
-        for element in rootElement.iter():
-            if element.tag == tag:
-                return self.state_map[element]
-        return None
-
-    def findByTagAll(self, tag:str, root:UI_STATE|None=None) -> list[UI_STATE]:
+    def findByTag(self, tag:str, root:UI_STATE|None=None) -> list[UI_STATE]:
         out = []
         rootElement = root.element if root != None else self.root.element
         for element in rootElement.iter():
