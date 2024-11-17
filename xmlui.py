@@ -75,11 +75,11 @@ class UI_STATE:
         self.element.attrib[key] = str(value)  # attribはdict[str,str]なのでstrで保存する
 
     @property
-    def enable(self) -> bool:
+    def is_enable(self) -> bool:
         return self.attrBool("enable", True) and not self.attrBool("disable", False)
 
     @property
-    def visible(self) -> bool:
+    def is_visible(self) -> bool:
         return self.attrBool("visible", True) and self.attrBool("show", True) and not self.attrBool("hide", False)
 
     # ツリー操作用
@@ -362,7 +362,7 @@ class XMLUI:
         state = self.state_map[parent]
 
         # disableなら子も含めてUpdateしない
-        if not state.enable:
+        if not state.is_enable:
             return
 
         # 更新処理
@@ -401,7 +401,7 @@ class XMLUI:
         state = self.state_map[parent]
 
         # 非表示なら子も含めて描画しない
-        if not state.visible or not state.enable:  # disable時も表示しない
+        if not state.is_visible or not state.is_enable:  # disable時も表示しない
             return
 
         # エリア更新
