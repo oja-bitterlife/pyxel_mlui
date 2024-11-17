@@ -15,6 +15,7 @@ def msg_text_update(state: UI_STATE):
     draw_count = state.update_count//2
     ui_text = UI_TEXT(state.getText(), {"name":"world", "age":10})
 
+    state.setAttr("draw_count", draw_count)
     state.setAttr("finish", draw_count >= ui_text.length)
 
 def menu_grid_update(state: UI_STATE):
@@ -61,8 +62,7 @@ def msg_win_draw(state:UI_STATE, ):
 def msg_text_draw(state:UI_STATE):
     wrap = state.attrInt("wrap", 256)
     color = state.attrInt("color", 7)
-
-    draw_count = state.update_count//2
+    draw_count = state.attrInt("draw_count", 0)
 
     # テキスト表示
     ui_text = UI_TEXT(state.getText(), {"name":"world", "age":10})

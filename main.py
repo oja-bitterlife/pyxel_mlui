@@ -9,6 +9,7 @@ xmlui = XMLUI.createFromFile("assets/ui/test.xml")
 import xmlui_pyxel
 xmlui_pyxel.setDefaults(xmlui)
 
+
 from xmlui import UI_MENU,UI_MENU_GROUP
 command_item_data = [
     ["speak", "tool"],
@@ -38,13 +39,17 @@ def update(): # フレームの更新処理
             active_menu.moveDown()
 
         if pyxel.btnp(pyxel.KEY_SPACE):
-            msg_win = xmlui.root.findByID("msg_win")
+            msg_win = xmlui.root.findByTag("msg_win")
             if msg_win:
-                if msg_win.is_enable:
-                    msg_win.setAttr("enable", False)
+                if msg_win[0].is_enable:
+                    msg_win[0].setAttr("enable", False)
 
                 elif active_menu.getData() == "speak":
-                    msg_win.setAttr("enable", True)
+                    msg_win[0].setAttr("enable", True)
+                    msg_text = msg_win[0].findByTag("msg_text")
+                    if msg_text:
+                        msg_text[0].update_count = 0
+                        msg_text[0].setAttr("finish", False)
 
         if pyxel.btnp(pyxel.KEY_BACKSPACE):
             active_menu.close()

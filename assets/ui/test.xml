@@ -3,7 +3,7 @@
 <xmlui>
     <templates visible="True">
 
-        <msg_win x="16" y="180" w="224" h="60" id="msg_win" enable="False">
+        <msg_win x="16" y="180" w="224" h="60" enable="False">
             <msg_text x="8" y="8" wrap="4">
                 name: {name}\nage: {age}\nHello-わーるド
             </msg_text>
