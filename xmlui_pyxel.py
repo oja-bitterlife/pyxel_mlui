@@ -23,7 +23,7 @@ def menu_grid_update(state: UI_STATE):
     item_h = state.attrInt("item_h", 0)
 
     item_data  = state._xmlui.menu.findByID("command_menu")
-    if item_data == None:
+    if item_data is None:
         return
 
     # アイテムを並べる
