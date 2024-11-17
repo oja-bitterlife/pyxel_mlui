@@ -15,10 +15,9 @@ command_item_data = [
     ["status", "check"],
 ]
 
-command_win = xmlui.findByID("command_win")
-if command_win:
-    command_items = UI_MENU(command_item_data, command_win, 0, 0)
-    xmlui.openMenu(command_items)
+command_menu = xmlui.findByID("command_menu")
+if command_menu:
+    xmlui.openMenu(UI_MENU(command_item_data, command_menu, 0, 0))
 
 
 # Main

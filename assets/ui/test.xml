@@ -10,8 +10,8 @@
             <msg_cur x="109" y="51" size="6"/>
         </msg_win>
 
-        <menu_win title="コマンド" x="16" y="100" w="128"  h="52" item_w="58" item_h="18" id="command_win">
-            <menu_grid x="12" y="14">
+        <menu_win title="コマンド" x="16" y="100" w="128"  h="52">
+            <menu_grid x="12" y="14" item_w="58" item_h="18" id="command_menu">
                 <menu_row>
                     <menu_item title="はなす"/>
                     <menu_item title="どうぐ"/>

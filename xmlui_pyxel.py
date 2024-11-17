@@ -15,7 +15,7 @@ def msg_text_update(ui:XMLUI, state: UI_STATE):
         ui_text = UI_TEXT(state.getText(), {"name":"world", "age":10})
         msg_cur.setAttr("visible", False if draw_count < ui_text.length else True)
 
-def menu_win_update(ui:XMLUI, state: UI_STATE):
+def menu_grid_update(ui:XMLUI, state: UI_STATE):
     item_w = state.attrInt("item_w", 0)
     item_h = state.attrInt("item_h", 0)
 
@@ -43,7 +43,7 @@ def menu_win_update(ui:XMLUI, state: UI_STATE):
 # update関数テーブル
 updateFuncs= {
     "msg_text": msg_text_update,
-    "menu_win": menu_win_update,
+    "menu_grid": menu_grid_update,
 }
 
 
