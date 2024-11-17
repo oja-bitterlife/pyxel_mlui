@@ -9,7 +9,7 @@ FONT_SIZE = 12
 def msg_text_update(state: UI_STATE):
     draw_count = state.update_count//2
 
-    msg_cur = state.xmlui.root.findByTag("msg_cur")[0]
+    msg_cur = state._xmlui.root.findByTag("msg_cur")[0]
     if msg_cur != None:
         ui_text = UI_TEXT(state.getText(), {"name":"world", "age":10})
         msg_cur.setAttr("visible", False if draw_count < ui_text.length else True)
@@ -18,7 +18,7 @@ def menu_grid_update(state: UI_STATE):
     item_w = state.attrInt("item_w", 0)
     item_h = state.attrInt("item_h", 0)
 
-    item_data  = state.xmlui.menu.findByID("command_menu")
+    item_data  = state._xmlui.menu.findByID("command_menu")
     if item_data == None:
         return
 

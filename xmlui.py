@@ -31,11 +31,12 @@ class UI_STATE:
     # プロパティ定義
     # 一度しか初期化されないので定義と同時に配列等オブジェクトを代入すると事故る
     # のでconstructorで初期化する
-    xmlui: 'XMLUI'  # ライブラリへのIF
+    # ライブラリ用。アプリ側で使うのは非推奨
+    _xmlui: 'XMLUI'  # ライブラリへのIF
+    _parent: 'UI_STATE'  # 親Element
 
     # XML構造
     element: Element  # 自身のElement
-    parent: 'UI_STATE'  # 親Element
     remove: bool  # 削除フラグ
     append_list: list['UI_STATE']  # 追加リスト
 
@@ -45,7 +46,7 @@ class UI_STATE:
 
     def __init__(self, xmlui:'XMLUI', element: Element):
         # プロパティの初期化
-        self.xmlui = xmlui
+        self._xmlui = xmlui
 
         self.element = element
         self.remove = False
@@ -94,13 +95,13 @@ class UI_STATE:
     #     return UI_STATE(self.element.makeelement(name, attr))
 
     def duplicate(self) -> 'UI_STATE':
-        return UI_STATE(self.xmlui, self.element.makeelement(self.element.tag, self.element.attrib.copy()))
+        return UI_STATE(self._xmlui, self.element.makeelement(self.element.tag, self.element.attrib.copy()))
 
     def setID(self, id:str):
         # rootから全部IDを取り出す
         root = self
         while(hasattr(root, "parent")):
-            root = root.parent
+            root = root._parent
 
         # グローバルキーなのでかぶってはいけない
         exists = [element.attrib["id"] for element in root.element.iter() if "id" in element.attrib]
@@ -111,7 +112,7 @@ class UI_STATE:
     def findByID(self, id:str) -> 'UI_STATE|None':
         for element in self.element.iter():
             if element.attrib.get("id") == id:
-                return self.xmlui.state_map[element]
+                return self._xmlui.state_map[element]
         return None
 
     def findByTag(self, tag:str) -> list['UI_STATE']:
@@ -119,7 +120,7 @@ class UI_STATE:
         rootElement = self.element if self != None else self.self.element
         for element in rootElement.iter():
             if element.tag == tag:
-                out.append(self.xmlui.state_map[element])
+                out.append(self._xmlui.state_map[element])
         return out
 
 # テキスト表示用
@@ -348,7 +349,7 @@ class XMLUI:
         for state in self.state_map.values():
             # removeがマークされたノードは削除
             if state.remove and state != self.root:
-                state.parent.element.remove(state.element)
+                state._parent.element.remove(state.element)
 
             # appendされたノードを追加
             for child in state.append_list:
@@ -386,7 +387,7 @@ class XMLUI:
         # state_mapのparentを更新
         def _updateStateParentRec(parent: Element):
             for child in parent:
-                self.state_map[child].parent = self.state_map[parent]
+                self.state_map[child]._parent = self.state_map[parent]
                 _updateStateParentRec(child)
         _updateStateParentRec(root_element)
 
@@ -408,10 +409,10 @@ class XMLUI:
         # エリア更新
         if state != self.root:  # rootは親を持たないので更新不要
             state.area = UI_RECT(  # 親からのオフセットでarea計算
-                state.attrInt("x", 0) + state.parent.area.x,
-                state.attrInt("y", 0) + state.parent.area.y,
-                state.attrInt("w", state.parent.area.w),
-                state.attrInt("h", state.parent.area.h))
+                state.attrInt("x", 0) + state._parent.area.x,
+                state.attrInt("y", 0) + state._parent.area.y,
+                state.attrInt("w", state._parent.area.w),
+                state.attrInt("h", state._parent.area.h))
 
         # 子を上に描画するため親を先に描画する
         self.drawElement(parent.tag, state)
