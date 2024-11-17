@@ -147,34 +147,37 @@ class UI_TEXT:
 
 
 # 表内移動Wrap付き
-class UI_GRID:
+class UI_MENU:
     grid: list[list[Any]]  # グリッド
+    state: UI_STATE  # 操作対象
+
     cur_x: int  # 現在位置x
     cur_y: int  # 現在位置y
 
-    def __init__(self, grid:list[list[Any]], init_cur_x:int=0, init_cur_y:int=0):
+    def __init__(self, grid:list[list[Any]], state:UI_STATE, init_cur_x:int=0, init_cur_y:int=0):
         self.grid = grid
+        self.state = state
         self.cur_x, self.cur_y = (init_cur_x, init_cur_y)
 
     # 範囲限定付き座標設定
-    def setPos(self, x:int, y:int, wrap:bool=False) -> 'UI_GRID':
+    def setPos(self, x:int, y:int, wrap:bool=False) -> 'UI_MENU':
         self.cur_x, self.cur_y = ((x + self.width) % self.width, (y + self.height) % self.height) if wrap else (max(min(x, self.width-1), 0), max(min(y, self.height-1), 0))
         return self
 
-    def moveUp(self, wrap:bool=False) -> 'UI_GRID':
+    def moveUp(self, wrap:bool=False) -> 'UI_MENU':
         return self.setPos(self.cur_x, self.cur_y-1, wrap)
 
-    def moveDown(self, wrap:bool=False) -> 'UI_GRID':
+    def moveDown(self, wrap:bool=False) -> 'UI_MENU':
         return self.setPos(self.cur_x, self.cur_y+1, wrap)
 
-    def moveLeft(self, wrap:bool=False) -> 'UI_GRID':
+    def moveLeft(self, wrap:bool=False) -> 'UI_MENU':
         return self.setPos(self.cur_x-1, self.cur_y, wrap)
 
-    def moveRight(self, wrap:bool=False) -> 'UI_GRID':
+    def moveRight(self, wrap:bool=False) -> 'UI_MENU':
         return self.setPos(self.cur_x+1, self.cur_y, wrap)
 
     # girdの内容取得
-    def get(self) -> Any:
+    def getData(self) -> Any:
         return self.grid[self.cur_y][self.cur_x]
 
     @property
