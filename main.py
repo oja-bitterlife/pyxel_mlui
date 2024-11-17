@@ -9,16 +9,17 @@ xmlui = XMLUI.createFromFile("assets/ui/test.xml")
 import xmlui_pyxel
 xmlui_pyxel.setDefaults(xmlui)
 
-
 from xmlui import UI_MENU,UI_MENU_GROUP
 command_item_data = [
     ["speak", "tool"],
     ["status", "check"],
 ]
 
-command_menu = xmlui.root.findByID("command_menu")
-if command_menu:
-    command_win = UI_MENU(command_item_data, command_menu, 0, 0)
+cmd_menu_template = xmlui.root.findByID("cmd_menu_template")
+if cmd_menu_template:
+    dup_cmd_menu = cmd_menu_template.duplicate("dup_cmd_menu")
+    xmlui.root.addChild(dup_cmd_menu)
+    command_win = UI_MENU(command_item_data, dup_cmd_menu, 0, 0)
     xmlui.openMenu(command_win)
 
 
@@ -39,16 +40,16 @@ def update(): # フレームの更新処理
             active_menu.moveDown()
 
         if pyxel.btnp(pyxel.KEY_SPACE):
-            msg_win_draw = xmlui.root.findByID("msg_win_draw")
+            dup_msg_win = xmlui.root.findByID("dup_msg_win")
             #  表示中なら消す
-            if msg_win_draw:
-                msg_win_draw._remove = True
+            if dup_msg_win:
+                dup_msg_win._remove = True
 
             # 非表示なら新規で追加
             elif active_menu.getData() == "speak":
                 msg_win_template = xmlui.root.findByID("msg_win_template")
                 if msg_win_template:
-                    xmlui.root.addChild(msg_win_template.duplicate("msg_win_draw"))
+                    xmlui.root.addChild(msg_win_template.duplicate("dup_msg_win"))
 
                     msg_text = msg_win_template.findByTag("msg_text")
                     if msg_text:

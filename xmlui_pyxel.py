@@ -22,7 +22,7 @@ def menu_grid_update(state: UI_STATE):
     item_w = state.attrInt("item_w", 0)
     item_h = state.attrInt("item_h", 0)
 
-    item_data  = state._xmlui.menu.findByID("command_menu")
+    item_data  = state._xmlui.menu.findByID("dup_cmd_menu")
     if item_data is None:
         return
 
