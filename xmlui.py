@@ -149,7 +149,8 @@ class UI_TEXT:
 # 表内移動Wrap付き
 class UI_MENU:
     grid: list[list[Any]]  # グリッド
-    state: UI_STATE  # 操作対象
+    state: UI_STATE  # 操作対象Element
+    remove: bool  # 削除フラグ
 
     cur_x: int  # 現在位置x
     cur_y: int  # 現在位置y
@@ -157,6 +158,7 @@ class UI_MENU:
     def __init__(self, grid:list[list[Any]], state:UI_STATE, init_cur_x:int=0, init_cur_y:int=0):
         self.grid = grid
         self.state = state
+        self.remove = False
         self.cur_x, self.cur_y = (init_cur_x, init_cur_y)
 
     # 範囲限定付き座標設定
@@ -180,6 +182,11 @@ class UI_MENU:
     def getData(self) -> Any:
         return self.grid[self.cur_y][self.cur_x]
 
+    # メニュー終了時処理
+    def close(self):
+        self.remove = True
+        self.state.remove = True
+
     @property
     def width(self) -> int:
         return len(self.grid[self.cur_y])
@@ -193,14 +200,50 @@ class UI_MENU:
         return sum([len(line) for line in self.grid])
 
 
+# メニュー階層管理
+class UI_MENU_STACK:
+    stack: list['UI_MENU|UI_MENU_STACK']
+    remove: bool  # 削除フラグ
+
+    def __init__(self):
+        self.stack = []
+
+    def getActive(self) -> UI_MENU|None:
+        if len(self.stack) == 0:
+            return None
+
+        active = self.stack[-1]
+
+        # グループならグループ内のactiveを返す
+        if isinstance(active, UI_MENU_STACK):
+            return active.getActive()
+
+    # メニューを閉じる
+    def close(self):
+        remove = True
+        for menu in self.stack:
+            menu.close()  # 子も閉じる
+
+    # 不要になったメニューを削除
+    def update(self):
+        for group in [group for group in self.stack if isinstance(group, UI_MENU_STACK)]:
+            group.update()  # 子も更新
+        self.stack = [menu for menu in self.stack if not menu.remove]
+
+
+
 # XMLでUIライブラリ本体
 # #############################################################################
 class XMLUI:
     root: UI_STATE
-    state_map: dict[Element, UI_STATE] = {}  # 状態保存用
+    state_map: dict[Element, UI_STATE]  # 状態保存用
 
-    update_funcs: dict[str, Callable[['XMLUI',UI_STATE], None]] = {}
-    draw_funcs: dict[str, Callable[['XMLUI',UI_STATE], None]] = {}
+    # メニュー管理
+    menu: UI_MENU_STACK
+
+    # 処理関数の登録
+    update_funcs: dict[str, Callable[['XMLUI',UI_STATE], None]]
+    draw_funcs: dict[str, Callable[['XMLUI',UI_STATE], None]]
 
     # 初期化
     # *************************************************************************
@@ -217,6 +260,11 @@ class XMLUI:
 
     # 初期化。<xmlui>を持つXMLを突っ込む
     def __init__(self, dom: xml.etree.ElementTree.Element):
+        self.state_map = {}
+        self.menu = UI_MENU_STACK()
+        self.update_funcs = {}
+        self.draw_funcs = {}
+
         # 最上位がxmluiでなくてもいい
         if dom.tag == "xmlui":
             xmlui_root = dom
@@ -259,6 +307,17 @@ class XMLUI:
         return out
 
 
+    # Menu操作用
+    # *************************************************************************
+    def openMenu(self, menu:UI_MENU):
+        self.menu.stack.append(menu)
+
+    def closeActiveMenu(self):
+        active = self.menu.getActive()
+        if active != None:
+            active.close()
+
+
     # 更新用
     # *************************************************************************
     # 全体を呼び出す処理
@@ -279,6 +338,9 @@ class XMLUI:
 
         # Treeが変更されたかもなのでstateを更新
         self.state_map = XMLUI._makeState(self.root.element, self.state_map)
+
+        # 不要になったメニューを削除
+        self.menu.update()
 
     # ツリーのノード以下を再帰処理
     def _updateTreeRec(self, parent: Element):
