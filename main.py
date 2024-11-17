@@ -9,7 +9,7 @@ xmlui = XMLUI.createFromFile("assets/ui/test.xml")
 import xmlui_pyxel
 xmlui_pyxel.setDefaults(xmlui)
 
-from xmlui import UI_MENU
+from xmlui import UI_MENU,UI_MENU_GROUP
 command_item_data = [
     ["speak", "tool"],
     ["status", "check"],
@@ -17,7 +17,8 @@ command_item_data = [
 
 command_menu = xmlui.findByID("command_menu")
 if command_menu:
-    xmlui.openMenu(UI_MENU(command_item_data, command_menu, 0, 0))
+    command_win = UI_MENU(command_item_data, command_menu, 0, 0)
+    xmlui.openMenu(command_win)
 
 
 # Main
@@ -41,6 +42,10 @@ def update(): # フレームの更新処理
                 msg_text = xmlui.findByTag("msg_text")
                 if msg_text:
                     msg_text.update_count = 0
+
+        if pyxel.btnp(pyxel.KEY_BACKSPACE):
+            active_menu.close()
+
 
     xmlui.update()
 

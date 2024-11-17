@@ -55,13 +55,13 @@ class UI_STATE:
             self.id = self.element.attrib["id"]
 
     # attribアクセス用
-    def attrInt(self, key: str, default: int) -> int:
+    def attrInt(self, key:str, default:int=0) -> int:
         return int(self.element.attrib.get(key, default))
 
-    def attrStr(self, key: str, default: str) -> str:
+    def attrStr(self, key:str, default:str="") -> str:
         return self.element.attrib.get(key, default)
 
-    def attrBool(self, key: str, default: bool) -> bool:
+    def attrBool(self, key:str, default:bool=False) -> bool:
         attr = self.element.attrib.get(key)
         return default if attr == None else (True if attr.lower() in ["true", "ok", "yes"] else False)
 
@@ -229,11 +229,20 @@ class UI_MENU_GROUP:
             group.update()  # 子も更新
         self.stack = [menu for menu in self.stack if not menu.remove]
 
-    def findByState(self, state:UI_STATE) -> UI_MENU|None:
+    # メニューリスト内検索
+    def findByID(self, id:str) -> UI_MENU|None:
         for menu in self.stack:
             if isinstance(menu, UI_MENU_GROUP):
-                return menu.findByState(state)
-            if menu.state == state:
+                return menu.findByID(id)
+            if menu.state.attrStr("id") == id:
+                return menu
+        return None
+
+    def findByTag(self, tag:str) -> UI_MENU|None:
+        for menu in self.stack:
+            if isinstance(menu, UI_MENU_GROUP):
+                return menu.findByTag(tag)
+            if menu.state.element.tag == tag:
                 return menu
         return None
 
@@ -294,21 +303,21 @@ class XMLUI:
 
     # XML操作用
     # *************************************************************************
-    def findByID(self, id: str, root:UI_STATE|None=None) -> UI_STATE|None:
+    def findByID(self, id:str, root:UI_STATE|None=None) -> UI_STATE|None:
         rootElement = root.element if root != None else self.root.element
         for element in rootElement.iter():
             if element.attrib.get("id") == id:
                 return self.state_map[element]
         return None
 
-    def findByTag(self, tag: str, root:UI_STATE|None=None) -> UI_STATE|None:
+    def findByTag(self, tag:str, root:UI_STATE|None=None) -> UI_STATE|None:
         rootElement = root.element if root != None else self.root.element
         for element in rootElement.iter():
             if element.tag == tag:
                 return self.state_map[element]
         return None
 
-    def findByTagAll(self, tag: str, root:UI_STATE|None=None) -> list[UI_STATE]:
+    def findByTagAll(self, tag:str, root:UI_STATE|None=None) -> list[UI_STATE]:
         out = []
         rootElement = root.element if root != None else self.root.element
         for element in rootElement.iter():
@@ -319,7 +328,7 @@ class XMLUI:
 
     # Menu操作用
     # *************************************************************************
-    def openMenu(self, menu:UI_MENU):
+    def openMenu(self, menu:UI_MENU|UI_MENU_GROUP):
         self.menu.stack.append(menu)
 
 

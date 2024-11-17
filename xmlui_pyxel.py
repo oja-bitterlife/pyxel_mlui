@@ -18,7 +18,7 @@ def menu_grid_update(ui:XMLUI, state: UI_STATE):
     item_w = state.attrInt("item_w", 0)
     item_h = state.attrInt("item_h", 0)
 
-    item_data  = ui.menu.findByState(state)
+    item_data  = ui.menu.findByID("command_menu")
     if item_data == None:
         return
 
