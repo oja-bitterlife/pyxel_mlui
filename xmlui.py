@@ -303,6 +303,13 @@ class XMLUI:
 
     # XML操作用
     # *************************************************************************
+    def setID(self, state:UI_STATE, id:str):
+        # グローバルキーなのでかぶってはいけない
+        exists = [element.attrib["id"] for element in self.root.element.iter() if "id" in element.attrib]
+        if id in exists:
+            raise Exception(f"ID {id} already exists")
+        state.setAttr("id", id)
+
     def findByID(self, id:str, root:UI_STATE|None=None) -> UI_STATE|None:
         rootElement = root.element if root != None else self.root.element
         for element in rootElement.iter():

@@ -43,8 +43,8 @@ def update(): # フレームの更新処理
                 if msg_text:
                     msg_text.update_count = 0
 
-        if pyxel.btnp(pyxel.KEY_BACKSPACE):
-            active_menu.close()
+        # if pyxel.btnp(pyxel.KEY_BACKSPACE):
+        #     active_menu.close()
 
 
     xmlui.update()
