@@ -15,7 +15,7 @@ command_item_data = [
     ["status", "check"],
 ]
 
-command_menu = xmlui.findByID("command_menu")
+command_menu = xmlui.root.findByID("command_menu")
 if command_menu:
     command_win = UI_MENU(command_item_data, command_menu, 0, 0)
     xmlui.openMenu(command_win)
@@ -38,14 +38,16 @@ def update(): # フレームの更新処理
             active_menu.moveDown()
 
         if pyxel.btnp(pyxel.KEY_SPACE):
-            if active_menu.getData() == "speak":
-                msg_win = xmlui.findByID("msg_win")
-                if msg_win:
-                    msg_win.setAttr("visible", True)
-                    # msg_text.update_count = 0
+            msg_win = xmlui.root.findByID("msg_win")
+            if msg_win:
+                if msg_win.is_enable:
+                    msg_win.setAttr("enable", False)
 
-        # if pyxel.btnp(pyxel.KEY_BACKSPACE):
-        #     active_menu.close()
+                elif active_menu.getData() == "speak":
+                    msg_win.setAttr("enable", True)
+
+        if pyxel.btnp(pyxel.KEY_BACKSPACE):
+            active_menu.close()
 
 
     xmlui.update()
