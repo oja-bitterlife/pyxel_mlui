@@ -18,7 +18,7 @@ command_item_data = [
 command_win = xmlui.findByID("command_win")
 if command_win:
     command_items = UI_MENU(command_item_data, command_win, 0, 0)
-    command_win.userData["item_data"] = command_items
+    xmlui.openMenu(command_items)
 
 
 # Main
@@ -26,20 +26,22 @@ def update(): # フレームの更新処理
     if pyxel.btnp(pyxel.KEY_Q):
         pyxel.quit()
 
-    if pyxel.btnp(pyxel.KEY_LEFT):
-        command_items.moveLeft()
-    if pyxel.btnp(pyxel.KEY_RIGHT):
-        command_items.moveRight()
-    if pyxel.btnp(pyxel.KEY_UP):
-        command_items.moveUp()
-    if pyxel.btnp(pyxel.KEY_DOWN):
-        command_items.moveDown()
+    active_menu = xmlui.menu.getActive()
+    if active_menu:
+        if pyxel.btnp(pyxel.KEY_LEFT):
+            active_menu.moveLeft()
+        if pyxel.btnp(pyxel.KEY_RIGHT):
+            active_menu.moveRight()
+        if pyxel.btnp(pyxel.KEY_UP):
+            active_menu.moveUp()
+        if pyxel.btnp(pyxel.KEY_DOWN):
+            active_menu.moveDown()
 
-    if pyxel.btnp(pyxel.KEY_SPACE):
-        if command_items.getData() == "speak":
-            msg_text = xmlui.findByTag("msg_text")
-            if msg_text:
-                msg_text.update_count = 0
+        if pyxel.btnp(pyxel.KEY_SPACE):
+            if active_menu.getData() == "speak":
+                msg_text = xmlui.findByTag("msg_text")
+                if msg_text:
+                    msg_text.update_count = 0
 
     xmlui.update()
 

@@ -221,18 +221,26 @@ class UI_MENU_GROUP:
         available = [menu for menu in self.stack if not menu.remove]  # 生きてるものだけ取り出す
         if len(available) == 0:
             return None
-
         active = available[-1]
+        if isinstance(active, UI_MENU):
+            return active
 
         # グループならグループ内のactiveを返す
-        if isinstance(active, UI_MENU_GROUP):
-            return active.getActive()
+        return active.getActive()
 
     # 不要になったメニューを削除
     def update(self):
         for group in [group for group in self.stack if isinstance(group, UI_MENU_GROUP)]:
             group.update()  # 子も更新
         self.stack = [menu for menu in self.stack if not menu.remove]
+
+    def findByState(self, state:UI_STATE) -> UI_MENU|None:
+        for menu in self.stack:
+            if isinstance(menu, UI_MENU_GROUP):
+                return menu.findByState(state)
+            if menu.state == state:
+                return menu
+        return None
 
     @property
     def remove(self) -> bool:
@@ -318,11 +326,6 @@ class XMLUI:
     # *************************************************************************
     def openMenu(self, menu:UI_MENU):
         self.menu.stack.append(menu)
-
-    def closeActiveMenu(self):
-        active = self.menu.getActive()
-        if active != None:
-            active.close()
 
 
     # 更新用

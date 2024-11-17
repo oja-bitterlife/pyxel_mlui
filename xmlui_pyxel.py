@@ -19,7 +19,9 @@ def menu_win_update(ui:XMLUI, state: UI_STATE):
     item_w = state.attrInt("item_w", 0)
     item_h = state.attrInt("item_h", 0)
 
-    item_data: UI_MENU  = state.userData["item_data"]
+    item_data  = ui.menu.findByState(state)
+    if item_data == None:
+        return
 
     # アイテムを並べる
     rows = ui.findByTagAll("menu_row", state)
