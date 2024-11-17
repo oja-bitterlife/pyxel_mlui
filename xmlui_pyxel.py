@@ -46,7 +46,7 @@ updateFuncs= {
 }
 
 
-def msg_win_draw(state: UI_STATE):
+def msg_win_draw(state:UI_STATE, ):
     bg_color = state.attrInt("bg_color", 12)
     fg_color = state.attrInt("fg_color", 7)
     pyxel.rect(state.area.x, state.area.y, state.area.w, state.area.h, bg_color)
@@ -54,7 +54,7 @@ def msg_win_draw(state: UI_STATE):
     pyxel.rectb(state.area.x+1, state.area.y+1, state.area.w-2, state.area.h-2, fg_color)
     pyxel.rectb(state.area.x+3, state.area.y+3, state.area.w-6, state.area.h-6, fg_color)
 
-def msg_text_draw(state: UI_STATE):
+def msg_text_draw(state:UI_STATE):
     wrap = state.attrInt("wrap", 256)
     color = state.attrInt("color", 7)
 
@@ -66,7 +66,7 @@ def msg_text_draw(state: UI_STATE):
     for i,text in enumerate(tokens):
         pyxel.text(state.area.x, state.area.y+i*FONT_SIZE, text, color, font)
 
-def msg_cur_draw(state: UI_STATE):
+def msg_cur_draw(state:UI_STATE):
     tri_size = state.attrInt("size", 6)
     color = state.attrInt("color", 7)
 
@@ -75,7 +75,7 @@ def msg_cur_draw(state: UI_STATE):
     y = state.area.y
     pyxel.tri(x, y, x+tri_size, y, x+tri_size//2, y+tri_size//2, color)
 
-def menu_win_draw(state: UI_STATE):
+def menu_win_draw(state:UI_STATE):
     bg_color = state.attrInt("bg_color", 12)
     fg_color = state.attrInt("fg_color", 7)
     title  = state.attrStr("title", "")
@@ -90,13 +90,13 @@ def menu_win_draw(state: UI_STATE):
         pyxel.rect(text_x,state.area.y, str_w, FONT_SIZE, bg_color)
         pyxel.text(text_x, state.area.y-2, title, fg_color, font)
 
-def menu_item_draw(state: UI_STATE):
+def menu_item_draw(state:UI_STATE):
     title  = state.attrStr("title", "")
     color = state.attrInt("color", 7)
     if title:
         pyxel.text(state.area.x, state.area.y, title, color, font)
 
-def menu_cur_draw(state: UI_STATE):
+def menu_cur_draw(state:UI_STATE):
     tri_size = state.attrInt("size", 6)
     color = state.attrInt("color", 7)
 

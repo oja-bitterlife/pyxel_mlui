@@ -423,20 +423,20 @@ class XMLUI:
 
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
-    def updateElement(self, name: str, state: UI_STATE):
+    def updateElement(self, name:str, state:UI_STATE):
         # 登録済みの関数だけ実行
         if name in self.update_funcs:
             self.update_funcs[name](state)
 
-    def drawElement(self, name: str, state: UI_STATE):
+    def drawElement(self, name:str, state:UI_STATE):
         # 登録済みの関数だけ実行
         if name in self.draw_funcs:
             self.draw_funcs[name](state)
 
     # 個別処理登録
-    def setUpdateFunc(self, name: str, func: Callable[[UI_STATE], None]):
+    def setUpdateFunc(self, name:str, func:Callable[[UI_STATE], None]):
         self.update_funcs[name] = func
 
-    def setDrawFunc(self, name: str, func: Callable[[UI_STATE], None]):
+    def setDrawFunc(self, name:str, func:Callable[[UI_STATE], None]):
         self.draw_funcs[name] = func
 
