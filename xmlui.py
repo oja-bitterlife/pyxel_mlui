@@ -201,35 +201,42 @@ class UI_MENU:
 
 
 # メニュー階層管理
-class UI_MENU_STACK:
-    stack: list['UI_MENU|UI_MENU_STACK']
-    remove: bool  # 削除フラグ
+class UI_MENU_GROUP:
+    stack: list['UI_MENU|UI_MENU_GROUP']
 
-    def __init__(self):
-        self.stack = []
+    def __init__(self, menu_list:list['UI_MENU|UI_MENU_GROUP']|UI_MENU=[]):
+        if isinstance(menu_list, UI_MENU):
+            menu_list = [menu_list]
+        self.stack = menu_list
 
-    def getActive(self) -> UI_MENU|None:
-        if len(self.stack) == 0:
-            return None
-
-        active = self.stack[-1]
-
-        # グループならグループ内のactiveを返す
-        if isinstance(active, UI_MENU_STACK):
-            return active.getActive()
+    def push(self, menu: 'UI_MENU|UI_MENU_GROUP'):
+        self.stack.append(menu)
 
     # メニューを閉じる
     def close(self):
-        remove = True
         for menu in self.stack:
-            menu.close()  # 子も閉じる
+            menu.close()  # 子を全て閉じる
+
+    def getActive(self) -> UI_MENU|None:
+        available = [menu for menu in self.stack if not menu.remove]  # 生きてるものだけ取り出す
+        if len(available) == 0:
+            return None
+
+        active = available[-1]
+
+        # グループならグループ内のactiveを返す
+        if isinstance(active, UI_MENU_GROUP):
+            return active.getActive()
 
     # 不要になったメニューを削除
     def update(self):
-        for group in [group for group in self.stack if isinstance(group, UI_MENU_STACK)]:
+        for group in [group for group in self.stack if isinstance(group, UI_MENU_GROUP)]:
             group.update()  # 子も更新
         self.stack = [menu for menu in self.stack if not menu.remove]
 
+    @property
+    def remove(self) -> bool:
+        return len(self.stack) == 0  # 空のグループは不要
 
 
 # XMLでUIライブラリ本体
@@ -239,7 +246,7 @@ class XMLUI:
     state_map: dict[Element, UI_STATE]  # 状態保存用
 
     # メニュー管理
-    menu: UI_MENU_STACK
+    menu: UI_MENU_GROUP
 
     # 処理関数の登録
     update_funcs: dict[str, Callable[['XMLUI',UI_STATE], None]]
@@ -261,7 +268,7 @@ class XMLUI:
     # 初期化。<xmlui>を持つXMLを突っ込む
     def __init__(self, dom: xml.etree.ElementTree.Element):
         self.state_map = {}
-        self.menu = UI_MENU_STACK()
+        self.menu = UI_MENU_GROUP()
         self.update_funcs = {}
         self.draw_funcs = {}
 
