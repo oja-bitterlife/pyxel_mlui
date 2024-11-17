@@ -394,35 +394,20 @@ class XMLUI:
         if not state.visible or not state.enable:  # disable時も表示しない
             return
 
-        # 親を先に描画する(子を上に描画)
+        # エリア更新
         if state != self.root:  # rootは親を持たないので更新不要
-            state.area = XMLUI._updateArea(state)  # エリア更新
+            state.area = UI_RECT(  # 親からのオフセットでarea計算
+                state.attrInt("x", 0) + state.parent.area.x,
+                state.attrInt("y", 0) + state.parent.area.y,
+                state.attrInt("w", state.parent.area.w),
+                state.attrInt("h", state.parent.area.h))
+
+        # 子を上に描画するため親を先に描画する
         self.drawElement(parent.tag, state)
 
-        # 子の処理
+        # 子の描画
         for child in parent:
             self._drawTreeRec(child)
-
-    # 子のエリア設定(親のエリア内に収まるように)
-    @classmethod
-    def _updateArea(cls, state:UI_STATE) -> UI_RECT:
-        element = state.element
-
-        # 親からのオフセットで計算
-        _x = int(element.attrib.get("x", 0))
-        _y = int(element.attrib.get("y", 0))
-        w = int(element.attrib.get("w", state.parent.area.w))
-        h = int(element.attrib.get("h", state.parent.area.h))
-
-        # paddingも設定できるように
-        _x += sum([int(element.attrib.get(name, 0)) for name in ["padding_x", "padding_l", "padding_size"]])
-        w -= sum([int(element.attrib.get(name, 0)) for name in ["padding_x", "padding_size"]])*2
-        _y += sum([int(element.attrib.get(name, 0)) for name in ["padding_y", "padding_t", "padding_size"]])
-        h -= sum([int(element.attrib.get(name, 0)) for name in ["padding_y", "padding_size"]])*2
-        w -= sum([int(element.attrib.get(name, 0)) for name in ["padding_l", "padding_r"]])
-        h -= sum([int(element.attrib.get(name, 0)) for name in ["padding_t", "padding_b"]])
-
-        return UI_RECT(state.parent.area.x+_x, state.parent.area.y+_y, w, h)
 
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
