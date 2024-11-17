@@ -68,7 +68,7 @@ class UI_STATE:
 
     def attrBool(self, key: str, default: bool) -> bool:
         attr = self.element.attrib.get(key)
-        return default if attr == None else (True if attr.lower() == "true"else False)
+        return default if attr == None else (True if attr.lower() in ["true", "ok", "yes"] else False)
 
     def getText(self) -> str:
         return self.element.text.strip() if self.element.text != None else ""
@@ -78,6 +78,14 @@ class UI_STATE:
 
     def setAttr(self, key: str, value: Any):
         self.element.attrib[key] = str(value)  # attribはdict[str,str]なのでstrで保存する
+
+    @property
+    def enable(self) -> bool:
+        return self.attrBool("enable", True) and not self.attrBool("disable", False)
+
+    @property
+    def visible(self) -> bool:
+        return self.attrBool("visible", True) and self.attrBool("show", True) and not self.attrBool("hide", False)
 
     # ツリー操作用
     def addChild(self, state:'UI_STATE'):
@@ -252,13 +260,8 @@ class XMLUI:
     # *************************************************************************
     # 全体を呼び出す処理
     def update(self):
-        # 各ノードのUpdate
-        for element in self.root.element.iter():
-            state = self.state_map[element]
-
-            # 更新処理
-            self.updateElement(element.tag, state)
-            state.update_count += 1  # 実行後に更新
+        # 更新処理
+        self._updateTreeRec(self.root.element)
 
         # ノードの追加と削除
         for state in self.state_map.values():
@@ -273,6 +276,23 @@ class XMLUI:
 
         # Treeが変更されたかもなのでstateを更新
         self.state_map = XMLUI._makeState(self.root.element, self.state_map)
+
+    # ツリーのノード以下を再帰処理
+    def _updateTreeRec(self, parent: Element):
+        state = self.state_map[parent]
+
+        # disableなら子も含めてUpdateしない
+        if not state.enable:
+            return
+
+        # 更新処理
+        self.updateElement(parent.tag, state)
+
+        # 子の処理
+        for child in parent:
+            self._updateTreeRec(child)
+
+        state.update_count += 1  # 実行後に更新
 
     # stateの更新
     @classmethod
@@ -301,7 +321,7 @@ class XMLUI:
         state = self.state_map[parent]
 
         # 非表示なら子も含めて描画しない
-        if not state.attrBool("visible", True):
+        if not state.visible or not state.enable:  # disable時も表示しない
             return
 
         # 親を先に描画する(子を上に描画)
@@ -310,8 +330,8 @@ class XMLUI:
         self.drawElement(parent.tag, state)
 
         # 子の処理
-        for node in parent:
-            self._drawTreeRec(node)
+        for child in parent:
+            self._drawTreeRec(child)
 
     # 子のエリア設定(親のエリア内に収まるように)
     @classmethod
