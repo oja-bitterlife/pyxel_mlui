@@ -8,7 +8,6 @@ FONT_SIZE = 12
 
 def msg_text_update(ui:XMLUI, state: UI_STATE):
     draw_count = state.update_count//2
-    state.userData["draw_count"] = draw_count
 
     msg_cur = ui.findByTag("msg_cur")
     if msg_cur != None:
@@ -58,12 +57,13 @@ def msg_win_draw(ui:XMLUI, state: UI_STATE):
 def msg_text_draw(ui:XMLUI, state: UI_STATE):
     wrap = state.attrInt("wrap", 256)
     color = state.attrInt("color", 7)
-    draw_count: int = state.userData.get("draw_count", 0)
+
+    draw_count = state.update_count//2
 
     # テキスト表示
     ui_text = UI_TEXT(state.getText(), {"name":"world", "age":10})
-    lines = ui_text.get(draw_count)
-    for i,text in enumerate(lines):
+    tokens = ui_text.getTokens(draw_count)
+    for i,text in enumerate(tokens):
         pyxel.text(state.area.x, state.area.y+i*FONT_SIZE, text, color, font)
 
 def msg_cur_draw(ui:XMLUI, state: UI_STATE):

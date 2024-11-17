@@ -39,10 +39,7 @@ class UI_STATE:
 
     # 表示関係
     area: UI_RECT  # 描画範囲
-
-    # 追加パラメータ
     update_count: int  # 更新カウンター
-    userData: dict[str, Any]  # XMLを操作しないユーザーデータ。update/draw間受け渡し用
 
     def __init__(self, element: Element):
         # プロパティの初期化
@@ -51,9 +48,7 @@ class UI_STATE:
         self.append_list = []
 
         self.area = UI_RECT(0, 0, 4096, 4096)
-
         self.update_count = 0
-        self.userData = {}
 
         # ステート取得
         if "id" in self.element.attrib:
@@ -121,7 +116,7 @@ class UI_TEXT:
                 self.tokens.append(line[:wrap])
 
     # 最大文字数に減らして取得
-    def get(self, limit:int=65535):
+    def getTokens(self, limit:int=65535):
         limit = int(limit)  # 計算式だとfloatが型チェックをスルーする
         out = []
 
