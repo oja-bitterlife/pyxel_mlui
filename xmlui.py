@@ -96,13 +96,20 @@ class UI_STATE:
         self._remove = True
 
     def duplicate(self, new_id:str|None) -> 'UI_STATE':
+        # まずは複製
         dup_state =  UI_STATE(self._xmlui, self.element.makeelement(self.element.tag, self.element.attrib.copy()))
         if new_id is None:
-            # idを消す
+            # Noneならidを消す(無名化)
             if new_id in dup_state.element.attrib:
                 dup_state.element.attrib.pop("id")
         else:
             dup_state.setID(new_id)
+
+        # 子も複製してぶら下げておく
+        for child in self.element:
+            dup_child = self._xmlui.state_map[child].duplicate(None)  # とりあえず名無しで
+            dup_state.element.append(dup_child.element)
+
         return dup_state
 
     def setID(self, id:str):
