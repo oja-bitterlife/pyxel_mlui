@@ -309,21 +309,21 @@ class XMLUI:
             return XMLUI(xml.etree.ElementTree.fromstring(xml_data))
 
     # 初期化。<xmlui>を持つXMLを突っ込む
-    def __init__(self, dom: xml.etree.ElementTree.Element):
+    def __init__(self, dom: xml.etree.ElementTree.Element, rootTag:str="xmlui"):
         self.state_map = {}
         self.menu = UI_MENU_GROUP()
         self.update_funcs = {}
         self.draw_funcs = {}
 
         # 最上位がxmluiでなくてもいい
-        if dom.tag == "xmlui":
+        if dom.tag == rootTag:
             xmlui_root = dom
         else:
             # 最上位でないときは子から探す
-            xmlui_root = dom.find("xmlui")
+            xmlui_root = dom.find(rootTag)
             # 見つからなかったら未対応のXML
             if xmlui_root is None:
-                raise Exception("<xmlui> not found")
+                raise Exception(f"<{rootTag}> not found")
 
         # state_mapの作成
         self._updateState(xmlui_root, {})
