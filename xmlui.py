@@ -291,8 +291,8 @@ class XMLUI:
     menu: UI_MENU_GROUP
 
     # 処理関数の登録
-    update_funcs: dict[str, Callable[['XMLUI',UI_STATE], None]]
-    draw_funcs: dict[str, Callable[['XMLUI',UI_STATE], None]]
+    update_funcs: dict[str, Callable[[UI_STATE], None]]
+    draw_funcs: dict[str, Callable[[UI_STATE], None]]
 
     # 初期化
     # *************************************************************************
@@ -425,17 +425,17 @@ class XMLUI:
     def updateElement(self, name: str, state: UI_STATE):
         # 登録済みの関数だけ実行
         if name in self.update_funcs:
-            self.update_funcs[name](self, state)
+            self.update_funcs[name](state)
 
     def drawElement(self, name: str, state: UI_STATE):
         # 登録済みの関数だけ実行
         if name in self.draw_funcs:
-            self.draw_funcs[name](self, state)
+            self.draw_funcs[name](state)
 
     # 個別処理登録
-    def setUpdateFunc(self, name: str, func: Callable[['XMLUI',UI_STATE], None]):
+    def setUpdateFunc(self, name: str, func: Callable[[UI_STATE], None]):
         self.update_funcs[name] = func
 
-    def setDrawFunc(self, name: str, func: Callable[['XMLUI',UI_STATE], None]):
+    def setDrawFunc(self, name: str, func: Callable[[UI_STATE], None]):
         self.draw_funcs[name] = func
 
