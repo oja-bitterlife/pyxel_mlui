@@ -5,14 +5,17 @@ import pyxel
 font = pyxel.Font("assets/font/b12.bdf")
 FONT_SIZE = 12
 
+def msg_win_update(state: UI_STATE):
+    msg_cur = state.findByTag("msg_cur")
+    msg_text = state.findByTag("msg_text")
+    if msg_cur and msg_text:
+        msg_cur[0].setAttr("visible", msg_text[0].attrBool("finish"))
 
 def msg_text_update(state: UI_STATE):
     draw_count = state.update_count//2
+    ui_text = UI_TEXT(state.getText(), {"name":"world", "age":10})
 
-    msg_cur = state._xmlui.root.findByTag("msg_cur")[0]
-    if msg_cur != None:
-        ui_text = UI_TEXT(state.getText(), {"name":"world", "age":10})
-        msg_cur.setAttr("visible", False if draw_count < ui_text.length else True)
+    state.setAttr("finish", draw_count >= ui_text.length)
 
 def menu_grid_update(state: UI_STATE):
     item_w = state.attrInt("item_w", 0)
@@ -41,6 +44,7 @@ def menu_grid_update(state: UI_STATE):
 
 # update関数テーブル
 updateFuncs= {
+    "msg_win": msg_win_update,
     "msg_text": msg_text_update,
     "menu_grid": menu_grid_update,
 }
