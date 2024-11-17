@@ -39,14 +39,18 @@ def update(): # フレームの更新処理
             active_menu.moveDown()
 
         if pyxel.btnp(pyxel.KEY_SPACE):
-            msg_win = xmlui.root.findByTag("msg_win")
-            if msg_win:
-                if msg_win[0].is_enable:
-                    msg_win[0].setAttr("enable", False)
+            msg_win_draw = xmlui.root.findByID("msg_win_draw")
+            #  表示中なら消す
+            if msg_win_draw:
+                msg_win_draw._remove = True
 
-                elif active_menu.getData() == "speak":
-                    msg_win[0].setAttr("enable", True)
-                    msg_text = msg_win[0].findByTag("msg_text")
+            # 非表示なら新規で追加
+            elif active_menu.getData() == "speak":
+                msg_win_template = xmlui.root.findByID("msg_win_template")
+                if msg_win_template:
+                    xmlui.root.addChild(msg_win_template.duplicate("msg_win_draw"))
+
+                    msg_text = msg_win_template.findByTag("msg_text")
                     if msg_text:
                         msg_text[0].update_count = 0
                         msg_text[0].setAttr("finish", False)

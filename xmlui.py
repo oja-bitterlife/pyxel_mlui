@@ -31,14 +31,15 @@ class UI_STATE:
     # プロパティ定義
     # 一度しか初期化されないので定義と同時に配列等オブジェクトを代入すると事故る
     # のでconstructorで初期化する
+
     # ライブラリ用。アプリ側で使うのは非推奨
     _xmlui: 'XMLUI'  # ライブラリへのIF
     _parent: 'UI_STATE'  # 親Element
+    _remove: bool  # 削除フラグ
+    _append_list: list['UI_STATE']  # 追加リスト
 
     # XML構造
     element: Element  # 自身のElement
-    remove: bool  # 削除フラグ
-    append_list: list['UI_STATE']  # 追加リスト
 
     # 表示関係
     area: UI_RECT  # 描画範囲
@@ -47,10 +48,10 @@ class UI_STATE:
     def __init__(self, xmlui:'XMLUI', element: Element):
         # プロパティの初期化
         self._xmlui = xmlui
+        self._remove = False
+        self._append_list = []
 
         self.element = element
-        self.remove = False
-        self.append_list = []
 
         self.area = UI_RECT(0, 0, 4096, 4096)
         self.update_count = 0
@@ -89,13 +90,20 @@ class UI_STATE:
 
     # ツリー操作用
     def addChild(self, state:'UI_STATE'):
-        self.append_list.append(state)
+        self._append_list.append(state)
 
-    # def makeElement(self, name:str, attr:dict[str,str]={}) -> 'UI_STATE':
-    #     return UI_STATE(self.element.makeelement(name, attr))
+    def remove(self):
+        self._remove = True
 
-    def duplicate(self) -> 'UI_STATE':
-        return UI_STATE(self._xmlui, self.element.makeelement(self.element.tag, self.element.attrib.copy()))
+    def duplicate(self, new_id:str|None) -> 'UI_STATE':
+        dup_state =  UI_STATE(self._xmlui, self.element.makeelement(self.element.tag, self.element.attrib.copy()))
+        if new_id is None:
+            # idを消す
+            if new_id in dup_state.element.attrib:
+                dup_state.element.attrib.pop("id")
+        else:
+            dup_state.setID(new_id)
+        return dup_state
 
     def setID(self, id:str):
         # rootから全部IDを取り出す
@@ -175,7 +183,7 @@ class UI_TEXT:
 class UI_MENU:
     grid: list[list[Any]]  # グリッド
     state: UI_STATE  # 操作対象Element
-    remove: bool  # 削除フラグ
+    _remove: bool  # 削除フラグ
 
     cur_x: int  # 現在位置x
     cur_y: int  # 現在位置y
@@ -183,7 +191,7 @@ class UI_MENU:
     def __init__(self, grid:list[list[Any]], state:UI_STATE, init_cur_x:int=0, init_cur_y:int=0):
         self.grid = grid
         self.state = state
-        self.remove = False
+        self._remove = False
         self.cur_x, self.cur_y = (init_cur_x, init_cur_y)
 
     # 範囲限定付き座標設定
@@ -209,8 +217,8 @@ class UI_MENU:
 
     # メニュー終了時処理
     def close(self):
-        self.remove = True
-        self.state.remove = True
+        self._remove = True
+        self.state._remove()
 
     @property
     def width(self) -> int:
@@ -243,7 +251,7 @@ class UI_MENU_GROUP:
             menu.close()  # 子を全て閉じる
 
     def getActive(self) -> UI_MENU|None:
-        available = [menu for menu in self.stack if not menu.remove]  # 生きてるものだけ取り出す
+        available = [menu for menu in self.stack if not menu._remove]  # 生きてるものだけ取り出す
         if len(available) == 0:
             return None
         active = available[-1]
@@ -257,7 +265,7 @@ class UI_MENU_GROUP:
     def update(self):
         for group in [group for group in self.stack if isinstance(group, UI_MENU_GROUP)]:
             group.update()  # 子も更新
-        self.stack = [menu for menu in self.stack if not menu.remove]
+        self.stack = [menu for menu in self.stack if not menu._remove]
 
     # メニューリスト内検索
     def findByID(self, id:str) -> UI_MENU|None:
@@ -348,13 +356,13 @@ class XMLUI:
         # ノードの追加と削除
         for state in self.state_map.values():
             # removeがマークされたノードは削除
-            if state.remove and state != self.root:
+            if state._remove and state != self.root:
                 state._parent.element.remove(state.element)
 
             # appendされたノードを追加
-            for child in state.append_list:
+            for child in state._append_list:
                 state.element.append(child.element)
-            state.append_list = []
+            state._append_list = []
 
         # Treeが変更されたかもなのでstateを更新
         self._updateState(self.root.element, self.state_map)
