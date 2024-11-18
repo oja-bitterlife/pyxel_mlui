@@ -76,12 +76,14 @@ class UI_TEXT:
 
 # 表内移動Wrap付き
 class UI_MENU:
+    state: 'UI_STATE|None'
     grid: list[list[Any]]  # グリッド
 
     cur_x: int  # 現在位置x
     cur_y: int  # 現在位置y
 
-    def __init__(self, grid:list[list[Any]], init_cur_x:int=0, init_cur_y:int=0):
+    def __init__(self, grid:list[list[Any]]=[], init_cur_x:int=0, init_cur_y:int=0):
+        self.state = None
         self.grid = grid
         self.cur_x, self.cur_y = (init_cur_x, init_cur_y)
 
@@ -232,7 +234,16 @@ class UI_STATE:
     # *************************************************************************
     def openMenu(self, menu:UI_MENU) -> 'UI_STATE':
         self.menu = menu
+        menu.state = self
         return self
+
+    def getActiveMenu(self) -> UI_MENU|None:
+        # 子までたぐりきる
+        for child in self.element:
+            state = self._xmlui.state_map[child]
+            if state.menu is not None:
+                return state.menu
+        return self.menu
 
 
     # デバッグ用

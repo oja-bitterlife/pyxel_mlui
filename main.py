@@ -25,7 +25,7 @@ def update(): # フレームの更新処理
     if pyxel.btnp(pyxel.KEY_Q):
         pyxel.quit()
 
-    active_menu = menu_grid.menu
+    active_menu = menu_win.getActiveMenu()
     if active_menu:
         if pyxel.btnp(pyxel.KEY_LEFT):
             active_menu.moveLeft()
@@ -38,14 +38,13 @@ def update(): # フレームの更新処理
 
         if pyxel.btnp(pyxel.KEY_SPACE):
             try:
-                win_message_worker = menu_win.findByTag("win_message")
                 #  表示中なら消す
-                if win_message_worker:
-                    win_message_worker.remove()
+                win_message = menu_win.findByTag("win_message")
+                win_message.remove()
             except:
                 # 非表示なら新規で追加
                 if active_menu.getData() == "speak":
-                    ui_worker.root.dupAddChild(ui_template.root.findByID("win_message"))
+                    ui_worker.root.dupAddChild(ui_template.root.findByID("win_message")).openMenu(UI_MENU())
 
         if pyxel.btnp(pyxel.KEY_BACKSPACE):
             menu_win.remove()
