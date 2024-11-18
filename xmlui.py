@@ -137,9 +137,6 @@ class UI_STATE:
     # メニュー管理
     menu: UI_MENU|None
 
-    # 表示関係
-    area: UI_RECT  # 描画範囲
-
     def __init__(self, xmlui:'XMLUI', element: Element):
         # プロパティの初期化
         self._xmlui = xmlui
@@ -149,13 +146,6 @@ class UI_STATE:
         self.element = element
 
         self.menu = None
-
-        self.area = UI_RECT(0, 0, 4096, 4096)
-
-        # ステート取得
-        if "id" in self.element.attrib:
-            self.id = self.element.attrib["id"]
-
 
     # attribアクセス用
     # *************************************************************************
@@ -187,6 +177,9 @@ class UI_STATE:
     def is_visible(self) -> bool:
         return self.attrBool("visible", True)
 
+    @property
+    def area(self) -> UI_RECT:
+        return UI_RECT(self.attrInt("area_x"), self.attrInt("area_y"), self.attrInt("area_w", 4096), self.attrInt("area_h", 4096))
 
     # ツリー操作用
     # *************************************************************************
@@ -368,11 +361,10 @@ class XMLUI:
 
         # エリア更新
         if state != self.root:  # rootは親を持たないので更新不要
-            state.area = UI_RECT(  # 親からのオフセットでarea計算
-                state.attrInt("x", 0) + state._parent.area.x,
-                state.attrInt("y", 0) + state._parent.area.y,
-                state.attrInt("w", state._parent.area.w),
-                state.attrInt("h", state._parent.area.h))
+            state.setAttr("area_x", state.attrInt("x") + state._parent.attrInt("area_x"))  # オフセット
+            state.setAttr("area_y", state.attrInt("y") + state._parent.attrInt("area_y"))  # オフセット
+            state.setAttr("area_w", state.attrInt("w", state._parent.attrInt("area_w")))
+            state.setAttr("area_h", state.attrInt("h", state._parent.attrInt("area_h")))
 
         # 子を上に描画するため親を先に描画する
         self.drawElement(element.tag, state)
