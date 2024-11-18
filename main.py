@@ -17,15 +17,15 @@ command_item_data = [
     ["status", "check"],
 ]
 
-menu_cmd = ui_worker.root.dupAddChild(ui_template.root.findByID("menu_cmd")).updateChildren()
-menu_grid = menu_cmd.findByTag("menu_grid").openMenu(UI_MENU(command_item_data, 0, 0))
+menu_win = ui_worker.root.dupAddChild(ui_template.root.findByID("menu_cmd")).updateChildren()
+menu_grid = menu_win.findByTag("menu_grid").openMenu(UI_MENU(command_item_data, 0, 0))
 
 # Main
 def update(): # フレームの更新処理
     if pyxel.btnp(pyxel.KEY_Q):
         pyxel.quit()
 
-    active_menu = menu_cmd.menu
+    active_menu = menu_grid.menu
     if active_menu:
         if pyxel.btnp(pyxel.KEY_LEFT):
             active_menu.moveLeft()
@@ -37,17 +37,18 @@ def update(): # フレームの更新処理
             active_menu.moveDown()
 
         if pyxel.btnp(pyxel.KEY_SPACE):
-            win_message_worker = menu_cmd.findByTag("win_message")
-            #  表示中なら消す
-            if win_message_worker:
-                win_message_worker.remove()
-
-            # 非表示なら新規で追加
-            elif active_menu.getData() == "speak":
-                ui_worker.root.dupAddChild(ui_template.root.findByID("win_message"))
+            try:
+                win_message_worker = menu_win.findByTag("win_message")
+                #  表示中なら消す
+                if win_message_worker:
+                    win_message_worker.remove()
+            except:
+                # 非表示なら新規で追加
+                if active_menu.getData() == "speak":
+                    ui_worker.root.dupAddChild(ui_template.root.findByID("win_message"))
 
         if pyxel.btnp(pyxel.KEY_BACKSPACE):
-            menu_cmd.remove()
+            menu_win.remove()
 
     ui_worker.update()
 

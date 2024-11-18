@@ -21,9 +21,6 @@ def menu_grid_update(state: UI_STATE):
     item_w = state.attrInt("item_w", 0)
     item_h = state.attrInt("item_h", 0)
 
-    # print(state._xmlui is state._parent._xmlui)
-    # print(state._parent.strTree())
-
     # item_data  = state.menu.findByID("dup_cmd_menu")
     # if item_data is None:
     #     return
