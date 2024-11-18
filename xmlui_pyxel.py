@@ -4,25 +4,29 @@ import pyxel
 font = pyxel.Font("assets/font/b12.bdf")
 FONT_SIZE = 12
 
-def msg_win_update(state: UI_STATE):
+def msg_win_update(state: UI_STATE, event:str|None):
     msg_cur = state.findByTag("msg_cur")
     msg_text = state.findByTag("msg_text")
+
     if msg_cur and msg_text:
         msg_cur.setAttr("visible", msg_text.attrBool("finish"))
 
-def msg_text_update(state: UI_STATE):
+    if event=="action":
+        state.remove()
+
+def msg_text_update(state: UI_STATE, event:str|None):
     draw_count = state.attrInt("draw_count")
     ui_text = UI_TEXT(state.getText(), {"name":"world", "age":10})
 
     state.setAttr("draw_count", draw_count+1)
     state.setAttr("finish", draw_count >= ui_text.length)
 
-def menu_grid_update(state: UI_STATE):
+def menu_grid_update(state: UI_STATE, event:str|None):
     item_w = state.attrInt("item_w", 0)
     item_h = state.attrInt("item_h", 0)
 
     # item_data  = state.menu.findByID("dup_cmd_menu")
-    # if item_data is None:
+    # if item_data is None:re
     #     return
 
     # アイテムを並べる

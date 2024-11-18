@@ -76,7 +76,7 @@ class UI_TEXT:
 
 # 表内移動Wrap付き
 class UI_MENU:
-    state: 'UI_STATE|None'
+    id:str # 識別名
     grid: list[list[Any]]  # グリッド
 
     cur_x: int  # 現在位置x
@@ -84,13 +84,9 @@ class UI_MENU:
 
     def __init__(self, id:str, grid:list[list[Any]]=[], init_cur_x:int=0, init_cur_y:int=0):
         self.id = id
-        self.state = None
         self.grid = grid
         self.cur_x, self.cur_y = (init_cur_x, init_cur_y)
-
-    def close(self):
-        if self.state is not None:
-            self.state.remove()
+        self._events = set([])
 
     # 範囲限定付き座標設定
     def setPos(self, x:int, y:int, wrap:bool=False) -> 'UI_MENU':
@@ -125,18 +121,16 @@ class UI_MENU:
     def length(self) -> int:
         return sum([len(line) for line in self.grid])
 
+    # action
+    def action(self, event_name:str):
+        self._events.add(event_name)
 
-# UIパーツの状態保存用
+
+# UIパーツの状態保存用popEvent
 class UI_STATE:
-    # プロパティ定義
-    # 一度しか初期化されないので定義と同時に配列等オブジェクトを代入すると事故る
-    # のでconstructorで初期化する
-
     # ライブラリ用。アプリ側で使うのは非推奨
     _xmlui: 'XMLUI'  # ライブラリへのIF
     _parent: 'UI_STATE'  # 親Element
-    _remove: bool  # 削除フラグ
-    _append_list: list['UI_STATE']  # 追加リスト
 
     # XML構造
     element: Element  # 自身のElement
@@ -147,11 +141,7 @@ class UI_STATE:
     def __init__(self, xmlui:'XMLUI', element: Element):
         # プロパティの初期化
         self._xmlui = xmlui
-        self._remove = False
-        self._append_list = []
-
         self.element = element
-
         self.menu = None
 
     # attribアクセス用
@@ -191,13 +181,14 @@ class UI_STATE:
     # ツリー操作用
     # *************************************************************************
     def addChild(self, state:'UI_STATE') -> 'UI_STATE':
-        self._append_list.append(state)
-        state._parent = self  # 親の更新
-        self._xmlui.state_map[state.element] = state  # すぐに使えるように登録しておく
+        self.element.append(state)
+        self._xmlui.state_map[state.element] = state
         return self
 
     def remove(self):
-        self._remove = True
+        if self._parent is not None:
+            self._parent.element.remove(self.element)
+            self._xmlui.state_map.pop(self.element)
 
     def findByID(self, id:str) -> 'UI_STATE':
         for element in self.element.iter():
@@ -214,39 +205,19 @@ class UI_STATE:
             return elements[0]
         raise Exception(f"Tag '{tag}' not found in '{self.element.tag}'")
 
-#    @property
-#    def is_remove(self) -> bool:
-#        return self._remove
-
-    def updateTree(self) -> 'UI_STATE':
-        self._xmlui.checkLock()
-
-        # appendされたノードを追加
-        for child in self._append_list:
-            self.element.append(child.element)
-
-        # removeがマークされたノードは削除
-        if self._remove and self._parent is not None:
-            self._parent.element.remove(self.element)
-
-        # 子もUpdate
-        for child in self.element:
-            self._xmlui.state_map[child].updateTree()
-
-        self._append_list = []
-        return self
+    @property
+    def children(self) -> list['UI_STATE']:
+        return [self._xmlui.state_map[element] for element in self.element.iter()]
 
 
     # Menu操作用
     # *************************************************************************
     def openMenu(self, menu:UI_MENU) -> 'UI_STATE':
         self.menu = menu
-        menu.state = self
         return self
 
     def getActiveMenu(self) -> UI_MENU|None:
-        # 一旦メニューを全て取得
-        menus = list(filter(lambda menu: menu is not None, [self._xmlui.state_map[element].menu for element in self.element.iter()]))
+        menus = [state.menu for state in self.children if state.menu is not None]
         if not menus:
             return None
         # 最後のがアクティブ
@@ -271,7 +242,6 @@ class XMLUI:
     state_map: dict[Element, UI_STATE]  # 状態保存用
 
     # 処理関数の登録
-    tree_lock:bool  # update/drawの時にlockをかける
     update_funcs: dict[str, Callable[[UI_STATE], None]]
     draw_funcs: dict[str, Callable[[UI_STATE], None]]
 
@@ -299,7 +269,6 @@ class XMLUI:
         self.state_map = {}
 
         # 更新処理
-        self.tree_lock = False
         self.update_funcs = {}
         self.draw_funcs = {}
 
@@ -314,7 +283,7 @@ class XMLUI:
                 raise Exception(f"<{root_tag}> not found")
 
         # state_mapの作成
-        self._updateState(xmlui_root, {})
+        self._updateState(None, xmlui_root, {})
 
         # rootを取り出しておく
         self.root = self.state_map[xmlui_root]
@@ -326,95 +295,77 @@ class XMLUI:
 
         # 子も複製してぶら下げておく
         for child in src_state.element:
-            dup_child = self.duplicate(src_state._xmlui.state_map[child])
-            dup_state.addChild(dup_child)
+            dup_state.addChild(self.duplicate(src_state._xmlui.state_map[child]))
 
         return dup_state
-
-    # ロック中なら例外を出す
-    def checkLock(self):
-        if self.tree_lock:
-            raise Exception("element tree is locked")
 
     # 更新用
     # *************************************************************************
     # 全体を呼び出す処理
     def update(self):
-        # 更新処理
-        self.tree_lock = True
-        self._updateTreeRec(self.root.element)
-        self.tree_lock = False
-
-        # ノードの追加と削除
-        self.root.updateTree()
-
-        # Treeが変更されたかもなのでstateを更新
-        self._updateState(self.root.element, self.state_map)
-
-
-    # ツリーのノード以下を再帰処理
-    def _updateTreeRec(self, element: Element):
-        state = self.state_map[element]
-
-        # disableなら子も含めてUpdateしない
-        if not state.is_enable:
-            return
+        # Treeが変更されたかもなのでstateを更新しておく
+        self._updateState(None, self.root.element, self.state_map)
 
         # 更新処理
-        self.updateElement(element.tag, state)
+        for state in self._getUpdateTarget():
+            self.updateElement(state.element.tag, state, None)
 
-        # 子の処理
-        for child in element:
-            self._updateTreeRec(child)
+    # updateが必要な要素をTree順で取り出す
+    def _getUpdateTarget(self) -> list[UI_STATE]:
+        def __getUpdateTargetRec(element:Element):
+            out = []
+            for child in element:
+                # disableな要素は子も含めて処理しない
+                if child.attrib.get("enable", True):
+                    out.append(self.state_map[child])
+                    out += __getUpdateTargetRec(child)
+                return out
+        __getUpdateTargetRec(self.root.element)
 
-    # stateの更新
-    def _updateState(self, root_element: Element, old_map: dict[Element,UI_STATE]):
-        # state_mapの更新
-        self.state_map = {element: old_map.get(element, UI_STATE(self, element)) for element in root_element.iter()}
+    # state_mapの一斉更新
+    def _updateState(self, root_parent:Element|None, root_element:Element, old_map: dict[Element,UI_STATE]):
+        def __updateStateRec(parent: Element|None, element:Element):
+            new_state = old_map.get(element, UI_STATE(self, element))
+            new_state._parent = parent
 
-        # state_mapのparentを更新
-        def _updateStateParentRec(parent: Element):
-            for child in parent:
-                self.state_map[child]._parent = self.state_map[parent]
-                _updateStateParentRec(child)
-        _updateStateParentRec(root_element)
+            # 再起で子全部
+            for child in element:
+                __updateStateRec(element, child)
+        __updateStateRec(root_parent, root_element)
 
 
     # 描画用
     # *************************************************************************
     def draw(self):
-        # ツリーの描画
-        self.tree_lock = True
-        self._drawTreeRec(self.root.element)
-        self.tree_lock = False
-
-    # ツリーのノード以下を再帰処理
-    def _drawTreeRec(self, element: Element):
-        state = self.state_map[element]
-
-        # 非表示なら子も含めて描画しない
-        if not state.is_visible or not state.is_enable:  # disable時も表示しない
-            return
-
         # エリア更新
-        if state != self.root:  # rootは親を持たないので更新不要
-            state.setAttr("area_x", state.attrInt("x") + state._parent.attrInt("area_x"))  # オフセット
-            state.setAttr("area_y", state.attrInt("y") + state._parent.attrInt("area_y"))  # オフセット
-            state.setAttr("area_w", state.attrInt("w", state._parent.attrInt("area_w")))
-            state.setAttr("area_h", state.attrInt("h", state._parent.attrInt("area_h")))
+        for state in self._getDrawTarget():
+            if state._parent is not None:  # rootは親を持たないので更新不要
+                state.setAttr("area_x", state.attrInt("x") + state._parent.attrInt("area_x"))  # オフセット
+                state.setAttr("area_y", state.attrInt("y") + state._parent.attrInt("area_y"))  # オフセット
+                state.setAttr("area_w", state.attrInt("w", state._parent.attrInt("area_w")))
+                state.setAttr("area_h", state.attrInt("h", state._parent.attrInt("area_h")))
 
-        # 子を上に描画するため親を先に描画する
-        self.drawElement(element.tag, state)
+        # 描画処理
+        for state in self._getDrawTarget():
+            self.drawElement(state.element.tag, state)
 
-        # 子の描画
-        for child in element:
-            self._drawTreeRec(child)
+    # updateが必要な要素をTree順で取り出す
+    def _getDrawTarget(self) -> list[UI_STATE]:
+        def __getDrawTargetRec(element:Element):
+            out = []
+            for child in element:
+                # disable/hideな要素は子も含めて処理しない
+                if child.attrib.get("enable", True) and child.attrib.get("visible", True):
+                    out.append(self.state_map[child])
+                    out += __getDrawTargetRec(child)
+                return out
+        __getDrawTargetRec(self.root.element)
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
-    def updateElement(self, name:str, state:UI_STATE):
+    def updateElement(self, name:str, state:UI_STATE, event:str):
         # 登録済みの関数だけ実行
         if name in self.update_funcs:
-            self.update_funcs[name](state)
+            self.update_funcs[name](state, event)
 
     def drawElement(self, name:str, state:UI_STATE):
         # 登録済みの関数だけ実行
@@ -422,7 +373,7 @@ class XMLUI:
             self.draw_funcs[name](state)
 
     # 個別処理登録
-    def setUpdateFunc(self, name:str, func:Callable[[UI_STATE], None]):
+    def setUpdateFunc(self, name:str, func:Callable[[UI_STATE,str|None], None]):
         self.update_funcs[name] = func
 
     def setDrawFunc(self, name:str, func:Callable[[UI_STATE], None]):
