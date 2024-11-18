@@ -18,10 +18,9 @@ command_item_data = [
 ]
 
 template_menu_cmd = ui_template.root.findByID("menu_cmd")
-if template_menu_cmd is None:
-    raise Exception("menu_cmd not found")
 
-menu_cmd = ui_worker.root.addChild(template_menu_cmd.duplicate()).openMenu(UI_MENU(command_item_data, 0, 0))
+menu_cmd = ui_worker.root.addChild(template_menu_cmd.duplicate()).updateTree()
+menu_grid = menu_cmd.findByTag("menu_grid").openMenu(UI_MENU(command_item_data, 0, 0))
 
 # Main
 def update(): # フレームの更新処理

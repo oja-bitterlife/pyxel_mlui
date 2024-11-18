@@ -212,22 +212,36 @@ class UI_STATE:
 
         return dup_state
 
-    def findByID(self, id:str) -> 'UI_STATE|None':
+    def findByID(self, id:str) -> 'UI_STATE':
         for element in self.element.iter():
             if element.attrib.get("id") == id:
                 return self._xmlui.state_map[element]
-        return None
+        raise Exception(f"ID '{id}' not found in '{self.element.tag}'")
 
     def findByTagAll(self, tag:str) -> list['UI_STATE']:
         return [self._xmlui.state_map[element] for element in self.element.findall(tag)]
 
-    def findByTag(self, tag:str) -> 'UI_STATE|None':
+    def findByTag(self, tag:str) -> 'UI_STATE':
         elements = self.findByTagAll(tag)
-        return elements[0] if elements else None
+        if elements:
+            return elements[0]
+        raise Exception(f"Tag '{tag}' not found in '{self.element.tag}'")
 
     @property
     def is_remove(self) -> bool:
         return self._remove
+
+    def updateTree(self) -> 'UI_STATE':
+        # appendされたノードを追加
+        for child in self._append_list:
+            self.element.append(child.element)
+        self._append_list = []
+
+        # removeがマークされたノードは削除
+        if self._remove and self._parent is not None:
+            self._parent.element.remove(self.element)
+
+        return self
 
 
     # Menu操作用
@@ -300,13 +314,13 @@ class XMLUI:
 
     # XML操作用
     # *************************************************************************
-    def findByID(self, id:str) -> UI_STATE|None:
+    def findByID(self, id:str) -> UI_STATE:
         return self.root.findByID(id)
 
     def findByTagAll(self, tag:str) -> list[UI_STATE]:
         return self.root.findByTagAll(tag)
 
-    def findByTag(self, tag:str) -> UI_STATE|None:
+    def findByTag(self, tag:str) -> UI_STATE:
         return self.root.findByTag(tag)
 
 
@@ -319,14 +333,7 @@ class XMLUI:
 
         # ノードの追加と削除
         for state in self.state_map.values():
-            # removeがマークされたノードは削除
-            if state._remove and state != self.root:
-                state._parent.element.remove(state.element)
-
-            # appendされたノードを追加
-            for child in state._append_list:
-                state.element.append(child.element)
-            state._append_list = []
+            state.updateTree()
 
         # Treeが変更されたかもなのでstateを更新
         self._updateState(self.root.element, self.state_map)
