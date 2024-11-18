@@ -195,7 +195,7 @@ class UI_STATE:
 
         state._parent = self  # 親の更新
         self._xmlui.state_map[state.element] = state  # すぐに使えるように登録しておく
-        return state
+        return self
 
     def dupAddChild(self, state:'UI_STATE') -> 'UI_STATE':
         return self.addChild(self._xmlui.duplicate(state))
