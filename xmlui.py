@@ -95,35 +95,17 @@ class UI_STATE:
     def remove(self):
         self._remove = True
 
-    def duplicate(self, new_id:str|None) -> 'UI_STATE':
+    def duplicate(self) -> 'UI_STATE':
         # まずは複製
         dup_state =  UI_STATE(self._xmlui, self.element.makeelement(self.element.tag, self.element.attrib.copy()))
         dup_state.element.text = self.element.text
-        if new_id is None:
-            # Noneならidを消す(無名化)
-            if new_id in dup_state.element.attrib:
-                dup_state.element.attrib.pop("id")
-        else:
-            dup_state.setID(new_id)
 
         # 子も複製してぶら下げておく
         for child in self.element:
-            dup_child = self._xmlui.state_map[child].duplicate(None)  # とりあえず名無しで
+            dup_child = self._xmlui.state_map[child].duplicate()
             dup_state.element.append(dup_child.element)
 
         return dup_state
-
-    def setID(self, id:str):
-        # rootから全部IDを取り出す
-        root = self
-        while(hasattr(root, "parent")):
-            root = root._parent
-
-        # グローバルキーなのでかぶってはいけない
-        exists = [element.attrib["id"] for element in root.element.iter() if "id" in element.attrib]
-        if id in exists:
-            raise Exception(f"ID {id} already exists")
-        self.setAttr("id", id)
 
     def findByID(self, id:str) -> 'UI_STATE|None':
         for element in self.element.iter():
@@ -138,6 +120,11 @@ class UI_STATE:
             if element.tag == tag:
                 out.append(self._xmlui.state_map[element])
         return out
+
+    @property
+    def is_remove(self) -> bool:
+        return self._remove
+
 
 # テキスト表示用
 class UI_TEXT:
@@ -226,7 +213,7 @@ class UI_MENU:
     # メニュー終了時処理
     def close(self):
         self._remove = True
-        self.state._remove()
+        self.state.remove()
 
     @property
     def width(self) -> int:
@@ -240,6 +227,9 @@ class UI_MENU:
     def length(self) -> int:
         return sum([len(line) for line in self.grid])
 
+    @property
+    def is_remove(self) -> bool:
+        return self._remove
 
 # メニュー階層管理
 class UI_MENU_GROUP:
@@ -259,7 +249,7 @@ class UI_MENU_GROUP:
             menu.close()  # 子を全て閉じる
 
     def getActive(self) -> UI_MENU|None:
-        available = [menu for menu in self.stack if not menu._remove]  # 生きてるものだけ取り出す
+        available = [menu for menu in self.stack if not menu.is_remove]  # 生きてるものだけ取り出す
         if len(available) == 0:
             return None
         active = available[-1]
@@ -273,7 +263,7 @@ class UI_MENU_GROUP:
     def update(self):
         for group in [group for group in self.stack if isinstance(group, UI_MENU_GROUP)]:
             group.update()  # 子も更新
-        self.stack = [menu for menu in self.stack if not menu._remove]
+        self.stack = [menu for menu in self.stack if not menu.is_remove]
 
     # メニューリスト内検索
     def findByID(self, id:str) -> UI_MENU|None:
@@ -294,7 +284,7 @@ class UI_MENU_GROUP:
         return out
 
     @property
-    def remove(self) -> bool:
+    def is_remove(self) -> bool:
         return len(self.stack) == 0  # 空のグループは不要
 
 
@@ -346,6 +336,15 @@ class XMLUI:
 
         # rootを取り出しておく
         self.root = self.state_map[xmlui_root]
+
+
+    # XML操作用
+    # *************************************************************************
+    def findByID(self, id:str) -> UI_STATE|None:
+        return self.root.findByID(id)
+
+    def findByTag(self, tag:str) -> list[UI_STATE]:
+        return self.root.findByTag(tag)
 
 
     # Menu操作用
