@@ -82,10 +82,15 @@ class UI_MENU:
     cur_x: int  # 現在位置x
     cur_y: int  # 現在位置y
 
-    def __init__(self, grid:list[list[Any]]=[], init_cur_x:int=0, init_cur_y:int=0):
+    def __init__(self, id:str, grid:list[list[Any]]=[], init_cur_x:int=0, init_cur_y:int=0):
+        self.id = id
         self.state = None
         self.grid = grid
         self.cur_x, self.cur_y = (init_cur_x, init_cur_y)
+
+    def close(self):
+        if self.state is not None:
+            self.state._remove = True
 
     # 範囲限定付き座標設定
     def setPos(self, x:int, y:int, wrap:bool=False) -> 'UI_MENU':
@@ -205,7 +210,12 @@ class UI_STATE:
         raise Exception(f"ID '{id}' not found in '{self.element.tag}'")
 
     def findByTagAll(self, tag:str) -> list['UI_STATE']:
-        return [self._xmlui.state_map[element] for element in self.element.findall(tag)]
+        out:list['UI_STATE'] = []
+        for element in self.element.iter():
+            print(element.tag)
+            if element.tag == tag:
+                out.append(self._xmlui.state_map[element])
+        return out
 
     def findByTag(self, tag:str) -> 'UI_STATE':
         elements = self.findByTagAll(tag)
@@ -315,7 +325,7 @@ class XMLUI:
         # 子も複製してぶら下げておく
         for child in src_state.element:
             dup_child = self.duplicate(src_state._xmlui.state_map[child])
-            dup_state.addChild(UI_STATE(self, dup_child.element))
+            dup_state.addChild(dup_child)
 
         return dup_state
 
