@@ -329,7 +329,6 @@ class XMLUI:
         for child in src_state.element:
             dup_child = self.duplicate(src_state._xmlui.state_map[child])
             dup_state.addChild(dup_child)
-            print("addChild", dup_child.element.tag)
 
         return dup_state
 
