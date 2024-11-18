@@ -404,18 +404,18 @@ class XMLUI:
         self._updateState(self.root.element, self.state_map)
 
     # ツリーのノード以下を再帰処理
-    def _updateTreeRec(self, parent: Element):
-        state = self.state_map[parent]
+    def _updateTreeRec(self, element: Element):
+        state = self.state_map[element]
 
         # disableなら子も含めてUpdateしない
         if not state.is_enable:
             return
 
         # 更新処理
-        self.updateElement(parent.tag, state)
+        self.updateElement(element.tag, state)
 
         # 子の処理
-        for child in parent:
+        for child in element:
             self._updateTreeRec(child)
 
         state.update_count += 1  # 実行後に更新
@@ -440,8 +440,8 @@ class XMLUI:
         self._drawTreeRec(self.root.element)
 
     # ツリーのノード以下を再帰処理
-    def _drawTreeRec(self, parent: Element):
-        state = self.state_map[parent]
+    def _drawTreeRec(self, element: Element):
+        state = self.state_map[element]
 
         # 非表示なら子も含めて描画しない
         if not state.is_visible or not state.is_enable:  # disable時も表示しない
@@ -456,10 +456,10 @@ class XMLUI:
                 state.attrInt("h", state._parent.area.h))
 
         # 子を上に描画するため親を先に描画する
-        self.drawElement(parent.tag, state)
+        self.drawElement(element.tag, state)
 
         # 子の描画
-        for child in parent:
+        for child in element:
             self._drawTreeRec(child)
 
 

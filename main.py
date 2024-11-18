@@ -9,7 +9,7 @@ ui_worker = XMLUI.createWorker("xmlui")
 
 # お試しサンプルUI
 import xmlui_pyxel
-xmlui_pyxel.setDefaults(ui_template)
+xmlui_pyxel.setDefaults(ui_worker)
 
 from xmlui import UI_MENU
 command_item_data = [
