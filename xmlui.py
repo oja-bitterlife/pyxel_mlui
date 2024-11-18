@@ -190,6 +190,9 @@ class UI_STATE:
         self._xmlui.state_map[state.element] = state  # すぐに使えるように登録しておく
         return state
 
+    def dupAddChild(self, state:'UI_STATE') -> 'UI_STATE':
+        return self.addChild(self._xmlui.duplicate(state))
+
     def remove(self):
         self._remove = True
 
