@@ -315,11 +315,15 @@ class XMLUI:
             return XMLUI(xml.etree.ElementTree.fromstring(xml_data))
 
     # 初期化。<xmlui>を持つXMLを突っ込む
-    def __init__(self, dom: xml.etree.ElementTree.Element, rootTag:str="xmlui"):
+    def __init__(self, dom: xml.etree.ElementTree.Element|None, rootTag:str="xmlui"):
         self.state_map = {}
         self.menu = UI_MENU_GROUP()
         self.update_funcs = {}
         self.draw_funcs = {}
+
+        # ワーカーDOMで作成
+        if dom is None:
+            dom = Element(rootTag)
 
         # 最上位がxmluiでなくてもいい
         if dom.tag == rootTag:
