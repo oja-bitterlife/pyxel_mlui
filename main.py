@@ -43,7 +43,8 @@ def update(): # フレームの更新処理
             elif active_menu.id == "command":
                 # 非表示なら新規で追加
                 if active_menu.getData() == "speak":
-                    menu_win.dupAddChild(ui_template.root.findByID("win_message")).openMenu(UI_MENU("message"))
+                    menu_win.dupAddChild(ui_template.root.findByID("win_message")).openMenu(UI_MENU("message")).updateTree()
+                    print(menu_win.strTree())
 
         if pyxel.btnp(pyxel.KEY_BACKSPACE):
             menu_win.remove()

@@ -247,12 +247,12 @@ class UI_STATE:
         return self
 
     def getActiveMenu(self) -> UI_MENU|None:
-        # 子までたぐりきる
-        for child in self.element:
-            state = self._xmlui.state_map[child]
-            if state.menu is not None:
-                return state.menu
-        return self.menu
+        # 一旦メニューを全て取得
+        menus = list(filter(lambda menu: menu is not None, [self._xmlui.state_map[element].menu for element in self.element.iter()]))
+        if not menus:
+            return None
+        # 最後のがアクティブ
+        return menus[-1]
 
 
     # デバッグ用
