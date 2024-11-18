@@ -1,29 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <xmlui>
-    <templates enable="False">
+    <msg_win x="16" y="180" w="224" h="60" id="win_message">
+        <msg_text x="8" y="8" wrap="4">
+            name: {name}\nage: {age}\nHello-わーるド
+        </msg_text>
+        <msg_cur x="109" y="51" size="6"/>
+    </msg_win>
 
-        <msg_win x="16" y="180" w="224" h="60" id="msg_win_template">
-            <msg_text x="8" y="8" wrap="4">
-                name: {name}\nage: {age}\nHello-わーるド
-            </msg_text>
-            <msg_cur x="109" y="51" size="6"/>
-        </msg_win>
+    <menu_win title="コマンド" x="32" y="16" w="128"  h="52" id="menu_cmd">
+        <menu_grid x="12" y="14" item_w="58" item_h="18">
+            <menu_row>
+                <menu_item title="はなす"/>
+                <menu_item title="どうぐ"/>
+            </menu_row>
+            <menu_row>
+                <menu_item title="つよさ"/>
+                <menu_item title="しらべる"/>
+            </menu_row>
+            <menu_cur  size="6"/>
+        </menu_grid>
+    </menu_win>
 
-        <menu_win title="コマンド" x="32" y="16" w="128"  h="52" id="cmd_menu_template">
-            <menu_grid x="12" y="14" item_w="58" item_h="18">
-                <menu_row>
-                    <menu_item title="はなす"/>
-                    <menu_item title="どうぐ"/>
-                </menu_row>
-                <menu_row>
-                    <menu_item title="つよさ"/>
-                    <menu_item title="しらべる"/>
-                </menu_row>
-                <menu_cur  size="6"/>
-            </menu_grid>
-        </menu_win>
-
-    </templates>
 </xmlui>
 

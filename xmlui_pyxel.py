@@ -9,7 +9,7 @@ def msg_win_update(state: UI_STATE):
     msg_cur = state.findByTag("msg_cur")
     msg_text = state.findByTag("msg_text")
     if msg_cur and msg_text:
-        msg_cur[0].setAttr("visible", msg_text[0].attrBool("finish"))
+        msg_cur.setAttr("visible", msg_text.attrBool("finish"))
 
 def msg_text_update(state: UI_STATE):
     draw_count = state.update_count//2
@@ -22,26 +22,26 @@ def menu_grid_update(state: UI_STATE):
     item_w = state.attrInt("item_w", 0)
     item_h = state.attrInt("item_h", 0)
 
-    item_data  = state._xmlui.menu.findByID("dup_cmd_menu")
-    if item_data is None:
-        return
+    # item_data  = state.menu.findByID("dup_cmd_menu")
+    # if item_data is None:
+    #     return
 
     # アイテムを並べる
-    rows = state.findByTag("menu_row")
-    for y,row in enumerate(rows):
-        item_y = y*item_h
-        row.setAttr("y", item_y)
+    # rows = state.findByTag("menu_row")
+    # for y,row in enumerate(rows):
+    #     item_y = y*item_h
+    #     row.setAttr("y", item_y)
 
-        items = row.findByTag("menu_item")
-        for x,item in enumerate(items):
-            item_x = x*item_w
-            item.setAttr("x",item_x )
+    #     items = row.findByTag("menu_item")
+    #     for x,item in enumerate(items):
+    #         item_x = x*item_w
+    #         item.setAttr("x",item_x )
 
-            if x == item_data.cur_x and y == item_data.cur_y:
-                cursor = state.findByTag("menu_cur")[0]
-                if cursor:
-                    cursor.setAttr("x", item_x -6)
-                    cursor.setAttr("y", item_y+2)
+    #         if x == item_data.cur_x and y == item_data.cur_y:
+    #             cursor = state.findByTag("menu_cur")[0]
+    #             if cursor:
+    #                 cursor.setAttr("x", item_x -6)
+    #                 cursor.setAttr("y", item_y+2)
 
 # update関数テーブル
 updateFuncs= {

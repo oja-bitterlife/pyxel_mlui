@@ -26,106 +26,6 @@ class UI_RECT:
         return f"RECT({self.x}, {self.y}, {self.w}, {self.h})"
 
 
-# UIパーツの状態保存用
-class UI_STATE:
-    # プロパティ定義
-    # 一度しか初期化されないので定義と同時に配列等オブジェクトを代入すると事故る
-    # のでconstructorで初期化する
-
-    # ライブラリ用。アプリ側で使うのは非推奨
-    _xmlui: 'XMLUI'  # ライブラリへのIF
-    _parent: 'UI_STATE'  # 親Element
-    _remove: bool  # 削除フラグ
-    _append_list: list['UI_STATE']  # 追加リスト
-
-    # XML構造
-    element: Element  # 自身のElement
-
-    # 表示関係
-    area: UI_RECT  # 描画範囲
-    update_count: int  # 更新カウンター
-
-    def __init__(self, xmlui:'XMLUI', element: Element):
-        # プロパティの初期化
-        self._xmlui = xmlui
-        self._remove = False
-        self._append_list = []
-
-        self.element = element
-
-        self.area = UI_RECT(0, 0, 4096, 4096)
-        self.update_count = 0
-
-        # ステート取得
-        if "id" in self.element.attrib:
-            self.id = self.element.attrib["id"]
-
-    # attribアクセス用
-    def attrInt(self, key:str, default:int=0) -> int:
-        return int(self.element.attrib.get(key, default))
-
-    def attrStr(self, key:str, default:str="") -> str:
-        return self.element.attrib.get(key, default)
-
-    def attrBool(self, key:str, default:bool=False) -> bool:
-        attr = self.element.attrib.get(key)
-        return default if attr is None else (True if attr.lower() in ["true", "ok", "yes"] else False)
-
-    def getText(self) -> str:
-        return self.element.text.strip() if self.element.text != None else ""
-
-    def hasAttr(self, key: str) -> bool:
-        return key in self.element.attrib
-
-    def setAttr(self, key: str, value: Any):
-        self.element.attrib[key] = str(value)  # attribはdict[str,str]なのでstrで保存する
-
-    @property
-    def is_enable(self) -> bool:
-        return self.attrBool("enable", True)
-
-    @property
-    def is_visible(self) -> bool:
-        return self.attrBool("visible", True)
-
-    # ツリー操作用
-    def addChild(self, state:'UI_STATE'):
-        self._append_list.append(state)
-
-    def remove(self):
-        self._remove = True
-
-    def duplicate(self) -> 'UI_STATE':
-        # まずは複製
-        dup_state =  UI_STATE(self._xmlui, self.element.makeelement(self.element.tag, self.element.attrib.copy()))
-        dup_state.element.text = self.element.text
-
-        # 子も複製してぶら下げておく
-        for child in self.element:
-            dup_child = self._xmlui.state_map[child].duplicate()
-            dup_state.element.append(dup_child.element)
-
-        return dup_state
-
-    def findByID(self, id:str) -> 'UI_STATE|None':
-        for element in self.element.iter():
-            if element.attrib.get("id") == id:
-                return self._xmlui.state_map[element]
-        return None
-
-    def findByTag(self, tag:str) -> list['UI_STATE']:
-        out = []
-        rootElement = self.element if self != None else self.self.element
-        for element in rootElement.iter():
-            if element.tag == tag:
-                out.append(self._xmlui.state_map[element])
-        return out
-
-    @property
-    def is_remove(self) -> bool:
-        return self._remove
-
-
 # テキスト表示用
 class UI_TEXT:
     src: str  # パラメータ置換済み文字列
@@ -177,15 +77,15 @@ class UI_TEXT:
 # 表内移動Wrap付き
 class UI_MENU:
     grid: list[list[Any]]  # グリッド
-    state: UI_STATE  # 操作対象Element
+    # state: UI_STATE  # 操作対象Element
     _remove: bool  # 削除フラグ
 
     cur_x: int  # 現在位置x
     cur_y: int  # 現在位置y
 
-    def __init__(self, grid:list[list[Any]], state:UI_STATE, init_cur_x:int=0, init_cur_y:int=0):
+    def __init__(self, grid:list[list[Any]], init_cur_x:int=0, init_cur_y:int=0):
         self.grid = grid
-        self.state = state
+        # self.state = state
         self._remove = False
         self.cur_x, self.cur_y = (init_cur_x, init_cur_y)
 
@@ -210,10 +110,10 @@ class UI_MENU:
     def getData(self) -> Any:
         return self.grid[self.cur_y][self.cur_x]
 
-    # メニュー終了時処理
-    def close(self):
-        self._remove = True
-        self.state.remove()
+    # # メニュー終了時処理
+    # def close(self):
+    #     self._remove = True
+        # self.state.remove()
 
     @property
     def width(self) -> int:
@@ -232,60 +132,191 @@ class UI_MENU:
         return self._remove
 
 # メニュー階層管理
-class UI_MENU_GROUP:
-    stack: list['UI_MENU|UI_MENU_GROUP']
+# class UI_MENU_GROUP:
+#     stack: list['UI_MENU|UI_MENU_GROUP']
 
-    def __init__(self, menu_list:list['UI_MENU|UI_MENU_GROUP']|UI_MENU=[]):
-        if isinstance(menu_list, UI_MENU):
-            menu_list = [menu_list]
-        self.stack = menu_list
+#     def __init__(self, menu_list:list['UI_MENU|UI_MENU_GROUP']|UI_MENU=[]):
+#         if isinstance(menu_list, UI_MENU):
+#             menu_list = [menu_list]
+#         self.stack = menu_list
 
-    def push(self, menu: 'UI_MENU|UI_MENU_GROUP'):
-        self.stack.append(menu)
+#     def push(self, menu: 'UI_MENU|UI_MENU_GROUP'):
+#         self.stack.append(menu)
 
-    # メニューを閉じる
-    def close(self):
-        for menu in self.stack:
-            menu.close()  # 子を全て閉じる
+#     # メニューを閉じる
+#     # def close(self):
+#     #     for menu in self.stack:
+#     #         menu.close()  # 子を全て閉じる
 
-    def getActive(self) -> UI_MENU|None:
-        available = [menu for menu in self.stack if not menu.is_remove]  # 生きてるものだけ取り出す
-        if len(available) == 0:
-            return None
-        active = available[-1]
-        if isinstance(active, UI_MENU):
-            return active
+#     def getActive(self) -> UI_MENU|None:
+#         available = [menu for menu in self.stack if not menu.is_remove]  # 生きてるものだけ取り出す
+#         if len(available) == 0:
+#             return None
+#         active = available[-1]
+#         if isinstance(active, UI_MENU):
+#             return active
 
-        # グループならグループ内のactiveを返す
-        return active.getActive()
+#         # グループならグループ内のactiveを返す
+#         return active.getActive()
 
-    # 不要になったメニューを削除
-    def update(self):
-        for group in [group for group in self.stack if isinstance(group, UI_MENU_GROUP)]:
-            group.update()  # 子も更新
-        self.stack = [menu for menu in self.stack if not menu.is_remove]
+#     # 不要になったメニューを削除
+#     def update(self):
+#         for group in [group for group in self.stack if isinstance(group, UI_MENU_GROUP)]:
+#             group.update()  # 子も更新
+#         self.stack = [menu for menu in self.stack if not menu.is_remove]
 
-    # メニューリスト内検索
-    def findByID(self, id:str) -> UI_MENU|None:
-        for menu in self.stack:
-            if isinstance(menu, UI_MENU_GROUP):
-                return menu.findByID(id)
-            if menu.state.attrStr("id") == id:
-                return menu
+#     # メニューリスト内検索
+#     # def findByID(self, id:str) -> UI_MENU|None:
+#     #     for menu in self.stack:
+#     #         if isinstance(menu, UI_MENU_GROUP):
+#     #             return menu.findByID(id)
+#     #         if menu.state.attrStr("id") == id:
+#     #             return menu
+#     #     return None
+
+#     # def findByTagAll(self, tag:str) -> list[UI_MENU]:
+#     #     out = []
+#     #     for menu in self.stack:
+#     #         if isinstance(menu, UI_MENU_GROUP):
+#     #             out += menu.findByTagAll(tag)
+#     #         elif menu.state.element.tag == tag:
+#     #             out.append(menu)
+#     #     return out
+
+#     # def findByTag(self, tag:str) -> UI_MENU|None:
+#     #     menus = self.findByTagAll(tag)
+#     #     return menus[0] if menus else None
+
+#     @property
+#     def is_remove(self) -> bool:
+#         return len(self.stack) == 0  # 空のグループは不要
+
+
+# UIパーツの状態保存用
+class UI_STATE:
+    # プロパティ定義
+    # 一度しか初期化されないので定義と同時に配列等オブジェクトを代入すると事故る
+    # のでconstructorで初期化する
+
+    # ライブラリ用。アプリ側で使うのは非推奨
+    _xmlui: 'XMLUI'  # ライブラリへのIF
+    _parent: 'UI_STATE'  # 親Element
+    _remove: bool  # 削除フラグ
+    _append_list: list['UI_STATE']  # 追加リスト
+
+    # XML構造
+    element: Element  # 自身のElement
+
+    # メニュー管理
+    menu: UI_MENU|None
+
+    # 表示関係
+    area: UI_RECT  # 描画範囲
+    update_count: int  # 更新カウンター
+
+    def __init__(self, xmlui:'XMLUI', element: Element):
+        # プロパティの初期化
+        self._xmlui = xmlui
+        self._remove = False
+        self._append_list = []
+
+        self.element = element
+
+        self.menu = None
+
+        self.area = UI_RECT(0, 0, 4096, 4096)
+        self.update_count = 0
+
+        # ステート取得
+        if "id" in self.element.attrib:
+            self.id = self.element.attrib["id"]
+
+
+    # attribアクセス用
+    # *************************************************************************
+    def attrInt(self, key:str, default:int=0) -> int:
+        return int(self.element.attrib.get(key, default))
+
+    def attrStr(self, key:str, default:str="") -> str:
+        return self.element.attrib.get(key, default)
+
+    def attrBool(self, key:str, default:bool=False) -> bool:
+        attr = self.element.attrib.get(key)
+        return default if attr is None else (True if attr.lower() in ["true", "ok", "yes"] else False)
+
+    def getText(self) -> str:
+        return self.element.text.strip() if self.element.text != None else ""
+
+    def hasAttr(self, key: str) -> bool:
+        return key in self.element.attrib
+
+    def setAttr(self, key: str, value: Any) -> 'UI_STATE':
+        self.element.attrib[key] = str(value)  # attribはdict[str,str]なのでstrで保存する
+        return self
+
+    @property
+    def is_enable(self) -> bool:
+        return self.attrBool("enable", True)
+
+    @property
+    def is_visible(self) -> bool:
+        return self.attrBool("visible", True)
+
+
+    # ツリー操作用
+    # *************************************************************************
+    def addChild(self, state:'UI_STATE') -> 'UI_STATE':
+        self._append_list.append(state)
+        return state
+
+    def remove(self):
+        self._remove = True
+
+    def duplicate(self) -> 'UI_STATE':
+        # まずは複製
+        dup_state =  UI_STATE(self._xmlui, self.element.makeelement(self.element.tag, self.element.attrib.copy()))
+        dup_state.element.text = self.element.text
+
+        # 子も複製してぶら下げておく
+        for child in self.element:
+            dup_child = self._xmlui.state_map[child].duplicate()
+            dup_state.element.append(dup_child.element)
+
+        return dup_state
+
+    def findByID(self, id:str) -> 'UI_STATE|None':
+        for element in self.element.iter():
+            if element.attrib.get("id") == id:
+                return self._xmlui.state_map[element]
         return None
 
-    def findByTag(self, tag:str) -> list[UI_MENU]:
-        out = []
-        for menu in self.stack:
-            if isinstance(menu, UI_MENU_GROUP):
-                out += menu.findByTag(tag)
-            elif menu.state.element.tag == tag:
-                out.append(menu)
-        return out
+    def findByTagAll(self, tag:str) -> list['UI_STATE']:
+        return [self._xmlui.state_map[element] for element in self.element.findall(tag)]
+
+    def findByTag(self, tag:str) -> 'UI_STATE|None':
+        elements = self.findByTagAll(tag)
+        return elements[0] if elements else None
 
     @property
     def is_remove(self) -> bool:
-        return len(self.stack) == 0  # 空のグループは不要
+        return self._remove
+
+
+    # Menu操作用
+    # *************************************************************************
+    def openMenu(self, menu:UI_MENU) -> 'UI_STATE':
+        self.menu = menu
+        return self
+
+
+    # デバッグ用
+    # *************************************************************************
+    def strTree(self, indent:str="  ", pre:str="") -> str:
+        out = pre + self.element.tag
+        out += ": " + self.attrStr("id") if "id" in self.element.attrib else ""
+        for element in self.element:
+            out += "\n" + self._xmlui.state_map[element].strTree(indent, pre+indent)
+        return out
 
 
 # XMLでUIライブラリ本体
@@ -293,9 +324,6 @@ class UI_MENU_GROUP:
 class XMLUI:
     root: UI_STATE
     state_map: dict[Element, UI_STATE]  # 状態保存用
-
-    # メニュー管理
-    menu: UI_MENU_GROUP
 
     # 処理関数の登録
     update_funcs: dict[str, Callable[[UI_STATE], None]]
@@ -305,35 +333,35 @@ class XMLUI:
     # *************************************************************************
     # ファイルから読み込み
     @classmethod
-    def createFromFile(cls, fileName: str):
+    def createFromFile(cls, fileName:str, root_tag:str|None=None):
         with open(fileName, "r", encoding="utf8") as f:
             return cls.createFromString(f.read())
 
     # リソースから読み込み
     @classmethod
-    def createFromString(cls, xml_data: str):
-            return XMLUI(xml.etree.ElementTree.fromstring(xml_data))
+    def createFromString(cls, xml_data:str, root_tag:str|None=None):
+        return XMLUI(xml.etree.ElementTree.fromstring(xml_data))
+
+    # ワーカーの作成
+    @classmethod
+    def createWorker(cls, root_tag:str):
+        return XMLUI(Element(root_tag))
 
     # 初期化。<xmlui>を持つXMLを突っ込む
-    def __init__(self, dom: xml.etree.ElementTree.Element|None, rootTag:str="xmlui"):
+    def __init__(self, dom:xml.etree.ElementTree.Element, root_tag:str|None=None):
         self.state_map = {}
-        self.menu = UI_MENU_GROUP()
         self.update_funcs = {}
         self.draw_funcs = {}
 
-        # ワーカーDOMで作成
-        if dom is None:
-            dom = Element(rootTag)
-
-        # 最上位がxmluiでなくてもいい
-        if dom.tag == rootTag:
+        # root_tag指定が無ければ最上位エレメント
+        if root_tag is None:
             xmlui_root = dom
         else:
-            # 最上位でないときは子から探す
-            xmlui_root = dom.find(rootTag)
+            # Noneでないときは子から探す
+            xmlui_root = dom.find(root_tag)
             # 見つからなかったら未対応のXML
             if xmlui_root is None:
-                raise Exception(f"<{rootTag}> not found")
+                raise Exception(f"<{root_tag}> not found")
 
         # state_mapの作成
         self._updateState(xmlui_root, {})
@@ -347,14 +375,11 @@ class XMLUI:
     def findByID(self, id:str) -> UI_STATE|None:
         return self.root.findByID(id)
 
-    def findByTag(self, tag:str) -> list[UI_STATE]:
+    def findByTagAll(self, tag:str) -> list[UI_STATE]:
+        return self.root.findByTagAll(tag)
+
+    def findByTag(self, tag:str) -> UI_STATE|None:
         return self.root.findByTag(tag)
-
-
-    # Menu操作用
-    # *************************************************************************
-    def openMenu(self, menu:UI_MENU|UI_MENU_GROUP):
-        self.menu.stack.append(menu)
 
 
     # 更新用
@@ -377,9 +402,6 @@ class XMLUI:
 
         # Treeが変更されたかもなのでstateを更新
         self._updateState(self.root.element, self.state_map)
-
-        # 不要になったメニューを削除
-        self.menu.update()
 
     # ツリーのノード以下を再帰処理
     def _updateTreeRec(self, parent: Element):
