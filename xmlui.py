@@ -222,7 +222,7 @@ class UI_STATE:
     def is_remove(self) -> bool:
         return self._remove
 
-    def updateTree(self) -> 'UI_STATE':
+    def updateChildren(self) -> 'UI_STATE':
         # appendされたノードを追加
         for child in self._append_list:
             self.element.append(child.element)
@@ -312,7 +312,7 @@ class XMLUI:
 
         # ノードの追加と削除
         for state in self.state_map.values():
-            state.updateTree()
+            state.updateChildren()
 
         # Treeが変更されたかもなのでstateを更新
         self._updateState(self.root.element, self.state_map)

@@ -17,7 +17,7 @@ command_item_data = [
     ["status", "check"],
 ]
 
-menu_cmd = ui_worker.root.addChild(ui_template.root.findByID("menu_cmd").duplicate()).updateTree()
+menu_cmd = ui_worker.root.addChild(ui_template.root.findByID("menu_cmd").duplicate()).updateChildren()
 menu_grid = menu_cmd.findByTag("menu_grid").openMenu(UI_MENU(command_item_data, 0, 0))
 
 # Main
