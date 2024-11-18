@@ -191,8 +191,9 @@ class UI_STATE:
     # ツリー操作用
     # *************************************************************************
     def addChild(self, state:'UI_STATE') -> 'UI_STATE':
-        self._append_list.append(state)
+        self._xmlui.checkLock()
 
+        self._append_list.append(state)
         state._parent = self  # 親の更新
         self._xmlui.state_map[state.element] = state  # すぐに使えるように登録しておく
         return self
@@ -220,6 +221,8 @@ class UI_STATE:
         return self._remove
 
     def updateTree(self) -> 'UI_STATE':
+        self._xmlui.checkLock()
+
         # appendされたノードを追加
         for child in self._append_list:
             self.element.append(child.element)
@@ -270,6 +273,7 @@ class XMLUI:
     state_map: dict[Element, UI_STATE]  # 状態保存用
 
     # 処理関数の登録
+    tree_lock:bool  # update/drawの時にlockをかける
     update_funcs: dict[str, Callable[[UI_STATE], None]]
     draw_funcs: dict[str, Callable[[UI_STATE], None]]
 
@@ -293,7 +297,11 @@ class XMLUI:
 
     # 初期化。<xmlui>を持つXMLを突っ込む
     def __init__(self, dom:xml.etree.ElementTree.Element, root_tag:str|None=None):
+        # elementの追加ステート
         self.state_map = {}
+
+        # 更新処理
+        self.tree_lock = False
         self.update_funcs = {}
         self.draw_funcs = {}
 
@@ -325,18 +333,26 @@ class XMLUI:
 
         return dup_state
 
+    # ロック中なら例外を出す
+    def checkLock(self):
+        if self.tree_lock:
+            raise Exception("element tree is locked")
+
     # 更新用
     # *************************************************************************
     # 全体を呼び出す処理
     def update(self):
         # 更新処理
+        self.tree_lock = True
         self._updateTreeRec(self.root.element)
+        self.tree_lock = False
 
         # ノードの追加と削除
         self.root.updateTree()
 
         # Treeが変更されたかもなのでstateを更新
         self._updateState(self.root.element, self.state_map)
+
 
     # ツリーのノード以下を再帰処理
     def _updateTreeRec(self, element: Element):
@@ -370,7 +386,9 @@ class XMLUI:
     # *************************************************************************
     def draw(self):
         # ツリーの描画
+        self.tree_lock = True
         self._drawTreeRec(self.root.element)
+        self.tree_lock = False
 
     # ツリーのノード以下を再帰処理
     def _drawTreeRec(self, element: Element):
@@ -393,7 +411,6 @@ class XMLUI:
         # 子の描画
         for child in element:
             self._drawTreeRec(child)
-
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
     def updateElement(self, name:str, state:UI_STATE):
