@@ -210,11 +210,7 @@ class UI_STATE:
         raise Exception(f"ID '{id}' not found in '{self.element.tag}'")
 
     def findByTagAll(self, tag:str) -> list['UI_STATE']:
-        out:list['UI_STATE'] = []
-        for element in self.element.iter():
-            if element.tag == tag:
-                out.append(self._xmlui.state_map[element])
-        return out
+        return [self._xmlui.state_map[element] for element in self.element.iter() if element.tag == tag]
 
     def findByTag(self, tag:str) -> 'UI_STATE':
         elements = self.findByTagAll(tag)

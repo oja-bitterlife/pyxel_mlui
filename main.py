@@ -37,9 +37,9 @@ def update(): # フレームの更新処理
             active_menu.moveDown()
 
         if pyxel.btnp(pyxel.KEY_SPACE):
-            print(active_menu.id)
             if active_menu.id == "message":
                 active_menu.close()
+
             elif active_menu.id == "command":
                 # 非表示なら新規で追加
                 if active_menu.getData() == "speak":
