@@ -77,16 +77,12 @@ class UI_TEXT:
 # 表内移動Wrap付き
 class UI_MENU:
     grid: list[list[Any]]  # グリッド
-    # state: UI_STATE  # 操作対象Element
-    _remove: bool  # 削除フラグ
 
     cur_x: int  # 現在位置x
     cur_y: int  # 現在位置y
 
     def __init__(self, grid:list[list[Any]], init_cur_x:int=0, init_cur_y:int=0):
         self.grid = grid
-        # self.state = state
-        self._remove = False
         self.cur_x, self.cur_y = (init_cur_x, init_cur_y)
 
     # 範囲限定付き座標設定
@@ -121,10 +117,6 @@ class UI_MENU:
     @property
     def length(self) -> int:
         return sum([len(line) for line in self.grid])
-
-    @property
-    def is_remove(self) -> bool:
-        return self._remove
 
 
 # UIパーツの状態保存用
@@ -202,6 +194,7 @@ class UI_STATE:
     # *************************************************************************
     def addChild(self, state:'UI_STATE') -> 'UI_STATE':
         self._append_list.append(state)
+        self._xmlui.state_map[state.element] = state  # すぐに使えるように登録しておく
         return state
 
     def remove(self):
@@ -215,7 +208,7 @@ class UI_STATE:
         # 子も複製してぶら下げておく
         for child in self.element:
             dup_child = self._xmlui.state_map[child].duplicate()
-            dup_state.element.append(dup_child.element)
+            dup_state.addChild(UI_STATE(self._xmlui, dup_child.element))
 
         return dup_state
 

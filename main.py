@@ -22,8 +22,6 @@ if template_menu_cmd is None:
     raise Exception("menu_cmd not found")
 
 menu_cmd = ui_worker.root.addChild(template_menu_cmd.duplicate()).openMenu(UI_MENU(command_item_data, 0, 0))
-ui_worker.update()
-print(ui_worker.root.strTree())
 
 # Main
 def update(): # フレームの更新処理
