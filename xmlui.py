@@ -185,23 +185,13 @@ class UI_STATE:
     # *************************************************************************
     def addChild(self, state:'UI_STATE') -> 'UI_STATE':
         self._append_list.append(state)
+
+        state._parent = self  # 親の更新
         self._xmlui.state_map[state.element] = state  # すぐに使えるように登録しておく
         return state
 
     def remove(self):
         self._remove = True
-
-    def duplicate(self) -> 'UI_STATE':
-        # まずは複製
-        dup_state =  UI_STATE(self._xmlui, self.element.makeelement(self.element.tag, self.element.attrib.copy()))
-        dup_state.element.text = self.element.text
-
-        # 子も複製してぶら下げておく
-        for child in self.element:
-            dup_child = self._xmlui.state_map[child].duplicate()
-            dup_state.addChild(UI_STATE(self._xmlui, dup_child.element))
-
-        return dup_state
 
     def findByID(self, id:str) -> 'UI_STATE':
         for element in self.element.iter():
@@ -303,6 +293,17 @@ class XMLUI:
         # rootを取り出しておく
         self.root = self.state_map[xmlui_root]
 
+    def duplicate(self, src_state:UI_STATE) -> UI_STATE:
+        # まずは複製
+        dup_state =  UI_STATE(self, src_state.element.makeelement(src_state.element.tag, src_state.element.attrib.copy()))
+        dup_state.element.text = src_state.element.text
+
+        # 子も複製してぶら下げておく
+        for child in src_state.element:
+            dup_child = self.duplicate(src_state._xmlui.state_map[child])
+            dup_state.addChild(UI_STATE(self, dup_child.element))
+
+        return dup_state
 
     # 更新用
     # *************************************************************************
