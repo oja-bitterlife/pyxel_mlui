@@ -110,11 +110,6 @@ class UI_MENU:
     def getData(self) -> Any:
         return self.grid[self.cur_y][self.cur_x]
 
-    # # メニュー終了時処理
-    # def close(self):
-    #     self._remove = True
-        # self.state.remove()
-
     @property
     def width(self) -> int:
         return len(self.grid[self.cur_y])
@@ -130,66 +125,6 @@ class UI_MENU:
     @property
     def is_remove(self) -> bool:
         return self._remove
-
-# メニュー階層管理
-# class UI_MENU_GROUP:
-#     stack: list['UI_MENU|UI_MENU_GROUP']
-
-#     def __init__(self, menu_list:list['UI_MENU|UI_MENU_GROUP']|UI_MENU=[]):
-#         if isinstance(menu_list, UI_MENU):
-#             menu_list = [menu_list]
-#         self.stack = menu_list
-
-#     def push(self, menu: 'UI_MENU|UI_MENU_GROUP'):
-#         self.stack.append(menu)
-
-#     # メニューを閉じる
-#     # def close(self):
-#     #     for menu in self.stack:
-#     #         menu.close()  # 子を全て閉じる
-
-#     def getActive(self) -> UI_MENU|None:
-#         available = [menu for menu in self.stack if not menu.is_remove]  # 生きてるものだけ取り出す
-#         if len(available) == 0:
-#             return None
-#         active = available[-1]
-#         if isinstance(active, UI_MENU):
-#             return active
-
-#         # グループならグループ内のactiveを返す
-#         return active.getActive()
-
-#     # 不要になったメニューを削除
-#     def update(self):
-#         for group in [group for group in self.stack if isinstance(group, UI_MENU_GROUP)]:
-#             group.update()  # 子も更新
-#         self.stack = [menu for menu in self.stack if not menu.is_remove]
-
-#     # メニューリスト内検索
-#     # def findByID(self, id:str) -> UI_MENU|None:
-#     #     for menu in self.stack:
-#     #         if isinstance(menu, UI_MENU_GROUP):
-#     #             return menu.findByID(id)
-#     #         if menu.state.attrStr("id") == id:
-#     #             return menu
-#     #     return None
-
-#     # def findByTagAll(self, tag:str) -> list[UI_MENU]:
-#     #     out = []
-#     #     for menu in self.stack:
-#     #         if isinstance(menu, UI_MENU_GROUP):
-#     #             out += menu.findByTagAll(tag)
-#     #         elif menu.state.element.tag == tag:
-#     #             out.append(menu)
-#     #     return out
-
-#     # def findByTag(self, tag:str) -> UI_MENU|None:
-#     #     menus = self.findByTagAll(tag)
-#     #     return menus[0] if menus else None
-
-#     @property
-#     def is_remove(self) -> bool:
-#         return len(self.stack) == 0  # 空のグループは不要
 
 
 # UIパーツの状態保存用
