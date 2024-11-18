@@ -39,12 +39,13 @@ def update(): # フレームの更新処理
         if pyxel.btnp(pyxel.KEY_SPACE):
             if active_menu.id == "message":
                 active_menu.close()
+                ui_worker.root.updateTree()
+                print(menu_win.strTree())
 
             elif active_menu.id == "command":
                 # 非表示なら新規で追加
                 if active_menu.getData() == "speak":
-                    menu_win.addChild(ui_worker.duplicate(ui_template.root.findByID("win_message")).openMenu(UI_MENU("message"))).updateTree()
-                    print(menu_win.strTree())
+                    menu_win.addChild(ui_worker.duplicate(ui_template.root.findByID("win_message")).openMenu(UI_MENU("message")))
 
         if pyxel.btnp(pyxel.KEY_BACKSPACE):
             menu_win.remove()

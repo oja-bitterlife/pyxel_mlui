@@ -90,7 +90,7 @@ class UI_MENU:
 
     def close(self):
         if self.state is not None:
-            self.state._remove = True
+            self.state.remove()
 
     # 範囲限定付き座標設定
     def setPos(self, x:int, y:int, wrap:bool=False) -> 'UI_MENU':
