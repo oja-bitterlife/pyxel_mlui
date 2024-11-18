@@ -191,8 +191,6 @@ class UI_STATE:
     # ツリー操作用
     # *************************************************************************
     def addChild(self, state:'UI_STATE') -> 'UI_STATE':
-        self._xmlui.checkLock()
-
         self._append_list.append(state)
         state._parent = self  # 親の更新
         self._xmlui.state_map[state.element] = state  # すぐに使えるように登録しておく
@@ -216,9 +214,9 @@ class UI_STATE:
             return elements[0]
         raise Exception(f"Tag '{tag}' not found in '{self.element.tag}'")
 
-    @property
-    def is_remove(self) -> bool:
-        return self._remove
+#    @property
+#    def is_remove(self) -> bool:
+#        return self._remove
 
     def updateTree(self) -> 'UI_STATE':
         self._xmlui.checkLock()
@@ -232,8 +230,8 @@ class UI_STATE:
             self._parent.element.remove(self.element)
 
         # 子もUpdate
-        for child in self._append_list:
-            child.updateTree()
+        for child in self.element:
+            self._xmlui.state_map[child].updateTree()
 
         self._append_list = []
         return self

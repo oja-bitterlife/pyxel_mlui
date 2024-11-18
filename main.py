@@ -39,8 +39,6 @@ def update(): # フレームの更新処理
         if pyxel.btnp(pyxel.KEY_SPACE):
             if active_menu.id == "message":
                 active_menu.close()
-                ui_worker.root.updateTree()
-                print(menu_win.strTree())
 
             elif active_menu.id == "command":
                 # 非表示なら新規で追加
