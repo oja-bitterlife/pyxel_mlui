@@ -247,6 +247,7 @@ class UI_STATE:
     def strTree(self, indent:str="  ", pre:str="") -> str:
         out = pre + self.element.tag
         out += ": " + self.attrStr("id") if "id" in self.element.attrib else ""
+        out += " [menu]" if self.menu is not None else ""
         for element in self.element:
             out += "\n" + self._xmlui.state_map[element].strTree(indent, pre+indent)
         return out

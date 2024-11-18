@@ -4,7 +4,7 @@ pyxel.init(256, 256) # 初期化(ウィンドウサイズを指定)
 
 from xmlui import XMLUI
 ui_template = XMLUI.createFromFile("assets/ui/test.xml")
-ui_worker = XMLUI.createWorker("xmlui")
+ui_worker = XMLUI.createWorker("my_ui")
 
 
 # お試しサンプルUI
