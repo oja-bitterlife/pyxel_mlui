@@ -17,9 +17,7 @@ command_item_data = [
     ["status", "check"],
 ]
 
-template_menu_cmd = ui_template.root.findByID("menu_cmd")
-
-menu_cmd = ui_worker.root.addChild(template_menu_cmd.duplicate()).updateTree()
+menu_cmd = ui_worker.root.addChild(ui_template.root.findByID("menu_cmd").duplicate()).updateTree()
 menu_grid = menu_cmd.findByTag("menu_grid").openMenu(UI_MENU(command_item_data, 0, 0))
 
 # Main
@@ -46,10 +44,7 @@ def update(): # フレームの更新処理
 
             # 非表示なら新規で追加
             elif active_menu.getData() == "speak":
-                template_win_message = ui_template.root.findByID("win_message")
-                if template_win_message is None:
-                    raise Exception("menu_cmd not found")
-                msg_text = ui_worker.root.addChild(template_win_message.duplicate()).findByTag("msg_text")
+                msg_text = ui_worker.root.addChild(ui_template.root.findByID("win_message").duplicate()).findByTag("msg_text")
                 if msg_text:
                     msg_text.update_count = 0
                     msg_text.setAttr("finish", False)

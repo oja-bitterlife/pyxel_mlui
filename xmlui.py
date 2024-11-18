@@ -312,18 +312,6 @@ class XMLUI:
         self.root = self.state_map[xmlui_root]
 
 
-    # XML操作用
-    # *************************************************************************
-    def findByID(self, id:str) -> UI_STATE:
-        return self.root.findByID(id)
-
-    def findByTagAll(self, tag:str) -> list[UI_STATE]:
-        return self.root.findByTagAll(tag)
-
-    def findByTag(self, tag:str) -> UI_STATE:
-        return self.root.findByTag(tag)
-
-
     # 更新用
     # *************************************************************************
     # 全体を呼び出す処理
