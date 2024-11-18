@@ -12,10 +12,10 @@ def msg_win_update(state: UI_STATE):
         msg_cur.setAttr("visible", msg_text.attrBool("finish"))
 
 def msg_text_update(state: UI_STATE):
-    draw_count = state.update_count//2
+    draw_count = state.attrInt("draw_count")
     ui_text = UI_TEXT(state.getText(), {"name":"world", "age":10})
 
-    state.setAttr("draw_count", draw_count)
+    state.setAttr("draw_count", draw_count+1)
     state.setAttr("finish", draw_count >= ui_text.length)
 
 def menu_grid_update(state: UI_STATE):

@@ -139,7 +139,6 @@ class UI_STATE:
 
     # 表示関係
     area: UI_RECT  # 描画範囲
-    update_count: int  # 更新カウンター
 
     def __init__(self, xmlui:'XMLUI', element: Element):
         # プロパティの初期化
@@ -152,7 +151,6 @@ class UI_STATE:
         self.menu = None
 
         self.area = UI_RECT(0, 0, 4096, 4096)
-        self.update_count = 0
 
         # ステート取得
         if "id" in self.element.attrib:
@@ -340,8 +338,6 @@ class XMLUI:
         # 子の処理
         for child in element:
             self._updateTreeRec(child)
-
-        state.update_count += 1  # 実行後に更新
 
     # stateの更新
     def _updateState(self, root_element: Element, old_map: dict[Element,UI_STATE]):

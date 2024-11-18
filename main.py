@@ -44,10 +44,7 @@ def update(): # フレームの更新処理
 
             # 非表示なら新規で追加
             elif active_menu.getData() == "speak":
-                msg_text = ui_worker.root.addChild(ui_template.root.findByID("win_message").duplicate()).findByTag("msg_text")
-                if msg_text:
-                    msg_text.update_count = 0
-                    msg_text.setAttr("finish", False)
+                ui_worker.root.addChild(ui_template.root.findByID("win_message").duplicate())
 
         if pyxel.btnp(pyxel.KEY_BACKSPACE):
             menu_cmd.remove()
