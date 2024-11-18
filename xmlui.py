@@ -212,7 +212,6 @@ class UI_STATE:
     def findByTagAll(self, tag:str) -> list['UI_STATE']:
         out:list['UI_STATE'] = []
         for element in self.element.iter():
-            print(element.tag)
             if element.tag == tag:
                 out.append(self._xmlui.state_map[element])
         return out
@@ -227,16 +226,20 @@ class UI_STATE:
     def is_remove(self) -> bool:
         return self._remove
 
-    def updateChildren(self) -> 'UI_STATE':
+    def updateTree(self) -> 'UI_STATE':
         # appendされたノードを追加
         for child in self._append_list:
             self.element.append(child.element)
-        self._append_list = []
 
         # removeがマークされたノードは削除
         if self._remove and self._parent is not None:
             self._parent.element.remove(self.element)
 
+        # 子もUpdate
+        for child in self._append_list:
+            child.updateTree()
+
+        self._append_list = []
         return self
 
 
@@ -326,6 +329,7 @@ class XMLUI:
         for child in src_state.element:
             dup_child = self.duplicate(src_state._xmlui.state_map[child])
             dup_state.addChild(dup_child)
+            print("addChild", dup_child.element.tag)
 
         return dup_state
 
@@ -337,8 +341,7 @@ class XMLUI:
         self._updateTreeRec(self.root.element)
 
         # ノードの追加と削除
-        for state in self.state_map.values():
-            state.updateChildren()
+        self.root.updateTree()
 
         # Treeが変更されたかもなのでstateを更新
         self._updateState(self.root.element, self.state_map)
