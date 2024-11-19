@@ -29,49 +29,28 @@ class UI_RECT:
 # テキスト表示用
 class UI_TEXT:
     src: str  # パラメータ置換済み文字列
-    tokens: list[str]  # 行(+wrap)分割済み文字列
 
     # 改行とwrapで分割する
-    def __init__(self, text:str, params:dict[str,Any]={}, wrap:int=1024, sepexp=r"\n|\\n"):
-        self.src = text.format(**params)
-        self.tokens = []
-
-        # 行分割
-        lines = re.split(sepexp, self.src)
-
-        # wrap分割
-        for line in lines:
-            while(len(line) > wrap):
-                self.tokens.append(line[:wrap])
-                line = line[wrap:]
-            # 残りを保存
-            if len(line) > 0:
-                self.tokens.append(line[:wrap])
+    def __init__(self, text:str, params:dict[str,Any]={}, sepexp:str=r"\n|\\n"):
+        text = text.format(**params)
+        self.src = re.sub(sepexp, "\n", text)
 
     # 最大文字数に減らして取得
-    def getTokens(self, limit:int=65535):
-        limit = int(limit)  # 計算式だとfloatが型チェックをスルーする
-        out = []
-
-        count = 0
-        for token in self.tokens:
-            # limitに届いていない間はそのまま保存
-            if len(token)+count < limit:
-                out.append(token)
-                count += len(token)
-            # limitを越えそう
-            else:
-                # limitまで取得
-                over = token[:limit-count]
-                if len(over) > 0:
-                    out.append(over)
-                break
-
-        return out
+    def getTokens(self, limit:int=65535, wrap:int=1024) -> list[str]:
+        tokens:list[str] = []
+        for line in self.src[:int(limit)].splitlines():  # 行分割
+            # wrap分割
+            while(len(line) > wrap):
+                tokens.append(line[:wrap])
+                line = line[wrap:]
+            # 残りを保存
+            if line:
+                tokens.append(line)
+        return tokens
 
     @property
     def length(self) -> int:
-        return len("".join(self.tokens))
+        return len(self.src.replace("\n", ""))  # 改行を外してカウント
 
 
 # 表内移動Wrap付き
