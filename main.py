@@ -35,6 +35,8 @@ def update(): # フレームの更新処理
 
         if pyxel.btnp(pyxel.KEY_SPACE):
             active_menu.on("action")
+        if pyxel.btnp(pyxel.KEY_BACKSPACE):
+            active_menu.on("cancel")
 
     else:
         if pyxel.btnp(pyxel.KEY_SPACE):
@@ -44,9 +46,6 @@ def update(): # フレームの更新処理
             except:
                 menu_win = ui_worker.duplicate(ui_template.findByID("menu_command"))
                 ui_worker.addChild(menu_win.openMenu(UI_MENU("command", menu_win, command_item_data)))
-
-        if pyxel.btnp(pyxel.KEY_BACKSPACE):
-            menu_win.remove()
 
     ui_worker.update()
 

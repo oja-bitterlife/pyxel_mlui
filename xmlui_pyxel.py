@@ -21,13 +21,16 @@ def menu_win_update(state: UI_STATE, events:set[str]):
             rows.setAttr(("x", "y"), (x*item_w, y*item_h))
 
     # カーソル表示位置設定
-    if state.menu:
-        cursor.setAttr(["x", "y"], [state.menu.cur_x*item_w-6, state.menu.cur_y*item_h+2])
+    cursor.setAttr(["x", "y"], [state.menu.cur_x*item_w-6, state.menu.cur_y*item_h+2])
 
-        if "action" in events:
-            if state.menu.getData() == "speak":
-                msg_win = state.xmlui.duplicate(ui_template.findByID("win_message"))
-                state.addChild(msg_win.openMenu(UI_MENU("message", msg_win)))
+    if "action" in events:
+        if state.menu.getData() == "speak":
+            msg_win = state.xmlui.duplicate(ui_template.findByID("win_message"))
+            msg_win_menu = UI_MENU("message", msg_win).setCloseState(state)
+            state.addChild(msg_win.openMenu(msg_win_menu))
+
+    if "cancel" in events:
+        state.menu.close()
 
 def msg_win_update(state: UI_STATE, events:set[str]):
     msg_cur = state.findByTag("msg_cur")
@@ -37,8 +40,8 @@ def msg_win_update(state: UI_STATE, events:set[str]):
         msg_cur.setAttr("visible", msg_text.attrBool("finish"))
 
     # 決定ボタンが押されたら
-    if "action" in events:
-        state.xmlui.findByID("menu_command").remove()  # 親ごとクローズする
+    if "action" in events or "cancel" in events:
+        state.menu.close()
 
 def msg_text_update(state: UI_STATE, events:set[str]):
     draw_count = state.attrInt("draw_count")
