@@ -4,14 +4,14 @@ import pyxel
 font = pyxel.Font("assets/font/b12.bdf")
 FONT_SIZE = 12
 
-def msg_win_update(state: UI_STATE, event:str|None):
+def msg_win_update(state: UI_STATE, events:set[str]):
     msg_cur = state.findByTag("msg_cur")
     msg_text = state.findByTag("msg_text")
 
     if msg_cur and msg_text:
         msg_cur.setAttr("visible", msg_text.attrBool("finish"))
 
-    if event=="action":
+    if "action" in events:
         state.remove()
 
 def msg_text_update(state: UI_STATE, event:str|None):
