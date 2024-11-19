@@ -12,16 +12,19 @@ def msg_win_update(state: UI_STATE, events:set[str]):
         msg_cur.setAttr("visible", msg_text.attrBool("finish"))
 
     if "action" in events:
+        print("remove")
         state.remove()
 
-def msg_text_update(state: UI_STATE, event:str|None):
+
+def msg_text_update(state: UI_STATE, events:set[str]):
     draw_count = state.attrInt("draw_count")
     ui_text = UI_TEXT(state.getText(), {"name":"world", "age":10})
 
     state.setAttr("draw_count", draw_count+1)
     state.setAttr("finish", draw_count >= ui_text.length)
 
-def menu_grid_update(state: UI_STATE, event:str|None):
+
+def menu_grid_update(state: UI_STATE, events:set[str]):
     item_w = state.attrInt("item_w", 0)
     item_h = state.attrInt("item_h", 0)
 

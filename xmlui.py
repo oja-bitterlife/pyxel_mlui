@@ -228,7 +228,7 @@ class UI_STATE:
         self._xmlui._menu_map[self._element] = UI_MENU(id, self, grid, init_cur_x, init_cur_y)
         return self
 
-    def getActiveMenu(self) -> UI_MENU|None:
+    def getTopMenu(self) -> UI_MENU|None:
         menus = [self._xmlui._menu_map[element] for element in self._element.iter() if element in self._xmlui._menu_map]
         return menus[-1] if menus else None
 
@@ -334,9 +334,12 @@ class XMLUI:
 
     def on(self, src:Element|UI_STATE, event:str):
         element = src._element if isinstance(src, UI_STATE) else src
+        # 存在しなければ作っておく
         if src not in self._event_map:
             self._event_map[element] = set([])
         self._event_map[element].add(event)
+
+        print(element.tag, self._event_map[element])
 
 
     # 更新用

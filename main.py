@@ -17,15 +17,14 @@ command_item_data = [
     ["status", "check"],
 ]
 
-menu_win = ui_worker.addChild(ui_worker.duplicate(ui_template.findByID("menu_cmd")))
-menu_grid = menu_win.findByTag("menu_grid").openMenu("command", command_item_data)
+menu_win = ui_worker.addChild(ui_worker.duplicate(ui_template.findByID("menu_cmd"))).openMenu("command", command_item_data)
 
 # Main
 def update(): # フレームの更新処理
     if pyxel.btnp(pyxel.KEY_Q):
         pyxel.quit()
 
-    active_menu = menu_win.getActiveMenu()
+    active_menu = menu_win.getTopMenu()
     if active_menu:
         if pyxel.btnp(pyxel.KEY_LEFT):
             active_menu.moveLeft()
