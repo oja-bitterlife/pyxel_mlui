@@ -39,13 +39,7 @@ class UI_TEXT:
     def getTokens(self, limit:int=65535, wrap:int=1024) -> list[str]:
         tokens:list[str] = []
         for line in self.src[:int(limit)].splitlines():  # 行分割
-            # wrap分割
-            while(len(line) > wrap):
-                tokens.append(line[:wrap])
-                line = line[wrap:]
-            # 残りを保存
-            if line:
-                tokens.append(line)
+            tokens += [line[i:i+wrap] for i in range(0, len(line), wrap)]  # wrap分割
         return tokens
 
     @property
