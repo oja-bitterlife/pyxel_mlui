@@ -226,6 +226,14 @@ class UI_STATE:
             return elements[0]
         raise Exception(f"Tag '{tag}' not found in '{self.tag}' and children")
 
+    def findByTagR(self, tag:str) -> 'UI_STATE':
+        parent = self.parent
+        while(parent is not None):
+            if parent.tag == tag:
+                return parent
+            parent = parent.parent
+        raise Exception(f"Tag '{tag}' not found in parents")
+
     @property
     def parent(self) -> 'UI_STATE|None':
         def _rec_parentSearch(element:Element, me:Element) -> Element|None:
