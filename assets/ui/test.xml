@@ -2,14 +2,16 @@
 
 <xmlui>
     <menu_win x="32" y="16" w="128" h="52" title="コマンド" id="menu_command">
-        <menu_row x="12" y="14">
-            <menu_item title="はなす"/>
-            <menu_item title="どうぐ" x="58"/>
-        </menu_row>
-        <menu_row x="12" y="32">
-            <menu_item title="つよさ"/>
-            <menu_item title="しらべる" x="58"/>
-        </menu_row>
+        <menu_grid>
+            <menu_row x="12" y="14">
+                <menu_item title="はなす"/>
+                <menu_item title="どうぐ" x="58"/>
+            </menu_row>
+            <menu_row x="12" y="32">
+                <menu_item title="つよさ"/>
+                <menu_item title="しらべる" x="58"/>
+            </menu_row>
+        </menu_grid>
         <menu_cur size="6"/>
     </menu_win>
 

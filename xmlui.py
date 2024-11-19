@@ -77,17 +77,28 @@ class UI_TEXT:
 # 表内移動Wrap付き
 class UI_MENU:
     id:str # 識別名
-    state: 'UI_STATE'  # 参照
-    _grid: list[list[Any]]  # グリッド
+    _state: 'UI_STATE'  # 参照
+    _close_with: 'UI_STATE'  # 閉じるときの参照
 
+    _grid: list[list[Any]]  # グリッド
     cur_x: int  # 現在位置x
     cur_y: int  # 現在位置y
 
     def __init__(self, id:str, state:'UI_STATE', grid:list[list[Any]]=[], init_cur_x:int=0, init_cur_y:int=0):
         self.id = id
-        self.state = state
+        self._state = state
+        self._close_with = state
         self._grid = grid
         self.cur_x, self.cur_y = (init_cur_x, init_cur_y)
+
+    # 消すウインドウを設定
+    def closeWith(self, state:'UI_STATE') -> 'UI_MENU':
+        self._close_with = state
+        return self
+
+    # stateではなくclose_withの方を消す
+    def close(self):
+        self._close_with.remove()
 
     # 範囲限定付き座標設定
     def setPos(self, x:int, y:int, wrap:bool=False) -> 'UI_MENU':
@@ -112,7 +123,7 @@ class UI_MENU:
 
     # イベント発火
     def on(self, event:str) -> 'UI_MENU':
-        self.state.on(event)
+        self._state.on(event)
         return self
 
     @property
@@ -130,7 +141,7 @@ class UI_MENU:
         return sum([len(line) for line in self._grid])
 
     def getItemGrid(self, tag_outside:str, tag_inside:str) -> list[list['UI_STATE']]:
-        outsides = self.state.findByTagAll(tag_outside)
+        outsides = self._state.findByTagAll(tag_outside)
         return [outside.findByTagAll(tag_inside) for outside in outsides]
 
     def getItemState(self, tag_outside:str, tag_inside:str) -> 'UI_STATE':
@@ -232,8 +243,8 @@ class UI_STATE:
 
     # イベント管理用
     # *************************************************************************
-    def openMenu(self, id:str, grid:list[list[Any]]=[], init_cur_x:int=0, init_cur_y:int=0) -> 'UI_STATE':
-        self.xmlui._menu_map[self._element] = UI_MENU(id, self, grid, init_cur_x, init_cur_y)
+    def openMenu(self, menu:UI_MENU) -> 'UI_STATE':
+        self.xmlui._menu_map[self._element] = menu
         return self
 
     def getTopMenu(self) -> UI_MENU|None:
