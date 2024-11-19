@@ -32,8 +32,7 @@ class UI_TEXT:
 
     # 改行とwrapで分割する
     def __init__(self, text:str, params:dict[str,Any]={}, sepexp:str=r"\n|\\n"):
-        text = text.format(**params)
-        self.src = re.sub(sepexp, "\n", text)  # 改行コードで統一
+        self.src = re.sub(sepexp, "\n", text.format(**params))  # 改行コードで統一
 
     # 最大文字数に減らして取得
     def getTokens(self, limit:int=65535, wrap:int=1024) -> list[str]:
