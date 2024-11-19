@@ -211,7 +211,13 @@ class UI_STATE:
 
     @property
     def parent(self) -> 'UI_STATE|None':
-        parent = self._element.find("../")
+        def _parentSearch(element:Element, me:Element) -> Element|None:
+            if me in element:
+                return element
+            for child in element:
+                return _parentSearch(child, me)
+            return None
+        parent = _parentSearch(self._xmlui.root._element, self._element)
         return UI_STATE(self._xmlui, parent) if parent is not None else None
 
 
