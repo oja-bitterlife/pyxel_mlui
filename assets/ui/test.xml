@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <xmlui>
-    <menu_win x="32" y="16" w="128" h="52" title="コマンド" id="menu_cmd">
+    <menu_win x="32" y="16" w="128" h="52" title="コマンド" id="menu_command">
         <menu_row x="12" y="14">
             <menu_item title="はなす"/>
             <menu_item title="どうぐ" x="58"/>

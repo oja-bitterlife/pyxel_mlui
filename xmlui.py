@@ -77,7 +77,7 @@ class UI_TEXT:
 # 表内移動Wrap付き
 class UI_MENU:
     id:str # 識別名
-    _state: 'UI_STATE'  # 参照
+    state: 'UI_STATE'  # 参照
     _grid: list[list[Any]]  # グリッド
 
     cur_x: int  # 現在位置x
@@ -85,7 +85,7 @@ class UI_MENU:
 
     def __init__(self, id:str, state:'UI_STATE', grid:list[list[Any]]=[], init_cur_x:int=0, init_cur_y:int=0):
         self.id = id
-        self._state = state
+        self.state = state
         self._grid = grid
         self.cur_x, self.cur_y = (init_cur_x, init_cur_y)
 
@@ -112,7 +112,7 @@ class UI_MENU:
 
     # イベント発火
     def on(self, event:str) -> 'UI_MENU':
-        self._state.on(event)
+        self.state.on(event)
         return self
 
     @property
@@ -130,7 +130,7 @@ class UI_MENU:
         return sum([len(line) for line in self._grid])
 
     def getItemGrid(self, tag_outside:str, tag_inside:str) -> list[list['UI_STATE']]:
-        outsides = self._state.findByTagAll(tag_outside)
+        outsides = self.state.findByTagAll(tag_outside)
         return [outside.findByTagAll(tag_inside) for outside in outsides]
 
     def getItemState(self, tag_outside:str, tag_inside:str) -> 'UI_STATE':
@@ -139,12 +139,12 @@ class UI_MENU:
 
 # UIパーツの状態管理ラッパー
 class UI_STATE:
-    _xmlui: 'XMLUI'  # ライブラリへのIF
+    xmlui: 'XMLUI'  # ライブラリへのIF
     _element: Element  # 自身のElement
 
     def __init__(self, xmlui:'XMLUI', element: Element):
         # プロパティの初期化
-        self._xmlui = xmlui
+        self.xmlui = xmlui
         self._element = element
 
 
@@ -204,11 +204,11 @@ class UI_STATE:
     def findByID(self, id:str) -> 'UI_STATE':
         for element in self._element.iter():
             if element.attrib.get("id") == id:
-                return UI_STATE(self._xmlui, element)
+                return UI_STATE(self.xmlui, element)
         raise Exception(f"ID '{id}' not found in '{self.tag}' and children")
 
     def findByTagAll(self, tag:str) -> list['UI_STATE']:
-        return [UI_STATE(self._xmlui, element) for element in self._element.iter() if element.tag == tag]
+        return [UI_STATE(self.xmlui, element) for element in self._element.iter() if element.tag == tag]
 
     def findByTag(self, tag:str) -> 'UI_STATE':
         elements = self.findByTagAll(tag)
@@ -226,27 +226,27 @@ class UI_STATE:
                 if result is not None:
                     return result
             return None
-        parent = _rec_parentSearch(self._xmlui.root._element, self._element)
-        return UI_STATE(self._xmlui, parent) if parent is not None else None
+        parent = _rec_parentSearch(self.xmlui.root._element, self._element)
+        return UI_STATE(self.xmlui, parent) if parent is not None else None
 
 
     # イベント管理用
     # *************************************************************************
     def openMenu(self, id:str, grid:list[list[Any]]=[], init_cur_x:int=0, init_cur_y:int=0) -> 'UI_STATE':
-        self._xmlui._menu_map[self._element] = UI_MENU(id, self, grid, init_cur_x, init_cur_y)
+        self.xmlui._menu_map[self._element] = UI_MENU(id, self, grid, init_cur_x, init_cur_y)
         return self
 
     def getTopMenu(self) -> UI_MENU|None:
-        menus = [self._xmlui._menu_map[element] for element in self._element.iter() if element in self._xmlui._menu_map]
+        menus = [self.xmlui._menu_map[element] for element in self._element.iter() if element in self.xmlui._menu_map]
         return menus[-1] if menus else None
 
     def on(self, event:str) -> 'UI_STATE':
-        self._xmlui.on(self, event)
+        self.xmlui.on(self, event)
         return self
 
     @property
     def menu(self) -> UI_MENU|None:
-        return self._xmlui._menu_map.get(self._element, None)
+        return self.xmlui._menu_map.get(self._element, None)
 
 
     # デバッグ用
@@ -254,9 +254,9 @@ class UI_STATE:
     def strTree(self, indent:str="  ", pre:str="") -> str:
         out = pre + self.tag
         out += ": " + self.attrStr("id") if "id" in self._element.attrib else ""
-        out += " [menu]" if self._element not in self._xmlui._menu_map else ""
+        out += " [menu]" if self._element not in self.xmlui._menu_map else ""
         for element in self._element:
-            out += "\n" + UI_STATE(self._xmlui, element).strTree(indent, pre+indent)
+            out += "\n" + UI_STATE(self.xmlui, element).strTree(indent, pre+indent)
         return out
 
 

@@ -20,8 +20,9 @@ def msg_win_update(state: UI_STATE, events:set[str]):
     if msg_cur and msg_text:
         msg_cur.setAttr("visible", msg_text.attrBool("finish"))
 
+    # 決定ボタンが押されたら
     if "action" in events:
-        state.remove()
+        state.xmlui.findByID("menu_command").remove()  # 親ごとクローズする
 
 def msg_text_update(state: UI_STATE, events:set[str]):
     draw_count = state.attrInt("draw_count")

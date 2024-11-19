@@ -17,7 +17,7 @@ command_item_data = [
     ["status", "check"],
 ]
 
-menu_win = ui_worker.duplicate(ui_template.findByID("menu_cmd")).openMenu("command", command_item_data)
+menu_win = ui_worker.duplicate(ui_template.findByID("menu_command")).openMenu("command", command_item_data)
 ui_worker.addChild(menu_win)
 
 # Main
