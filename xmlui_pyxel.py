@@ -5,22 +5,24 @@ font = pyxel.Font("assets/font/b12.bdf")
 FONT_SIZE = 12
 
 def menu_win_update(state: UI_STATE, events:set[str]):
-    if state.menu:
-        item_w = state.attrInt("item_w")
-        item_h = state.attrInt("item_h")
+    if state.menu is None:
+        raise Exception("menu not found")
 
-        grid = state.menu.getItemGrid("menu_row", "menu_item")
-        for y,cols in enumerate(grid):
-            for x,rows in enumerate(cols):
-                rows.setAttr("x", x*item_w)
-                rows.setAttr("y", y*item_h)
+    item_w = state.attrInt("item_w")
+    item_h = state.attrInt("item_h")
+    cursor = state.findByTag("menu_cur")
 
-                # カーソル表示位置設定
-                if state.menu.cur_x == x and state.menu.cur_y == y:
-                    cursor = state.findByTag("menu_cur")
-                    if cursor:
-                        cursor.setAttr("x", x*item_w-6)
-                        cursor.setAttr("y", y*item_h+2)
+    grid = state.menu.getItemGrid("menu_row", "menu_item")
+    for y,cols in enumerate(grid):
+        for x,rows in enumerate(cols):
+            # 各アイテムの位置設定
+            rows.setAttr("x", x*item_w)
+            rows.setAttr("y", y*item_h)
+
+            # カーソル表示位置設定
+            if state.menu.cur_x == x and state.menu.cur_y == y:
+                cursor.setAttr("x", x*item_w-6)
+                cursor.setAttr("y", y*item_h+2)
 
 
 def msg_win_update(state: UI_STATE, events:set[str]):
