@@ -234,6 +234,10 @@ class UI_STATE:
         self._xmlui.on(self, event)
         return self
 
+    @property
+    def menu(self) -> UI_MENU|None:
+        return self._xmlui._menu_map.get(self._element, None)
+
 
     # デバッグ用
     # *************************************************************************
@@ -336,6 +340,9 @@ class XMLUI:
         # 更新処理
         for element in self._rec_getUpdateElements(self.root._element):
             self.updateElement(element.tag, UI_STATE(self, element), self._event_map.get(element, set([])))
+
+        # 状態のリセット
+        self._event_map.clear()
 
     # updateが必要な要素をTree順で取り出す
     def _rec_getUpdateElements(self, element:Element):
