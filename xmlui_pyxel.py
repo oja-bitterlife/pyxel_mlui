@@ -6,11 +6,11 @@ FONT_SIZE = 12
 
 def menu_win_update(state: UI_STATE, events:set[str]):
     if state.menu:
-        item = state.menu.getItemState("menu_row", "menu_col")
+        item = state.menu.getItemState("menu_row", "menu_item")
         cursor = state.findByTag("menu_cur")
         if cursor:
-            cursor.setAttr("x", item.area.x-6)
-            cursor.setAttr("y", item.area.x+2)
+            cursor.setAttr("x", item.attrInt("area_x")-6)
+            cursor.setAttr("y", item.attrInt("area_y")+2)
 
 
 def msg_win_update(state: UI_STATE, events:set[str]):

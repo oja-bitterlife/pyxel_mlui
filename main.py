@@ -17,7 +17,8 @@ command_item_data = [
     ["status", "check"],
 ]
 
-menu_win = ui_worker.addChild(ui_worker.duplicate(ui_template.findByID("menu_cmd"))).openMenu("command", command_item_data)
+menu_win = ui_worker.duplicate(ui_template.findByID("menu_cmd")).openMenu("command", command_item_data)
+ui_worker.addChild(menu_win)
 
 # Main
 def update(): # フレームの更新処理
@@ -41,8 +42,8 @@ def update(): # フレームの更新処理
             if active_menu.id == "command":
                 # 非表示なら新規で追加
                 if active_menu.getData() == "speak":
-                    message = ui_worker.duplicate(ui_template.findByID("win_message")).openMenu("message")
-                    menu_win.addChild(message)
+                    msg_win = ui_worker.duplicate(ui_template.findByID("win_message")).openMenu("message")
+                    menu_win.addChild(msg_win)
                     
 
         if pyxel.btnp(pyxel.KEY_BACKSPACE):

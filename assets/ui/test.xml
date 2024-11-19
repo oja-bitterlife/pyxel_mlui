@@ -10,7 +10,7 @@
             <menu_item title="つよさ"/>
             <menu_item title="しらべる" x="58"/>
         </menu_row>
-        <menu_cur  size="6"/>
+        <menu_cur size="6"/>
     </menu_win>
 
     <msg_win x="16" y="180" w="224" h="60" id="win_message">

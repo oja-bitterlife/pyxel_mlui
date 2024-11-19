@@ -127,13 +127,12 @@ class UI_MENU:
     def length(self) -> int:
         return sum([len(line) for line in self._grid])
 
-    def getItemGrid(self, row_tag_name:str, col_tag_name:str) -> list[list['UI_STATE']]:
-        cols = self._state.findByTagAll(col_tag_name)
-        return [col.findByTagAll(row_tag_name) for col in cols]
+    def getItemGrid(self, tag_outside:str, tag_inside:str) -> list[list['UI_STATE']]:
+        outsides = self._state.findByTagAll(tag_outside)
+        return [outside.findByTagAll(tag_inside) for outside in outsides]
 
-    def getItemState(self, row_tag_name:str, col_tag_name:str) -> 'UI_STATE':
-        item_grid = self.getItemGrid(row_tag_name, col_tag_name)
-        return item_grid[self.cur_y][self.cur_x]
+    def getItemState(self, tag_outside:str, tag_inside:str) -> 'UI_STATE':
+        return self.getItemGrid(tag_outside, tag_inside)[self.cur_y][self.cur_x]
 
 
 # UIパーツの状態管理ラッパー
@@ -192,9 +191,8 @@ class UI_STATE:
 
     # ツリー操作用
     # *************************************************************************
-    def addChild(self, child:'UI_STATE') -> 'UI_STATE':
+    def addChild(self, child:'UI_STATE'):
         self._element.append(child._element)
-        return self
 
     def remove(self):
         parent = self.parent
@@ -233,6 +231,7 @@ class UI_STATE:
     # イベント管理用
     # *************************************************************************
     def openMenu(self, id:str, grid:list[list[Any]]=[], init_cur_x:int=0, init_cur_y:int=0) -> 'UI_STATE':
+        print(self._element)
         self._xmlui._menu_map[self._element] = UI_MENU(id, self, grid, init_cur_x, init_cur_y)
         return self
 
@@ -319,8 +318,8 @@ class XMLUI:
 
     # XML操作
     # *************************************************************************
-    def addChild(self, child:'UI_STATE') -> 'UI_STATE':
-        return self.root.addChild(child)
+    def addChild(self, child:'UI_STATE'):
+        self.root.addChild(child)
 
     def findByID(self, id:str) -> UI_STATE:
         return self.root.findByID(id)
