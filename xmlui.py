@@ -176,8 +176,13 @@ class UI_STATE:
     def hasAttr(self, key: str) -> bool:
         return key in self._element.attrib
 
-    def setAttr(self, key: str, value: Any) -> 'UI_STATE':
-        self._element.attrib[key] = str(value)  # attribはdict[str,str]なのでstrで保存する
+    def setAttr(self, key:str|list[str]|tuple[str], value: Any) -> 'UI_STATE':
+        # attribはdict[str,str]なのでstrで保存する
+        if isinstance(key, (tuple, list)):
+            for i, k in enumerate(key):
+                self._element.attrib[k] = str(value[i])
+        else:
+            self._element.attrib[key] = str(value)
         return self
 
     @property

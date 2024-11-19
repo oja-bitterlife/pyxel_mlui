@@ -16,14 +16,11 @@ def menu_win_update(state: UI_STATE, events:set[str]):
     for y,cols in enumerate(grid):
         for x,rows in enumerate(cols):
             # 各アイテムの位置設定
-            rows.setAttr("x", x*item_w)
-            rows.setAttr("y", y*item_h)
+            rows.setAttr(("x", "y"), (x*item_w, y*item_h))
 
             # カーソル表示位置設定
             if state.menu.cur_x == x and state.menu.cur_y == y:
-                cursor.setAttr("x", x*item_w-6)
-                cursor.setAttr("y", y*item_h+2)
-
+                cursor.setAttr(["x", "y"], [x*item_w-6, y*item_h+2])
 
 def msg_win_update(state: UI_STATE, events:set[str]):
     msg_cur = state.findByTag("msg_cur")
