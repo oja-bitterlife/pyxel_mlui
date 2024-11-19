@@ -333,7 +333,10 @@ class XMLUI:
         self._draw_funcs[name] = func
 
     def on(self, src:Element|UI_STATE, event:str):
-        self._event_map[src._element if isinstance(src, UI_STATE) else src].add(event)
+        element = src._element if isinstance(src, UI_STATE) else src
+        if src not in self._event_map:
+            self._event_map[element] = set([])
+        self._event_map[element].add(event)
 
 
     # 更新用
