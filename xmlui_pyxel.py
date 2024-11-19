@@ -12,7 +12,6 @@ def msg_win_update(state: UI_STATE, events:set[str]):
         msg_cur.setAttr("visible", msg_text.attrBool("finish"))
 
     if "action" in events:
-        print("remove")
         state.remove()
 
 

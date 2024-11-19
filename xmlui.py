@@ -339,8 +339,6 @@ class XMLUI:
             self._event_map[element] = set([])
         self._event_map[element].add(event)
 
-        print(element.tag, self._event_map[element])
-
 
     # 更新用
     # *************************************************************************
