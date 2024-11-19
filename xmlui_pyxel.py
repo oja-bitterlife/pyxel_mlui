@@ -9,8 +9,8 @@ def menu_win_update(state: UI_STATE, events:set[str]):
         item = state.menu.getItemState("menu_row", "menu_item")
         cursor = state.findByTag("menu_cur")
         if cursor:
-            cursor.setAttr("x", item.attrInt("area_x")-6)
-            cursor.setAttr("y", item.attrInt("area_y")+2)
+            cursor.setAttr("abs_x", item.attrInt("area_x")-6)
+            cursor.setAttr("abs_y", item.attrInt("area_y")+2)
 
 
 def msg_win_update(state: UI_STATE, events:set[str]):

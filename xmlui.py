@@ -231,7 +231,6 @@ class UI_STATE:
     # イベント管理用
     # *************************************************************************
     def openMenu(self, id:str, grid:list[list[Any]]=[], init_cur_x:int=0, init_cur_y:int=0) -> 'UI_STATE':
-        print(self._element)
         self._xmlui._menu_map[self._element] = UI_MENU(id, self, grid, init_cur_x, init_cur_y)
         return self
 
@@ -382,12 +381,15 @@ class XMLUI:
 
         # エリア更新
         for state in draw_states:
-            # if(state.tag == "menu_item"):
-            #     print(state.parent)
-
             if state.parent is not None:  # rootは親を持たないので更新不要
-                state.setAttr("area_x", state.attrInt("x") + state.parent.attrInt("area_x"))  # オフセット
-                state.setAttr("area_y", state.attrInt("y") + state.parent.attrInt("area_y"))  # オフセット
+                if state.hasAttr("abs_x"):
+                    state.setAttr("area_x", state.attrInt("abs_x"))  # 絶対座標
+                else:
+                    state.setAttr("area_x", state.attrInt("x") + state.parent.attrInt("area_x"))  # オフセット
+                if state.hasAttr("abs_y"):
+                    state.setAttr("area_y", state.attrInt("abs_y"))  # 絶対座標
+                else:
+                    state.setAttr("area_y", state.attrInt("y") + state.parent.attrInt("area_y"))  # オフセット
                 state.setAttr("area_w", state.attrInt("w", state.parent.attrInt("area_w")))
                 state.setAttr("area_h", state.attrInt("h", state.parent.attrInt("area_h")))
 
