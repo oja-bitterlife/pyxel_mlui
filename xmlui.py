@@ -78,7 +78,6 @@ class UI_TEXT:
 class UI_MENU:
     id:str # 識別名
     _state: 'UI_STATE'  # 参照
-    _close_with: 'UI_STATE'  # 閉じるときの参照
 
     _grid: list[list[Any]]  # グリッド
     cur_x: int  # 現在位置x
@@ -87,18 +86,18 @@ class UI_MENU:
     def __init__(self, id:str, state:'UI_STATE', grid:list[list[Any]]=[], init_cur_x:int=0, init_cur_y:int=0):
         self.id = id
         self._state = state
-        self._close_with = state
         self._grid = grid
         self.cur_x, self.cur_y = (init_cur_x, init_cur_y)
 
     # 消すウインドウを設定
-    def closeWith(self, state:'UI_STATE') -> 'UI_MENU':
-        self._close_with = state
+    def closeWith(self, state:'UI_STATE'):
+        self.close()
+        state.remove()  # 合わせて削除
         return self
 
     # stateではなくclose_withの方を消す
     def close(self):
-        self._close_with.remove()
+        self.remove()
 
     # 範囲限定付き座標設定
     def setPos(self, x:int, y:int, wrap:bool=False) -> 'UI_MENU':

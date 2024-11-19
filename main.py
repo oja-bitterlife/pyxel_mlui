@@ -18,7 +18,7 @@ command_item_data = [
 ]
 
 menu_win = ui_worker.duplicate(ui_template.findByID("menu_command"))
-menu_command = UI_MENU("command", menu_win, command_item_data)  # .closeWith(menu_win)
+menu_command = UI_MENU("command", menu_win, command_item_data)
 ui_worker.addChild(menu_win.openMenu(menu_command))
  
 # Main
