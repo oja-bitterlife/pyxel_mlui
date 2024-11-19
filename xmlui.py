@@ -345,25 +345,27 @@ class XMLUI:
         self._event_map.clear()
 
     # updateが必要な要素をTree順で取り出す
-    def _rec_getUpdateElements(self, element:Element):
+    def _rec_getUpdateElements(self, element:Element) -> list[Element]:
+        out: list[Element] = []
         # まず兄弟を処理
         for child in element:
             # disableな子は処理しない
             if child.attrib.get("enable", True):
-                yield child
+                out.append(child)
 
         # その後子を再帰
         for child in element:
             # disableな子は処理しない
             if child.attrib.get("enable", True):
-                self._rec_getUpdateElements(child)
+                out += self._rec_getUpdateElements(child)
+        return out
 
 
     # 描画用
     # *************************************************************************
     def draw(self):
         # 更新対象Elementを取得
-        draw_states = [UI_STATE(self, element) for element in self._rec_getUpdateElements(self.root._element)]
+        draw_states = [UI_STATE(self, element) for element in self._rec_getDrawElements(self.root._element)]
 
         # エリア更新
         for state in draw_states:
@@ -378,18 +380,20 @@ class XMLUI:
             self.drawElement(state.tag, state)
 
     # drawが必要な要素をTree順で取り出す
-    def _rec_getDrawElements(self, element:Element):
+    def _rec_getDrawElements(self, element:Element) -> list[Element]:
+        out: list[Element] = []
         # まず兄弟を処理
         for child in element:
             # disableな子は処理しない
             if child.attrib.get("enable", True) and child.attrib.get("visible", True):
-                yield child
+                out.append(child)
 
         # その後子を再帰
         for child in element:
             # disableな子は処理しない
             if child.attrib.get("enable", True) and child.attrib.get("visible", True):
-                yield self._rec_getDrawElements(child)
+                out += self._rec_getDrawElements(child)
+        return out
 
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい

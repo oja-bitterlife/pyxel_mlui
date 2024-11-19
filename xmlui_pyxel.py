@@ -25,26 +25,27 @@ def menu_grid_update(state: UI_STATE, event:str|None):
     item_w = state.attrInt("item_w", 0)
     item_h = state.attrInt("item_h", 0)
 
-    # item_data  = state.menu.findByID("dup_cmd_menu")
-    # if item_data is None:re
-    #     return
+    menu = state.menu
+    if menu is None:
+        return
 
     # アイテムを並べる
-    # rows = state.findByTag("menu_row")
-    # for y,row in enumerate(rows):
-    #     item_y = y*item_h
-    #     row.setAttr("y", item_y)
+    rows = state.findByTagAll("menu_row")
+    for y,row in enumerate(rows):
+        item_y = y*item_h
+        row.setAttr("y", item_y)
 
-    #     items = row.findByTag("menu_item")
-    #     for x,item in enumerate(items):
-    #         item_x = x*item_w
-    #         item.setAttr("x",item_x )
+        items = row.findByTagAll("menu_item")
+        for x,item in enumerate(items):
+            item_x = x*item_w
+            item.setAttr("x",item_x )
 
-    #         if x == item_data.cur_x and y == item_data.cur_y:
-    #             cursor = state.findByTag("menu_cur")[0]
-    #             if cursor:
-    #                 cursor.setAttr("x", item_x -6)
-    #                 cursor.setAttr("y", item_y+2)
+            if x == menu.cur_x and y == menu.cur_y:
+                cursor = state.findByTag("menu_cur")
+                if cursor:
+                    cursor.setAttr("x", item_x -6)
+                    cursor.setAttr("y", item_y+2)
+
 
 # update関数テーブル
 updateFuncs= {
