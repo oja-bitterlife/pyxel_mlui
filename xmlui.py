@@ -210,13 +210,15 @@ class UI_STATE:
 
     @property
     def parent(self) -> 'UI_STATE|None':
-        def _parentSearch(element:Element, me:Element) -> Element|None:
+        def _rec_parentSearch(element:Element, me:Element) -> Element|None:
             if me in element:
                 return element
             for child in element:
-                return _parentSearch(child, me)
+                result = _rec_parentSearch(child, me)
+                if result is not None:
+                    return result
             return None
-        parent = _parentSearch(self._xmlui.root._element, self._element)
+        parent = _rec_parentSearch(self._xmlui.root._element, self._element)
         return UI_STATE(self._xmlui, parent) if parent is not None else None
 
 
@@ -369,6 +371,9 @@ class XMLUI:
 
         # エリア更新
         for state in draw_states:
+            # if(state.tag == "menu_item"):
+            #     print(state.parent)
+
             if state.parent is not None:  # rootは親を持たないので更新不要
                 state.setAttr("area_x", state.attrInt("x") + state.parent.attrInt("area_x"))  # オフセット
                 state.setAttr("area_y", state.attrInt("y") + state.parent.attrInt("area_y"))  # オフセット

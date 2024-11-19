@@ -32,20 +32,19 @@ def menu_grid_update(state: UI_STATE, event:str|None):
     # アイテムを並べる
     rows = state.findByTagAll("menu_row")
     for y,row in enumerate(rows):
-        item_y = y*item_h
+        item_y = y * item_h
         row.setAttr("y", item_y)
 
         items = row.findByTagAll("menu_item")
         for x,item in enumerate(items):
-            item_x = x*item_w
-            item.setAttr("x",item_x )
+            item_x = x * item_w
+            item.setAttr("x", item_x)
 
             if x == menu.cur_x and y == menu.cur_y:
                 cursor = state.findByTag("menu_cur")
                 if cursor:
-                    cursor.setAttr("x", item_x -6)
+                    cursor.setAttr("x", item_x-6)
                     cursor.setAttr("y", item_y+2)
-
 
 # update関数テーブル
 updateFuncs= {
