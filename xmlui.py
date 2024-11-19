@@ -117,6 +117,8 @@ class UI_MENU:
 
     @property
     def width(self) -> int:
+        if len(self._grid) == 0:
+            return 0
         return len(self._grid[self.cur_y])
 
     @property
