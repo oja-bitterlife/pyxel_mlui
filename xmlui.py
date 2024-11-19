@@ -77,7 +77,7 @@ class UI_TEXT:
 # 表内移動Wrap付き
 class UI_MENU:
     id:str # 識別名
-    state: 'UI_STATE'  # ターゲット
+    _state: 'UI_STATE'  # 参照
     _grid: list[list[Any]]  # グリッド
 
     cur_x: int  # 現在位置x
@@ -85,7 +85,7 @@ class UI_MENU:
 
     def __init__(self, id:str, state:'UI_STATE', grid:list[list[Any]]=[], init_cur_x:int=0, init_cur_y:int=0):
         self.id = id
-        self.state = state
+        self._state = state
         self._grid = grid
         self.cur_x, self.cur_y = (init_cur_x, init_cur_y)
 
@@ -112,7 +112,7 @@ class UI_MENU:
 
     # イベント発火
     def on(self, event:str) -> 'UI_MENU':
-        self.state.on(event)
+        self._state.on(event)
         return self
 
     @property
@@ -130,7 +130,6 @@ class UI_MENU:
 
 # UIパーツの状態管理ラッパー
 class UI_STATE:
-    # ライブラリ用。アプリ側で使うのは非推奨
     _xmlui: 'XMLUI'  # ライブラリへのIF
     _element: Element  # 自身のElement
 
@@ -224,7 +223,7 @@ class UI_STATE:
     # イベント管理用
     # *************************************************************************
     def openMenu(self, id:str, grid:list[list[Any]]=[], init_cur_x:int=0, init_cur_y:int=0) -> 'UI_STATE':
-        UI_MENU(id, self, grid, init_cur_x, init_cur_y)
+        self._xmlui._menu_map[self._element] = UI_MENU(id, self, grid, init_cur_x, init_cur_y)
         return self
 
     def getActiveMenu(self) -> UI_MENU|None:
@@ -327,8 +326,8 @@ class XMLUI:
     def setDrawFunc(self, name:str, func:Callable[[UI_STATE], None]):
         self._draw_funcs[name] = func
 
-    def on(self, state:UI_STATE, event:str):
-        self._event_map[state._element].add(event)
+    def on(self, src:Element|UI_STATE, event:str):
+        self._event_map[src._element if isinstance(src, UI_STATE) else src].add(event)
 
 
     # 更新用
