@@ -1,5 +1,7 @@
 from xmlui import XMLUI,UI_STATE,UI_TEXT,UI_MENU
 
+ui_template = XMLUI.createFromFile("assets/ui/test.xml")
+
 import pyxel
 font = pyxel.Font("assets/font/b12.bdf")
 FONT_SIZE = 12
@@ -18,9 +20,14 @@ def menu_win_update(state: UI_STATE, events:set[str]):
             # 各アイテムの位置設定
             rows.setAttr(("x", "y"), (x*item_w, y*item_h))
 
-            # カーソル表示位置設定
-            if state.menu.cur_x == x and state.menu.cur_y == y:
-                cursor.setAttr(["x", "y"], [x*item_w-6, y*item_h+2])
+    # カーソル表示位置設定
+    if state.menu:
+        cursor.setAttr(["x", "y"], [state.menu.cur_x*item_w-6, state.menu.cur_y*item_h+2])
+
+        if "action" in events:
+            if state.menu.getData() == "speak":
+                msg_win = state.xmlui.duplicate(ui_template.findByID("win_message"))
+                state.addChild(msg_win.openMenu(UI_MENU("message", msg_win)))
 
 def msg_win_update(state: UI_STATE, events:set[str]):
     msg_cur = state.findByTag("msg_cur")
