@@ -39,8 +39,10 @@ def msg_win_update(state: UI_STATE, events:set[str]):
     if msg_cur and msg_text:
         msg_cur.setAttr("visible", msg_text.attrBool("finish"))
 
-    # 決定ボタンが押されたら
-    if "action" in events or "cancel" in events:
+    if "action" in events:
+        state.menu.close()  # TODO: メッセージ送りに
+
+    if "cancel" in events:
         state.menu.close()
 
 def msg_text_update(state: UI_STATE, events:set[str]):
