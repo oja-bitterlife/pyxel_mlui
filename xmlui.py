@@ -127,6 +127,14 @@ class UI_MENU:
     def length(self) -> int:
         return sum([len(line) for line in self._grid])
 
+    def getItemGrid(self, row_tag_name:str, col_tag_name:str) -> list[list['UI_STATE']]:
+        cols = self._state.findByTagAll(col_tag_name)
+        return [col.findByTagAll(row_tag_name) for col in cols]
+
+    def getItemState(self, row_tag_name:str, col_tag_name:str) -> 'UI_STATE':
+        item_grid = self.getItemGrid(row_tag_name, col_tag_name)
+        return item_grid[self.cur_y][self.cur_x]
+
 
 # UIパーツの状態管理ラッパー
 class UI_STATE:

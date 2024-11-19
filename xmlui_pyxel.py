@@ -4,6 +4,15 @@ import pyxel
 font = pyxel.Font("assets/font/b12.bdf")
 FONT_SIZE = 12
 
+def menu_win_update(state: UI_STATE, events:set[str]):
+    if state.menu:
+        item = state.menu.getItemState("menu_row", "menu_col")
+        cursor = state.findByTag("menu_cur")
+        if cursor:
+            cursor.setAttr("x", item.area.x-6)
+            cursor.setAttr("y", item.area.x+2)
+
+
 def msg_win_update(state: UI_STATE, events:set[str]):
     msg_cur = state.findByTag("msg_cur")
     msg_text = state.findByTag("msg_text")
@@ -14,7 +23,6 @@ def msg_win_update(state: UI_STATE, events:set[str]):
     if "action" in events:
         state.remove()
 
-
 def msg_text_update(state: UI_STATE, events:set[str]):
     draw_count = state.attrInt("draw_count")
     ui_text = UI_TEXT(state.getText(), {"name":"world", "age":10})
@@ -23,36 +31,11 @@ def msg_text_update(state: UI_STATE, events:set[str]):
     state.setAttr("finish", draw_count >= ui_text.length)
 
 
-def menu_grid_update(state: UI_STATE, events:set[str]):
-    item_w = state.attrInt("item_w", 0)
-    item_h = state.attrInt("item_h", 0)
-
-    menu = state.menu
-    if menu is None:
-        return
-
-    # アイテムを並べる
-    rows = state.findByTagAll("menu_row")
-    for y,row in enumerate(rows):
-        item_y = y * item_h
-        row.setAttr("y", item_y)
-
-        items = row.findByTagAll("menu_item")
-        for x,item in enumerate(items):
-            item_x = x * item_w
-            item.setAttr("x", item_x)
-
-            if x == menu.cur_x and y == menu.cur_y:
-                cursor = state.findByTag("menu_cur")
-                if cursor:
-                    cursor.setAttr("x", item_x-6)
-                    cursor.setAttr("y", item_y+2)
-
 # update関数テーブル
 updateFuncs= {
+    "menu_win": menu_win_update,
     "msg_win": msg_win_update,
     "msg_text": msg_text_update,
-    "menu_grid": menu_grid_update,
 }
 
 
