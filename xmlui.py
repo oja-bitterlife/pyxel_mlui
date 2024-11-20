@@ -31,8 +31,8 @@ class UI_TEXT:
     src: str  # パラメータ置換済み文字列
 
     # 改行とwrapで分割する
-    def __init__(self, text:str, params:dict[str,Any]={}, sepexp:str=r"\n|\\n"):
-        self.src = re.sub(sepexp, "\n", text.format(**params))  # 改行コードで統一
+    def __init__(self, text:str, params:dict[str,Any]={}, sep_exp:str=r"\n|\\n"):
+        self.src = re.sub(sep_exp, "\n", text.format(**params))  # 改行コードで統一
 
     # 最大文字数に減らして取得
     def getTokens(self, limit:int=65535, wrap:int=1024) -> list[str]:
@@ -116,7 +116,7 @@ class UI_STATE:
 
     def attrBool(self, key:str, default:bool=False) -> bool:
         attr = self._element.attrib.get(key)
-        return default if attr is None else (True if attr.lower() in ["true", "ok", "yes"] else False)
+        return default if attr is None else (True if attr.lower() in ["true", "ok", "yes", "on"] else False)
 
     def getText(self) -> str:
         return self._element.text.strip() if self._element.text != None else ""
@@ -139,7 +139,7 @@ class UI_STATE:
 
     @property
     def area(self) -> UI_RECT:
-        return UI_RECT(self.attrInt("area_x"), self.attrInt("area_y"), self.attrInt("area_w", 4096), self.attrInt("area_h", 4096))
+        return UI_RECT(self.area_x, self.area_y, self.area_w, self.area_h)
 
 
     # ツリー操作用
@@ -198,7 +198,7 @@ class UI_STATE:
     # *************************************************************************
     def strTree(self, indent:str="  ", pre:str="") -> str:
         out = pre + self.tag
-        out += ": " + self.attrStr("id") if "id" in self._element.attrib else ""
+        out += ": " + self.id if self.id else ""
         for element in self._element:
             out += "\n" + UI_STATE(self.xmlui, element).strTree(indent, pre+indent)
         return out
@@ -351,7 +351,7 @@ class XMLUI:
         update_states = [UI_STATE(self, element) for element in self.root._element.iter() if element.attrib.get("enable", True)]
 
         # use_eventがTrueなstateだけ抜き出す
-        use_event_states = list(filter(lambda state: state.attrBool("use_event"), update_states))
+        use_event_states = list(filter(lambda state: state.use_event, update_states))
         active_state = use_event_states[-1] if use_event_states else None  # 最後=Active
 
         # 更新処理
@@ -369,15 +369,15 @@ class XMLUI:
         for state in draw_states:
             if state.parent is not None:  # rootは親を持たないので更新不要
                 if state.hasAttr("abs_x"):
-                    state.setAttr("area_x", state.attrInt("abs_x"))  # 絶対座標
+                    state.setAttr("area_x", state.abs_x)  # 絶対座標
                 else:
-                    state.setAttr("area_x", state.attrInt("x") + state.parent.attrInt("area_x"))  # オフセット
+                    state.setAttr("area_x", state.x + state.parent.area_x)  # オフセット
                 if state.hasAttr("abs_y"):
-                    state.setAttr("area_y", state.attrInt("abs_y"))  # 絶対座標
+                    state.setAttr("area_y", state.abs_y)  # 絶対座標
                 else:
-                    state.setAttr("area_y", state.attrInt("y") + state.parent.attrInt("area_y"))  # オフセット
-                state.setAttr("area_w", state.attrInt("w", state.parent.attrInt("area_w")))
-                state.setAttr("area_h", state.attrInt("h", state.parent.attrInt("area_h")))
+                    state.setAttr("area_y", state.y + state.parent.area_y)  # オフセット
+                state.setAttr("area_w", state.attrInt("w", state.parent.area_w))
+                state.setAttr("area_h", state.attrInt("h", state.parent.area_h))
 
         # 描画処理
         for state in draw_states:
