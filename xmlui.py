@@ -261,35 +261,21 @@ class XMLUI:
     # 更新用
     # *************************************************************************
     def update(self):
+        # 更新対象Elementを取得
+        update_states = [UI_STATE(self, element) for element in self.root._element.iter() if element.attrib.get("enable", True)]
+
         # 更新処理
-        for element in self._rec_getUpdateElements(self.root._element):
-            self.updateElement(element.tag, UI_STATE(self, element), self._event_map.get(element, set([])))
+        for states in update_states:
+            self.updateElement(states.tag, states, self._event_map.get(states._element, set([])))
 
         # 状態のリセット
         self._event_map.clear()
-
-    # updateが必要な要素をTree順で取り出す
-    def _rec_getUpdateElements(self, element:Element) -> list[Element]:
-        out: list[Element] = []
-        # まず兄弟を処理
-        for child in element:
-            # disableな子は処理しない
-            if child.attrib.get("enable", True):
-                out.append(child)
-
-        # その後子を再帰
-        for child in element:
-            # disableな子は処理しない
-            if child.attrib.get("enable", True):
-                out += self._rec_getUpdateElements(child)
-        return out
-
 
     # 描画用
     # *************************************************************************
     def draw(self):
         # 更新対象Elementを取得
-        draw_states = [UI_STATE(self, element) for element in self._rec_getDrawElements(self.root._element)]
+        draw_states = [UI_STATE(self, element) for element in self.root._element.iter() if element.attrib.get("enable", True) and element.attrib.get("visible", True)]
 
         # エリア更新
         for state in draw_states:
@@ -308,23 +294,6 @@ class XMLUI:
         # 描画処理
         for state in draw_states:
             self.drawElement(state.tag, state)
-
-    # drawが必要な要素をTree順で取り出す
-    def _rec_getDrawElements(self, element:Element) -> list[Element]:
-        out: list[Element] = []
-        # まず兄弟を処理
-        for child in element:
-            # disableな子は処理しない
-            if child.attrib.get("enable", True) and child.attrib.get("visible", True):
-                out.append(child)
-
-        # その後子を再帰
-        for child in element:
-            # disableな子は処理しない
-            if child.attrib.get("enable", True) and child.attrib.get("visible", True):
-                out += self._rec_getDrawElements(child)
-        return out
-
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
     def updateElement(self, name:str, state:UI_STATE, events:set[str]):

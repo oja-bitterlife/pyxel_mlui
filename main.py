@@ -33,13 +33,14 @@ def update(): # フレームの更新処理
     #         active_menu.on("cancel")
 
     # else:
-    #     if pyxel.btnp(pyxel.KEY_SPACE):
-    #         # コマンドメニュー表示
-    #         try:
-    #             ui_worker.findByID("menu_command")
-    #         except:
-    #             menu_win = ui_worker.duplicate(ui_template.findByID("menu_command"))
-    #             ui_worker.addChild(menu_win.openMenu(UI_MENU("command", menu_win, command_item_data)))
+
+    # コマンドメニュー表示
+    # if pyxel.btnp(pyxel.KEY_SPACE):
+    try:
+        ui_worker.findByID("menu_command")
+    except:
+        menu_win = ui_worker.duplicate(ui_template.findByID("menu_command"))
+        ui_worker.addChild(menu_win)
 
     ui_worker.update()
 
