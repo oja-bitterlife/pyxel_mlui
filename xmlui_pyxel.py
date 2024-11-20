@@ -1,4 +1,4 @@
-from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_TEXT
+from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_TEXT,UI_CURSOR
 
 ui_template = XMLUI.createFromFile("assets/ui/test.xml")
 
@@ -9,7 +9,6 @@ FONT_SIZE = 12
 def menu_win_update(state: UI_STATE, active_event:UI_EVENT):
     item_w = state.attrInt("item_w")
     item_h = state.attrInt("item_h")
-    cursor = state.findByTag("menu_cur")
 
     grid = state.arrayByTag("menu_row", "menu_item")
     for y,cols in enumerate(grid):
@@ -18,16 +17,24 @@ def menu_win_update(state: UI_STATE, active_event:UI_EVENT):
             rows.setAttr(["x", "y"], (x*item_w, y*item_h))
 
     # カーソル表示位置設定
-    # cursor.setAttr(["x", "y"], [state.menu.cur_x*item_w-6, state.menu.cur_y*item_h+2])
+    
+    cursor = UI_CURSOR(state.findByTag("menu_cur"), len(grid[0]), len(grid))
+    if "left" in active_event.trg:
+        cursor.moveLeft()
+    if "right" in active_event.trg:
+        cursor.moveRight()
+    if "up" in active_event.trg:
+        cursor.moveUp()
+    if "down" in active_event.trg:
+        cursor.moveDown()
+    cursor.state.setAttr(["x", "y"], (cursor.cur_x*item_w-6, cursor.cur_y*item_h+2))
 
-    # if "action" in events:
-    #     if state.menu.getData() == "speak":
-    #         msg_win = state.xmlui.duplicate(ui_template.findByID("win_message"))
-    #         msg_win_menu = UI_MENU("message", msg_win).setCloseState(state)
-    #         state.addChild(msg_win.openMenu(msg_win_menu))
-
-    if "action" in active_event.input:
-        print("action")
+    if "action" in active_event.trg:
+        try:
+            state.xmlui.findByID("win_message")
+        except:
+            msg_win = state.xmlui.duplicate(ui_template.findByID("win_message"))
+            state.addChild(msg_win)
 
 def msg_win_update(state: UI_STATE, active_event:UI_EVENT):
     msg_cur = state.findByTag("msg_cur")

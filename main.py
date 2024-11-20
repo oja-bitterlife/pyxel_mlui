@@ -17,18 +17,18 @@ def update(): # フレームの更新処理
     if pyxel.btnp(pyxel.KEY_Q):
         pyxel.quit()
 
-    if pyxel.btnp(pyxel.KEY_LEFT):
+    if pyxel.btn(pyxel.KEY_LEFT):
         ui_worker.event.on("left")
-    if pyxel.btnp(pyxel.KEY_RIGHT):
+    if pyxel.btn(pyxel.KEY_RIGHT):
         ui_worker.event.on("right")
-    if pyxel.btnp(pyxel.KEY_UP):
+    if pyxel.btn(pyxel.KEY_UP):
         ui_worker.event.on("up")
-    if pyxel.btnp(pyxel.KEY_DOWN):
+    if pyxel.btn(pyxel.KEY_DOWN):
         ui_worker.event.on("down")
 
-    if pyxel.btnp(pyxel.KEY_SPACE):
+    if pyxel.btn(pyxel.KEY_SPACE):
         ui_worker.event.on("action")
-    if pyxel.btnp(pyxel.KEY_BACKSPACE):
+    if pyxel.btn(pyxel.KEY_BACKSPACE):
         ui_worker.event.on("cancel")
 
     # コマンドメニュー表示

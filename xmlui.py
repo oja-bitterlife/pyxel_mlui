@@ -88,6 +88,45 @@ class UI_EVENT:
         return self._release  # 解除された入力を取得
 
 
+class UI_CURSOR:
+    _state: 'UI_STATE'
+    grid_w: int
+    grid_h: int
+
+    def __init__(self, state:'UI_STATE', grid_w:int, grid_h:int):
+        self._state = state
+        self.grid_w = grid_w
+        self.grid_h = grid_h
+
+    # 範囲限定付き座標設定
+    def setCurPos(self, x:int, y:int, wrap:bool=False) -> 'UI_CURSOR':
+        self._state.setAttr("cur_x", (x + self.grid_w) % self.grid_w if wrap else max(min(x, self.grid_w-1), 0))
+        self._state.setAttr("cur_y", (y + self.grid_h) % self.grid_h if wrap else max(min(y, self.grid_h-1), 0))
+        return self
+
+    def moveLeft(self, wrap:bool=False) -> 'UI_CURSOR':
+        return self.setCurPos(self._state.cur_x-1, self._state.cur_y, wrap)
+    def moveRight(self, wrap:bool=False) -> 'UI_CURSOR':
+        return self.setCurPos(self._state.cur_x+1, self._state.cur_y, wrap)
+    def moveUp(self, wrap:bool=False) -> 'UI_CURSOR':
+        return self.setCurPos(self._state.cur_x, self._state.cur_y-1, wrap)
+    def moveDown(self, wrap:bool=False) -> 'UI_CURSOR':
+        return self.setCurPos(self._state.cur_x, self._state.cur_y+1, wrap)
+
+    @property
+    def cur_x(self) -> int:
+        return self._state.cur_x
+    @property
+    def cur_y(self) -> int:
+        return self._state.cur_y
+
+    @property
+    def state(self) -> 'UI_STATE':
+        return self._state
+
+    def __repr__(self) -> str:
+        return f"UI_CURSOR({self._state.x}, {self._state.y}, {self.grid_w}, {self.grid_h})"
+
 
 # UIパーツの状態管理ラッパー
 class UI_STATE:
@@ -259,6 +298,13 @@ class UI_STATE:
     @property
     def wrap(self) -> int:  # テキスト自動改行文字数
         return self.attrInt("wrap", 1024)
+
+    @property
+    def cur_x(self) -> int:  # 選択グリッドx
+        return self.attrInt("cur_x", 0)
+    @property
+    def cur_y(self) -> int:  # 選択グリッドy
+        return self.attrInt("cur_y", 0)
 
 
 # XMLでUIライブラリ本体
