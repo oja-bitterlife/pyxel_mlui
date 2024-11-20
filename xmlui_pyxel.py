@@ -1,4 +1,4 @@
-from xmlui import XMLUI,UI_STATE,UI_TEXT,UI_MENU
+from xmlui import XMLUI,UI_STATE,UI_TEXT
 
 ui_template = XMLUI.createFromFile("assets/ui/test.xml")
 
@@ -7,30 +7,27 @@ font = pyxel.Font("assets/font/b12.bdf")
 FONT_SIZE = 12
 
 def menu_win_update(state: UI_STATE, events:set[str]):
-    if state.menu is None:
-        raise Exception("menu not found")
-
     item_w = state.attrInt("item_w")
     item_h = state.attrInt("item_h")
     cursor = state.findByTag("menu_cur")
 
-    grid = state.menu.getItemGrid("menu_row", "menu_item")
+    grid = state.arrayByTag("menu_row", "menu_item")
     for y,cols in enumerate(grid):
         for x,rows in enumerate(cols):
             # 各アイテムの位置設定
-            rows.setAttr(("x", "y"), (x*item_w, y*item_h))
+            rows.setAttr(["x", "y"], (x*item_w, y*item_h))
 
     # カーソル表示位置設定
-    cursor.setAttr(["x", "y"], [state.menu.cur_x*item_w-6, state.menu.cur_y*item_h+2])
+    # cursor.setAttr(["x", "y"], [state.menu.cur_x*item_w-6, state.menu.cur_y*item_h+2])
 
-    if "action" in events:
-        if state.menu.getData() == "speak":
-            msg_win = state.xmlui.duplicate(ui_template.findByID("win_message"))
-            msg_win_menu = UI_MENU("message", msg_win).setCloseState(state)
-            state.addChild(msg_win.openMenu(msg_win_menu))
+    # if "action" in events:
+    #     if state.menu.getData() == "speak":
+    #         msg_win = state.xmlui.duplicate(ui_template.findByID("win_message"))
+    #         msg_win_menu = UI_MENU("message", msg_win).setCloseState(state)
+    #         state.addChild(msg_win.openMenu(msg_win_menu))
 
-    if "cancel" in events:
-        state.menu.close()
+    # if "cancel" in events:
+    #     state.menu.close()
 
 def msg_win_update(state: UI_STATE, events:set[str]):
     msg_cur = state.findByTag("msg_cur")
@@ -39,11 +36,11 @@ def msg_win_update(state: UI_STATE, events:set[str]):
     if msg_cur and msg_text:
         msg_cur.setAttr("visible", msg_text.attrBool("finish"))
 
-    if "action" in events:
-        state.menu.close()  # TODO: メッセージ送りに
+    # if "action" in events:
+    #     state.menu.close()  # TODO: メッセージ送りに
 
-    if "cancel" in events:
-        state.menu.close()
+    # if "cancel" in events:
+    #     state.menu.close()
 
 def msg_text_update(state: UI_STATE, events:set[str]):
     draw_count = state.attrInt("draw_count")

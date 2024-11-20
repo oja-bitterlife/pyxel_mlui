@@ -46,79 +46,6 @@ class UI_TEXT:
         return len(self.src.replace("\n", ""))  # 改行を外してカウント
 
 
-# 表内移動Wrap付き
-class UI_MENU:
-    id:str # 識別名
-    _state: 'UI_STATE'  # 参照
-    _close_state: 'UI_STATE'  # 同時クローズ先
-
-    _grid: list[list[Any]]  # グリッド
-    cur_x: int  # 現在位置x
-    cur_y: int  # 現在位置y
-
-    def __init__(self, id:str, state:'UI_STATE', grid:list[list[Any]]=[], init_cur_x:int=0, init_cur_y:int=0):
-        self.id = id
-        self._state = self._close_state = state
-        self._grid = grid
-        self.cur_x, self.cur_y = (init_cur_x, init_cur_y)
-
-    # 消すウインドウを設定
-    def setCloseState(self, state:'UI_STATE'):
-        self._close_state = state
-        return self
-
-    # stateではなくclose_withの方を消す
-    def close(self):
-        self._close_state.remove()
-
-    # 範囲限定付き座標設定
-    def setPos(self, x:int, y:int, wrap:bool=False) -> 'UI_MENU':
-        self.cur_x, self.cur_y = ((x + self.width) % self.width, (y + self.height) % self.height) if wrap else (max(min(x, self.width-1), 0), max(min(y, self.height-1), 0))
-        return self
-
-    def moveUp(self, wrap:bool=False) -> 'UI_MENU':
-        return self.setPos(self.cur_x, self.cur_y-1, wrap)
-
-    def moveDown(self, wrap:bool=False) -> 'UI_MENU':
-        return self.setPos(self.cur_x, self.cur_y+1, wrap)
-
-    def moveLeft(self, wrap:bool=False) -> 'UI_MENU':
-        return self.setPos(self.cur_x-1, self.cur_y, wrap)
-
-    def moveRight(self, wrap:bool=False) -> 'UI_MENU':
-        return self.setPos(self.cur_x+1, self.cur_y, wrap)
-
-    # girdの内容取得
-    def getData(self) -> Any:
-        return self._grid[self.cur_y][self.cur_x]
-
-    # イベント発火
-    def on(self, event:str) -> 'UI_MENU':
-        self._state.on(event)
-        return self
-
-    @property
-    def width(self) -> int:
-        if len(self._grid) == 0:
-            return 0
-        return len(self._grid[self.cur_y])
-
-    @property
-    def height(self) -> int:
-        return len(self._grid)
-
-    @property
-    def length(self) -> int:
-        return sum([len(line) for line in self._grid])
-
-    def getItemGrid(self, tag_outside:str, tag_inside:str) -> list[list['UI_STATE']]:
-        outsides = self._state.findByTagAll(tag_outside)
-        return [outside.findByTagAll(tag_inside) for outside in outsides]
-
-    def getItemState(self, tag_outside:str, tag_inside:str) -> 'UI_STATE':
-        return self.getItemGrid(tag_outside, tag_inside)[self.cur_y][self.cur_x]
-
-
 # UIパーツの状態管理ラッパー
 class UI_STATE:
     xmlui: 'XMLUI'  # ライブラリへのIF
@@ -148,9 +75,9 @@ class UI_STATE:
     def hasAttr(self, key: str) -> bool:
         return key in self._element.attrib
 
-    def setAttr(self, key:str|list[str]|tuple[str], value: Any) -> 'UI_STATE':
+    def setAttr(self, key:str|list[str], value: Any) -> 'UI_STATE':
         # attribはdict[str,str]なのでstrで保存する
-        if isinstance(key, (tuple, list)):
+        if isinstance(key, list):
             for i, k in enumerate(key):
                 self._element.attrib[k] = str(value[i])
         else:
@@ -211,6 +138,11 @@ class UI_STATE:
             parent = parent.parent
         raise Exception(f"Tag '{tag}' not found in parents")
 
+    # 子の2D配列を返す
+    def arrayByTag(self, tag_outside:str, tag_inside:str) -> list[list['UI_STATE']]:
+        outsides = self.findByTagAll(tag_outside)
+        return [outside.findByTagAll(tag_inside) for outside in outsides]
+
     @property
     def parent(self) -> 'UI_STATE|None':
         def _rec_parentSearch(element:Element, me:Element) -> Element|None:
@@ -227,21 +159,7 @@ class UI_STATE:
 
     # イベント管理用
     # *************************************************************************
-    def openMenu(self, menu:UI_MENU) -> 'UI_STATE':
-        self.xmlui._menu_map[self._element] = menu
-        return self
 
-    def getTopMenu(self) -> UI_MENU|None:
-        menus = [self.xmlui._menu_map[element] for element in self._element.iter() if element in self.xmlui._menu_map]
-        return menus[-1] if menus else None
-
-    def on(self, event:str) -> 'UI_STATE':
-        self.xmlui.on(self, event)
-        return self
-
-    @property
-    def menu(self) -> UI_MENU|None:
-        return self.xmlui._menu_map.get(self._element, None)
 
 
     # デバッグ用
@@ -249,7 +167,6 @@ class UI_STATE:
     def strTree(self, indent:str="  ", pre:str="") -> str:
         out = pre + self.tag
         out += ": " + self.attrStr("id") if "id" in self._element.attrib else ""
-        out += " [menu]" if self._element not in self.xmlui._menu_map else ""
         for element in self._element:
             out += "\n" + UI_STATE(self.xmlui, element).strTree(indent, pre+indent)
         return out
@@ -260,7 +177,6 @@ class UI_STATE:
 class XMLUI:
     root: UI_STATE
     _event_map: dict[Element, set[str]]  # イベント通知用
-    _menu_map: dict[Element, UI_MENU]  # メニュー用
 
     # 処理関数の登録
     _update_funcs: dict[str, Callable[[UI_STATE,set[str]], None]]
@@ -288,7 +204,6 @@ class XMLUI:
     def __init__(self, dom:xml.etree.ElementTree.Element, root_tag:str|None=None):
         # elementの追加ステート
         self._event_map = {}
-        self._menu_map = {}
 
         # 更新処理
         self._update_funcs = {}
