@@ -18,7 +18,7 @@ def menu_win_update(state: UI_STATE, active_event:UI_EVENT):
         for x,rows in enumerate(cols):
             rows.setAttr(["x", "y"], (x*item_w, y*item_h))
 
-    # カーソル移動
+    # カーソル
     cursor = UI_CURSOR(state.findByTag("menu_cur"), len(grid[0]), len(grid))
     cursor.moveByEvent(active_event.trg, "left", "right", "up", "down")
     # カーソル表示位置設定
@@ -28,6 +28,7 @@ def menu_win_update(state: UI_STATE, active_event:UI_EVENT):
     if "action" in active_event.trg:
         # メッセージウインドウ表示
         state.open(ui_template, "win_message")
+
 
 def msg_win_update(state: UI_STATE, active_event:UI_EVENT):
     msg_cur = state.findByTag("msg_cur")
@@ -41,6 +42,7 @@ def msg_win_update(state: UI_STATE, active_event:UI_EVENT):
 
     if "cancel" in active_event.trg:
         state.close("win_message")
+
 
 def msg_text_update(state: UI_STATE, active_event:UI_EVENT):
     draw_count = state.attrInt("draw_count")

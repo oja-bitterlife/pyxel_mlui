@@ -149,8 +149,8 @@ class UI_STATE:
         self.xmlui = xmlui
         self._element = element
 
-    def useEvent(self, use_event:bool=True) -> 'UI_STATE':
-        return self.setAttr("use_event", True)
+    def disableEvent(self) -> 'UI_STATE':
+        return self.setAttr("use_event", False)
 
     # UI_STATEは都度使い捨てなので、対象となるElementで比較する
     def __eq__(self, other) -> bool:
@@ -251,7 +251,7 @@ class UI_STATE:
             return self.findByID(id)  # すでにいたらなにもしない
         except:
             opend  = self.xmlui.duplicate(src.findByID(id))
-            self.addChild(opend)
+            self.addChild(opend.setAttr("use_event", True))
             return opend
 
     def close(self, id:str):

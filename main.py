@@ -32,12 +32,7 @@ def update(): # フレームの更新処理
         ui_worker.event.on("cancel")
 
     # コマンドメニュー表示
-    # if pyxel.btnp(pyxel.KEY_SPACE):
-    try:
-        ui_worker.findByID("menu_command")
-    except:
-        menu_win = ui_worker.duplicate(ui_template.findByID("menu_command"))
-        ui_worker.addChild(menu_win.useEvent())
+    ui_worker.root.open(ui_template, "menu_command")
 
     ui_worker.update()
 
