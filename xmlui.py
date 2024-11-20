@@ -46,6 +46,43 @@ class UI_TEXT:
         return len(self.src.replace("\n", ""))  # 改行を外してカウント
 
 
+class UI_INPUT:
+    # 入力状態の保存
+    _input:list[str]
+    _old:list[str]
+    _trg:list[str]
+    _release:list[str]
+
+    def __init__(self):
+        self._input = []
+        self._old = []
+
+    # 更新
+    def update(self):
+        _trg = [i for i in self._input if i not in self._old]
+        _relase = [i for i in self._old if i not in self._input]
+        self._old = self._input
+        self._input = []
+
+    # 入力
+    def add(self, text:str) -> 'UI_INPUT':
+        self._input.append(text)
+        return self
+
+    # 取得
+    @property
+    def trg(self) -> list[str]:
+        return self._trg  # 新規追加された入力を取得
+
+    @property
+    def release(self) -> list[str]:
+        return self._release  # 解除された入力を取得
+
+    @property
+    def pressed(self) -> list[str]:
+        return self._old  # 現在押されているか
+
+
 # UIパーツの状態管理ラッパー
 class UI_STATE:
     xmlui: 'XMLUI'  # ライブラリへのIF
@@ -159,7 +196,9 @@ class UI_STATE:
 
     # イベント管理用
     # *************************************************************************
-
+    @property
+    def input(self) -> UI_INPUT:
+        return self.xmlui._input
 
 
     # デバッグ用
@@ -177,6 +216,8 @@ class UI_STATE:
 class XMLUI:
     root: UI_STATE
     _event_map: dict[Element, set[str]]  # イベント通知用
+
+    _input: UI_INPUT
 
     # 処理関数の登録
     _update_funcs: dict[str, Callable[[UI_STATE,set[str]], None]]
@@ -204,6 +245,9 @@ class XMLUI:
     def __init__(self, dom:xml.etree.ElementTree.Element, root_tag:str|None=None):
         # elementの追加ステート
         self._event_map = {}
+
+        # 入力
+        self._input = UI_INPUT()
 
         # 更新処理
         self._update_funcs = {}
@@ -261,6 +305,9 @@ class XMLUI:
     # 更新用
     # *************************************************************************
     def update(self):
+        # 入力の更新
+        self._input.update()
+
         # 更新対象Elementを取得
         update_states = [UI_STATE(self, element) for element in self.root._element.iter() if element.attrib.get("enable", True)]
 
