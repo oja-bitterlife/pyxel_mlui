@@ -32,7 +32,8 @@ def update(): # フレームの更新処理
         ui_worker.event.on("cancel")
 
     # コマンドメニュー表示
-    ui_worker.root.open(ui_template, "menu_command")
+    if pyxel.btn(pyxel.KEY_SPACE):
+        ui_worker.root.open(ui_template, "menu_command")
 
     ui_worker.update()
 
