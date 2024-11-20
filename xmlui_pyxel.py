@@ -29,6 +29,10 @@ def menu_win_update(state: UI_STATE, active_event:UI_EVENT):
         # メッセージウインドウ表示
         state.open(ui_template, "win_message")
 
+    # 閉じる
+    if "cancel" in active_event.trg:
+        state.close(state.id)
+
 
 def msg_win_update(state: UI_STATE, active_event:UI_EVENT):
     msg_cur = state.findByTag("msg_cur")
@@ -38,11 +42,9 @@ def msg_win_update(state: UI_STATE, active_event:UI_EVENT):
 
     if "action" in active_event.trg:
         if msg_text.attrBool("finish"):
-            # 閉じる
-            state.close("win_message")
+            state.close("win_message")  # 閉じる
         else:
-            # 一気に表示する
-            msg_text.setAttr("draw_count", 1024)
+            msg_text.setAttr("draw_count", 1024)  # 一気に表示する
     
     # 閉じる
     if "cancel" in active_event.trg:
