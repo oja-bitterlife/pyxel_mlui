@@ -150,7 +150,7 @@ class UI_STATE:
 
     def remove(self):
         parent = self.parent
-        if parent is not None:
+        if parent:
             parent._element.remove(self._element)
 
     def findByID(self, id:str) -> 'UI_STATE':
@@ -170,7 +170,7 @@ class UI_STATE:
 
     def findByTagR(self, tag:str) -> 'UI_STATE':
         parent = self.parent
-        while(parent is not None):
+        while(parent):
             if parent.tag == tag:
                 return parent
             parent = parent.parent
@@ -188,11 +188,11 @@ class UI_STATE:
                 return element
             for child in element:
                 result = _rec_parentSearch(child, me)
-                if result is not None:
+                if result:
                     return result
             return None
         parent = _rec_parentSearch(self.xmlui.root._element, self._element)
-        return UI_STATE(self.xmlui, parent) if parent is not None else None
+        return UI_STATE(self.xmlui, parent) if parent else None
 
 
     # デバッグ用
@@ -368,7 +368,7 @@ class XMLUI:
 
         # エリア更新
         for state in draw_states:
-            if state.parent is not None:  # rootは親を持たないので更新不要
+            if state.parent:  # rootは親を持たないので更新不要
                 if state.hasAttr("abs_x"):
                     state.setAttr("area_x", state.abs_x)  # 絶対座標
                 else:
