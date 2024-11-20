@@ -17,22 +17,19 @@ def update(): # フレームの更新処理
     if pyxel.btnp(pyxel.KEY_Q):
         pyxel.quit()
 
-    # if active_menu:
-    #     if pyxel.btnp(pyxel.KEY_LEFT):
-    #         active_menu.moveLeft()
-    #     if pyxel.btnp(pyxel.KEY_RIGHT):
-    #         active_menu.moveRight()
-    #     if pyxel.btnp(pyxel.KEY_UP):
-    #         active_menu.moveUp()
-    #     if pyxel.btnp(pyxel.KEY_DOWN):
-    #         active_menu.moveDown()
+    if pyxel.btnp(pyxel.KEY_LEFT):
+        ui_worker.event.on("left")
+    if pyxel.btnp(pyxel.KEY_RIGHT):
+        ui_worker.event.on("right")
+    if pyxel.btnp(pyxel.KEY_UP):
+        ui_worker.event.on("up")
+    if pyxel.btnp(pyxel.KEY_DOWN):
+        ui_worker.event.on("down")
 
-    #     if pyxel.btnp(pyxel.KEY_SPACE):
-    #         active_menu.on("action")
-    #     if pyxel.btnp(pyxel.KEY_BACKSPACE):
-    #         active_menu.on("cancel")
-
-    # else:
+    if pyxel.btnp(pyxel.KEY_SPACE):
+        ui_worker.event.on("action")
+    if pyxel.btnp(pyxel.KEY_BACKSPACE):
+        ui_worker.event.on("cancel")
 
     # コマンドメニュー表示
     # if pyxel.btnp(pyxel.KEY_SPACE):
@@ -40,7 +37,7 @@ def update(): # フレームの更新処理
         ui_worker.findByID("menu_command")
     except:
         menu_win = ui_worker.duplicate(ui_template.findByID("menu_command"))
-        ui_worker.addChild(menu_win)
+        ui_worker.addChild(menu_win.useEvent())
 
     ui_worker.update()
 

@@ -71,7 +71,7 @@ class UI_EVENT:
 
     # 入力
     def on(self, text:str) -> 'UI_EVENT':
-        self._input.add(text)
+        self._receive.add(text)
         return self
 
     # 取得
@@ -93,21 +93,18 @@ class UI_EVENT:
 class UI_STATE:
     xmlui: 'XMLUI'  # ライブラリへのIF
     _element: Element  # 自身のElement
-    _use_event: bool  # イベント通知フラグ
 
-    def __init__(self, xmlui:'XMLUI', element:Element, use_event:bool=False):
+    def __init__(self, xmlui:'XMLUI', element:Element):
         # プロパティの初期化
         self.xmlui = xmlui
         self._element = element
-        self._use_event = use_event
 
-    def setUseEvent(self, use_event:bool) -> 'UI_STATE':
-        self._use_event = use_event
-        return self
+    def useEvent(self, use_event:bool=True) -> 'UI_STATE':
+        return self.setAttr("use_event", True)
 
     # UI_STATEは都度使い捨てなので、対象となるElementで比較する
-    def __eq__(self, value:object) -> bool:
-        return isinstance(object, UI_STATE) and getattr(object, "_element") == self._element
+    def __eq__(self, other) -> bool:
+        return other._element == self._element if isinstance(other, UI_STATE) else False
 
     # attribアクセス用
     # *************************************************************************
@@ -228,7 +225,7 @@ class XMLUI:
     event: UI_EVENT
 
     # 処理関数の登録
-    _update_funcs: dict[str, Callable[[UI_STATE,UI_EVENT|None], None]]
+    _update_funcs: dict[str, Callable[[UI_STATE,UI_EVENT], None]]
     _draw_funcs: dict[str, Callable[[UI_STATE], None]]
 
     # 初期化
@@ -293,7 +290,7 @@ class XMLUI:
 
     # 処理登録
     # *************************************************************************
-    def setUpdateFunc(self, name:str, func:Callable[[UI_STATE,UI_EVENT|None], None]):
+    def setUpdateFunc(self, name:str, func:Callable[[UI_STATE,UI_EVENT], None]):
         self._update_funcs[name] = func
 
     def setDrawFunc(self, name:str, func:Callable[[UI_STATE], None]):
@@ -310,12 +307,12 @@ class XMLUI:
         update_states = [UI_STATE(self, element) for element in self.root._element.iter() if element.attrib.get("enable", True)]
 
         # use_eventがTrueなstateだけ抜き出す
-        use_event_states = list(filter(lambda state: state._use_event, update_states))
-        active_state = use_event_states[-1] if use_event_states else None
+        use_event_states = list(filter(lambda state: state.attrBool("use_event"), update_states))
+        active_state = use_event_states[-1] if use_event_states else None  # 最後=Active
 
         # 更新処理
         for state in update_states:
-            self.updateElement(state.tag, state, self.event if state == active_state else None)  # 最後＝Activeなときだけeventを渡す
+            self.updateElement(state.tag, state, self.event if state == active_state else UI_EVENT())
 
 
     # 描画用
@@ -343,10 +340,10 @@ class XMLUI:
             self.drawElement(state.tag, state)
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
-    def updateElement(self, name:str, state:UI_STATE, activeEvent:UI_EVENT|None):
+    def updateElement(self, name:str, state:UI_STATE, active_event:UI_EVENT):
         # 登録済みの関数だけ実行
         if name in self._update_funcs:
-            self._update_funcs[name](state, activeEvent)
+            self._update_funcs[name](state, active_event)
 
     def drawElement(self, name:str, state:UI_STATE):
         # 登録済みの関数だけ実行

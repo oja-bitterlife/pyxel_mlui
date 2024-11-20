@@ -1,4 +1,4 @@
-from xmlui import XMLUI,UI_STATE,UI_TEXT
+from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_TEXT
 
 ui_template = XMLUI.createFromFile("assets/ui/test.xml")
 
@@ -6,7 +6,7 @@ import pyxel
 font = pyxel.Font("assets/font/b12.bdf")
 FONT_SIZE = 12
 
-def menu_win_update(state: UI_STATE, events:set[str]):
+def menu_win_update(state: UI_STATE, active_event:UI_EVENT):
     item_w = state.attrInt("item_w")
     item_h = state.attrInt("item_h")
     cursor = state.findByTag("menu_cur")
@@ -26,10 +26,10 @@ def menu_win_update(state: UI_STATE, events:set[str]):
     #         msg_win_menu = UI_MENU("message", msg_win).setCloseState(state)
     #         state.addChild(msg_win.openMenu(msg_win_menu))
 
-    # if "cancel" in events:
-    #     state.menu.close()
+    if "action" in active_event.input:
+        print("action")
 
-def msg_win_update(state: UI_STATE, events:set[str]):
+def msg_win_update(state: UI_STATE, active_event:UI_EVENT):
     msg_cur = state.findByTag("msg_cur")
     msg_text = state.findByTag("msg_text")
 
@@ -42,7 +42,7 @@ def msg_win_update(state: UI_STATE, events:set[str]):
     # if "cancel" in events:
     #     state.menu.close()
 
-def msg_text_update(state: UI_STATE, events:set[str]):
+def msg_text_update(state: UI_STATE, active_event:UI_EVENT):
     draw_count = state.attrInt("draw_count")
     ui_text = UI_TEXT(state.getText(), {"name":"world", "age":10})
 
