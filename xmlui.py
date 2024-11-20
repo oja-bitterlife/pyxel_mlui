@@ -248,12 +248,15 @@ class UI_STATE:
     def open(self, template:'XMLUI|UI_STATE', id:str) -> 'UI_STATE':
         src = template.root if isinstance(template, XMLUI) else template
         try:
-            return self.findByID(id)
+            return self.findByID(id)  # すでにいたらなにもしない
         except:
             opend  = self.xmlui.duplicate(src.findByID(id))
             self.addChild(opend)
             return opend
 
+    def close(self, id:str):
+        state = self.findByID(id)
+        state.remove()
 
     # デバッグ用
     # *************************************************************************

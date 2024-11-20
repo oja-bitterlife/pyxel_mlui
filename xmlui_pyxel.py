@@ -39,8 +39,8 @@ def msg_win_update(state: UI_STATE, active_event:UI_EVENT):
     # if "action" in events:
     #     state.menu.close()  # TODO: メッセージ送りに
 
-    # if "cancel" in events:
-    #     state.menu.close()
+    if "cancel" in active_event.trg:
+        state.close("win_message")
 
 def msg_text_update(state: UI_STATE, active_event:UI_EVENT):
     draw_count = state.attrInt("draw_count")
