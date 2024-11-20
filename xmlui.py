@@ -250,6 +250,7 @@ class UI_STATE:
         try:
             return self.findByID(id)  # すでにいたらなにもしない
         except:
+            # eventを有効にして追加する
             opend  = self.xmlui.duplicate(src.findByID(id))
             self.addChild(opend.setAttr("use_event", True))
             return opend
