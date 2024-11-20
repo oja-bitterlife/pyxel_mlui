@@ -10,31 +10,24 @@ def menu_win_update(state: UI_STATE, active_event:UI_EVENT):
     item_w = state.attrInt("item_w")
     item_h = state.attrInt("item_h")
 
+    # メニューアイテム取得
     grid = state.arrayByTag("menu_row", "menu_item")
+
+    # 各アイテムの位置設定
     for y,cols in enumerate(grid):
         for x,rows in enumerate(cols):
-            # 各アイテムの位置設定
             rows.setAttr(["x", "y"], (x*item_w, y*item_h))
 
-    # カーソル表示位置設定
-    
+    # カーソル移動
     cursor = UI_CURSOR(state.findByTag("menu_cur"), len(grid[0]), len(grid))
-    if "left" in active_event.trg:
-        cursor.moveLeft()
-    if "right" in active_event.trg:
-        cursor.moveRight()
-    if "up" in active_event.trg:
-        cursor.moveUp()
-    if "down" in active_event.trg:
-        cursor.moveDown()
+    cursor.moveByEvent(active_event.trg, "left", "right", "up", "down")
+    # カーソル表示位置設定
     cursor.state.setAttr(["x", "y"], (cursor.cur_x*item_w-6, cursor.cur_y*item_h+2))
 
+    # 選択アイテムの表示
     if "action" in active_event.trg:
-        try:
-            state.xmlui.findByID("win_message")
-        except:
-            msg_win = state.xmlui.duplicate(ui_template.findByID("win_message"))
-            state.addChild(msg_win)
+        # メッセージウインドウ表示
+        state.open(ui_template, "win_message")
 
 def msg_win_update(state: UI_STATE, active_event:UI_EVENT):
     msg_cur = state.findByTag("msg_cur")

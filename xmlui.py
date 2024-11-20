@@ -113,6 +113,17 @@ class UI_CURSOR:
     def moveDown(self, wrap:bool=False) -> 'UI_CURSOR':
         return self.setCurPos(self._state.cur_x, self._state.cur_y+1, wrap)
 
+    def moveByEvent(self, input:set[str], leftEvent:str, rightEvent:str, upEvent:str, downEvent:str, x_wrap:bool=False, y_wrap:bool=False) -> 'UI_CURSOR':
+        if leftEvent in input:
+            self.moveLeft(x_wrap)
+        if rightEvent in input:
+            self.moveRight(x_wrap)
+        if upEvent in input:
+            self.moveUp(y_wrap)
+        if downEvent in input:
+            self.moveDown(y_wrap)
+        return self
+
     @property
     def cur_x(self) -> int:
         return self._state.cur_x
@@ -232,6 +243,16 @@ class UI_STATE:
             return None
         parent = _rec_parentSearch(self.xmlui.root._element, self._element)
         return UI_STATE(self.xmlui, parent) if parent else None
+
+    # 子に別Element一式を追加する
+    def open(self, template:'XMLUI|UI_STATE', id:str) -> 'UI_STATE':
+        src = template.root if isinstance(template, XMLUI) else template
+        try:
+            return self.findByID(id)
+        except:
+            opend  = self.xmlui.duplicate(src.findByID(id))
+            self.addChild(opend)
+            return opend
 
 
     # デバッグ用
