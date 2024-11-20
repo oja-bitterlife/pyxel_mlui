@@ -34,12 +34,17 @@ def msg_win_update(state: UI_STATE, active_event:UI_EVENT):
     msg_cur = state.findByTag("msg_cur")
     msg_text = state.findByTag("msg_text")
 
-    if msg_cur and msg_text:
-        msg_cur.setAttr("visible", msg_text.attrBool("finish"))
+    msg_cur.setAttr("visible", msg_text.attrBool("finish"))
 
-    # if "action" in events:
-    #     state.menu.close()  # TODO: メッセージ送りに
-
+    if "action" in active_event.trg:
+        if msg_text.attrBool("finish"):
+            # 閉じる
+            state.close("win_message")
+        else:
+            # 一気に表示する
+            msg_text.setAttr("draw_count", 1024)
+    
+    # 閉じる
     if "cancel" in active_event.trg:
         state.close("win_message")
 

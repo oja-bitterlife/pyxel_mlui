@@ -256,8 +256,11 @@ class UI_STATE:
             return opend
 
     def close(self, id:str):
-        state = self.findByID(id)
-        state.remove()
+        try:
+            state = self.findByID(id)
+            state.remove()
+        finally:
+            return None
 
     # デバッグ用
     # *************************************************************************
