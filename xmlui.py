@@ -46,53 +46,68 @@ class UI_TEXT:
         return len(self.src.replace("\n", ""))  # 改行を外してカウント
 
 
-class UI_INPUT:
+class UI_EVENT:
     # 入力状態の保存
-    _input:list[str]
-    _old:list[str]
-    _trg:list[str]
-    _release:list[str]
+    _receive:set[str]  # 次の状態受付
+    _input:set[str]
+    _trg:set[str]
+    _release:set[str]
 
     def __init__(self):
-        self._input = []
-        self._old = []
+        self._input = set([])
+        self._trg = set([])
+        self._release = set([])
+        self._receive = set([])
 
     # 更新
     def update(self):
-        _trg = [i for i in self._input if i not in self._old]
-        _relase = [i for i in self._old if i not in self._input]
-        self._old = self._input
-        self._input = []
+        # 状態更新
+        self._trg = set([i for i in self._receive if i not in self._input])
+        self._relase = set([i for i in self._input if i not in self._receive])
+        self._input = self._receive
+
+        # 取得し直す
+        self._receive = set([])
 
     # 入力
-    def add(self, text:str) -> 'UI_INPUT':
-        self._input.append(text)
+    def on(self, text:str) -> 'UI_EVENT':
+        self._input.add(text)
         return self
 
     # 取得
     @property
-    def trg(self) -> list[str]:
+    def input(self) -> set[str]:
+        return self._input  # 現在押されているか
+
+    @property
+    def trg(self) -> set[str]:
         return self._trg  # 新規追加された入力を取得
 
     @property
-    def release(self) -> list[str]:
+    def release(self) -> set[str]:
         return self._release  # 解除された入力を取得
 
-    @property
-    def pressed(self) -> list[str]:
-        return self._old  # 現在押されているか
 
 
 # UIパーツの状態管理ラッパー
 class UI_STATE:
     xmlui: 'XMLUI'  # ライブラリへのIF
     _element: Element  # 自身のElement
+    _use_event: bool  # イベント通知フラグ
 
-    def __init__(self, xmlui:'XMLUI', element: Element):
+    def __init__(self, xmlui:'XMLUI', element:Element, use_event:bool=False):
         # プロパティの初期化
         self.xmlui = xmlui
         self._element = element
+        self._use_event = use_event
 
+    def setUseEvent(self, use_event:bool) -> 'UI_STATE':
+        self._use_event = use_event
+        return self
+
+    # UI_STATEは都度使い捨てなので、対象となるElementで比較する
+    def __eq__(self, value:object) -> bool:
+        return isinstance(object, UI_STATE) and getattr(object, "_element") == self._element
 
     # attribアクセス用
     # *************************************************************************
@@ -194,13 +209,6 @@ class UI_STATE:
         return UI_STATE(self.xmlui, parent) if parent is not None else None
 
 
-    # イベント管理用
-    # *************************************************************************
-    @property
-    def input(self) -> UI_INPUT:
-        return self.xmlui._input
-
-
     # デバッグ用
     # *************************************************************************
     def strTree(self, indent:str="  ", pre:str="") -> str:
@@ -215,12 +223,12 @@ class UI_STATE:
 # #############################################################################
 class XMLUI:
     root: UI_STATE
-    _event_map: dict[Element, set[str]]  # イベント通知用
 
-    _input: UI_INPUT
+    # 入力処理
+    event: UI_EVENT
 
     # 処理関数の登録
-    _update_funcs: dict[str, Callable[[UI_STATE,set[str]], None]]
+    _update_funcs: dict[str, Callable[[UI_STATE,UI_EVENT|None], None]]
     _draw_funcs: dict[str, Callable[[UI_STATE], None]]
 
     # 初期化
@@ -243,11 +251,8 @@ class XMLUI:
 
     # 初期化。<xmlui>を持つXMLを突っ込む
     def __init__(self, dom:xml.etree.ElementTree.Element, root_tag:str|None=None):
-        # elementの追加ステート
-        self._event_map = {}
-
         # 入力
-        self._input = UI_INPUT()
+        self.event = UI_EVENT()
 
         # 更新処理
         self._update_funcs = {}
@@ -288,35 +293,30 @@ class XMLUI:
 
     # 処理登録
     # *************************************************************************
-    def setUpdateFunc(self, name:str, func:Callable[[UI_STATE,set[str]], None]):
+    def setUpdateFunc(self, name:str, func:Callable[[UI_STATE,UI_EVENT|None], None]):
         self._update_funcs[name] = func
 
     def setDrawFunc(self, name:str, func:Callable[[UI_STATE], None]):
         self._draw_funcs[name] = func
 
-    def on(self, src:Element|UI_STATE, event:str):
-        element = src._element if isinstance(src, UI_STATE) else src
-        # 存在しなければ作っておく
-        if src not in self._event_map:
-            self._event_map[element] = set([])
-        self._event_map[element].add(event)
-
 
     # 更新用
     # *************************************************************************
     def update(self):
-        # 入力の更新
-        self._input.update()
+        # (入力)イベントの更新
+        self.event.update()
 
         # 更新対象Elementを取得
         update_states = [UI_STATE(self, element) for element in self.root._element.iter() if element.attrib.get("enable", True)]
 
-        # 更新処理
-        for states in update_states:
-            self.updateElement(states.tag, states, self._event_map.get(states._element, set([])))
+        # use_eventがTrueなstateだけ抜き出す
+        use_event_states = list(filter(lambda state: state._use_event, update_states))
+        active_state = use_event_states[-1] if use_event_states else None
 
-        # 状態のリセット
-        self._event_map.clear()
+        # 更新処理
+        for state in update_states:
+            self.updateElement(state.tag, state, self.event if state == active_state else None)  # 最後＝Activeなときだけeventを渡す
+
 
     # 描画用
     # *************************************************************************
@@ -343,10 +343,10 @@ class XMLUI:
             self.drawElement(state.tag, state)
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
-    def updateElement(self, name:str, state:UI_STATE, events:set[str]):
+    def updateElement(self, name:str, state:UI_STATE, activeEvent:UI_EVENT|None):
         # 登録済みの関数だけ実行
         if name in self._update_funcs:
-            self._update_funcs[name](state, events)
+            self._update_funcs[name](state, activeEvent)
 
     def drawElement(self, name:str, state:UI_STATE):
         # 登録済みの関数だけ実行
