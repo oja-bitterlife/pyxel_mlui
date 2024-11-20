@@ -76,13 +76,13 @@ def msg_win_draw(state:UI_STATE, ):
     pyxel.rectb(state.area.x+3, state.area.y+3, state.area.w-6, state.area.h-6, fg_color)
 
 def msg_text_draw(state:UI_STATE):
-    wrap = state.attrInt("wrap", 256)
+    wrap = state.attrInt("wrap", 1024)
     color = state.attrInt("color", 7)
     draw_count = state.attrInt("draw_count", 0)
 
     # テキスト表示
     ui_text = UI_TEXT(state.text, {"name":"world", "age":10})
-    tokens = ui_text.getTokens(draw_count)
+    tokens = ui_text.getTokens(draw_count, wrap)
     for i,text in enumerate(tokens):
         pyxel.text(state.area.x, state.area.y+i*FONT_SIZE, text, color, font)
 
@@ -111,10 +111,8 @@ def menu_win_draw(state:UI_STATE):
         pyxel.text(text_x, state.area.y-2, title, fg_color, font)
 
 def menu_item_draw(state:UI_STATE):
-    title  = state.attrStr("title", "")
     color = state.attrInt("color", 7)
-    if title:
-        pyxel.text(state.area.x, state.area.y, title, color, font)
+    pyxel.text(state.area.x, state.area.y, state.text, color, font)
 
 def menu_cur_draw(state:UI_STATE):
     tri_size = state.attrInt("size", 6)
