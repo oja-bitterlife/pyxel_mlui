@@ -134,18 +134,6 @@ class UI_STATE:
         return self
 
     @property
-    def is_enable(self) -> bool:
-        return self.attrBool("enable", True)
-
-    @property
-    def is_visible(self) -> bool:
-        return self.attrBool("visible", True)
-
-    @property
-    def id(self) -> str:
-        return self.attrStr("id", "")
-
-    @property
     def tag(self) -> str:
         return self._element.tag
 
@@ -214,6 +202,62 @@ class UI_STATE:
         for element in self._element:
             out += "\n" + UI_STATE(self.xmlui, element).strTree(indent, pre+indent)
         return out
+
+
+    # xmluiで特別な意味を持つアトリビュート一覧
+    # わかりやすく全てプロパティを用意しておく(デフォルト値も書く)
+    # 面倒でも頑張って書く
+    # *************************************************************************
+    @property
+    def id(self) -> str:  # ID。xmlではかぶらないように(精神論)
+        return self.attrStr("id", "")
+
+    @property
+    def enable(self) -> bool:  # 有効フラグ
+        return self.attrBool("enable", True)
+    @property
+    def visible(self) -> bool:  # 表示フラグ
+        return self.attrBool("visible", True)
+
+    @property
+    def x(self) -> int:  # 親からの相対座標x
+        return self.attrInt("x", 0)
+    @property
+    def y(self) -> int:  # 親からの相対座標y
+        return self.attrInt("y", 0)
+    @property
+    def abs_x(self) -> int:  # 絶対座標x
+        return self.attrInt("abs_x", 0)
+    @property
+    def abs_y(self) -> int:  # 絶対座標y
+        return self.attrInt("abs_y", 0)
+    @property
+    def w(self) -> int:  # elementの幅
+        return self.attrInt("w", 4096)
+    @property
+    def h(self) -> int:  # elementの高さ
+        return self.attrInt("h", 4096)
+
+    @property
+    def area_x(self) -> int:  # 表示最終座標x
+        return self.attrInt("area_x", 0)
+    @property
+    def area_y(self) -> int:  # 表示最終座標y
+        return self.attrInt("area_y", 0)
+    @property
+    def area_w(self) -> int:  #  表示最終幅
+        return self.attrInt("area_w", 4096)
+    @property
+    def area_h(self) -> int:  #  表示最終高さ
+        return self.attrInt("area_h", 4096)
+
+    @property
+    def use_event(self) -> bool:  # eventを使うかどうか
+        return self.attrBool("use_event", False)
+
+    @property
+    def wrap(self) -> int:  # テキスト自動改行文字数
+        return self.attrInt("wrap", 1024)
 
 
 # XMLでUIライブラリ本体
