@@ -118,9 +118,6 @@ class UI_STATE:
         attr = self._element.attrib.get(key)
         return default if attr is None else (True if attr.lower() in ["true", "ok", "yes", "on"] else False)
 
-    def getText(self) -> str:
-        return self._element.text.strip() if self._element.text != None else ""
-
     def hasAttr(self, key: str) -> bool:
         return key in self._element.attrib
 
@@ -136,6 +133,10 @@ class UI_STATE:
     @property
     def tag(self) -> str:
         return self._element.tag
+
+    @property
+    def text(self) -> str:
+        return self._element.text.strip() if self._element.text else ""
 
     @property
     def area(self) -> UI_RECT:

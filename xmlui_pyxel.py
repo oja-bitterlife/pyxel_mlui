@@ -44,7 +44,7 @@ def msg_win_update(state: UI_STATE, active_event:UI_EVENT):
 
 def msg_text_update(state: UI_STATE, active_event:UI_EVENT):
     draw_count = state.attrInt("draw_count")
-    ui_text = UI_TEXT(state.getText(), {"name":"world", "age":10})
+    ui_text = UI_TEXT(state.text, {"name":"world", "age":10})
 
     state.setAttr("draw_count", draw_count+1)
     state.setAttr("finish", draw_count >= ui_text.length)
@@ -72,7 +72,7 @@ def msg_text_draw(state:UI_STATE):
     draw_count = state.attrInt("draw_count", 0)
 
     # テキスト表示
-    ui_text = UI_TEXT(state.getText(), {"name":"world", "age":10})
+    ui_text = UI_TEXT(state.text, {"name":"world", "age":10})
     tokens = ui_text.getTokens(draw_count)
     for i,text in enumerate(tokens):
         pyxel.text(state.area.x, state.area.y+i*FONT_SIZE, text, color, font)
