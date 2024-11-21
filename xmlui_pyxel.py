@@ -6,7 +6,9 @@ import pyxel
 font = pyxel.Font("assets/font/b12.bdf")
 FONT_SIZE = 12
 
+
 def my_ui_update(state: UI_STATE, event:UI_EVENT):
+    # メインメニューを開く
     if "action" in event.trg:
         state.open(ui_template, "menu_command")
 

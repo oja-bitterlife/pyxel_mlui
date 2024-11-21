@@ -365,6 +365,9 @@ class XMLUI:
     _update_funcs: dict[str, Callable[[UI_STATE,UI_EVENT], None]]
     _draw_funcs: dict[str, Callable[[UI_STATE], None]]
 
+    # 更新管理(drawはupdateされたElementのみ対象に)
+    _update_states_cache: list[UI_STATE]  # 更新対象のキャッシュ
+
     # 初期化
     # *************************************************************************
     # ファイルから読み込み
@@ -442,22 +445,22 @@ class XMLUI:
         self.event.update()
 
         # 更新対象Elementを取得
-        update_states = [UI_STATE(self, element) for element in self.root._element.iter() if element.attrib.get("enable", True)]
+        self._update_states_cache = [UI_STATE(self, element) for element in self.root._element.iter() if element.attrib.get("enable", True)]
 
         # use_eventがTrueなstateだけ抜き出す
-        use_event_states = list(filter(lambda state: state.use_event, update_states))
+        use_event_states = list(filter(lambda state: state.use_event, self._update_states_cache))
         active_state = use_event_states[-1] if use_event_states else None  # 最後=Active
 
         # 更新処理
-        for state in update_states:
+        for state in self._update_states_cache:
             self.updateElement(state.tag, state, self.event if state == active_state else UI_EVENT())
 
 
     # 描画用
     # *************************************************************************
     def draw(self):
-        # 更新対象Elementを取得
-        draw_states = [UI_STATE(self, element) for element in self.root._element.iter() if element.attrib.get("enable", True) and element.attrib.get("visible", True)]
+        # 更新対象を取得(Updateされたもののみ対象)
+        draw_states = [state for state in self._update_states_cache if state.visible]
 
         # エリア更新
         for state in draw_states:
