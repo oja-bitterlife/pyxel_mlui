@@ -30,26 +30,34 @@ class UI_TEXT(str):
     # クラス定数
     SEPARATE_REGEXP:str = r"\\n"
 
+    _state: 'UI_STATE'
+
     # 改行コードに変換しておく
-    def __new__(cls, text:str):
+    def __new__(cls, state:'UI_STATE', text:str):
         self = super().__new__(cls, re.sub(cls.SEPARATE_REGEXP, "\n", text).rstrip("\n"))
+        self._state = state
         return self
 
     # ただのformat。関数連結のために用意
     def bind(self, params:dict[str,Any]={}, wrap:int=1024) -> 'UI_TEXT':
         wrap = max(1, wrap)  # 0だと無限になってしまうので最低1を入れておく
-        return UI_TEXT("\n".join([self.format(**params)[i:i+wrap].rstrip("\n") for i in range(0, len(self), wrap)]))
+        return UI_TEXT(self._state, "\n".join([self.format(**params)[i:i+wrap].rstrip("\n") for i in range(0, len(self), wrap)]))
 
+    # 改行を外して長さを制限
     def limit(self, limit:int) -> 'UI_TEXT':
         for i,c in enumerate(self):
             if limit <= 0:
-                return UI_TEXT(self[:i].rstrip("\n"))  # 改行終端は削る
+                return UI_TEXT(self._state, self[:i].rstrip("\n"))  # 改行終端は削る
             if c != "\n":  # 改行は無視する
                 limit -= 1
-            return UI_TEXT(self)
+            return UI_TEXT(self._state, self)
 
-    def getPage(self, page:int, page_line_num:int) -> 'UI_TEXT':
-        return UI_TEXT("\n".join(self.splitlines()[page*page_line_num:(page+1)*page_line_num]))
+    # 指定ページ部分取得
+    def getPageText(self, page:int, page_line_num:int) -> 'UI_TEXT':
+        return UI_TEXT(self._state, "\n".join(self.splitlines()[page*page_line_num:(page+1)*page_line_num]))
+
+    def getPages(self, page_attr:str, page_line_num:int) -> 'UI_PAGE':
+        return UI_PAGE(self, page_attr, page_line_num)
 
     @property
     def length(self) -> int:
@@ -58,20 +66,24 @@ class UI_TEXT(str):
 
 # テキストのページ管理
 class UI_PAGE:
-    text: UI_TEXT
-    page: int
-    page_line_num: int
+    _text: UI_TEXT
+    page_attr: str
+    line_num: str
 
-    def __init__(self, text:'UI_TEXT', page_line_num:int):
-        self.text = text
-        self.page = 0
-        self.page_line_num = page_line_num
+    def __init__(self, text:'UI_TEXT', page_attr:str, line_num:int):
+        self._text = text
+        self.page_attr = page_attr
+        self.line_num = line_num
 
-    def text(self):
-        self.text.getPage(self.page, self.page_line_num)
+    def getText(self):
+        return self._text.getPageText(self._text._state.attrInt(self.page_attr), self.line_num)
+
+    @property
+    def page_no(self) -> int:
+        return self._text._state.attrInt(self.page_attr)
 
     def __len__(self):
-        return len(self._pages)
+        return self._text.length
 
 
 class UI_EVENT:
@@ -217,7 +229,7 @@ class UI_STATE:
 
     @property
     def text(self) -> UI_TEXT:
-        return UI_TEXT(self._element.text.strip() if self._element.text else "")
+        return UI_TEXT(self, self._element.text.strip() if self._element.text else "")
 
     @property
     def area(self) -> UI_RECT:
