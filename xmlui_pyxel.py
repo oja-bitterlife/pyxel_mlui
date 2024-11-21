@@ -42,13 +42,13 @@ def msg_win_update(state: UI_STATE, event:UI_EVENT):
     msg_cur = state.findByTag("msg_cur")
     msg_text = state.findByTag("msg_text")
 
-    msg_cur.setAttr("visible", msg_text.attrBool("finish"))
+    msg_cur.setAttr("visible", msg_text.attrBool("page_end"))
 
     if "action" in event.trg:
         if msg_text.attrBool("finish"):
             state.close("menu_command")  # メニューごと閉じる
         else:
-            msg_text.setAttr("draw_count", 1024)  # 一気に表示する
+            msg_text.setAttr("draw_count", 65536)  # 一気に表示する
     
     # メニューごと閉じる
     if "cancel" in event.trg:
@@ -58,9 +58,11 @@ def msg_win_update(state: UI_STATE, event:UI_EVENT):
 def msg_text_update(state: UI_STATE, event:UI_EVENT):
     wrap = state.attrInt("wrap", 1024)
     draw_count = state.attrInt("draw_count")
+    page_no = state.attrInt("page_no")
 
     state.setAttr("draw_count", draw_count+1)
-    state.setAttr("finish", draw_count >= state.text.bind({"name":"world", "age":10}).length)
+    state.setAttr("finish", page_no < state.text.bind({"name":"world", "age":10}).splitPages(3, wrap).page_num-1)
+    state.setAttr("page_end", draw_count >= state.text.bind({"name":"world", "age":10}).splitPages(3, wrap).strlen(page_no))
 
 
 # update関数テーブル
@@ -84,10 +86,11 @@ def msg_text_draw(state:UI_STATE):
     wrap = state.attrInt("wrap", 1024)
     color = state.attrInt("color", 7)
     draw_count = state.attrInt("draw_count", 0)
+    page_no = state.attrInt("page_no")
 
     # テキスト表示
-    page_text = state.text.bind({"name":"world", "age":10}, draw_count).splitPages(3)
-    for i,text in enumerate(page_text.getPage(0)):
+    page_text = state.text.bind({"name":"world", "age":10}, draw_count).splitPages(3, wrap)
+    for i,text in enumerate(page_text.getPage(page_no).splitlines()):
         pyxel.text(state.area.x, state.area.y+i*FONT_SIZE, text, color, font)
 
 def msg_cur_draw(state:UI_STATE):

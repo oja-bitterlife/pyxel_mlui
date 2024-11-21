@@ -28,33 +28,31 @@ class UI_RECT:
 
 # テキスト表示用
 class UI_PAGE_TEXT:
-    _tokens: list[str]  # 行(+wrap)分割したもの
-    _page_line:int  # 1ページの最大行数
+    _pages: list[str]  # ページ分割した文字列(\n改行)
 
-    def __init__(self, text:str, page_line:int, wrap:int=1024):
-        self._tokens = []
+    def __init__(self, text:str, page_line_num:int, wrap:int=1024):
+        # 0だと無限になってしまうので最低1を入れておく
+        wrap = max(1, wrap)
+        page_line_num = max(1, page_line_num)
+
+        # 一旦トークン(行+wrap分割)ごとにわける
+        tokens = []
         for line in text.splitlines():  # 行分割
-            self._tokens += [line[i:i+wrap] for i in range(0, len(line), max(1, wrap))]  # wrap分割
+            tokens += [line[i:i+wrap] for i in range(0, len(line), wrap)]  # wrap分割
 
-        self._page_line = max(1, page_line)  # 必ず1ページ以上であること
+        # 行ごとに分離した文字列
+        self._pages = ["\n".join(tokens[i:i+page_line_num]) for i in range(0, len(tokens), page_line_num)]
 
-    def getPage(self, page:int) -> list[str]:
-        return self._tokens[self._page_line*page:self._page_line*(page+1)]
+    def getPage(self, page:int) -> str:
+        return self._pages[page]
 
-    @property
-    def length(self) -> int:
-        return len("".join(self._tokens))  # 結合してカウント
-
-    @property
-    def line_count(self):
-        return len(self._tokens)
+    # 引数pageが必要なのでpropertyではなく関数で
+    def strlen(self, page:int) -> int:
+        return len(self._pages[page])
 
     @property
-    def page_count(self):
-        return (self.line_count+self._page_line-1)/self._page_line
-
-    def __iter__(self):
-        return iter(self._tokens)
+    def page_num(self):
+        return len(self._pages)
 
 class UI_TEXT(str):
     sep_exp:str=r"\\n"
@@ -64,13 +62,13 @@ class UI_TEXT(str):
         self = super().__new__(cls, re.sub(cls.sep_exp, "\n", text))
         return self
 
-    # limit付きformat。文末に改行が来ないように細工
+    # limit付きformat。文末に改行が来ないように
     def bind(self, params:dict[str,Any]={}, limit:int=65536) -> 'UI_TEXT':
-        return UI_TEXT(self.format(**params)[:limit].strip())
+        return UI_TEXT(self.format(**params)[:limit].rstrip("\n"))
 
     # ページ分割クラスに変換
-    def splitPages(self, page_line:int, wrap=1024) -> UI_PAGE_TEXT:
-        return UI_PAGE_TEXT(self, page_line, wrap)
+    def splitPages(self, page_line_num:int, wrap=1024) -> UI_PAGE_TEXT:
+        return UI_PAGE_TEXT(self, page_line_num, wrap)
 
     @property
     def length(self) -> int:
