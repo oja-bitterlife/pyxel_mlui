@@ -6,9 +6,13 @@ import pyxel
 font = pyxel.Font("assets/font/b12.bdf")
 FONT_SIZE = 12
 
+def my_ui_update(state: UI_STATE, event:UI_EVENT):
+    if "action" in event.trg:
+        state.open(ui_template, "menu_command")
+
+
 def menu_win_update(state: UI_STATE, event:UI_EVENT):
-    item_w = state.attrInt("item_w")
-    item_h = state.attrInt("item_h")
+    item_w, item_h = state.attrInt("item_w"), state.attrInt("item_h")
 
     # メニューアイテム取得
     grid = state.arrayByTag("menu_row", "menu_item")
@@ -19,10 +23,8 @@ def menu_win_update(state: UI_STATE, event:UI_EVENT):
             rows.setAttr(["x", "y"], (x*item_w, y*item_h))
 
     # カーソル
-    cursor = UI_CURSOR(state.findByTag("menu_cur"), len(grid[0]), len(grid))
-    cursor.moveByEvent(event.trg, "left", "right", "up", "down")
-    # カーソル表示位置設定
-    cursor.state.setAttr(["x", "y"], (cursor.cur_x*item_w-6, cursor.cur_y*item_h+2))
+    cursor = UI_CURSOR(state.findByTag("menu_cur"), len(grid[0]), len(grid)).moveByEvent(event.trg, "left", "right", "up", "down")
+    cursor.state.setAttr(["x", "y"], (cursor.cur_x*item_w-6, cursor.cur_y*item_h+2))  # 表示位置設定
 
     # 選択アイテムの表示
     if "action" in event.trg:
@@ -42,13 +44,13 @@ def msg_win_update(state: UI_STATE, event:UI_EVENT):
 
     if "action" in event.trg:
         if msg_text.attrBool("finish"):
-            state.close("win_message")  # 閉じる
+            state.close("menu_command")  # メニューごと閉じる
         else:
             msg_text.setAttr("draw_count", 1024)  # 一気に表示する
     
-    # 閉じる
+    # メニューごと閉じる
     if "cancel" in event.trg:
-        state.close("win_message")
+        state.close("menu_command")
 
 
 def msg_text_update(state: UI_STATE, event:UI_EVENT):
@@ -61,6 +63,7 @@ def msg_text_update(state: UI_STATE, event:UI_EVENT):
 
 # update関数テーブル
 updateFuncs= {
+    'my_ui': my_ui_update,
     "menu_win": menu_win_update,
     "msg_win": msg_win_update,
     "msg_text": msg_text_update,
@@ -91,8 +94,7 @@ def msg_cur_draw(state:UI_STATE):
     color = state.attrInt("color", 7)
 
     # カーソル表示
-    x = state.area.x
-    y = state.area.y
+    x, y = state.area.x, state.area.y
     pyxel.tri(x, y, x+tri_size, y, x+tri_size//2, y+tri_size//2, color)
 
 def menu_win_draw(state:UI_STATE):

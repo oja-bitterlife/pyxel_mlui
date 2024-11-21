@@ -275,7 +275,7 @@ class UI_STATE:
 
     def close(self, id:str):
         try:
-            state = self.findByID(id)
+            state = self.xmlui.root.findByID(id)
             state.remove()
         finally:
             return None
@@ -404,6 +404,7 @@ class XMLUI:
 
         # rootを取り出しておく
         self.root = UI_STATE(self, xmlui_root)
+        self.root.setAttr("use_event", True)  # rootはデフォルトではイベントをとるように
 
     # Elmentを複製する
     def duplicate(self, src:Element|UI_STATE) -> UI_STATE:
