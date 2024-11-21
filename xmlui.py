@@ -32,20 +32,14 @@ class UI_PAGE_TEXT:
     _page_line:int  # 1ページの最大行数
 
     def __init__(self, text:str, page_line:int, wrap:int=1024):
-        self._tokens = self._splitTokens(text, wrap)  # 行分割
+        self._tokens = []
+        for line in text.splitlines():  # 行分割
+            self._tokens += [line[i:i+wrap] for i in range(0, len(line), max(1, wrap))]  # wrap分割
+
         self._page_line = max(1, page_line)  # 必ず1ページ以上であること
 
-    def _splitTokens(self, text:str, wrap:int=1024):
-        tokens:list[str] = []
-        for line in text.splitlines():  # 行分割
-            tokens += [line[i:i+wrap] for i in range(0, len(line), wrap)]  # wrap分割
-        return tokens
-
-    def getPage(self, page:int) -> 'UI_PAGE_TEXT':
-        # tokensを置き換えたUI_TEXTを作って渡す
-        ui_text =  UI_PAGE_TEXT("", 1024)
-        ui_text._tokens = self._tokens[self._page_line*page:self._page_line*(page+1)]
-        return ui_text
+    def getPage(self, page:int) -> list[str]:
+        return self._tokens[self._page_line*page:self._page_line*(page+1)]
 
     @property
     def length(self) -> int:
@@ -70,9 +64,11 @@ class UI_TEXT(str):
         self = super().__new__(cls, re.sub(cls.sep_exp, "\n", text))
         return self
 
+    # limit付きformat。文末に改行が来ないように細工
     def bind(self, params:dict[str,Any]={}, limit:int=65536) -> 'UI_TEXT':
         return UI_TEXT(self.format(**params)[:limit].strip())
 
+    # ページ分割クラスに変換
     def splitPages(self, page_line:int, wrap=1024) -> UI_PAGE_TEXT:
         return UI_PAGE_TEXT(self, page_line, wrap)
 

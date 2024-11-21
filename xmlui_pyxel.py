@@ -58,10 +58,9 @@ def msg_win_update(state: UI_STATE, event:UI_EVENT):
 def msg_text_update(state: UI_STATE, event:UI_EVENT):
     wrap = state.attrInt("wrap", 1024)
     draw_count = state.attrInt("draw_count")
-    page_text = state.text.bind({"name":"world", "age":10}, draw_count).splitPages(3)
 
     state.setAttr("draw_count", draw_count+1)
-    state.setAttr("finish", draw_count >= page_text.getPage(0).length)
+    state.setAttr("finish", draw_count >= state.text.bind({"name":"world", "age":10}).length)
 
 
 # update関数テーブル
