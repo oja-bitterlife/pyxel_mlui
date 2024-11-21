@@ -6,7 +6,7 @@ import pyxel
 font = pyxel.Font("assets/font/b12.bdf")
 FONT_SIZE = 12
 
-def menu_win_update(state: UI_STATE, active_event:UI_EVENT):
+def menu_win_update(state: UI_STATE, event:UI_EVENT):
     item_w = state.attrInt("item_w")
     item_h = state.attrInt("item_h")
 
@@ -20,38 +20,38 @@ def menu_win_update(state: UI_STATE, active_event:UI_EVENT):
 
     # カーソル
     cursor = UI_CURSOR(state.findByTag("menu_cur"), len(grid[0]), len(grid))
-    cursor.moveByEvent(active_event.trg, "left", "right", "up", "down")
+    cursor.moveByEvent(event.trg, "left", "right", "up", "down")
     # カーソル表示位置設定
     cursor.state.setAttr(["x", "y"], (cursor.cur_x*item_w-6, cursor.cur_y*item_h+2))
 
     # 選択アイテムの表示
-    if "action" in active_event.trg:
+    if "action" in event.trg:
         # メッセージウインドウ表示
         state.open(ui_template, "win_message")
 
     # 閉じる
-    if "cancel" in active_event.trg:
+    if "cancel" in event.trg:
         state.close(state.id)
 
 
-def msg_win_update(state: UI_STATE, active_event:UI_EVENT):
+def msg_win_update(state: UI_STATE, event:UI_EVENT):
     msg_cur = state.findByTag("msg_cur")
     msg_text = state.findByTag("msg_text")
 
     msg_cur.setAttr("visible", msg_text.attrBool("finish"))
 
-    if "action" in active_event.trg:
+    if "action" in event.trg:
         if msg_text.attrBool("finish"):
             state.close("win_message")  # 閉じる
         else:
             msg_text.setAttr("draw_count", 1024)  # 一気に表示する
     
     # 閉じる
-    if "cancel" in active_event.trg:
+    if "cancel" in event.trg:
         state.close("win_message")
 
 
-def msg_text_update(state: UI_STATE, active_event:UI_EVENT):
+def msg_text_update(state: UI_STATE, event:UI_EVENT):
     draw_count = state.attrInt("draw_count")
     ui_text = UI_TEXT(state.text, {"name":"world", "age":10})
 
@@ -67,13 +67,13 @@ updateFuncs= {
 }
 
 
-def msg_win_draw(state:UI_STATE, ):
+def msg_win_draw(state:UI_STATE):
     bg_color = state.attrInt("bg_color", 12)
-    fg_color = state.attrInt("fg_color", 7)
+    frame_color = state.attrInt("frame_color", 7)
     pyxel.rect(state.area.x, state.area.y, state.area.w, state.area.h, bg_color)
-    pyxel.rectb(state.area.x, state.area.y, state.area.w, state.area.h, fg_color)
-    pyxel.rectb(state.area.x+1, state.area.y+1, state.area.w-2, state.area.h-2, fg_color)
-    pyxel.rectb(state.area.x+3, state.area.y+3, state.area.w-6, state.area.h-6, fg_color)
+    pyxel.rectb(state.area.x, state.area.y, state.area.w, state.area.h, frame_color)
+    pyxel.rectb(state.area.x+1, state.area.y+1, state.area.w-2, state.area.h-2, frame_color)
+    pyxel.rectb(state.area.x+3, state.area.y+3, state.area.w-6, state.area.h-6, frame_color)
 
 def msg_text_draw(state:UI_STATE):
     wrap = state.attrInt("wrap", 1024)
@@ -97,18 +97,18 @@ def msg_cur_draw(state:UI_STATE):
 
 def menu_win_draw(state:UI_STATE):
     bg_color = state.attrInt("bg_color", 12)
-    fg_color = state.attrInt("fg_color", 7)
+    frame_color = state.attrInt("frame_color", 7)
     title  = state.attrStr("title", "")
 
     pyxel.rect(state.area.x, state.area.y, state.area.w, state.area.h, bg_color)
-    pyxel.rectb(state.area.x, state.area.y, state.area.w, state.area.h, fg_color)
-    pyxel.rectb(state.area.x+1, state.area.y+1, state.area.w-2, state.area.h-2, fg_color)
+    pyxel.rectb(state.area.x, state.area.y, state.area.w, state.area.h, frame_color)
+    pyxel.rectb(state.area.x+1, state.area.y+1, state.area.w-2, state.area.h-2, frame_color)
 
     if title:
         str_w = FONT_SIZE*len(title)
         text_x = state.area.x+(state.area.w-str_w)/2
         pyxel.rect(text_x,state.area.y, str_w, FONT_SIZE, bg_color)
-        pyxel.text(text_x, state.area.y-2, title, fg_color, font)
+        pyxel.text(text_x, state.area.y-2, title, frame_color, font)
 
 def menu_item_draw(state:UI_STATE):
     color = state.attrInt("color", 7)

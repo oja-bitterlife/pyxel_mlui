@@ -47,13 +47,16 @@ class UI_TEXT:
 
 
 class UI_EVENT:
+    active:bool  # 現在アクティブかどうか
+
     # 入力状態の保存
     _receive:set[str]  # 次の状態受付
     _input:set[str]
     _trg:set[str]
     _release:set[str]
 
-    def __init__(self):
+    def __init__(self, init_active=False):
+        self.active = init_active
         self._input = set([])
         self._trg = set([])
         self._release = set([])
@@ -368,7 +371,7 @@ class XMLUI:
     # 初期化。<xmlui>を持つXMLを突っ込む
     def __init__(self, dom:xml.etree.ElementTree.Element, root_tag:str|None=None):
         # 入力
-        self.event = UI_EVENT()
+        self.event = UI_EVENT(True)  # 唯一のactiveとする
 
         # 更新処理
         self._update_funcs = {}
@@ -459,10 +462,13 @@ class XMLUI:
             self.drawElement(state.tag, state)
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
-    def updateElement(self, name:str, state:UI_STATE, active_event:UI_EVENT):
+    def updateElement(self, name:str, state:UI_STATE, event:UI_EVENT):
+        # デバッグ用
+        state.setAttr("frame_color", 10 if event.active else 7)
+
         # 登録済みの関数だけ実行
         if name in self._update_funcs:
-            self._update_funcs[name](state, active_event)
+            self._update_funcs[name](state, event)
 
     def drawElement(self, name:str, state:UI_STATE):
         # 登録済みの関数だけ実行
