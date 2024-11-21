@@ -82,14 +82,14 @@ class UI_PAGE:
         self._text._state.setAttr(self.draw_count_attr, draw_count)
         return self
 
-    def getText(self):
+    def getPageText(self):
         return self._text.getPageText(self.page_no, self.line_num).limit(self.draw_count)
 
     def nextPage(self) -> 'UI_PAGE':
         self.setPageNo(self.page_no+1)
         self.setDrawCount(0)
         return self
-    
+
     def nextCount(self) -> 'UI_PAGE':
         self.setDrawCount(self.draw_count+1)
         return self
@@ -105,6 +105,9 @@ class UI_PAGE:
     @property
     def page_max(self) -> int:
         return (len(self._text.splitlines())+self.line_num)//self.line_num
+
+    def is_page_end(self):
+        return self.draw_count >= self._text.length
 
     def is_finish(self):
         return self.page_no >= self.page_max
