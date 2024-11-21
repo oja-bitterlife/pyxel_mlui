@@ -48,23 +48,24 @@ class UI_PAGE_TEXT:
 
     # 引数pageが必要なのでpropertyではなく関数で
     def strlen(self, page:int) -> int:
-        return len(self._pages[page])
+        return len(self._pages[page].replace("\n", ""))  # 改行を外してカウント
 
     @property
     def page_num(self):
         return len(self._pages)
 
 class UI_TEXT(str):
-    sep_exp:str=r"\\n"
+    # クラス定数
+    SEPARATE_REGEXP:str = r"\\n"
 
     # 改行コードに変換しておく
     def __new__(cls, text:str):
-        self = super().__new__(cls, re.sub(cls.sep_exp, "\n", text))
+        self = super().__new__(cls, re.sub(cls.SEPARATE_REGEXP, "\n", text))
         return self
 
-    # limit付きformat。文末に改行が来ないように
-    def bind(self, params:dict[str,Any]={}, limit:int=65536) -> 'UI_TEXT':
-        return UI_TEXT(self.format(**params)[:limit].rstrip("\n"))
+    # ただのformat。関数連結のために用意
+    def bind(self, params:dict[str,Any]={}) -> 'UI_TEXT':
+        return UI_TEXT(self.format(**params).rstrip("\n"))
 
     # ページ分割クラスに変換
     def splitPages(self, page_line_num:int, wrap=1024) -> UI_PAGE_TEXT:
