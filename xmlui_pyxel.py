@@ -1,4 +1,4 @@
-from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_CURSOR
+from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_CURSOR,UI_PAGE
 
 ui_template = XMLUI.createFromFile("assets/ui/test.xml")
 
@@ -49,12 +49,13 @@ def msg_win_update(state: UI_STATE, event:UI_EVENT):
             state.close("menu_command")  # メニューごと閉じる
         else:
             msg_text.setAttr("draw_count", 65536)  # 一気に表示する
-    
+
+    pages =  UI_PAGE(msg_text.text, "page_no", "draw_count", 3)
+    pages.nextCount()
 
     # 次のページへ
     if "action" in event.trg:
-        msg_text.text.bind({"name":"world", "age":10}).getPages("page_no", "draw_count", 3).nextPage()
-        msg_text.attrInt("draw_count", 0)
+        pages.nextPage()
 
     # メニューごと閉じる
     if "cancel" in event.trg:
@@ -63,12 +64,10 @@ def msg_win_update(state: UI_STATE, event:UI_EVENT):
 
 def msg_text_update(state: UI_STATE, event:UI_EVENT):
     wrap = state.attrInt("wrap", 1024)
-    draw_count = state.attrInt("draw_count")
 
-    state.setAttr("draw_count", draw_count+1)
-
-    pages  = state.text.bind({"name":"world", "age":10}).getPages("page_no", "draw_count", 3)
-    state.setAttr("page_end", draw_count >= pages.getText().length)
+    bind_text = state.text.bind({"name":"world", "age":10}, wrap)
+    pages  = UI_PAGE(bind_text, "page_no", "draw_count", 3)
+    state.setAttr("page_end", pages.draw_count >= pages.getText().length)
     state.setAttr("finish", pages.is_finish)
 
 
@@ -94,7 +93,8 @@ def msg_text_draw(state:UI_STATE):
     color = state.attrInt("color", 7)
 
     # テキスト表示
-    pages = state.text.bind({"name":"world", "age":10}, wrap).getPages("page_no", "draw_count", 3)
+    bind_text = state.text.bind({"name":"world", "age":10}, wrap)
+    pages = UI_PAGE(bind_text, "page_no", "draw_count", 3)
     for i,text in enumerate(pages.getText().splitlines()):
         pyxel.text(state.area.x, state.area.y+i*FONT_SIZE, text, color, font)
 

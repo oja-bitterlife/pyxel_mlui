@@ -57,13 +57,9 @@ class UI_TEXT(str):
     def getPageText(self, page:int, page_line_num:int) -> 'UI_TEXT':
         return UI_TEXT(self._state, "\n".join(self.splitlines()[page*page_line_num:(page+1)*page_line_num]))
 
-    def getPages(self, page_no_attr:str, draw_count_attr:str, page_line_num:int) -> 'UI_PAGE':
-        return UI_PAGE(self, page_no_attr, draw_count_attr, page_line_num)
-
     @property
     def length(self) -> int:
         return len(self.replace("\n", ""))  # 改行を外してカウント
-
 
 # テキストのページ管理
 class UI_PAGE:
@@ -78,18 +74,33 @@ class UI_PAGE:
         self.draw_count_attr = draw_count_attr
         self.line_num = line_num
 
-    def getText(self):
-        draw_count = self._text._state.attrInt(self.draw_count_attr)
-        page_no = self._text._state.attrInt(self.page_no_attr)
-        return self._text.limit(draw_count).getPageText(page_no, self.line_num)
+    def setPageNo(self, page_no:int) -> 'UI_PAGE':
+        self._text._state.setAttr(self.page_no_attr, page_no)
+        return self
 
-    def nextPage(self):
-        self._text._state.setAttr(self.page_no_attr, self.page_no+1)
-        self._text._state.setAttr(self.draw_count_attr, 0)
+    def setDrawCount(self, draw_count:int) -> 'UI_PAGE':
+        self._text._state.setAttr(self.draw_count_attr, draw_count)
+        return self
+
+    def getText(self):
+        return self._text.getPageText(self.page_no, self.line_num).limit(self.draw_count)
+
+    def nextPage(self) -> 'UI_PAGE':
+        self.setPageNo(self.page_no+1)
+        self.setDrawCount(0)
+        return self
+    
+    def nextCount(self) -> 'UI_PAGE':
+        self.setDrawCount(self.draw_count+1)
+        return self
 
     @property
     def page_no(self) -> int:
         return self._text._state.attrInt(self.page_no_attr)
+
+    @property
+    def draw_count(self) -> int:
+        return self._text._state.attrInt(self.draw_count_attr)
 
     @property
     def page_max(self) -> int:
@@ -97,9 +108,6 @@ class UI_PAGE:
 
     def is_finish(self):
         return self.page_no >= self.page_max
-
-    def __len__(self):
-        return self._text.length
 
 
 class UI_EVENT:
