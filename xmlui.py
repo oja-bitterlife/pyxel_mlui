@@ -31,7 +31,7 @@ class UI_PAGE_TEXT:
     _tokens: list[str]  # 行(+wrap)分割したもの
     _page_line:int  # 1ページの最大行数
 
-    def __init__(self, text:str, wrap:int=1024, page_line:int=256):
+    def __init__(self, text:str, page_line:int, wrap:int=1024):
         self._tokens = self._splitTokens(text, wrap)  # 行分割
         self._page_line = max(1, page_line)  # 必ず1ページ以上であること
 
@@ -43,7 +43,7 @@ class UI_PAGE_TEXT:
 
     def getPage(self, page:int) -> 'UI_PAGE_TEXT':
         # tokensを置き換えたUI_TEXTを作って渡す
-        ui_text =  UI_PAGE_TEXT("")
+        ui_text =  UI_PAGE_TEXT("", 1024)
         ui_text._tokens = self._tokens[self._page_line*page:self._page_line*(page+1)]
         return ui_text
 
@@ -73,8 +73,8 @@ class UI_TEXT(str):
     def bind(self, params:dict[str,Any]={}, limit:int=65536) -> 'UI_TEXT':
         return UI_TEXT(self.format(**params)[:limit].strip())
 
-    def splitPages(self, wrap=1024, page_line=256) -> UI_PAGE_TEXT:
-        return UI_PAGE_TEXT(self, wrap, page_line)
+    def splitPages(self, page_line:int, wrap=1024) -> UI_PAGE_TEXT:
+        return UI_PAGE_TEXT(self, page_line, wrap)
 
     @property
     def length(self) -> int:

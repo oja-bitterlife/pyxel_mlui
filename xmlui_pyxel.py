@@ -58,7 +58,7 @@ def msg_win_update(state: UI_STATE, event:UI_EVENT):
 def msg_text_update(state: UI_STATE, event:UI_EVENT):
     wrap = state.attrInt("wrap", 1024)
     draw_count = state.attrInt("draw_count")
-    page_text = state.text.bind({"name":"world", "age":10}, draw_count).splitPages(wrap, 3)
+    page_text = state.text.bind({"name":"world", "age":10}, draw_count).splitPages(3)
 
     state.setAttr("draw_count", draw_count+1)
     state.setAttr("finish", draw_count >= page_text.getPage(0).length)
@@ -87,7 +87,7 @@ def msg_text_draw(state:UI_STATE):
     draw_count = state.attrInt("draw_count", 0)
 
     # テキスト表示
-    page_text = state.text.bind({"name":"world", "age":10}, draw_count).splitPages(wrap, 3)
+    page_text = state.text.bind({"name":"world", "age":10}, draw_count).splitPages(3)
     for i,text in enumerate(page_text.getPage(0)):
         pyxel.text(state.area.x, state.area.y+i*FONT_SIZE, text, color, font)
 
