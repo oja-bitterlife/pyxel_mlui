@@ -28,22 +28,36 @@ class UI_RECT:
 
 # テキスト表示用
 class UI_TEXT:
-    src: str  # パラメータ置換済み文字列
+    text: str  # パラメータ置換済み最終文字列
 
-    # 改行とwrapで分割する
-    def __init__(self, text:str, params:dict[str,Any]={}, sep_exp:str=r"\n|\\n"):
-        self.src = re.sub(sep_exp, "\n", text.format(**params))  # 改行コードで統一
+    def __init__(self, format_text:str, params:dict[str, Any]={}):
+        self.src = format_text.format(**params)
 
     # 最大文字数に減らして取得
-    def getTokens(self, limit:int=65535, wrap:int=1024) -> list[str]:
+    def splitTokens(self, limit:int=65535, wrap:int=1024) -> list[str]:
         tokens:list[str] = []
         for line in self.src[:int(limit)].splitlines():  # 行分割
             tokens += [line[i:i+wrap] for i in range(0, len(line), wrap)]  # wrap分割
         return tokens
 
+    def getPage(self, page_line:int, page:int) -> list[str]:
+        return self.splitTokens()[page_line*page:page_line*(page+1)]
+
     @property
     def length(self) -> int:
         return len(self.src.replace("\n", ""))  # 改行を外してカウント
+
+class UI_PREPARED_TEXT(str):
+    # 改行とwrapで分割する
+    def __new__(cls, text:str, sep_exp:str=r"\n|\\n"):
+        self = super().__new__(cls, re.sub(sep_exp, "\n", text))  # 改行コードで統一しておく
+
+    def bind(self, params:dict[str,Any]={}) -> UI_TEXT:
+        return UI_TEXT(self, params)
+
+    @property
+    def length(self) -> int:
+        return len(self.replace("\n", ""))  # 改行を外してカウント
 
 
 class UI_EVENT:
@@ -188,8 +202,8 @@ class UI_STATE:
         return self._element.tag
 
     @property
-    def text(self) -> str:
-        return self._element.text.strip() if self._element.text else ""
+    def text(self) -> UI_PREPARED_TEXT:
+        return UI_PREPARED_TEXT(self._element.text.strip() if self._element.text else "")
 
     @property
     def area(self) -> UI_RECT:
