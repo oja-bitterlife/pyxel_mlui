@@ -26,76 +26,52 @@ class UI_RECT:
         return f"RECT({self.x}, {self.y}, {self.w}, {self.h})"
 
 
-# テキスト表示用
-class UI_PAGE_TEXT:
-    _pages: list[str]  # ページ分割した文字列(\n改行)
-
-    def __init__(self, text:str, page_line_num:int, wrap:int=1024):
-        # 0だと無限になってしまうので最低1を入れておく
-        wrap = max(1, wrap)
-        page_line_num = max(1, page_line_num)
-
-        # 一旦トークン(行+wrap分割)ごとにわける
-        tokens = []
-        for line in text.splitlines():  # 行分割
-            tokens += [line[i:i+wrap] for i in range(0, len(line), wrap)]  # wrap分割
-
-        # 行ごとに分離した文字列
-        self._pages = ["\n".join(tokens[i:i+page_line_num]) for i in range(0, len(tokens), page_line_num)]
-
-    def getPage(self, page:int) -> str:
-        return self._pages[page]
-
-    # 引数pageが必要なのでpropertyではなく関数で
-    def strlen(self, page:int) -> int:
-        return len(self._pages[page].replace("\n", ""))  # 改行を外してカウント
-
-    def __len__(self):
-        return len(self._pages)
-
 class UI_TEXT(str):
     # クラス定数
     SEPARATE_REGEXP:str = r"\\n"
-    _str_count: list[int]
 
     # 改行コードに変換しておく
     def __new__(cls, text:str):
         self = super().__new__(cls, re.sub(cls.SEPARATE_REGEXP, "\n", text).rstrip("\n"))
-
-        self._str_count = []
-        _cr_count = []
-
-        str_gen = iter([i for i,c in enumerate(self.replace("\n", ""))])
-        for i,c in enumerate(self):
-            if c == "\n":
-                _cr_count.append(i)
-            else:
-                self._str_count.append(next(str_gen))
-
-        for cr_index in reversed(_cr_count):
-            self._str_count.insert(cr_index, -1)
-        print(self._str_count)
         return self
 
     # ただのformat。関数連結のために用意
-    def bind(self, params:dict[str,Any]={}) -> 'UI_TEXT':
-        return UI_TEXT(self.format(**params))
-
-    def wrap(self, wrap:int=1024) -> 'UI_TEXT':
+    def bind(self, params:dict[str,Any]={}, wrap:int=1024) -> 'UI_TEXT':
         wrap = max(1, wrap)  # 0だと無限になってしまうので最低1を入れておく
-        return UI_TEXT("\n".join([self[i:i+wrap] for i in range(0, len(self), wrap)]))
+        return UI_TEXT("\n".join([self.format(**params)[i:i+wrap].rstrip("\n") for i in range(0, len(self), wrap)]))
 
-    def limit(self, limit:int=65536) -> 'UI_TEXT':
-        cr_count = len(list(filter(lambda val: val < limit, self._cr_count)))
-        return UI_TEXT(self[:limit+cr_count])  # crを含む分だけ伸ばして返す
+    def limit(self, limit:int) -> 'UI_TEXT':
+        for i,c in enumerate(self):
+            if limit <= 0:
+                return UI_TEXT(self[:i].rstrip("\n"))  # 改行終端は削る
+            if c != "\n":  # 改行は無視する
+                limit -= 1
+            return UI_TEXT(self)
 
-    # ページ分割クラスに変換
-    def splitPages(self, page_line_num:int) -> UI_PAGE_TEXT:
-        return UI_PAGE_TEXT(self, page_line_num)
+    def getPage(self, page:int, page_line_num:int) -> 'UI_TEXT':
+        return UI_TEXT("\n".join(self.splitlines()[page*page_line_num:(page+1)*page_line_num]))
 
     @property
     def length(self) -> int:
         return len(self.replace("\n", ""))  # 改行を外してカウント
+
+
+# テキストのページ管理
+class UI_PAGE:
+    text: UI_TEXT
+    page: int
+    page_line_num: int
+
+    def __init__(self, text:'UI_TEXT', page_line_num:int):
+        self.text = text
+        self.page = 0
+        self.page_line_num = page_line_num
+
+    def text(self):
+        self.text.getPage(self.page, self.page_line_num)
+
+    def __len__(self):
+        return len(self._pages)
 
 
 class UI_EVENT:

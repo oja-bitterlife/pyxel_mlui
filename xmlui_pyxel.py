@@ -1,4 +1,4 @@
-from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_PAGE_TEXT,UI_CURSOR
+from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_CURSOR
 
 ui_template = XMLUI.createFromFile("assets/ui/test.xml")
 
@@ -68,8 +68,9 @@ def msg_text_update(state: UI_STATE, event:UI_EVENT):
 
     state.setAttr("draw_count", draw_count+1)
 
-    pages  = state.text.bind({"name":"world", "age":10}).splitPages(3)
-    state.setAttr("page_end", draw_count >= pages.strlen(page_no))
+    pages  = state.text.bind({"name":"world", "age":10}).limit(draw_count).getPage(0, 3)
+    print(pages)
+    state.setAttr("page_end", draw_count >= len(pages))
 
     if page_no >= len(pages):
         state.setAttr("finish", True)
@@ -99,8 +100,8 @@ def msg_text_draw(state:UI_STATE):
     page_no = state.attrInt("page_no")
 
     # テキスト表示
-    pages = state.text.bind({"name":"world", "age":10}).splitPages(3)
-    for i,text in enumerate(pages.getPage(page_no)[:draw_count].splitlines()):
+    pages = state.text.bind({"name":"world", "age":10}).limit(draw_count).getPage(0, 3)
+    for i,text in enumerate(pages):
         pyxel.text(state.area.x, state.area.y+i*FONT_SIZE, text, color, font)
 
 def msg_cur_draw(state:UI_STATE):
