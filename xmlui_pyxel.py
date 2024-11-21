@@ -68,7 +68,7 @@ def msg_text_update(state: UI_STATE, event:UI_EVENT):
 
     state.setAttr("draw_count", draw_count+1)
 
-    pages  = state.text.bind({"name":"world", "age":10}).splitPages(3, wrap)
+    pages  = state.text.bind({"name":"world", "age":10}).splitPages(3)
     state.setAttr("page_end", draw_count >= pages.strlen(page_no))
 
     if page_no >= len(pages):
@@ -99,7 +99,7 @@ def msg_text_draw(state:UI_STATE):
     page_no = state.attrInt("page_no")
 
     # テキスト表示
-    pages = state.text.bind({"name":"world", "age":10}).splitPages(3, wrap)
+    pages = state.text.bind({"name":"world", "age":10}).splitPages(3)
     for i,text in enumerate(pages.getPage(page_no)[:draw_count].splitlines()):
         pyxel.text(state.area.x, state.area.y+i*FONT_SIZE, text, color, font)
 
