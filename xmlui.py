@@ -49,7 +49,7 @@ class UI_TEXT:
 
 class UI_PREPARED_TEXT(str):
     # 改行コードに変換しておく
-    def __new__(cls, text:str, sep_exp:str=r"\\n|<\s*br\s*/?>"):
+    def __new__(cls, text:str, sep_exp:str=r"\\n"):
         self = super().__new__(cls, re.sub(sep_exp, "\n", text))
         return self
 
