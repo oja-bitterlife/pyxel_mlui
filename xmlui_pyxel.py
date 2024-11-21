@@ -50,6 +50,12 @@ def msg_win_update(state: UI_STATE, event:UI_EVENT):
         else:
             msg_text.setAttr("draw_count", 65536)  # 一気に表示する
     
+
+    # 次のページへ
+    if "action" in event.trg:
+        msg_text.setAttr("page_no", msg_text.attrInt("page_no")+1)
+        msg_text.attrInt("draw_count", 0)
+
     # メニューごと閉じる
     if "cancel" in event.trg:
         state.close("menu_command")
@@ -59,11 +65,14 @@ def msg_text_update(state: UI_STATE, event:UI_EVENT):
     wrap = state.attrInt("wrap", 1024)
     draw_count = state.attrInt("draw_count")
     page_no = state.attrInt("page_no")
-    pages  = state.text.bind({"name":"world", "age":10}).splitPages(3, wrap)
 
     state.setAttr("draw_count", draw_count+1)
-    state.setAttr("finish", page_no >= pages.page_num)
+
+    pages  = state.text.bind({"name":"world", "age":10}).splitPages(3, wrap)
     state.setAttr("page_end", draw_count >= pages.strlen(page_no))
+
+    if page_no >= len(pages):
+        state.setAttr("finish", True)
 
 
 # update関数テーブル

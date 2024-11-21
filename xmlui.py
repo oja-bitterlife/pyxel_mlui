@@ -50,8 +50,7 @@ class UI_PAGE_TEXT:
     def strlen(self, page:int) -> int:
         return len(self._pages[page].replace("\n", ""))  # 改行を外してカウント
 
-    @property
-    def page_num(self):
+    def __len__(self):
         return len(self._pages)
 
 class UI_TEXT(str):
