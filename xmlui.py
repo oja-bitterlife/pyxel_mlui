@@ -27,34 +27,54 @@ class UI_RECT:
 
 
 # テキスト表示用
-class UI_TEXT:
-    text: str  # パラメータ置換済み最終文字列
+class UI_PAGE_TEXT:
+    _tokens: list[str]  # 行(+wrap)分割したもの
+    _page_line:int  # 1ページの最大行数
 
-    def __init__(self, format_text:str, params:dict[str, Any]={}):
-        self.src = format_text.format(**params)
+    def __init__(self, text:str, wrap:int=1024, page_line:int=256):
+        self._tokens = self._splitTokens(text, wrap)  # 行分割
+        self._page_line = max(1, page_line)  # 必ず1ページ以上であること
 
-    # 最大文字数に減らして取得
-    def splitTokens(self, limit:int=65535, wrap:int=1024) -> list[str]:
+    def _splitTokens(self, text:str, wrap:int=1024):
         tokens:list[str] = []
-        for line in self.src[:int(limit)].splitlines():  # 行分割
+        for line in text.splitlines():  # 行分割
             tokens += [line[i:i+wrap] for i in range(0, len(line), wrap)]  # wrap分割
         return tokens
 
-    def getPage(self, page_line:int, page:int) -> list[str]:
-        return self.splitTokens()[page_line*page:page_line*(page+1)]
+    def getPage(self, page:int) -> 'UI_PAGE_TEXT':
+        # tokensを置き換えたUI_TEXTを作って渡す
+        ui_text =  UI_PAGE_TEXT("")
+        ui_text._tokens = self._tokens[self._page_line*page:self._page_line*(page+1)]
+        return ui_text
 
     @property
     def length(self) -> int:
-        return len(self.src.replace("\n", ""))  # 改行を外してカウント
+        return len("".join(self._tokens))  # 結合してカウント
 
-class UI_PREPARED_TEXT(str):
+    @property
+    def line_count(self):
+        return len(self._tokens)
+
+    @property
+    def page_count(self):
+        return (self.line_count+self._page_line-1)/self._page_line
+
+    def __iter__(self):
+        return iter(self._tokens)
+
+class UI_TEXT(str):
+    sep_exp:str=r"\\n"
+
     # 改行コードに変換しておく
-    def __new__(cls, text:str, sep_exp:str=r"\\n"):
-        self = super().__new__(cls, re.sub(sep_exp, "\n", text))
+    def __new__(cls, text:str):
+        self = super().__new__(cls, re.sub(cls.sep_exp, "\n", text))
         return self
 
-    def bind(self, params:dict[str,Any]={}) -> UI_TEXT:
-        return UI_TEXT(self, params)
+    def bind(self, params:dict[str,Any]={}, limit:int=65536) -> 'UI_TEXT':
+        return UI_TEXT(self.format(**params)[:limit].strip())
+
+    def splitPages(self, wrap=1024, page_line=256) -> UI_PAGE_TEXT:
+        return UI_PAGE_TEXT(self, wrap, page_line)
 
     @property
     def length(self) -> int:
@@ -203,8 +223,8 @@ class UI_STATE:
         return self._element.tag
 
     @property
-    def text(self) -> UI_PREPARED_TEXT:
-        return UI_PREPARED_TEXT(self._element.text.strip() if self._element.text else "")
+    def text(self) -> UI_TEXT:
+        return UI_TEXT(self._element.text.strip() if self._element.text else "")
 
     @property
     def area(self) -> UI_RECT:
