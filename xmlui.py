@@ -48,9 +48,10 @@ class UI_TEXT:
         return len(self.src.replace("\n", ""))  # 改行を外してカウント
 
 class UI_PREPARED_TEXT(str):
-    # 改行とwrapで分割する
-    def __new__(cls, text:str, sep_exp:str=r"\n|\\n"):
-        self = super().__new__(cls, re.sub(sep_exp, "\n", text))  # 改行コードで統一しておく
+    # 改行コードに変換しておく
+    def __new__(cls, text:str, sep_exp:str=r"\\n|<\s*br\s*/?>"):
+        self = super().__new__(cls, re.sub(sep_exp, "\n", text))
+        return self
 
     def bind(self, params:dict[str,Any]={}) -> UI_TEXT:
         return UI_TEXT(self, params)
