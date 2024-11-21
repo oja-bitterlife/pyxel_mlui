@@ -45,19 +45,20 @@ class UI_TEXT(str):
 
     # 改行を外して長さを制限
     def limit(self, limit:int) -> 'UI_TEXT':
+        start_limit = limit
         for i,c in enumerate(self):
             if limit <= 0:
                 return UI_TEXT(self._state, self[:i].rstrip("\n"))  # 改行終端は削る
             if c != "\n":  # 改行は無視する
                 limit -= 1
-            return UI_TEXT(self._state, self)
+        return UI_TEXT(self._state, self)
 
     # 指定ページ部分取得
     def getPageText(self, page:int, page_line_num:int) -> 'UI_TEXT':
         return UI_TEXT(self._state, "\n".join(self.splitlines()[page*page_line_num:(page+1)*page_line_num]))
 
-    def getPages(self, page_attr:str, page_line_num:int) -> 'UI_PAGE':
-        return UI_PAGE(self, page_attr, page_line_num)
+    def getPages(self, page_no_attr:str, draw_count_attr:str, page_line_num:int) -> 'UI_PAGE':
+        return UI_PAGE(self, page_no_attr, draw_count_attr, page_line_num)
 
     @property
     def length(self) -> int:
@@ -67,20 +68,35 @@ class UI_TEXT(str):
 # テキストのページ管理
 class UI_PAGE:
     _text: UI_TEXT
-    page_attr: str
+    page_no_attr: str
+    draw_count_attr: str
     line_num: str
 
-    def __init__(self, text:'UI_TEXT', page_attr:str, line_num:int):
+    def __init__(self, text:'UI_TEXT', page_no_attr:str, draw_count_attr:str, line_num:int):
         self._text = text
-        self.page_attr = page_attr
+        self.page_no_attr = page_no_attr
+        self.draw_count_attr = draw_count_attr
         self.line_num = line_num
 
     def getText(self):
-        return self._text.getPageText(self._text._state.attrInt(self.page_attr), self.line_num)
+        draw_count = self._text._state.attrInt(self.draw_count_attr)
+        page_no = self._text._state.attrInt(self.page_no_attr)
+        return self._text.limit(draw_count).getPageText(page_no, self.line_num)
+
+    def nextPage(self):
+        self._text._state.setAttr(self.page_no_attr, self.page_no+1)
+        self._text._state.setAttr(self.draw_count_attr, 0)
 
     @property
     def page_no(self) -> int:
-        return self._text._state.attrInt(self.page_attr)
+        return self._text._state.attrInt(self.page_no_attr)
+
+    @property
+    def page_max(self) -> int:
+        return (len(self._text.splitlines())+self.line_num)//self.line_num
+
+    def is_finish(self):
+        return self.page_no >= self.page_max
 
     def __len__(self):
         return self._text.length

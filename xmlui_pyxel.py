@@ -53,7 +53,7 @@ def msg_win_update(state: UI_STATE, event:UI_EVENT):
 
     # 次のページへ
     if "action" in event.trg:
-        msg_text.setAttr("page_no", msg_text.attrInt("page_no")+1)
+        msg_text.text.bind({"name":"world", "age":10}).getPages("page_no", "draw_count", 3).nextPage()
         msg_text.attrInt("draw_count", 0)
 
     # メニューごと閉じる
@@ -67,11 +67,9 @@ def msg_text_update(state: UI_STATE, event:UI_EVENT):
 
     state.setAttr("draw_count", draw_count+1)
 
-    pages  = state.text.bind({"name":"world", "age":10}).limit(draw_count).getPages("page_no", 3)
-    state.setAttr("page_end", draw_count >= len(pages.getText()))
-
-    if pages.page_no >= len(pages):
-        state.setAttr("finish", True)
+    pages  = state.text.bind({"name":"world", "age":10}).getPages("page_no", "draw_count", 3)
+    state.setAttr("page_end", draw_count >= pages.getText().length)
+    state.setAttr("finish", pages.is_finish)
 
 
 # update関数テーブル
@@ -94,13 +92,10 @@ def msg_win_draw(state:UI_STATE):
 def msg_text_draw(state:UI_STATE):
     wrap = state.attrInt("wrap", 1024)
     color = state.attrInt("color", 7)
-    draw_count = state.attrInt("draw_count", 0)
-    page_no = state.attrInt("page_no")
-    page_no = 1
 
     # テキスト表示
-    pages = state.text.bind({"name":"world", "age":10}, wrap=4).limit(draw_count)
-    for i,text in enumerate(pages.splitlines()):
+    pages = state.text.bind({"name":"world", "age":10}, wrap).getPages("page_no", "draw_count", 3)
+    for i,text in enumerate(pages.getText().splitlines()):
         pyxel.text(state.area.x, state.area.y+i*FONT_SIZE, text, color, font)
 
 def msg_cur_draw(state:UI_STATE):
