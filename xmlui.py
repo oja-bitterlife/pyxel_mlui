@@ -42,7 +42,7 @@ class UI_TEXT:
     def __init__(self, state:'UI_STATE', _draw_count_attr:str):
         self._state = state
         self._draw_count_attr = _draw_count_attr
-        self._draw_text = self._state.attrStr(self._state.text.strip(), "")
+        self._draw_text = self._state.text.strip() if self._state.text else ""
 
     def bind(self, params:dict[str, Any]={}, wrap:int=1024) -> 'UI_TEXT':
         draw_text = self._state.attrStr(self._state.text.strip(), "").format(**params)
@@ -103,8 +103,6 @@ class UI_PAGE:
 
     # 状態保存先
     _page_no_attr: str  # ページ番号
-    _page_text_attr: str  # ページ内容
-
 
     def __init__(self, text:UI_TEXT, page_line_num:int, page_no_attr:str):
         self._text = text
@@ -124,7 +122,7 @@ class UI_PAGE:
 
     # page内容に絞る
     @property
-    def load(self) -> 'UI_PAGE':
+    def getPage(self) -> 'UI_PAGE':
         self._text._draw_text = "\n".join(self._text.split()[self.page_no*self._page_line_num:(self.page_no+1)*self._page_line_num])
         return self
 
