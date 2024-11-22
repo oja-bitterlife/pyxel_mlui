@@ -39,18 +39,18 @@ class UI_PAGE_TEXT:
     _page_no_attr: str  # ページ番号
 
     # 最終テキスト
-    _draw_text: str
+    _display_text: str
 
     # 改行コードに変換しておく
     def __init__(self, state:'UI_STATE', draw_count_attr:str):
         self._state = state
         self._draw_count_attr = draw_count_attr
-        self._draw_text = self._state.text.strip()
+        self._display_text = self._state.text.strip()
 
     def bind(self, params:dict[str, Any]={}, wrap:int=4096) -> 'UI_PAGE_TEXT':
         wrap = max(1, wrap)  # 0だと無限になってしまうので最低1を入れておく
         tmp_text = self._state.text.strip().format(**params)
-        self._draw_text = "\n".join([tmp_text[i:i+wrap].strip("\n") for i in range(0, len(tmp_text), wrap)])
+        self._display_text = "\n".join([tmp_text[i:i+wrap].strip("\n") for i in range(0, len(tmp_text), wrap)])
         return self
 
     # draw_countの操作
@@ -65,7 +65,7 @@ class UI_PAGE_TEXT:
         return self.setDrawCount(0)
 
     def finish(self) -> 'UI_PAGE_TEXT':
-        return self.setDrawCount(len(self._draw_text))
+        return self.setDrawCount(len(self._display_text))
 
     # draw_countまでの文字列を改行分割
     @classmethod
@@ -80,7 +80,11 @@ class UI_PAGE_TEXT:
         return tmp_text.strip("\n")
 
     def split(self) -> list[str]:
-        return self._limitStr(self._draw_text, self.draw_count).splitlines()
+        return self._limitStr(self.text, self.draw_count).splitlines()
+
+    @property
+    def text(self) -> str:
+        return self._display_text
 
     @property
     def draw_count(self) -> int:
@@ -88,7 +92,7 @@ class UI_PAGE_TEXT:
 
     @property
     def length(self) -> int:
-        return len(self._draw_text.replace("\n", ""))
+        return len(self._display_text.replace("\n", ""))
 
     @property
     def is_finish(self) -> int:
@@ -110,13 +114,21 @@ class UI_PAGE_TEXT:
         self.reset()  # draw_countをリセットしておく
         return self.setDrawCount(self.page_no+add)
 
-    def _getPageText(self, page_line_num, page_no:int|None) -> str:
-        page_no = page_no if page_no else self._state.attrInt(self._page_no_attr, 0)
-        return "\n".join(self._draw_text.splitlines()[page_no*page_line_num:(page_no+1)*page_line_num])
-
     def splitPage(self) -> list[str]:
-        page_text = self._getPageText(self._page_line_num, self.page_no)
-        return self._limitStr(page_text, self.draw_count).splitlines()
+        return self._limitStr(self.page_text, self.draw_count).splitlines()
+
+    @property
+    def page_text(self) -> str:
+        page_no = self._state.attrInt(self._page_no_attr, 0)
+        return "\n".join(self._display_text.splitlines()[page_no*self._page_line_num:(page_no+1)*self._page_line_num])
+
+    @property
+    def page_length(self) -> int:
+        return len(self.page_text.replace("\n", ""))
+
+    @property
+    def is_page_finish(self) -> int:
+        return self.draw_count >= self.page_length
 
     # ページ情報取得
     @property
@@ -125,11 +137,11 @@ class UI_PAGE_TEXT:
 
     @property
     def page_max(self) -> int:
-        line_num = len(self._draw_text.splitlines())
+        line_num = len(self._display_text.splitlines())
         return (line_num+self._page_line_num-1)//self._page_line_num
 
     @property
-    def is_page_end(self) -> bool:
+    def is_pages_end(self) -> bool:
         return self.page_no >= self.page_max
 
 

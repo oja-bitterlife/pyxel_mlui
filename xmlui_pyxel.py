@@ -48,14 +48,14 @@ def msg_win_update(state: UI_STATE, event:UI_EVENT):
     page = text.usePage("page_no", 3)
 
     # カーソル表示
-    msg_cur.setAttr("visible", page.is_page_end)  # 次のページあり
+    msg_cur.setAttr("visible", not page.is_pages_end)  # 次のページあり
 
     if "action" in event.trg:
-        if not page.is_page_end:
+        if page.is_pages_end:
             state.close("menu_command")  # メニューごと閉じる
         else:
             # テキストを表示しきっていたら
-            if text.is_finish:
+            if page.is_page_finish:
                 page.next()  # 次のページ
             # テキストがまだ残っていたら
             else:
