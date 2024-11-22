@@ -90,6 +90,11 @@ class UI_TEXT:
     @property
     def length(self) -> int:
         return len(self.text.replace("\n", ""))  # 改行を外してカウント
+    
+    @property
+    def is_finish(self) -> bool:
+        return self.draw_count >= self.length
+
 
 class UI_PAGE(UI_TEXT):
     _page_line_num: int  # ページ行数
@@ -103,15 +108,20 @@ class UI_PAGE(UI_TEXT):
         self._page_line_num = page_line_num
         self._page_no_attr = page_no_attr
 
-    def getPage(self) -> list[str]:
-        return self.split()[self.page_no*self._page_line_num:(self.page_no+1)*self._page_line_num]
-
     def setPage(self, page_no:int) -> 'UI_PAGE':
         self._state.setAttr(self._page_no_attr, page_no)
         return self
 
     def nextPage(self) -> 'UI_PAGE':
         return self.setPage(self.page_no+1)
+
+    def resetPage(self) -> 'UI_PAGE':
+        return self.setPage(0)
+
+    def load(self) -> 'UI_PAGE':
+        page_text = "\n".join(self.split()[self.page_no*self._page_line_num:(self.page_no+1)*self._page_line_num])
+        self._state.setAttr(self._anim_text_attr, page_text)
+        return self
 
     @property
     def page_no(self) -> int:

@@ -42,13 +42,13 @@ def msg_win_update(state: UI_STATE, event:UI_EVENT):
     msg_cur = state.findByTag("msg_cur")
     msg_text = state.findByTag("msg_text")
 
-    text = UI_TEXT(state, "draw_count", "anim_text").bind({"name":"world", "age":10})
-    pages = UI_PAGE(text.next(), 3, "page_no")
+    text = UI_TEXT(state, "draw_count", "anim_text").bind({"name":"world", "age":10}).next()
+    pages = UI_PAGE(text, 3, "page_no")
 
     msg_cur.setAttr("visible", pages.is_page_end)
 
     if "action" in event.trg:
-        if pages.finish:
+        if not pages.is_finish:
             state.close("menu_command")  # メニューごと閉じる
         else:
             pages.finish()  # 一気に表示する
@@ -96,8 +96,8 @@ def msg_text_draw(state:UI_STATE):
 
     # テキスト表示
     text = UI_TEXT(state, "draw_count", "anim_text").bind({"name":"world", "age":10}, wrap)
-    pages = UI_PAGE(text.next(), 3, "page_no")
-    for i,text in enumerate(pages.getPage()):
+    pages = UI_PAGE(text.next(), 3, "page_no").load()
+    for i,text in enumerate(pages.split()):
         pyxel.text(state.area.x, state.area.y+i*FONT_SIZE, text, color, font)
 
 def msg_cur_draw(state:UI_STATE):
