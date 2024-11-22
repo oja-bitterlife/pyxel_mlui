@@ -48,7 +48,7 @@ def msg_win_update(state: UI_STATE, event:UI_EVENT):
     page = text.usePage("page_no", 3)
 
     # カーソル表示
-    msg_cur.setAttr("visible", not page.is_end_page)  # 次のページあり
+    msg_cur.setAttr("visible", not page.is_end_page and page.is_page_finish)  # 次のページあり
 
     if "action" in event.trg:
         if page.is_end_page:
