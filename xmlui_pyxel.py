@@ -42,7 +42,7 @@ def msg_win_update(state: UI_STATE, event:UI_EVENT):
     msg_cur = state.findByTag("msg_cur")
     msg_text = state.findByTag("msg_text")
 
-    text = UI_TEXT(state, "draw_count", "anim_text").bind({"name":"world", "age":10}).next()
+    text = UI_TEXT(state, "draw_count").bind({"name":"world", "age":10})
     pages = UI_PAGE(text, 3, "page_no")
 
     msg_cur.setAttr("visible", pages.is_page_end)
@@ -65,7 +65,7 @@ def msg_text_update(state: UI_STATE, event:UI_EVENT):
     wrap = state.attrInt("wrap", 1024)
     page_no = state.attrInt("page_no")
 
-    text = UI_TEXT(state, "draw_count", "anim_text").bind({"name":"world", "age":10}, wrap)
+    text = UI_TEXT(state, "draw_count").bind({"name":"world", "age":10}, wrap)
     pages = UI_PAGE(text.next(), 3, "page_no")
     state.setAttr("page_end", text.draw_count >= pages.is_page_end)
 
@@ -93,7 +93,7 @@ def msg_text_draw(state:UI_STATE):
     color = state.attrInt("color", 7)
 
     # テキスト表示
-    text = UI_TEXT(state, "draw_count", "anim_text")
+    text = UI_TEXT(state, "draw_count")
     for i,text in enumerate(text.split()):
         pyxel.text(state.area.x, state.area.y+i*FONT_SIZE, text, color, font)
 

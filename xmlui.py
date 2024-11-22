@@ -33,22 +33,23 @@ class UI_TEXT:
 
     # 状態保存先
     _state: 'UI_STATE'
-    _draw_count_attr: str
-    _anim_text_attr: str
+    _draw_count_attr: str  # 描画文字数
+
+    # アニメーションテキスト表示用
+    _draw_text: str
 
     # 改行コードに変換しておく
-    def __init__(self, state:'UI_STATE', _draw_count_attr:str, _anim_text_attr:str):
+    def __init__(self, state:'UI_STATE', _draw_count_attr:str):
         self._state = state
         self._draw_count_attr = _draw_count_attr
-        self._anim_text_attr = _anim_text_attr
+        self._draw_text = self._state.attrStr(self._state.text.strip(), "")
 
     def bind(self, params:dict[str, Any]={}, wrap:int=1024) -> 'UI_TEXT':
-        bind_text = self._state.attrStr(self._state.text.strip(), "").format(**params)
+        draw_text = self._state.attrStr(self._state.text.strip(), "").format(**params)
 
         wrap = max(1, wrap)  # 0だと無限になってしまうので最低1を入れておく
-        wrap_text = "\n".join([bind_text[i:i+wrap].strip("\n") for i in range(0, len(bind_text), wrap)])
+        draw_text = "\n".join([draw_text[i:i+wrap].strip("\n") for i in range(0, len(draw_text), wrap)])
 
-        self._state.setAttr(self._anim_text_attr, wrap_text)
         return self
 
     def setDrawCount(self, draw_count:int) -> 'UI_TEXT':
@@ -85,7 +86,7 @@ class UI_TEXT:
 
     @property
     def text(self) -> str:
-        return self._state.attrStr(self._anim_text_attr, self._state.text.strip())
+        return self._draw_text
 
     @property
     def length(self) -> int:
@@ -96,20 +97,23 @@ class UI_TEXT:
         return self.draw_count >= self.length
 
 
-class UI_PAGE(UI_TEXT):
+class UI_PAGE:
+    _text: UI_TEXT  # 扱うtext
     _page_line_num: int  # ページ行数
 
     # 状態保存先
-    _page_no_attr:str  # ページ番号
+    _page_no_attr: str  # ページ番号
+    _page_text_attr: str  # ページ内容
+
 
     def __init__(self, text:UI_TEXT, page_line_num:int, page_no_attr:str):
-        super().__init__(text._state, text._draw_count_attr, text._anim_text_attr)
-        # 追加パラメータ
+        self._text = text
         self._page_line_num = page_line_num
         self._page_no_attr = page_no_attr
 
+    # page_no管理
     def setPage(self, page_no:int) -> 'UI_PAGE':
-        self._state.setAttr(self._page_no_attr, page_no)
+        self._text._state.setAttr(self._page_no_attr, page_no)
         return self
 
     def nextPage(self) -> 'UI_PAGE':
@@ -118,14 +122,15 @@ class UI_PAGE(UI_TEXT):
     def resetPage(self) -> 'UI_PAGE':
         return self.setPage(0)
 
+    # page内容に絞る
+    @property
     def load(self) -> 'UI_PAGE':
-        page_text = "\n".join(self.split()[self.page_no*self._page_line_num:(self.page_no+1)*self._page_line_num])
-        self._state.setAttr(self._anim_text_attr, page_text)
+        self._text._draw_text = "\n".join(self._text.split()[self.page_no*self._page_line_num:(self.page_no+1)*self._page_line_num])
         return self
 
     @property
     def page_no(self) -> int:
-        return self._state.attrInt(self._page_no_attr, 0)
+        return self._text._state.attrInt(self._page_no_attr, 0)
 
     @property
     def page_num(self) -> int:
@@ -137,7 +142,7 @@ class UI_PAGE(UI_TEXT):
 
     @property
     def line_num(self) -> int:
-        return len(self.split())
+        return len(self._text.split())
 
 
 
