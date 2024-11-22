@@ -42,22 +42,13 @@ def msg_win_update(state: UI_STATE, event:UI_EVENT):
     msg_cur = state.findByTag("msg_cur")
     msg_text = state.findByTag("msg_text")
 
-    msg_cur.setAttr("visible", msg_text.attrBool("on_next_page"))
-
-    # メニューごと閉じる
-    if "cancel" in event.trg:
-        state.close("menu_command")
-
-
-def msg_text_update(state: UI_STATE, event:UI_EVENT):
-    wrap = state.attrInt("wrap", 1024)
-
     # 文字列更新
-    text = UI_PAGE_TEXT(state, "draw_count").bind({"name":"world", "age":10}, wrap)
+    wrap = msg_text.attrInt("wrap", 1024)
+    text = UI_PAGE_TEXT(msg_text, "draw_count").bind({"name":"world", "age":10}, wrap).next()
     page = text.usePage("page_no", 3)
 
-    # カーソル表示用
-    state.setAttr("on_next_page", True)  # 次のページあり
+    # カーソル表示
+    msg_cur.setAttr("visible", page.is_page_end)  # 次のページあり
 
     if "action" in event.trg:
         if not page.is_page_end:
@@ -70,13 +61,16 @@ def msg_text_update(state: UI_STATE, event:UI_EVENT):
             else:
                 text.finish()  # 一気に表示
 
+    # メニューごと閉じる
+    if "cancel" in event.trg:
+        state.close("menu_command")
+
 
 # update関数テーブル
 updateFuncs= {
     'my_ui': my_ui_update,
     "menu_win": menu_win_update,
     "msg_win": msg_win_update,
-    "msg_text": msg_text_update,
 }
 
 

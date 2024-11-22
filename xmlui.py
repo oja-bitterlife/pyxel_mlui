@@ -65,7 +65,7 @@ class UI_PAGE_TEXT:
         return self.setDrawCount(0)
 
     def finish(self) -> 'UI_PAGE_TEXT':
-        return self.setDrawCount(65536)
+        return self.setDrawCount(len(self._draw_text))
 
     # draw_countまでの文字列を改行分割
     @classmethod
@@ -84,7 +84,15 @@ class UI_PAGE_TEXT:
 
     @property
     def draw_count(self) -> int:
-        return self._state.attrInt(self._draw_count_attr, 65536)  # 基本は一括表示
+        return self._state.attrInt(self._draw_count_attr)
+
+    @property
+    def length(self) -> int:
+        return len(self._draw_text.replace("\n", ""))
+
+    @property
+    def is_finish(self) -> int:
+        return self.draw_count >= self.length
 
     # Page関係
     # *************************************************************************
@@ -122,7 +130,7 @@ class UI_PAGE_TEXT:
 
     @property
     def is_page_end(self) -> bool:
-        return self.page_no >= self.page_max()
+        return self.page_no >= self.page_max
 
 
 class UI_EVENT:
