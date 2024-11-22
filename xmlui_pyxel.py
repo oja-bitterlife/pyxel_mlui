@@ -42,19 +42,7 @@ def msg_win_update(state: UI_STATE, event:UI_EVENT):
     msg_cur = state.findByTag("msg_cur")
     msg_text = state.findByTag("msg_text")
 
-    text = UI_TEXT(state, "draw_count").bind({"name":"world", "age":10})
-    pages = UI_PAGE(text, 3, "page_no")
-
-    msg_cur.setAttr("visible", pages.is_page_end)
-
-    if "action" in event.trg:
-        if not pages.is_page_end:
-            state.close("menu_command")  # メニューごと閉じる
-        else:
-            if text.is_finish:
-                pages.nextPage()
-            else:
-                text.finish()  # 一気に表示する
+    msg_cur.setAttr("visible", msg_text.attrBool("on_next_page"))
 
     # メニューごと閉じる
     if "cancel" in event.trg:
@@ -63,14 +51,25 @@ def msg_win_update(state: UI_STATE, event:UI_EVENT):
 
 def msg_text_update(state: UI_STATE, event:UI_EVENT):
     wrap = state.attrInt("wrap", 1024)
-    page_no = state.attrInt("page_no")
 
-    text = UI_TEXT(state, "draw_count").bind({"name":"world", "age":10}, wrap)
-    pages = UI_PAGE(text.next(), 3, "page_no")
-    state.setAttr("page_end", text.draw_count >= pages.is_page_end)
+    # 文字列更新
+    text = UI_TEXT(state, "draw_count").bind({"name":"world", "age":10}, wrap).next()
+    pages = UI_PAGE(text, 3, "page_no")
 
-    if page_no >= pages.page_num:
-        state.setAttr("finish", True)
+    # カーソル表示用
+    state.setAttr("on_next_page", True)  # 次のページあり
+
+    if "action" in event.trg:
+        if not pages.is_page_end:
+            state.close("menu_command")  # メニューごと閉じる
+        else:
+            # テキストを表示しきっていたら
+            if text.is_finish:
+                pages.nextPage()  # 次のページ
+            # テキストがまだ残っていたら
+            else:
+                text.finish()  # 一気に表示
+
 
 # update関数テーブル
 updateFuncs= {
