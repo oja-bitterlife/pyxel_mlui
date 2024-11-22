@@ -74,7 +74,7 @@ class UI_PAGE_TEXT:
         for i,c in enumerate(tmp_text):
             if c != "\n":
                 draw_count -= 1
-                if draw_count <= 0:
+                if draw_count < 0:
                     tmp_text = tmp_text[:i]
                     break
         return tmp_text.strip("\n")
