@@ -45,11 +45,11 @@ class UI_PAGE_TEXT:
     def __init__(self, state:'UI_STATE', draw_count_attr:str):
         self._state = state
         self._draw_count_attr = draw_count_attr
-        self._display_text = self._state.text.strip()
+        self._display_text = re.sub(self.SEPARATE_REGEXP, "\n", self._state.text).strip()
 
     def bind(self, params:dict[str, Any]={}, wrap:int=4096) -> 'UI_PAGE_TEXT':
         wrap = max(1, wrap)  # 0だと無限になってしまうので最低1を入れておく
-        tmp_text = self._state.text.strip().format(**params)
+        tmp_text = re.sub(self.SEPARATE_REGEXP, "\n", self._state.text).strip().format(**params)
         self._display_text = "\n".join([tmp_text[i:i+wrap].strip("\n") for i in range(0, len(tmp_text), wrap)])
         return self
 
