@@ -48,14 +48,13 @@ def msg_win_update(state: UI_STATE, event:UI_EVENT):
     msg_cur.setAttr("visible", pages.is_page_end)
 
     if "action" in event.trg:
-        if not pages.is_finish:
+        if not pages.is_page_end:
             state.close("menu_command")  # メニューごと閉じる
         else:
-            pages.finish()  # 一気に表示する
-
-    # 次のページへ
-    if "action" in event.trg:
-        pages.nextPage()
+            if text.is_finish:
+                pages.nextPage()
+            else:
+                text.finish()  # 一気に表示する
 
     # メニューごと閉じる
     if "cancel" in event.trg:
@@ -91,13 +90,11 @@ def msg_win_draw(state:UI_STATE):
     pyxel.rectb(state.area.x+3, state.area.y+3, state.area.w-6, state.area.h-6, frame_color)
 
 def msg_text_draw(state:UI_STATE):
-    wrap = state.attrInt("wrap", 1024)
     color = state.attrInt("color", 7)
 
     # テキスト表示
-    text = UI_TEXT(state, "draw_count", "anim_text").bind({"name":"world", "age":10}, wrap)
-    pages = UI_PAGE(text.next(), 3, "page_no").load()
-    for i,text in enumerate(pages.split()):
+    text = UI_TEXT(state, "draw_count", "anim_text")
+    for i,text in enumerate(text.split()):
         pyxel.text(state.area.x, state.area.y+i*FONT_SIZE, text, color, font)
 
 def msg_cur_draw(state:UI_STATE):
