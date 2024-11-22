@@ -1,4 +1,4 @@
-from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_CURSOR,UI_PAGE_TEXT
+from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_CURSOR
 
 ui_template = XMLUI.createFromFile("assets/ui/test.xml")
 
@@ -44,19 +44,19 @@ def msg_win_update(state: UI_STATE, event:UI_EVENT):
 
     # 文字列更新
     wrap = msg_text.attrInt("wrap", 1024)
-    text = UI_PAGE_TEXT(msg_text, "draw_count").bind({"name":"world", "age":10}, wrap).next()
+    text = msg_text.getAnimText("draw_count").bind({"name":"world", "age":10}, wrap).next()
     page = text.usePage("page_no", 3)
 
     # カーソル表示
-    msg_cur.setAttr("visible", not page.is_end_page and page.is_page_finish)  # 次のページあり
+    msg_cur.setAttr("visible", not page.is_end_page and page.is_finish)  # 次のページあり
 
     if "action" in event.trg:
         if page.is_end_page:
             state.close("menu_command")  # メニューごと閉じる
         else:
             # テキストを表示しきっていたら
-            if page.is_page_finish:
-                page.nextPage()  # 次のページ
+            if page.is_finish:
+                page.next()  # 次のページ
             # テキストがまだ残っていたら
             else:
                 text.finish()  # 一気に表示
@@ -82,13 +82,12 @@ def msg_win_draw(state:UI_STATE):
     pyxel.rectb(state.area.x+3, state.area.y+3, state.area.w-6, state.area.h-6, frame_color)
 
 def msg_text_draw(state:UI_STATE):
-    wrap = state.attrInt("wrap", 1024)
-
     # テキスト表示
-    text = UI_PAGE_TEXT(state, "draw_count").bind({"name":"world", "age":10}, wrap)
+    wrap = state.attrInt("wrap", 1024)
+    text = state.getAnimText("draw_count").bind({"name":"world", "age":10}, wrap)
     page = text.usePage("page_no", 3)
 
-    for i,text in enumerate(page.splitPage()):
+    for i,text in enumerate(page.split()):
         pyxel.text(state.area.x, state.area.y+i*FONT_SIZE, text, 7, font)
 
 def msg_cur_draw(state:UI_STATE):

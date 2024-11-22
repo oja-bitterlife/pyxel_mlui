@@ -27,7 +27,7 @@ class UI_RECT:
 
 
 # アニメーションテキスト表示用
-class UI_PAGE_TEXT:
+class UI_ANIM_TEXT:
     # クラス定数
     SEPARATE_REGEXP:str = r"\\n"
 
@@ -41,24 +41,24 @@ class UI_PAGE_TEXT:
         self._draw_count_attr = draw_count_attr
         self._display_text = re.sub(self.SEPARATE_REGEXP, "\n", self._state.text).strip()
 
-    def bind(self, params:dict[str, Any]={}, wrap:int=4096) -> 'UI_PAGE_TEXT':
+    def bind(self, params:dict[str, Any]={}, wrap:int=4096) -> 'UI_ANIM_TEXT':
         wrap = max(1, wrap)  # 0だと無限になってしまうので最低1を入れておく
         tmp_text = re.sub(self.SEPARATE_REGEXP, "\n", self._state.text).strip().format(**params)
         self._display_text = "\n".join([tmp_text[i:i+wrap].strip("\n") for i in range(0, len(tmp_text), wrap)])
         return self
 
     # draw_countの操作
-    def setDrawCount(self, draw_count:int) -> 'UI_PAGE_TEXT':
+    def setDrawCount(self, draw_count:int) -> 'UI_ANIM_TEXT':
         self._state.setAttr(self._draw_count_attr, draw_count)
         return self
 
-    def next(self, add:int=1) -> 'UI_PAGE_TEXT':
+    def next(self, add:int=1) -> 'UI_ANIM_TEXT':
         return self.setDrawCount(self.draw_count+add)
 
-    def reset(self) -> 'UI_PAGE_TEXT':
+    def reset(self) -> 'UI_ANIM_TEXT':
         return self.setDrawCount(0)
 
-    def finish(self) -> 'UI_PAGE_TEXT':
+    def finish(self) -> 'UI_ANIM_TEXT':
         return self.setDrawCount(len(self._display_text))
 
     # draw_countまでの文字列を改行分割
@@ -77,12 +77,12 @@ class UI_PAGE_TEXT:
         return self._limitStr(self.text, self.draw_count).splitlines()
 
     @property
-    def text(self) -> str:
-        return self._display_text
-
-    @property
     def draw_count(self) -> int:
         return self._state.attrInt(self._draw_count_attr)
+
+    @property
+    def text(self) -> str:
+        return self._display_text
 
     @property
     def length(self) -> int:
@@ -92,46 +92,51 @@ class UI_PAGE_TEXT:
     def is_finish(self) -> int:
         return self.draw_count >= self.length
 
-    def usePage(self, page_no_attr:str,  page_line_num:int) -> 'UI_PAGE':
-        return UI_PAGE(self, page_no_attr, page_line_num)
+    def usePage(self, page_no_attr:str,  page_line_num:int) -> 'UI_ANIM_PAGE':
+        return UI_ANIM_PAGE(self, page_no_attr, page_line_num)
 
 # Page関係
-class UI_PAGE:
-    _text: UI_PAGE_TEXT  # 作成元
+class UI_ANIM_PAGE:
+    _text: UI_ANIM_TEXT  # 作成元
     _page_line_num: int  # ページ行数
     _page_no_attr: str  # ページ番号
 
-    def __init__(self, text:UI_PAGE_TEXT, page_no_attr:str,  page_line_num:int):
+    def __init__(self, text:UI_ANIM_TEXT, page_no_attr:str,  page_line_num:int):
         self._text = text
         self._page_no_attr = page_no_attr
         self._page_line_num = page_line_num
 
     # page_noの操作
-    def setPageNo(self, page_no:int) -> 'UI_PAGE_TEXT':
+    def setPageNo(self, page_no:int) -> 'UI_ANIM_TEXT':
         self._text._state.setAttr(self._page_no_attr, page_no)
         return self
 
-    def nextPage(self, add:int=1) -> 'UI_PAGE_TEXT':
+    def next(self, add:int=1) -> 'UI_ANIM_TEXT':
         self._text.reset()  # draw_countをリセットしておく
         return self.setPageNo(self.page_no+add)
 
-    def splitPage(self) -> list[str]:
-        return self._text._limitStr(self.page_text, self._text.draw_count).splitlines()
+    def split(self) -> list[str]:
+        return self._text._limitStr(self.text, self._text.draw_count).splitlines()
+
+    # textと同じIF
+    @property
+    def draw_count(self) -> int:
+        return self._text.draw_count
 
     @property
-    def page_text(self) -> str:
+    def text(self) -> str:
         page_no = self._text._state.attrInt(self._page_no_attr, 0)
         return "\n".join(self._text._display_text.splitlines()[page_no*self._page_line_num:(page_no+1)*self._page_line_num])
 
     @property
-    def page_length(self) -> int:
-        return len(self.page_text.replace("\n", ""))
+    def length(self) -> int:
+        return len(self.text.replace("\n", ""))
 
     @property
-    def is_page_finish(self) -> int:
-        return self._text.draw_count >= self.page_length
+    def is_finish(self) -> int:
+        return self._text.draw_count >= self.length
 
-    # ページ情報取得
+    # ページ専用プロパティ
     @property
     def page_no(self) -> int:
         return self._text._state.attrInt(self._page_no_attr, 0)
@@ -283,18 +288,24 @@ class UI_STATE:
             self._element.attrib[key] = str(value)
         return self
 
+    # textアクセス用
+    # *************************************************************************
+    @property
+    def text(self) -> str:
+        return self._element.text.strip() if self._element.text else ""
+
+    def getAnimText(self, draw_count_attr:str, params={}) -> UI_ANIM_TEXT:
+        return UI_ANIM_TEXT(self, draw_count_attr)
+
+    # その他
+    # *************************************************************************
     @property
     def tag(self) -> str:
         return self._element.tag
 
     @property
-    def text(self) -> str:
-        return self._element.text.strip() if self._element.text else ""
-
-    @property
     def area(self) -> UI_RECT:
         return UI_RECT(self.area_x, self.area_y, self.area_w, self.area_h)
-
 
     # ツリー操作用
     # *************************************************************************
