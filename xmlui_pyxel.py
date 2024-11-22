@@ -1,4 +1,4 @@
-from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_CURSOR,UI_TEXT,UI_PAGE
+from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_CURSOR,UI_PAGE_TEXT
 
 ui_template = XMLUI.createFromFile("assets/ui/test.xml")
 
@@ -53,19 +53,19 @@ def msg_text_update(state: UI_STATE, event:UI_EVENT):
     wrap = state.attrInt("wrap", 1024)
 
     # 文字列更新
-    text = UI_TEXT(state, "draw_count").bind({"name":"world", "age":10}, wrap).next()
-    pages = UI_PAGE(text, 3, "page_no")
+    text = UI_PAGE_TEXT(state, "draw_count").bind({"name":"world", "age":10}, wrap)
+    page = text.usePage("page_no", 3)
 
     # カーソル表示用
     state.setAttr("on_next_page", True)  # 次のページあり
 
     if "action" in event.trg:
-        if not pages.is_page_end:
+        if not page.is_page_end:
             state.close("menu_command")  # メニューごと閉じる
         else:
             # テキストを表示しきっていたら
             if text.is_finish:
-                pages.nextPage()  # 次のページ
+                page.next()  # 次のページ
             # テキストがまだ残っていたら
             else:
                 text.finish()  # 一気に表示
@@ -81,20 +81,21 @@ updateFuncs= {
 
 
 def msg_win_draw(state:UI_STATE):
-    bg_color = state.attrInt("bg_color", 12)
     frame_color = state.attrInt("frame_color", 7)
-    pyxel.rect(state.area.x, state.area.y, state.area.w, state.area.h, bg_color)
+    pyxel.rect(state.area.x, state.area.y, state.area.w, state.area.h, 12)
     pyxel.rectb(state.area.x, state.area.y, state.area.w, state.area.h, frame_color)
     pyxel.rectb(state.area.x+1, state.area.y+1, state.area.w-2, state.area.h-2, frame_color)
     pyxel.rectb(state.area.x+3, state.area.y+3, state.area.w-6, state.area.h-6, frame_color)
 
 def msg_text_draw(state:UI_STATE):
-    color = state.attrInt("color", 7)
+    wrap = state.attrInt("wrap", 1024)
 
     # テキスト表示
-    text = UI_TEXT(state, "draw_count")
-    for i,text in enumerate(text.split()):
-        pyxel.text(state.area.x, state.area.y+i*FONT_SIZE, text, color, font)
+    text = UI_PAGE_TEXT(state, "draw_count").bind({"name":"world", "age":10}, wrap)
+    page = text.usePage("page_no", 3)
+
+    for i,text in enumerate(page.splitPage()):
+        pyxel.text(state.area.x, state.area.y+i*FONT_SIZE, text, 7, font)
 
 def msg_cur_draw(state:UI_STATE):
     tri_size = state.attrInt("size", 6)
