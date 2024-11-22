@@ -112,7 +112,7 @@ class UI_PAGE_TEXT:
 
     def nextPage(self, add:int=1) -> 'UI_PAGE_TEXT':
         self.reset()  # draw_countをリセットしておく
-        return self.setDrawCount(self.page_no+add)
+        return self.setPageNo(self.page_no+add)
 
     def splitPage(self) -> list[str]:
         return self._limitStr(self.page_text, self.draw_count).splitlines()
