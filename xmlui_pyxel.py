@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_CURSOR,UI_TEXT,UI_PAGE
-=======
-from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_CURSOR,UI_PAGE
->>>>>>> 21ca74d4ce593c6fa08b2549f1ac951cab068fb2
 
 ui_template = XMLUI.createFromFile("assets/ui/test.xml")
 
@@ -46,14 +42,16 @@ def msg_win_update(state: UI_STATE, event:UI_EVENT):
     msg_cur = state.findByTag("msg_cur")
     msg_text = state.findByTag("msg_text")
 
-    pages =  UI_PAGE(msg_text.text, "page_no", "draw_count", 3).nextCount()
+    text = UI_TEXT(state, "draw_count", "anim_text").bind({"name":"world", "age":10})
+    pages = UI_PAGE(text.next(), 3, "page_no")
+
     msg_cur.setAttr("visible", pages.is_page_end)
 
     if "action" in event.trg:
-        if msg_text.attrBool("finish"):
+        if pages.finish:
             state.close("menu_command")  # メニューごと閉じる
         else:
-            pages.setDrawCount(pages.getPageText().length)  # 一気に表示する
+            pages.finish()  # 一気に表示する
 
     # 次のページへ
     if "action" in event.trg:
@@ -66,20 +64,14 @@ def msg_win_update(state: UI_STATE, event:UI_EVENT):
 
 def msg_text_update(state: UI_STATE, event:UI_EVENT):
     wrap = state.attrInt("wrap", 1024)
-<<<<<<< HEAD
     page_no = state.attrInt("page_no")
 
     text = UI_TEXT(state, "draw_count", "anim_text").bind({"name":"world", "age":10}, wrap)
     pages = UI_PAGE(text.next(), 3, "page_no")
-    state.setAttr("page_end", text.draw_count >= pages.strlen(page_no))
+    state.setAttr("page_end", text.draw_count >= pages.is_page_end)
 
     if page_no >= pages.page_num:
         state.setAttr("finish", True)
-=======
->>>>>>> 21ca74d4ce593c6fa08b2549f1ac951cab068fb2
-
-    bind_text = state.text.bind({"name":"world", "age":10}, wrap)
-    UI_PAGE(bind_text, "page_no", "draw_count", 3).nextCount()
 
 # update関数テーブル
 updateFuncs= {
@@ -103,15 +95,9 @@ def msg_text_draw(state:UI_STATE):
     color = state.attrInt("color", 7)
 
     # テキスト表示
-<<<<<<< HEAD
     text = UI_TEXT(state, "draw_count", "anim_text").bind({"name":"world", "age":10}, wrap)
     pages = UI_PAGE(text.next(), 3, "page_no")
-    for i,text in enumerate(pages.getPage(page_no)):
-=======
-    bind_text = state.text.bind({"name":"world", "age":10}, wrap)
-    pages = UI_PAGE(bind_text, "page_no", "draw_count", 3)
-    for i,text in enumerate(pages.getPageText().splitlines()):
->>>>>>> 21ca74d4ce593c6fa08b2549f1ac951cab068fb2
+    for i,text in enumerate(pages.getPage()):
         pyxel.text(state.area.x, state.area.y+i*FONT_SIZE, text, color, font)
 
 def msg_cur_draw(state:UI_STATE):

@@ -55,13 +55,14 @@ class UI_TEXT:
         self._state.setAttr(self._draw_count_attr, draw_count)
         return self
 
-    def next(self) -> 'UI_TEXT':
-        self._state.setAttr(self._draw_count_attr, self.draw_count+1)
-        return self
+    def next(self, add:int=1) -> 'UI_TEXT':
+        return self.setDrawCount(self.draw_count+add)
 
     def reset(self) -> 'UI_TEXT':
-        self._state.setAttr(self._draw_count_attr, 0)
-        return self
+        return self.setDrawCount(0)
+
+    def finish(self) -> 'UI_TEXT':
+        return self.setDrawCount(65536)
 
     # draw_countまでの文字列を改行分割
     def split(self) -> list[str]:
@@ -80,7 +81,7 @@ class UI_TEXT:
 
     @property
     def draw_count(self) -> int:
-        return self._state.attrInt(self._draw_count_attr, 65536)
+        return self._state.attrInt(self._draw_count_attr, 65536)  # 基本は一括表示
 
     @property
     def text(self) -> str:
@@ -90,32 +91,44 @@ class UI_TEXT:
     def length(self) -> int:
         return len(self.text.replace("\n", ""))  # 改行を外してカウント
 
-class UI_PAGE:
-    _text: UI_TEXT
-    _page_line_num: int
+class UI_PAGE(UI_TEXT):
+    _page_line_num: int  # ページ行数
 
     # 状態保存先
-    _page_no_attr:str
+    _page_no_attr:str  # ページ番号
 
     def __init__(self, text:UI_TEXT, page_line_num:int, page_no_attr:str):
-        self._text = text
+        super().__init__(text._state, text._draw_count_attr, text._anim_text_attr)
+        # 追加パラメータ
         self._page_line_num = page_line_num
         self._page_no_attr = page_no_attr
 
-    def getPage(self, page:int) -> list[str]:
-        return self._text.split()[page*self._page_line_num:(page+1)*self._page_line_num]
+    def getPage(self) -> list[str]:
+        return self.split()[self.page_no*self._page_line_num:(self.page_no+1)*self._page_line_num]
 
-    # 引数pageが必要なのでpropertyではなく関数で
-    def strlen(self, page:int) -> int:
-        return len("".join(self.getPage(page)))
+    def setPage(self, page_no:int) -> 'UI_PAGE':
+        self._state.setAttr(self._page_no_attr, page_no)
+        return self
+
+    def nextPage(self) -> 'UI_PAGE':
+        return self.setPage(self.page_no+1)
+
+    @property
+    def page_no(self) -> int:
+        return self._state.attrInt(self._page_no_attr, 0)
 
     @property
     def page_num(self) -> int:
         return (self.line_num+self._page_line_num-1)//self._page_line_num
 
     @property
+    def is_page_end(self) -> bool:
+        return self.page_no >= self.page_num
+
+    @property
     def line_num(self) -> int:
-        return len(self._text.split())
+        return len(self.split())
+
 
 
 class UI_EVENT:
