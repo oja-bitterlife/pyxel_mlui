@@ -26,76 +26,96 @@ class UI_RECT:
         return f"RECT({self.x}, {self.y}, {self.w}, {self.h})"
 
 
-# テキスト表示用
-class UI_PAGE_TEXT:
-    _pages: list[str]  # ページ分割した文字列(\n改行)
-
-    def __init__(self, text:str, page_line_num:int, wrap:int=1024):
-        # 0だと無限になってしまうので最低1を入れておく
-        wrap = max(1, wrap)
-        page_line_num = max(1, page_line_num)
-
-        # 一旦トークン(行+wrap分割)ごとにわける
-        tokens = []
-        for line in text.splitlines():  # 行分割
-            tokens += [line[i:i+wrap] for i in range(0, len(line), wrap)]  # wrap分割
-
-        # 行ごとに分離した文字列
-        self._pages = ["\n".join(tokens[i:i+page_line_num]) for i in range(0, len(tokens), page_line_num)]
-
-    def getPage(self, page:int) -> str:
-        return self._pages[page]
-
-    # 引数pageが必要なのでpropertyではなく関数で
-    def strlen(self, page:int) -> int:
-        return len(self._pages[page].replace("\n", ""))  # 改行を外してカウント
-
-    def __len__(self):
-        return len(self._pages)
-
-class UI_TEXT(str):
+# アニメーションテキスト表示用
+class UI_TEXT:
     # クラス定数
     SEPARATE_REGEXP:str = r"\\n"
-    _str_count: list[int]
+
+    # 状態保存先
+    _state: 'UI_STATE'
+    _draw_count_attr: str
+    _anim_text_attr: str
 
     # 改行コードに変換しておく
-    def __new__(cls, text:str):
-        self = super().__new__(cls, re.sub(cls.SEPARATE_REGEXP, "\n", text).rstrip("\n"))
+    def __init__(self, state:'UI_STATE', _draw_count_attr:str, _anim_text_attr:str):
+        self._state = state
+        self._draw_count_attr = _draw_count_attr
+        self._anim_text_attr = _anim_text_attr
 
-        self._str_count = []
-        _cr_count = []
+    def bind(self, params:dict[str, Any]={}, wrap:int=1024) -> 'UI_TEXT':
+        bind_text = self._state.attrStr(self._state.text.strip(), "").format(**params)
 
-        str_gen = iter([i for i,c in enumerate(self.replace("\n", ""))])
-        for i,c in enumerate(self):
-            if c == "\n":
-                _cr_count.append(i)
-            else:
-                self._str_count.append(next(str_gen))
+        wrap = max(1, wrap)  # 0だと無限になってしまうので最低1を入れておく
+        wrap_text = "\n".join([bind_text[i:i+wrap].strip("\n") for i in range(0, len(bind_text), wrap)])
 
-        for cr_index in reversed(_cr_count):
-            self._str_count.insert(cr_index, -1)
-        print(self._str_count)
+        self._state.setAttr(self._anim_text_attr, wrap_text)
         return self
 
-    # ただのformat。関数連結のために用意
-    def bind(self, params:dict[str,Any]={}) -> 'UI_TEXT':
-        return UI_TEXT(self.format(**params))
+    def setDrawCount(self, draw_count:int) -> 'UI_TEXT':
+        self._state.setAttr(self._draw_count_attr, draw_count)
+        return self
 
-    def wrap(self, wrap:int=1024) -> 'UI_TEXT':
-        wrap = max(1, wrap)  # 0だと無限になってしまうので最低1を入れておく
-        return UI_TEXT("\n".join([self[i:i+wrap] for i in range(0, len(self), wrap)]))
+    def next(self) -> 'UI_TEXT':
+        self._state.setAttr(self._draw_count_attr, self.draw_count+1)
+        return self
 
-    def limit(self, limit:int=65536) -> 'UI_TEXT':
-        cr_count = len(list(filter(lambda val: val < limit, self._cr_count)))
-        return UI_TEXT(self[:limit+cr_count])  # crを含む分だけ伸ばして返す
+    def reset(self) -> 'UI_TEXT':
+        self._state.setAttr(self._draw_count_attr, 0)
+        return self
 
-    # ページ分割クラスに変換
-    def splitPages(self, page_line_num:int) -> UI_PAGE_TEXT:
-        return UI_PAGE_TEXT(self, page_line_num)
+    # draw_countまでの文字列を改行分割
+    def split(self) -> list[str]:
+        tmp_text = self.text
+
+        # まずlimitまで縮める
+        limit = self.draw_count
+        for i,c in tmp_text:
+            if c != "\n":
+                limit -= 1
+                if limit <= 0:
+                    tmp_text = tmp_text[:i]  # tmp_textを書き換えて縮める
+                    break
+
+        return tmp_text.splitlines()
+
+    @property
+    def draw_count(self) -> int:
+        return self._state.attrInt(self._draw_count_attr, 65536)
+
+    @property
+    def text(self) -> str:
+        return self._state.attrStr(self._anim_text_attr, self._state.text.strip())
 
     @property
     def length(self) -> int:
-        return len(self.replace("\n", ""))  # 改行を外してカウント
+        return len(self.text.replace("\n", ""))  # 改行を外してカウント
+
+class UI_PAGE:
+    _text: UI_TEXT
+    _page_line_num: int
+
+    # 状態保存先
+    _page_no_attr:str
+
+    def __init__(self, text:UI_TEXT, page_line_num:int, page_no_attr:str):
+        self._text = text
+        self._page_line_num = page_line_num
+        self._page_no_attr = page_no_attr
+
+    def getPage(self, page:int) -> list[str]:
+        return self._text.split()[page*self._page_line_num:(page+1)*self._page_line_num]
+
+    # 引数pageが必要なのでpropertyではなく関数で
+    def strlen(self, page:int) -> int:
+        return len("".join(self.getPage(page)))
+
+    @property
+    def page_num(self) -> int:
+        return (self.line_num+self._page_line_num-1)//self._page_line_num
+
+    @property
+    def line_num(self) -> int:
+        return len(self._text.split())
 
 
 class UI_EVENT:
@@ -240,8 +260,8 @@ class UI_STATE:
         return self._element.tag
 
     @property
-    def text(self) -> UI_TEXT:
-        return UI_TEXT(self._element.text.strip() if self._element.text else "")
+    def text(self) -> str:
+        return self._element.text.strip() if self._element.text else ""
 
     @property
     def area(self) -> UI_RECT:
