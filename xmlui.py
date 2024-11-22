@@ -141,8 +141,8 @@ class UI_PAGE_TEXT:
         return (line_num+self._page_line_num-1)//self._page_line_num
 
     @property
-    def is_pages_end(self) -> bool:
-        return self.page_no >= self.page_max
+    def is_end_page(self) -> bool:
+        return self.page_no+1 >= self.page_max
 
 
 class UI_EVENT:
