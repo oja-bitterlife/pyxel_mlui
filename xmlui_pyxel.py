@@ -96,7 +96,7 @@ def msg_win_update(state: UI_STATE, event:UI_EVENT):
 
     # 文字列更新
     wrap = msg_text.attrInt("wrap", 1024)
-    text = msg_text.getAnimText("draw_count").bind({"name":"world", "age":10}, wrap).next()
+    text = msg_text.getAnimText("draw_count").bind({"name":"world", "age":10}, wrap).next(0.1)
     page = text.usePage("page_no", 3)
 
     # カーソル表示

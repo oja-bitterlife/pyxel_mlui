@@ -2,7 +2,7 @@ import xml.etree.ElementTree
 from xml.etree.ElementTree import Element
 from typing import Callable,Any
 
-import re, copy
+import re, math, copy
 
 # 描画領域計算用
 class UI_RECT:
@@ -48,11 +48,11 @@ class UI_ANIM_TEXT:
         return self
 
     # draw_countの操作
-    def setDrawCount(self, draw_count:int) -> 'UI_ANIM_TEXT':
+    def setDrawCount(self, draw_count:float) -> 'UI_ANIM_TEXT':
         self._state.setAttr(self._draw_count_attr, draw_count)
         return self
 
-    def next(self, add:int=1) -> 'UI_ANIM_TEXT':
+    def next(self, add:float=1) -> 'UI_ANIM_TEXT':
         return self.setDrawCount(self.draw_count+add)
 
     def reset(self) -> 'UI_ANIM_TEXT':
@@ -62,8 +62,8 @@ class UI_ANIM_TEXT:
         return self.setDrawCount(len(self._display_text))
 
     @property
-    def draw_count(self) -> int:
-        return self._state.attrInt(self._draw_count_attr)
+    def draw_count(self) -> float:
+        return self._state.attrFloat(self._draw_count_attr)
 
     # 分割
     def split(self) -> list[str]:
@@ -71,12 +71,13 @@ class UI_ANIM_TEXT:
 
     # draw_countまでの文字列を改行分割
     @classmethod
-    def _limitStr(cls, tmp_text, draw_count:int) -> str:
+    def _limitStr(cls, tmp_text, draw_count:float) -> str:
+        limit = math.ceil(draw_count)
         # まずlimitまで縮める
         for i,c in enumerate(tmp_text):
             if c != "\n":
-                draw_count -= 1
-                if draw_count < 0:
+                limit -= 1
+                if limit < 0:
                     tmp_text = tmp_text[:i]
                     break
         return tmp_text.strip("\n")
@@ -92,7 +93,7 @@ class UI_ANIM_TEXT:
 
     @property
     def is_finish(self) -> int:
-        return self.draw_count >= self.length
+        return math.ceil(self.draw_count) >= self.length
 
     def usePage(self, page_no_attr:str,  page_line_num:int) -> 'UI_ANIM_PAGE':
         return UI_ANIM_PAGE(self, page_no_attr, page_line_num)
@@ -127,7 +128,7 @@ class UI_ANIM_PAGE:
 
     # textと同じIF
     @property
-    def draw_count(self) -> int:
+    def draw_count(self) -> float:
         return self._text.draw_count
 
     @property
@@ -141,7 +142,7 @@ class UI_ANIM_PAGE:
 
     @property
     def is_finish(self) -> int:
-        return self._text.draw_count >= self.length
+        return math.ceil(self._text.draw_count) >= self.length
 
     # ページ専用プロパティ
     @property
@@ -274,6 +275,9 @@ class UI_STATE:
     # *************************************************************************
     def attrInt(self, key:str, default:int=0) -> int:
         return int(self._element.attrib.get(key, default))
+
+    def attrFloat(self, key:str, default:float=0) -> float:
+        return float(self._element.attrib.get(key, default))
 
     def attrStr(self, key:str, default:str="") -> str:
         return self._element.attrib.get(key, default)
