@@ -36,12 +36,12 @@ def menu_win_update(state: UI_STATE, event:UI_EVENT):
             rows.setAttr(["x", "y"], (x*item_w, y*item_h))
 
     # カーソル
-    cursor = UI_CURSOR(state.findByTag("menu_cur"), len(grid[0]), len(grid)).moveByEvent(event.trg, "left", "right", "up", "down")
-    cursor.state.setAttr(["x", "y"], (cursor.cur_x*item_w-6, cursor.cur_y*item_h+2))  # 表示位置設定
+    cursor = UI_CURSOR(state.findByTag("menu_cur"), grid).moveByEvent(event.trg, "left", "right", "up", "down")
+    cursor.state.setAttr(["x", "y"], (cursor.selected.x-6, cursor.selected.y+2))  # 表示位置設定
 
     # 選択アイテムの表示
     if "action" in event.trg:
-        if grid[cursor.cur_y][cursor.cur_x].attrStr("action") == "speak":
+        if cursor.selected.attrStr("action") == "speak":
             # メッセージウインドウ表示
             state.open(ui_template, "win_message")
 

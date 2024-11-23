@@ -215,13 +215,11 @@ class UI_EVENT:
 
 class UI_CURSOR:
     _state: 'UI_STATE'
-    grid_w: int
-    grid_h: int
+    _grid: list[list['UI_STATE']]  # グリッド保存
 
-    def __init__(self, state:'UI_STATE', grid_w:int, grid_h:int):
+    def __init__(self, state:'UI_STATE', grid:list[list['UI_STATE']]):
         self._state = state
-        self.grid_w = grid_w
-        self.grid_h = grid_h
+        self._grid = grid
 
     # 範囲限定付き座標設定
     def setCurPos(self, x:int, y:int, wrap:bool=False) -> 'UI_CURSOR':
@@ -250,6 +248,13 @@ class UI_CURSOR:
         return self
 
     @property
+    def grid_w(self) -> int:
+        return len(self._grid[0])
+    @property
+    def grid_h(self) -> int:
+        return len(self._grid)
+
+    @property
     def cur_x(self) -> int:
         return self._state.cur_x
     @property
@@ -259,6 +264,10 @@ class UI_CURSOR:
     @property
     def state(self) -> 'UI_STATE':
         return self._state
+
+    @property
+    def selected(self) -> 'UI_STATE':
+        return self._grid[self.cur_y][self.cur_x]
 
     def __repr__(self) -> str:
         return f"UI_CURSOR({self._state.x}, {self._state.y}, {self.grid_w}, {self.grid_h})"
