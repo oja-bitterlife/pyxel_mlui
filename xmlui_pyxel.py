@@ -56,7 +56,7 @@ def msg_win_update(state: UI_STATE, event:UI_EVENT):
         else:
             # テキストを表示しきっていたら
             if page.is_finish:
-                page.next()  # 次のページ
+                page.nextPage()  # 次のページ
             # テキストがまだ残っていたら
             else:
                 text.finish()  # 一気に表示

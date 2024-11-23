@@ -61,6 +61,14 @@ class UI_ANIM_TEXT:
     def finish(self) -> 'UI_ANIM_TEXT':
         return self.setDrawCount(len(self._display_text))
 
+    @property
+    def draw_count(self) -> int:
+        return self._state.attrInt(self._draw_count_attr)
+
+    # 分割
+    def split(self) -> list[str]:
+        return self._limitStr(self.text, self.draw_count).splitlines()
+
     # draw_countまでの文字列を改行分割
     @classmethod
     def _limitStr(cls, tmp_text, draw_count:int) -> str:
@@ -73,13 +81,7 @@ class UI_ANIM_TEXT:
                     break
         return tmp_text.strip("\n")
 
-    def split(self) -> list[str]:
-        return self._limitStr(self.text, self.draw_count).splitlines()
-
-    @property
-    def draw_count(self) -> int:
-        return self._state.attrInt(self._draw_count_attr)
-
+    # テキストアクセスプロパティ
     @property
     def text(self) -> str:
         return self._display_text
@@ -107,16 +109,21 @@ class UI_ANIM_PAGE:
         self._page_line_num = page_line_num
 
     # page_noの操作
-    def setPageNo(self, page_no:int) -> 'UI_ANIM_TEXT':
+    def setPageNo(self, page_no:int) -> 'UI_ANIM_PAGE':
         self._text._state.setAttr(self._page_no_attr, page_no)
         return self
 
-    def next(self, add:int=1) -> 'UI_ANIM_TEXT':
+    def nextPage(self, add:int=1) -> 'UI_ANIM_PAGE':
         self._text.reset()  # draw_countをリセットしておく
         return self.setPageNo(self.page_no+add)
 
+    # 分割
     def split(self) -> list[str]:
         return self._text._limitStr(self.text, self._text.draw_count).splitlines()
+
+    def splitPage(self) -> list[list[str]]:
+        lines = self._text._display_text.splitlines()
+        return [lines[i:i+self._page_line_num] for i in range(0, len(lines), self._page_line_num)]
 
     # textと同じIF
     @property
@@ -126,7 +133,7 @@ class UI_ANIM_PAGE:
     @property
     def text(self) -> str:
         page_no = self._text._state.attrInt(self._page_no_attr, 0)
-        return "\n".join(self._text._display_text.splitlines()[page_no*self._page_line_num:(page_no+1)*self._page_line_num])
+        return "\n".join(self.splitPage()[page_no])
 
     @property
     def length(self) -> int:
@@ -143,8 +150,7 @@ class UI_ANIM_PAGE:
 
     @property
     def page_max(self) -> int:
-        line_num = len(self._text._display_text.splitlines())
-        return (line_num+self._page_line_num-1)//self._page_line_num
+        return len(self.splitPage())
 
     @property
     def is_end_page(self) -> bool:
