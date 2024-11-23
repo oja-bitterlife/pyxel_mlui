@@ -6,6 +6,10 @@ pyxel.init(256, 256) # 初期化(ウィンドウサイズを指定)
 import xmlui_pyxel
 ui_worker = xmlui_pyxel.ui_worker
 
+# お試し
+ui_template = xmlui_pyxel.ui_template
+ui_worker.root.open(ui_template, "menu_command")
+
 
 # Main
 def update(): # フレームの更新処理

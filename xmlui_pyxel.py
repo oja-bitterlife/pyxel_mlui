@@ -7,6 +7,8 @@ import pyxel
 font = pyxel.Font("assets/font/b12.bdf")
 FONT_SIZE = 12
 
+# お試しパラメータ
+test_params = {"name":"world", "age":10}
 
 # 入力待ち
 # *****************************************************************************
@@ -83,6 +85,7 @@ def menu_cur_draw(state:UI_STATE):
 
 # メッセージウインドウ
 # *****************************************************************************
+MSG_WIN_LINES = 3
 # 更新
 # ---------------------------------------------------------
 @ui_worker.tag_update("msg_win")
@@ -92,8 +95,8 @@ def msg_win_update(state: UI_STATE, event:UI_EVENT):
 
     # 文字列更新
     wrap = msg_text.attrInt("wrap", 1024)
-    text = msg_text.getAnimText("draw_count").bind({"name":"world", "age":10}, wrap).next(0.1)
-    page = text.usePage("page_no", 3)
+    text = msg_text.getAnimText("draw_count").bind(test_params, wrap).next(1.0)
+    page = text.usePage("page_no", MSG_WIN_LINES)
 
     # カーソル表示
     msg_cur.setAttr("visible", not page.is_end_page and page.is_finish)  # 次のページあり
@@ -128,8 +131,8 @@ def msg_win_draw(state:UI_STATE):
 def msg_text_draw(state:UI_STATE):
     # テキスト表示
     wrap = state.attrInt("wrap", 1024)
-    text = state.getAnimText("draw_count").bind({"name":"world", "age":10}, wrap)
-    page = text.usePage("page_no", 3)
+    text = state.getAnimText("draw_count").bind(test_params, wrap)
+    page = text.usePage("page_no", MSG_WIN_LINES)
 
     for i,text in enumerate(page.split()):
         pyxel.text(state.area.x, state.area.y+i*FONT_SIZE, text, 7, font)
