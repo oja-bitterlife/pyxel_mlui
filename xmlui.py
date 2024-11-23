@@ -374,6 +374,13 @@ class UI_STATE:
         outsides = self.findByTagAll(tag_outside)
         return [outside.findByTagAll(tag_inside) for outside in outsides]
 
+    def arrangeByTag(self, tag_outside:str, tag_inside:str, w:int, h:int) -> list[list['UI_STATE']]:
+        grid = self.arrayByTag(tag_outside, tag_inside)
+        for y,cols in enumerate(grid):
+            for x,rows in enumerate(cols):
+                rows.setAttr(["x", "y"], (x*w, y*h))
+        return grid
+
     @property
     def parent(self) -> 'UI_STATE|None':
         def _rec_parentSearch(element:Element, me:Element) -> Element|None:

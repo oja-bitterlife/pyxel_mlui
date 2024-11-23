@@ -28,12 +28,7 @@ def menu_win_update(state: UI_STATE, event:UI_EVENT):
     item_w, item_h = state.attrInt("item_w"), state.attrInt("item_h")
 
     # メニューアイテム取得
-    grid = state.arrayByTag("menu_row", "menu_item")
-
-    # 各アイテムの位置設定
-    for y,cols in enumerate(grid):
-        for x,rows in enumerate(cols):
-            rows.setAttr(["x", "y"], (x*item_w, y*item_h))
+    grid = state.arrangeByTag("menu_row", "menu_item", item_w, item_h)
 
     # カーソル
     cursor = UI_CURSOR(state.findByTag("menu_cur"), grid).moveByEvent(event.trg, "left", "right", "up", "down")
