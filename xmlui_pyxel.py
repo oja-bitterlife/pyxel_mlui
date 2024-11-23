@@ -103,15 +103,15 @@ def msg_win_update(state: UI_STATE, event:UI_EVENT):
     msg_cur.setAttr("visible", not page.is_end_page and page.is_finish)  # 次のページあり
 
     if "action" in event.trg:
-        if page.is_end_page:
-            state.close("menu_command")  # メニューごと閉じる
-        else:
-            # テキストを表示しきっていたら
-            if page.is_finish:
-                page.nextPage()  # 次のページ
-            # テキストがまだ残っていたら
+        # テキストを表示しきっていたら
+        if page.is_finish:
+            if page.is_end_page:
+                state.close("menu_command")  # メニューごと閉じる
             else:
-                text.finish()  # 一気に表示
+                page.nextPage()  # 次のページ
+        # テキストがまだ残っていたら
+        else:
+            text.finish()  # 一気に表示
 
     # メニューごと閉じる
     if "cancel" in event.trg:
