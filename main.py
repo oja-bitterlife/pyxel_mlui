@@ -2,12 +2,9 @@ import pyxel # Pyxelモジュールをインポート
 
 pyxel.init(256, 256) # 初期化(ウィンドウサイズを指定)
 
-from xmlui import XMLUI
-ui_worker = XMLUI.createWorker("my_ui")
-
 # お試しサンプルUI
 import xmlui_pyxel
-xmlui_pyxel.setDefaults(ui_worker)
+ui_worker = xmlui_pyxel.ui_worker
 
 
 # Main
