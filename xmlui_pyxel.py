@@ -1,9 +1,5 @@
 from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_CURSOR
 
-
-from typing import Callable,Any
-from functools import wraps
-
 ui_template = XMLUI.createFromFile("assets/ui/test.xml")
 ui_worker = XMLUI.createWorker("my_ui")
 
