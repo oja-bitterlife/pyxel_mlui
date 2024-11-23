@@ -531,15 +531,6 @@ class XMLUI:
         return self.root.findByTag(tag)
 
 
-    # 処理登録
-    # *************************************************************************
-    def setUpdateFunc(self, name:str, func:Callable[[UI_STATE,UI_EVENT], None]):
-        self._update_funcs[name] = func
-
-    def setDrawFunc(self, name:str, func:Callable[[UI_STATE], None]):
-        self._draw_funcs[name] = func
-
-
     # 更新用
     # *************************************************************************
     def update(self):
@@ -583,16 +574,35 @@ class XMLUI:
             self.drawElement(state.tag, state)
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
-    def updateElement(self, name:str, state:UI_STATE, event:UI_EVENT):
+    def updateElement(self, tag_name:str, state:UI_STATE, event:UI_EVENT):
         # デバッグ用
         state.setAttr("frame_color", 10 if event.active else 7)
 
         # 登録済みの関数だけ実行
-        if name in self._update_funcs:
-            self._update_funcs[name](state, event)
+        if tag_name in self._update_funcs:
+            self._update_funcs[tag_name](state, event)
 
-    def drawElement(self, name:str, state:UI_STATE):
+    def drawElement(self, tag_name:str, state:UI_STATE):
         # 登録済みの関数だけ実行
-        if name in self._draw_funcs:
-            self._draw_funcs[name](state)
+        if tag_name in self._draw_funcs:
+            self._draw_funcs[tag_name](state)
 
+
+    # 処理登録
+    # *************************************************************************
+    def setUpdateFunc(self, tag_name:str, func:Callable[[UI_STATE,UI_EVENT], None]):
+        self._update_funcs[tag_name] = func
+
+    def setDrawFunc(self, tag_name:str, func:Callable[[UI_STATE], None]):
+        self._draw_funcs[tag_name] = func
+
+    # デコレータを用意
+    def tag_update(self, tag_name:str):
+        def wrapper(update_func:Callable[[UI_STATE,UI_EVENT], None]):
+            self.setUpdateFunc(tag_name, update_func)
+        return wrapper
+
+    def tag_draw(self, tag_name:str):
+        def wrapper(draw_func:Callable[[UI_STATE], None]):
+            self.setDrawFunc(tag_name, draw_func)
+        return wrapper

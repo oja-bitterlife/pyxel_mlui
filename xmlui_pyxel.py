@@ -11,20 +11,10 @@ import pyxel
 font = pyxel.Font("assets/font/b12.bdf")
 FONT_SIZE = 12
 
-def update_func(xmlui:XMLUI, tag_name:str):
-    def wrapper(update_func:Callable[[UI_STATE,UI_EVENT], None]):
-        xmlui.setUpdateFunc(tag_name, update_func)
-    return wrapper
-
-def draw_func(xmlui:XMLUI, tag_name:str):
-    def wrapper(draw_func:Callable[[UI_STATE], None]):
-        xmlui.setDrawFunc(tag_name, draw_func)
-    return wrapper
-
 
 # 入力待ち
 # *****************************************************************************
-@update_func(ui_worker, "my_ui")
+@ui_worker.tag_update("my_ui")
 def my_ui_update(state: UI_STATE, event:UI_EVENT):
     # メインメニューを開く
     if "action" in event.trg:
@@ -33,7 +23,7 @@ def my_ui_update(state: UI_STATE, event:UI_EVENT):
 
 # コマンドメニュー
 # *****************************************************************************
-@update_func(ui_worker, "menu_win")
+@ui_worker.tag_update("menu_win")
 def menu_win_update(state: UI_STATE, event:UI_EVENT):
     item_w, item_h = state.attrInt("item_w"), state.attrInt("item_h")
 
@@ -61,7 +51,7 @@ def menu_win_update(state: UI_STATE, event:UI_EVENT):
 
 # メッセージウインドウ
 # *****************************************************************************
-@update_func(ui_worker, "msg_win")
+@ui_worker.tag_update("msg_win")
 def msg_win_update(state: UI_STATE, event:UI_EVENT):
     msg_cur = state.findByTag("msg_cur")
     msg_text = state.findByTag("msg_text")
@@ -89,7 +79,7 @@ def msg_win_update(state: UI_STATE, event:UI_EVENT):
     if "cancel" in event.trg:
         state.close("menu_command")
 
-@draw_func(ui_worker, "msg_win")
+@ui_worker.tag_draw("msg_win")
 def msg_win_draw(state:UI_STATE):
     frame_color = state.attrInt("frame_color", 7)
     pyxel.rect(state.area.x, state.area.y, state.area.w, state.area.h, 12)
@@ -97,7 +87,7 @@ def msg_win_draw(state:UI_STATE):
     pyxel.rectb(state.area.x+1, state.area.y+1, state.area.w-2, state.area.h-2, frame_color)
     pyxel.rectb(state.area.x+3, state.area.y+3, state.area.w-6, state.area.h-6, frame_color)
 
-@draw_func(ui_worker, "msg_text")
+@ui_worker.tag_draw("msg_text")
 def msg_text_draw(state:UI_STATE):
     # テキスト表示
     wrap = state.attrInt("wrap", 1024)
@@ -107,7 +97,7 @@ def msg_text_draw(state:UI_STATE):
     for i,text in enumerate(page.split()):
         pyxel.text(state.area.x, state.area.y+i*FONT_SIZE, text, 7, font)
 
-@draw_func(ui_worker, "msg_cur")
+@ui_worker.tag_draw("msg_cur")
 def msg_cur_draw(state:UI_STATE):
     tri_size = state.attrInt("size", 6)
     color = state.attrInt("color", 7)
@@ -116,7 +106,7 @@ def msg_cur_draw(state:UI_STATE):
     x, y = state.area.x, state.area.y
     pyxel.tri(x, y, x+tri_size, y, x+tri_size//2, y+tri_size//2, color)
 
-@draw_func(ui_worker, "menu_win")
+@ui_worker.tag_draw("menu_win")
 def menu_win_draw(state:UI_STATE):
     bg_color = state.attrInt("bg_color", 12)
     frame_color = state.attrInt("frame_color", 7)
@@ -132,12 +122,12 @@ def menu_win_draw(state:UI_STATE):
         pyxel.rect(text_x,state.area.y, str_w, FONT_SIZE, bg_color)
         pyxel.text(text_x, state.area.y-2, title, frame_color, font)
 
-@draw_func(ui_worker, "menu_item")
+@ui_worker.tag_draw("menu_item")
 def menu_item_draw(state:UI_STATE):
     color = state.attrInt("color", 7)
     pyxel.text(state.area.x, state.area.y, state.text, color, font)
 
-@draw_func(ui_worker, "menu_cur")
+@ui_worker.tag_draw("menu_cur")
 def menu_cur_draw(state:UI_STATE):
     tri_size = state.attrInt("size", 6)
     color = state.attrInt("color", 7)
