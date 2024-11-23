@@ -600,14 +600,7 @@ class XMLUI:
     def setDrawFunc(self, tag_name:str, func:Callable[[UI_STATE], None]):
         self._draw_funcs[tag_name] = func
 
-    # クラス用
-    def setUpdateMethod(self, tag_name:str, func:Callable[[Any, UI_STATE,UI_EVENT], None]):
-        self._update_funcs[tag_name] = func
-
-    def setDrawMethod(self, tag_name:str, func:Callable[[Any, UI_STATE], None]):
-        self._draw_funcs[tag_name] = func
-
-    # デコレータも用意
+    # デコレータを用意
     def update_func(self, tag_name:str):
         def wrapper(update_func:Callable[[UI_STATE,UI_EVENT], None]):
             self.setUpdateFunc(tag_name, update_func)
@@ -616,14 +609,4 @@ class XMLUI:
     def draw_func(self, tag_name:str):
         def wrapper(draw_func:Callable[[UI_STATE], None]):
             self.setDrawFunc(tag_name, draw_func)
-        return wrapper
-
-    def update_method(self, tag_name:str):
-        def wrapper(update_func:Callable[[Any, UI_STATE,UI_EVENT], None]):
-            self.setUpdateMethod(tag_name, update_func)
-        return wrapper
-
-    def draw_method(self, tag_name:str):
-        def wrapper(draw_func:Callable[[Any, UI_STATE], None]):
-            self.setDrawMethod(tag_name, draw_func)
         return wrapper
