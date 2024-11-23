@@ -30,6 +30,9 @@ class UI_RECT:
 # 半角を全角に変換
 _from_hanakaku = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 _to_zenkaku = "０１２３４５６７８９ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ"
+_from_hanakaku += " !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"  # 半角記号を追加
+_to_zenkaku += "　！＂＃＄％＆＇（）＊＋，－．／：；＜＝＞？＠［￥］＾＿｀｛｜｝～"  # 全角記号を追加
+
 _hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
 def convertHZ(hankaku:str):
     return unicodedata.normalize("NFKC", hankaku).translate(_hankaku_zenkaku_dict)
