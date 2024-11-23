@@ -23,6 +23,8 @@ def my_ui_update(state: UI_STATE, event:UI_EVENT):
 
 # コマンドメニュー
 # *****************************************************************************
+# 更新
+# ---------------------------------------------------------
 @ui_worker.tag_update("menu_win")
 def menu_win_update(state: UI_STATE, event:UI_EVENT):
     item_w, item_h = state.attrInt("item_w"), state.attrInt("item_h")
@@ -49,63 +51,8 @@ def menu_win_update(state: UI_STATE, event:UI_EVENT):
         state.close(state.id)
 
 
-# メッセージウインドウ
-# *****************************************************************************
-@ui_worker.tag_update("msg_win")
-def msg_win_update(state: UI_STATE, event:UI_EVENT):
-    msg_cur = state.findByTag("msg_cur")
-    msg_text = state.findByTag("msg_text")
-
-    # 文字列更新
-    wrap = msg_text.attrInt("wrap", 1024)
-    text = msg_text.getAnimText("draw_count").bind({"name":"world", "age":10}, wrap).next()
-    page = text.usePage("page_no", 3)
-
-    # カーソル表示
-    msg_cur.setAttr("visible", not page.is_end_page and page.is_finish)  # 次のページあり
-
-    if "action" in event.trg:
-        if page.is_end_page:
-            state.close("menu_command")  # メニューごと閉じる
-        else:
-            # テキストを表示しきっていたら
-            if page.is_finish:
-                page.nextPage()  # 次のページ
-            # テキストがまだ残っていたら
-            else:
-                text.finish()  # 一気に表示
-
-    # メニューごと閉じる
-    if "cancel" in event.trg:
-        state.close("menu_command")
-
-@ui_worker.tag_draw("msg_win")
-def msg_win_draw(state:UI_STATE):
-    frame_color = state.attrInt("frame_color", 7)
-    pyxel.rect(state.area.x, state.area.y, state.area.w, state.area.h, 12)
-    pyxel.rectb(state.area.x, state.area.y, state.area.w, state.area.h, frame_color)
-    pyxel.rectb(state.area.x+1, state.area.y+1, state.area.w-2, state.area.h-2, frame_color)
-    pyxel.rectb(state.area.x+3, state.area.y+3, state.area.w-6, state.area.h-6, frame_color)
-
-@ui_worker.tag_draw("msg_text")
-def msg_text_draw(state:UI_STATE):
-    # テキスト表示
-    wrap = state.attrInt("wrap", 1024)
-    text = state.getAnimText("draw_count").bind({"name":"world", "age":10}, wrap)
-    page = text.usePage("page_no", 3)
-
-    for i,text in enumerate(page.split()):
-        pyxel.text(state.area.x, state.area.y+i*FONT_SIZE, text, 7, font)
-
-@ui_worker.tag_draw("msg_cur")
-def msg_cur_draw(state:UI_STATE):
-    tri_size = state.attrInt("size", 6)
-    color = state.attrInt("color", 7)
-
-    # カーソル表示
-    x, y = state.area.x, state.area.y
-    pyxel.tri(x, y, x+tri_size, y, x+tri_size//2, y+tri_size//2, color)
-
+# 描画
+# ---------------------------------------------------------
 @ui_worker.tag_draw("menu_win")
 def menu_win_draw(state:UI_STATE):
     bg_color = state.attrInt("bg_color", 12)
@@ -136,4 +83,67 @@ def menu_cur_draw(state:UI_STATE):
     x = state.area.x
     y = state.area.y
     pyxel.tri(x, y, x, y+tri_size, x+tri_size//2, y+tri_size//2, color)
+
+
+# メッセージウインドウ
+# *****************************************************************************
+# 更新
+# ---------------------------------------------------------
+@ui_worker.tag_update("msg_win")
+def msg_win_update(state: UI_STATE, event:UI_EVENT):
+    msg_cur = state.findByTag("msg_cur")
+    msg_text = state.findByTag("msg_text")
+
+    # 文字列更新
+    wrap = msg_text.attrInt("wrap", 1024)
+    text = msg_text.getAnimText("draw_count").bind({"name":"world", "age":10}, wrap).next()
+    page = text.usePage("page_no", 3)
+
+    # カーソル表示
+    msg_cur.setAttr("visible", not page.is_end_page and page.is_finish)  # 次のページあり
+
+    if "action" in event.trg:
+        if page.is_end_page:
+            state.close("menu_command")  # メニューごと閉じる
+        else:
+            # テキストを表示しきっていたら
+            if page.is_finish:
+                page.nextPage()  # 次のページ
+            # テキストがまだ残っていたら
+            else:
+                text.finish()  # 一気に表示
+
+    # メニューごと閉じる
+    if "cancel" in event.trg:
+        state.close("menu_command")
+
+
+# 描画
+# ---------------------------------------------------------
+@ui_worker.tag_draw("msg_win")
+def msg_win_draw(state:UI_STATE):
+    frame_color = state.attrInt("frame_color", 7)
+    pyxel.rect(state.area.x, state.area.y, state.area.w, state.area.h, 12)
+    pyxel.rectb(state.area.x, state.area.y, state.area.w, state.area.h, frame_color)
+    pyxel.rectb(state.area.x+1, state.area.y+1, state.area.w-2, state.area.h-2, frame_color)
+    pyxel.rectb(state.area.x+3, state.area.y+3, state.area.w-6, state.area.h-6, frame_color)
+
+@ui_worker.tag_draw("msg_text")
+def msg_text_draw(state:UI_STATE):
+    # テキスト表示
+    wrap = state.attrInt("wrap", 1024)
+    text = state.getAnimText("draw_count").bind({"name":"world", "age":10}, wrap)
+    page = text.usePage("page_no", 3)
+
+    for i,text in enumerate(page.split()):
+        pyxel.text(state.area.x, state.area.y+i*FONT_SIZE, text, 7, font)
+
+@ui_worker.tag_draw("msg_cur")
+def msg_cur_draw(state:UI_STATE):
+    tri_size = state.attrInt("size", 6)
+    color = state.attrInt("color", 7)
+
+    # カーソル表示
+    x, y = state.area.x, state.area.y
+    pyxel.tri(x, y, x+tri_size, y, x+tri_size//2, y+tri_size//2, color)
 
