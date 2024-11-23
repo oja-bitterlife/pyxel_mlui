@@ -29,10 +29,7 @@ def menu_win_update(state: UI_STATE, event:UI_EVENT):
 
     # メニューアイテム取得
     grid = state.arrangeGridByTag("menu_row", "menu_item", item_w, item_h)
-
-    # カーソル
     cursor = UI_GRID_CURSOR(state.findByTag("menu_cur"), grid).moveByEvent(event.trg, "left", "right", "up", "down")
-    cursor.setPos(cursor.selected.x-6, cursor.selected.y+2)  # 表示位置設定
 
     # 選択アイテムの表示
     if "action" in event.trg:
@@ -74,8 +71,8 @@ def menu_cur_draw(state:UI_STATE):
     color = state.attrInt("color", 7)
 
     # カーソル表示
-    x = state.area.x
-    y = state.area.y
+    x = state.area.x-6
+    y = state.area.y+2
     pyxel.tri(x, y, x, y+tri_size, x+tri_size//2, y+tri_size//2, color)
 
 

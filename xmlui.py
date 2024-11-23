@@ -206,6 +206,7 @@ class UI_GRID_CURSOR:
     def setCurPos(self, x:int, y:int, wrap:bool=False) -> 'UI_GRID_CURSOR':
         self._state.setAttr("cur_x", (x + self.grid_w) % self.grid_w if wrap else max(min(x, self.grid_w-1), 0))
         self._state.setAttr("cur_y", (y + self.grid_h) % self.grid_h if wrap else max(min(y, self.grid_h-1), 0))
+        self.setPos(self.selected.x, self.selected.y)
         return self
 
     def moveLeft(self, wrap:bool=False) -> 'UI_GRID_CURSOR':
