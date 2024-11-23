@@ -476,6 +476,20 @@ class UI_STATE:
         return self.attrInt("cur_y", 0)
 
 
+# 更新用IF
+# #############################################################################
+class UI_CLASS_IF:
+    def __init__(self, xmlui:'XMLUI', tag_name:str):
+        xmlui.setInstance(tag_name, self)
+        pass
+
+    def update(self, state:UI_STATE, event:UI_EVENT):
+        pass
+
+    def draw(self, state:UI_STATE):
+        pass
+
+
 # XMLでUIライブラリ本体
 # #############################################################################
 class XMLUI:
@@ -505,6 +519,7 @@ class XMLUI:
         # 処理関数の登録
         self._update_funcs = {}
         self._draw_funcs = {}
+        self._update_draw_class = {}
 
         # root_tag指定が無ければ最上位エレメント
         if root_tag is None:
@@ -586,10 +601,16 @@ class XMLUI:
         if tag_name in self._update_funcs:
             self._update_funcs[tag_name](state, event)
 
+        if tag_name in self._update_draw_class:
+            self._update_draw_class[tag_name].update(state, event)
+
     def drawElement(self, tag_name:str, state:UI_STATE):
         # 登録済みの関数だけ実行
         if tag_name in self._draw_funcs:
             self._draw_funcs[tag_name](state)
+
+        if tag_name in self._update_draw_class:
+            self._update_draw_class[tag_name].draw(state)
 
 
     # 処理登録
@@ -599,6 +620,9 @@ class XMLUI:
 
     def setDrawFunc(self, tag_name:str, func:Callable[[UI_STATE], None]):
         self._draw_funcs[tag_name] = func
+
+    def setInstance(self, tag_name:str, instance:Any):
+        self._update_draw_class[tag_name] = instance
 
     # デコレータを用意
     def update_func(self, tag_name:str):
