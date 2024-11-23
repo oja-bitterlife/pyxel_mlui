@@ -41,8 +41,9 @@ def menu_win_update(state: UI_STATE, event:UI_EVENT):
 
     # 選択アイテムの表示
     if "action" in event.trg:
-        # メッセージウインドウ表示
-        state.open(ui_template, "win_message")
+        if grid[cursor.cur_y][cursor.cur_x].attrStr("action") == "speak":
+            # メッセージウインドウ表示
+            state.open(ui_template, "win_message")
 
     # 閉じる
     if "cancel" in event.trg:
