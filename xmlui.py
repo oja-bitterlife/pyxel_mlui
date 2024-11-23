@@ -2,7 +2,6 @@ import xml.etree.ElementTree
 from xml.etree.ElementTree import Element
 from typing import Callable,Any
 
-import unicodedata
 import re, math, copy
 
 # 描画領域計算用
@@ -73,14 +72,12 @@ class UI_ANIM_TEXT:
     # draw_countまでの文字列を改行分割
     @classmethod
     def _limitStr(cls, tmp_text, draw_count:float) -> str:
-        limit = math.ceil(draw_count)*2  # draw_countは全角カウント
+        limit = math.ceil(draw_count)
         # まずlimitまで縮める
         for i,c in enumerate(tmp_text):
-            if c != "\n":
-                limit -= 1 if unicodedata.east_asian_width(c) in ["H", "Na"] else 2  # 全角は2消費
-                if limit < 0:
-                    tmp_text = tmp_text[:i]
-                    break
+            if (limit := limit if c == "\n" else limit-1) < 0:
+                tmp_text = tmp_text[:i]
+                break
         return tmp_text.strip("\n")
 
     # テキストアクセスプロパティ
