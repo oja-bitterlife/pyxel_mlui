@@ -73,14 +73,11 @@ class UI_ANIM_TEXT:
     # draw_countまでの文字列を改行分割
     @classmethod
     def _limitStr(cls, tmp_text, draw_count:float) -> str:
-        limit = math.ceil(draw_count)
+        limit = math.ceil(draw_count)*2  # draw_countは全角カウント
         # まずlimitまで縮める
         for i,c in enumerate(tmp_text):
             if c != "\n":
-                if unicodedata.east_asian_width(c) in ["H", "Na"]:
-                    limit -= 0.5
-                else:
-                    limit -= 1
+                limit -= 1 if unicodedata.east_asian_width(c) in ["H", "Na"] else 2  # 全角は2消費
                 if limit < 0:
                     tmp_text = tmp_text[:i]
                     break
