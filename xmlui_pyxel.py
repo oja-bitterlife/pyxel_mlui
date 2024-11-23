@@ -21,7 +21,7 @@ class IDLE_UI(UI_CLASS_IF):
         if "action" in event.trg:
             state.open(ui_template, "menu_command")
 
-idle_inst = IDLE_UI(ui_worker, "my_ui")
+IDLE_UI(ui_worker, "my_ui")
 
 
 # コマンドメニュー
