@@ -349,15 +349,28 @@ class UI_STATE:
 
     # GRID用
     def findGridByTag(self, tag_outside:str, tag_inside:str) -> list[list['UI_STATE']]:
-        outsides = self.findByTagAll(tag_outside)
-        return [outside.findByTagAll(tag_inside) for outside in outsides]
+        return [outside.findByTagAll(tag_inside) for outside in self.findByTagAll(tag_outside)]
 
-    def arrangeGridByTag(self, tag_outside:str, tag_inside:str, w:int, h:int) -> list[list['UI_STATE']]:
+    # 転置(Transpose)GRID
+    def findGridByTagT(self, tag_outside:str, tag_inside:str) -> list[list['UI_STATE']]:
         grid = self.findGridByTag(tag_outside, tag_inside)
+        grid = [[grid[y][x] for y in range(len(grid))] for x in range(len(grid[0]))]  # 転置
+        return grid
+
+    # グリッド各アイテムの座標設定
+    def _arrangeGrid(self, grid:list[list['UI_STATE']], w:int, h:int):
         for y,cols in enumerate(grid):
             for x,rows in enumerate(cols):
                 rows.setAttr(["x", "y"], (x*w, y*h))
         return grid
+
+    # 横並びグリッド
+    def arrangeGridByTag(self, tag_outside:str, tag_inside:str, w:int, h:int) -> list[list['UI_STATE']]:
+        return self._arrangeGrid(self.findGridByTag(tag_outside, tag_inside), w, h)
+
+    # 転置縦並びグリッド
+    def arrangeGridByTagT(self, tag_outside:str, tag_inside:str, w:int, h:int) -> list[list['UI_STATE']]:
+        return self._arrangeGrid(self.findGridByTagT(tag_outside, tag_inside), w, h)
 
     @property
     def parent(self) -> 'UI_STATE|None':
