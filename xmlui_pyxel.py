@@ -1,4 +1,4 @@
-from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_GRID_CURSOR,UI_CLASS_IF
+from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_GRID_CURSOR
 
 ui_template = XMLUI.createFromFile("assets/ui/test.xml")
 ui_worker = XMLUI.createWorker("my_ui")
@@ -12,16 +12,11 @@ test_params = {"name":"world", "age":10}
 
 # 入力待ち
 # *****************************************************************************
-class IDLE_UI(UI_CLASS_IF):
-    def __init__(self, xmlui: XMLUI, tag_name: str):
-        super().__init__(xmlui, tag_name)
-
-    def update(self, state:UI_STATE, event:UI_EVENT):
-        # メインメニューを開く
-        if "action" in event.trg:
-            state.open(ui_template, "menu_command")
-
-IDLE_UI(ui_worker, "my_ui")
+@ui_worker.update_func("my_ui")
+def my_ui_update(state:UI_STATE, event:UI_EVENT):
+    # メインメニューを開く
+    if "action" in event.trg:
+        state.open(ui_template, "menu_command")
 
 
 # コマンドメニュー
