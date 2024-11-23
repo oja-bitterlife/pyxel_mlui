@@ -2,6 +2,7 @@ import xml.etree.ElementTree
 from xml.etree.ElementTree import Element
 from typing import Callable,Any
 
+import unicodedata
 import re, math, copy
 
 # 描画領域計算用
@@ -76,7 +77,10 @@ class UI_ANIM_TEXT:
         # まずlimitまで縮める
         for i,c in enumerate(tmp_text):
             if c != "\n":
-                limit -= 1
+                if unicodedata.east_asian_width(c) in ["H", "Na"]:
+                    limit -= 0.5
+                else:
+                    limit -= 1
                 if limit < 0:
                     tmp_text = tmp_text[:i]
                     break
