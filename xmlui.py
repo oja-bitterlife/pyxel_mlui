@@ -581,14 +581,9 @@ class XMLUI:
         # エリア更新
         for state in draw_states:
             if state.parent:  # rootは親を持たないので更新不要
-                if state.hasAttr("abs_x"):
-                    state.setAttr("area_x", state.abs_x)  # 絶対座標
-                else:
-                    state.setAttr("area_x", state.x + state.parent.area_x)  # オフセット
-                if state.hasAttr("abs_y"):
-                    state.setAttr("area_y", state.abs_y)  # 絶対座標
-                else:
-                    state.setAttr("area_y", state.y + state.parent.area_y)  # オフセット
+                # absがあれば絶対座標、なければ親からのオフセット
+                state.setAttr("area_x", state.abs_x if state.hasAttr("abs_x") else state.x + state.parent.area_x)
+                state.setAttr("area_y", state.abs_y if state.hasAttr("abs_y") else state.y + state.parent.area_y)
                 state.setAttr("area_w", state.attrInt("w", state.parent.area_w))
                 state.setAttr("area_h", state.attrInt("h", state.parent.area_h))
 
