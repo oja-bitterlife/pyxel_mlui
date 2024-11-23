@@ -3,6 +3,7 @@ from xml.etree.ElementTree import Element
 from typing import Callable,Any
 
 import re, math, copy
+import unicodedata
 
 # 描画領域計算用
 class UI_RECT:
@@ -26,6 +27,13 @@ class UI_RECT:
         return f"RECT({self.x}, {self.y}, {self.w}, {self.h})"
 
 
+# 半角を全角に変換
+_from_hanakaku = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+_to_zenkaku = "０１２３４５６７８９ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ"
+_hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
+def convertHZ(hankaku:str):
+    return unicodedata.normalize("NFKC", hankaku).translate(_hankaku_zenkaku_dict)
+
 # アニメーションテキスト表示用
 class UI_ANIM_TEXT:
     # クラス定数
@@ -43,8 +51,9 @@ class UI_ANIM_TEXT:
 
     def bind(self, params:dict[str, Any]={}, wrap:int=4096) -> 'UI_ANIM_TEXT':
         wrap = max(1, wrap)  # 0だと無限になってしまうので最低1を入れておく
-        tmp_text = re.sub(self.SEPARATE_REGEXP, "\n", self._state.text).strip().format(**params)
-        self._display_text = "\n".join([tmp_text[i:i+wrap].strip("\n") for i in range(0, len(tmp_text), wrap)])
+        tmp_text = convertHZ(re.sub(self.SEPARATE_REGEXP, "\n", self._state.text).strip().format(**params))
+        # 各行に分解し、その行をさらにwrapで分解する
+        self._display_text = "\n".join(["\n".join([line[i:i+wrap].strip("\n") for i in range(0, len(line), wrap)]) for line in tmp_text.splitlines()])
         return self
 
     # draw_countの操作
