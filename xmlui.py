@@ -369,13 +369,13 @@ class UI_STATE:
             parent = parent.parent
         raise Exception(f"Tag '{tag}' not found in parents")
 
-    # 子の2D配列を返す
-    def arrayByTag(self, tag_outside:str, tag_inside:str) -> list[list['UI_STATE']]:
+    # GRID用
+    def findGridByTag(self, tag_outside:str, tag_inside:str) -> list[list['UI_STATE']]:
         outsides = self.findByTagAll(tag_outside)
         return [outside.findByTagAll(tag_inside) for outside in outsides]
 
-    def arrangeByTag(self, tag_outside:str, tag_inside:str, w:int, h:int) -> list[list['UI_STATE']]:
-        grid = self.arrayByTag(tag_outside, tag_inside)
+    def arrangeGridByTag(self, tag_outside:str, tag_inside:str, w:int, h:int) -> list[list['UI_STATE']]:
+        grid = self.findGridByTag(tag_outside, tag_inside)
         for y,cols in enumerate(grid):
             for x,rows in enumerate(cols):
                 rows.setAttr(["x", "y"], (x*w, y*h))
