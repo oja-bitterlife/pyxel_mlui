@@ -42,15 +42,11 @@ class UI_ANIM_TEXT:
     # クラス定数
     SEPARATE_REGEXP:str = r"\\n"
 
-    _state: 'UI_STATE'
-    _draw_count_attr: str  # 描画文字数
-    _display_text: str  # 最終テキスト
-
     # 改行コードに変換しておく
     def __init__(self, state:'UI_STATE', draw_count_attr:str):
         self._state = state
-        self._draw_count_attr = draw_count_attr
-        self._display_text = re.sub(self.SEPARATE_REGEXP, "\n", self._state.text).strip()
+        self._draw_count_attr = draw_count_attr  # 描画文字数
+        self._display_text = re.sub(self.SEPARATE_REGEXP, "\n", self._state.text).strip()  # 最終テキスト
 
     def bind(self, params:dict[str, Any]={}, wrap:int=4096) -> 'UI_ANIM_TEXT':
         wrap = max(1, wrap)  # 0だと無限になってしまうので最低1を入れておく
@@ -110,14 +106,10 @@ class UI_ANIM_TEXT:
 
 # Page関係
 class UI_ANIM_PAGE:
-    _text: UI_ANIM_TEXT  # 作成元
-    _page_line_num: int  # ページ行数
-    _page_no_attr: str  # ページ番号
-
     def __init__(self, text:UI_ANIM_TEXT, page_no_attr:str,  page_line_num:int):
-        self._text = text
-        self._page_no_attr = page_no_attr
-        self._page_line_num = page_line_num
+        self._text = text  # 作成元
+        self._page_no_attr = page_no_attr  # ページ番号
+        self._page_line_num = page_line_num  # ページ行数
 
     # page_noの操作
     def setPageNo(self, page_no:int) -> 'UI_ANIM_PAGE':
@@ -169,20 +161,12 @@ class UI_ANIM_PAGE:
 
 
 class UI_EVENT:
-    active:bool  # 現在アクティブかどうか
-
-    # 入力状態の保存
-    _receive:set[str]  # 次の状態受付
-    _input:set[str]
-    _trg:set[str]
-    _release:set[str]
-
     def __init__(self, init_active=False):
-        self.active = init_active
+        self.active = init_active  # 現在アクティブかどうか
+        self._receive = set([])  # 次の状態受付
         self._input = set([])
         self._trg = set([])
         self._release = set([])
-        self._receive = set([])
 
     # 更新
     def update(self):
@@ -214,12 +198,9 @@ class UI_EVENT:
 
 
 class UI_GRID_CURSOR:
-    _state: 'UI_STATE'
-    _grid: list[list['UI_STATE']]  # グリッド保存
-
     def __init__(self, state:'UI_STATE', grid:list[list['UI_STATE']]):
-        self._state = state
-        self._grid = grid
+        self._state = state  # カーソル位置保存用
+        self._grid = grid  # グリッド保存
 
     # 範囲限定付き座標設定
     def setCurPos(self, x:int, y:int, wrap:bool=False) -> 'UI_GRID_CURSOR':
@@ -275,13 +256,9 @@ class UI_GRID_CURSOR:
 
 # UIパーツの状態管理ラッパー
 class UI_STATE:
-    xmlui: 'XMLUI'  # ライブラリへのIF
-    _element: Element  # 自身のElement
-
     def __init__(self, xmlui:'XMLUI', element:Element):
-        # プロパティの初期化
-        self.xmlui = xmlui
-        self._element = element
+        self.xmlui = xmlui  # ライブラリへのIF
+        self._element = element  # 自身のElement
 
     def disableEvent(self) -> 'UI_STATE':
         return self.setAttr("use_event", False)
@@ -488,18 +465,6 @@ class UI_STATE:
 # XMLでUIライブラリ本体
 # #############################################################################
 class XMLUI:
-    root: UI_STATE
-
-    # 入力処理
-    event: UI_EVENT
-
-    # 処理関数の登録
-    _update_funcs: dict[str, Callable[[UI_STATE,UI_EVENT], None]]
-    _draw_funcs: dict[str, Callable[[UI_STATE], None]]
-
-    # 更新管理(drawはupdateされたElementのみ対象に)
-    _update_states_cache: list[UI_STATE]  # 更新対象のキャッシュ
-
     # 初期化
     # *************************************************************************
     # ファイルから読み込み
@@ -521,9 +486,9 @@ class XMLUI:
     # 初期化。<xmlui>を持つXMLを突っ込む
     def __init__(self, dom:xml.etree.ElementTree.Element, root_tag:str|None=None):
         # 入力
-        self.event = UI_EVENT(True)  # 唯一のactiveとする
+        self._event = UI_EVENT(True)  # 唯一のactiveとする
 
-        # 更新処理
+        # 処理関数の登録
         self._update_funcs = {}
         self._draw_funcs = {}
 
@@ -565,7 +530,7 @@ class XMLUI:
     # *************************************************************************
     def update(self):
         # (入力)イベントの更新
-        self.event.update()
+        self._event.update()
 
         # 更新対象Elementを取得
         self._update_states_cache = [UI_STATE(self, element) for element in self.root._element.iter() if element.attrib.get("enable", True)]
@@ -576,7 +541,7 @@ class XMLUI:
 
         # 更新処理
         for state in self._update_states_cache:
-            self.updateElement(state.tag, state, self.event if state == active_state else UI_EVENT())
+            self.updateElement(state.tag, state, self._event if state == active_state else UI_EVENT())
 
 
     # 描画用
