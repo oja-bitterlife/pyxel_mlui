@@ -1,4 +1,4 @@
-from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_CURSOR
+from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_GRID_CURSOR
 
 ui_template = XMLUI.createFromFile("assets/ui/test.xml")
 ui_worker = XMLUI.createWorker("my_ui")
@@ -31,8 +31,8 @@ def menu_win_update(state: UI_STATE, event:UI_EVENT):
     grid = state.arrangeGridByTag("menu_row", "menu_item", item_w, item_h)
 
     # カーソル
-    cursor = UI_CURSOR(state.findByTag("menu_cur"), grid).moveByEvent(event.trg, "left", "right", "up", "down")
-    cursor.state.setAttr(["x", "y"], (cursor.selected.x-6, cursor.selected.y+2))  # 表示位置設定
+    cursor = UI_GRID_CURSOR(state.findByTag("menu_cur"), grid).moveByEvent(event.trg, "left", "right", "up", "down")
+    cursor.setPos(cursor.selected.x-6, cursor.selected.y+2)  # 表示位置設定
 
     # 選択アイテムの表示
     if "action" in event.trg:

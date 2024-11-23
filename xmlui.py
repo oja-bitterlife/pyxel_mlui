@@ -213,7 +213,7 @@ class UI_EVENT:
         return self._release  # 解除された入力を取得
 
 
-class UI_CURSOR:
+class UI_GRID_CURSOR:
     _state: 'UI_STATE'
     _grid: list[list['UI_STATE']]  # グリッド保存
 
@@ -222,21 +222,21 @@ class UI_CURSOR:
         self._grid = grid
 
     # 範囲限定付き座標設定
-    def setCurPos(self, x:int, y:int, wrap:bool=False) -> 'UI_CURSOR':
+    def setCurPos(self, x:int, y:int, wrap:bool=False) -> 'UI_GRID_CURSOR':
         self._state.setAttr("cur_x", (x + self.grid_w) % self.grid_w if wrap else max(min(x, self.grid_w-1), 0))
         self._state.setAttr("cur_y", (y + self.grid_h) % self.grid_h if wrap else max(min(y, self.grid_h-1), 0))
         return self
 
-    def moveLeft(self, wrap:bool=False) -> 'UI_CURSOR':
+    def moveLeft(self, wrap:bool=False) -> 'UI_GRID_CURSOR':
         return self.setCurPos(self._state.cur_x-1, self._state.cur_y, wrap)
-    def moveRight(self, wrap:bool=False) -> 'UI_CURSOR':
+    def moveRight(self, wrap:bool=False) -> 'UI_GRID_CURSOR':
         return self.setCurPos(self._state.cur_x+1, self._state.cur_y, wrap)
-    def moveUp(self, wrap:bool=False) -> 'UI_CURSOR':
+    def moveUp(self, wrap:bool=False) -> 'UI_GRID_CURSOR':
         return self.setCurPos(self._state.cur_x, self._state.cur_y-1, wrap)
-    def moveDown(self, wrap:bool=False) -> 'UI_CURSOR':
+    def moveDown(self, wrap:bool=False) -> 'UI_GRID_CURSOR':
         return self.setCurPos(self._state.cur_x, self._state.cur_y+1, wrap)
 
-    def moveByEvent(self, input:set[str], leftEvent:str, rightEvent:str, upEvent:str, downEvent:str, x_wrap:bool=False, y_wrap:bool=False) -> 'UI_CURSOR':
+    def moveByEvent(self, input:set[str], leftEvent:str, rightEvent:str, upEvent:str, downEvent:str, x_wrap:bool=False, y_wrap:bool=False) -> 'UI_GRID_CURSOR':
         if leftEvent in input:
             self.moveLeft(x_wrap)
         if rightEvent in input:
@@ -262,12 +262,12 @@ class UI_CURSOR:
         return self._state.cur_y
 
     @property
-    def state(self) -> 'UI_STATE':
-        return self._state
-
-    @property
     def selected(self) -> 'UI_STATE':
         return self._grid[self.cur_y][self.cur_x]
+
+    # 表示位置設定
+    def setPos(self, x, y):
+        self._state.setAttr(["x", "y"], [x, y])
 
     def __repr__(self) -> str:
         return f"UI_CURSOR({self._state.x}, {self._state.y}, {self.grid_w}, {self.grid_h})"
