@@ -655,10 +655,14 @@ class UI_GRID_CURSOR:
 
 # ダイアル
 class UI_DIAL:
-    def __init__(self, state:'UI_STATE', digits_attr:str, digit_no_attr:str, digit_num:int, digit_list:str="0123456789"):
+    def __init__(self, state:'UI_STATE', digits_attr:str, digit_no_attr:str, digit_num:int, digit_list:str="０１２３４５６７８９"):
         self._state = state
         self._digits_attr = digits_attr
         self._digit_no_attr = digit_no_attr
         self._digit_num = digit_num
         self._digit_list = digit_list
+
+        # 初期値
+        digits = digit_list[0]*digit_num
+        state.setAttr(self._digits_attr, digits)
 
