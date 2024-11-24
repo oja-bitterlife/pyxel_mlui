@@ -606,10 +606,22 @@ class UI_ANIM_PAGE:
 
 # メニュー系
 # ---------------------------------------------------------
-# グリッド系選択肢
-class UI_GRID_CURSOR:
-    def __init__(self, state:'UI_STATE', grid:list[list['UI_STATE']]):
+# グリッド情報
+class UI_GRID_CURSOR_RO:
+    def __init__(self, state:'UI_STATE'):
         self._state = state  # カーソル位置保存用
+
+    @property
+    def cur_x(self) -> int:
+        return self._state.cur_x
+    @property
+    def cur_y(self) -> int:
+        return self._state.cur_y
+
+# グリッド選択
+class UI_GRID_CURSOR(UI_GRID_CURSOR_RO):
+    def __init__(self, state:'UI_STATE', grid:list[list['UI_STATE']]):
+        super().__init__(state)
         self._grid = grid  # グリッド保存
 
     # 範囲限定付き座標設定
@@ -649,18 +661,8 @@ class UI_GRID_CURSOR:
         return len(self._grid)
 
     @property
-    def cur_x(self) -> int:
-        return self._state.cur_x
-    @property
-    def cur_y(self) -> int:
-        return self._state.cur_y
-
-    @property
     def selected(self) -> 'UI_STATE':
         return self._grid[self.cur_y][self.cur_x]
-
-    def __repr__(self) -> str:
-        return f"UI_CURSOR({self._state.x}, {self._state.y}, {self.grid_w}, {self.grid_h})"
 
 
 # ダイアル
@@ -691,15 +693,12 @@ class UI_DIAL_RO:
 # ダイアル操作
 class UI_DIAL(UI_DIAL_RO):
     def __init__(self, state:'UI_STATE', digits_attr:str, digit_pos_attr:str, digit_num:int, digit_list:str="0123456789"):
+        super().__init__(state, digits_attr, digit_pos_attr)
+        self._digit_list = digit_list  # 数字リスト。基本は数字だけどどんな文字でもいける
+
         # 初期化
         if not state.hasAttr(digits_attr):
             state.setAttr(digits_attr, digit_list[0]*digit_num)
-        state.setAttr(digit_pos_attr, state.attrInt(digit_pos_attr))
-
-        # super()の前にattributeの事前追加をしておくこと
-        super().__init__(state, digits_attr, digit_pos_attr)
-
-        self._digit_list = digit_list  # 数字リスト。基本は数字だけどどんな文字でもいける
 
     # 移動しすぎ禁止付きdigit_pos設定
     def setDigitPos(self, digit_pos) -> 'UI_DIAL':
