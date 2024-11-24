@@ -1,4 +1,4 @@
-from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_GRID_CURSOR,UI_PAGE_ANIM,UI_PAGE_TEXT,UI_DIAL,UI_DIAL_RO
+from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_GRID_CURSOR,UI_TEXT,UI_DIAL,UI_DIAL_RO
 
 ui_template = XMLUI.createFromFile("assets/ui/test.xml")
 ui_worker = XMLUI.createWorker("my_ui")
@@ -89,19 +89,18 @@ def msg_win_update(msg_win:UI_STATE, event:UI_EVENT):
     msg_text = msg_win.findByTag("msg_text")
 
     # 文字列更新
-    page = UI_PAGE_TEXT(msg_text, "format_text",  "page_no", 3, test_params)
-    anim = UI_PAGE_ANIM(page, "draw_count")
+    text = UI_TEXT(msg_text, "format_text",  "draw_count", "page_no", 3, test_params)
 
     # 次のページありカーソル表示
-    msg_cur.setVisible(not page.is_end_page and anim.is_finish)
+    msg_cur.setVisible(not text.is_end_page and text.is_finish)
 
     if "button_a" in event.trg or "button_b" in event.trg:
         # 表示しきっていたらメニューごと閉じる
-        if page.is_end_page:
+        if text.is_end_page:
             msg_win.close("menu_command")
         # なにか残っていたら適切なアクション(ライブラリにお任せ)
         else:
-            anim.action()
+           text.action()
 
 # 描画
 # ---------------------------------------------------------
@@ -116,10 +115,9 @@ def msg_win_draw(msg_win:UI_STATE, event:UI_EVENT):
 @ui_worker.draw_func("msg_text")
 def msg_text_draw(msg_text:UI_STATE, event:UI_EVENT):
     # テキスト表示
-    page = UI_PAGE_TEXT(msg_text, "format_text",  "page_no", 3, test_params)
-    anim = UI_PAGE_ANIM(page, "draw_count")
+    text = UI_TEXT(msg_text, "format_text",  "draw_count", "page_no", 3, test_params)
 
-    for i,text in enumerate(page.page_text.split()):
+    for i,text in enumerate(text.page_text.split()):
         pyxel.text(msg_text.area.x, msg_text.area.y+i*FONT_SIZE, text, 7, font)
 
 @ui_worker.draw_func("msg_cur")

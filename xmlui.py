@@ -484,13 +484,14 @@ _hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
 # まずは読み込み用
 # *****************************************************************************
 # テキスト基底(フォーマット済み)
-class UI_PAGE_TEXT:
+class UI_TEXT:
     # クラス定数
     SEPARATE_REGEXP:str = r"\\n"
 
-    def __init__(self, state:'UI_STATE', format_text_attr:str, page_no_attr:str, page_line_num:int, params:dict[str, Any]={}):
+    def __init__(self, state:'UI_STATE', format_text_attr:str, draw_count_attr:str, page_no_attr:str, page_line_num:int, params:dict[str, Any]={}):
         self._state = state
         self._format_text_attr = format_text_attr  # 変換後テキスト置き場
+        self._draw_count_attr = draw_count_attr
         self._page_no_attr = page_no_attr  # ページ番号置き場
 
         # 改行を\nに統一して全角化
@@ -500,7 +501,7 @@ class UI_PAGE_TEXT:
         wrap = max(1, self._state.wrap)  # 0だと無限になってしまうので最低1を入れておく
         wrap_text =  [[line[i:i+wrap] for i in  range(0, len(line), wrap)] for line in tmp_text.splitlines()]
 
-        # ページごとに\0で分割
+        # ページごとに\0で分割されたキーワード置換された改行が\nで統一された文字列を保存
         pages_text = self. _splitPage(sum(wrap_text, []), page_line_num)
         self._state.setAttr(self._format_text_attr, pages_text)
 
@@ -538,11 +539,7 @@ class UI_PAGE_TEXT:
 
     @property
     def page_text(self) -> str:
-        return self.all_text.split("\0")[self.page_no]
-
-    @property
-    def length(self) -> int:
-        return len(self.text.replace("\n", ""))
+        return "" if self.page_max else self.all_text.split("\0")[self.page_no]
 
     # ユーティリティ
     # -----------------------------------------------------
@@ -551,21 +548,15 @@ class UI_PAGE_TEXT:
     def convertZenkaku(cls, hankaku:str):
         return unicodedata.normalize("NFKC", hankaku).translate(_hankaku_zenkaku_dict)
 
-
-class UI_PAGE_ANIM:
-    def __init__(self, text:UI_PAGE_TEXT, draw_count_attr:str):
-        self._text = text
-        self._draw_count_attr = draw_count_attr
-
     # アニメーション情報
     # -----------------------------------------------------
     @property
     def draw_count(self) -> float:
-        return self._text._state.attrFloat(self._draw_count_attr)
+        return self._state.attrFloat(self._draw_count_attr)
 
     @property
     def is_finish(self) -> bool:
-        return math.ceil(self.draw_count) >= len(self._text.page_text.replace("\n", ""))
+        return math.ceil(self.draw_count) >= len(self.page_text.replace("\n", ""))
 
     # 出力用行配列取得
     # -----------------------------------------------------
@@ -583,15 +574,15 @@ class UI_PAGE_ANIM:
     # アニメーション管理
     # -----------------------------------------------------
     def finish(self):
-        self._text._state.setAttr(self._draw_count_attr, 65536)
+        self._state.setAttr(self._draw_count_attr, len(self.page_textl))
 
     # イベントアクション
     # -----------------------------------------------------
     def action(self):  # 結果が一意でないのでselfは返さない
         if not self.is_finish:
             self.finish()
-        elif not self._text.is_end_page:
-            self._text.nextPage()
+        elif not self.is_end_page:
+            self.nextPage()
 
 
 # メニュー系
