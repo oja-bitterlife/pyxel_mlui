@@ -528,8 +528,8 @@ class UI_PAGE_TEXT_RO(UI_FORMAT_TEXT_RO):
         return self.text.splitlines()
 
     # 全てのページをベージごとに改行分割
-    def splitPage(self) -> list[list[str]]:
-        lines = self.text.splitlines()
+    def _splitPage(self) -> list[list[str]]:
+        lines = self._state.attrStr(self._format_text_attr).splitlines()
         return [lines[i:i+self.page_line_num] for i in range(0, len(lines), self.page_line_num)]
 
     # ページ状態取得
@@ -546,7 +546,7 @@ class UI_PAGE_TEXT_RO(UI_FORMAT_TEXT_RO):
     # ページの最大数
     @property
     def page_max(self) -> int:
-        return len(self.splitPage())
+        return len(self._splitPage())
 
     # ページ全部表示済みかどうか
     @property
@@ -559,7 +559,7 @@ class UI_PAGE_TEXT_RO(UI_FORMAT_TEXT_RO):
     @property
     def text(self) -> str:
         page_no = self._state.attrInt(self._page_no_attr, 0)
-        return "\n".join(self.splitPage()[page_no])
+        return "\n".join(self._splitPage()[page_no])
 
     # 現在ページテキスト長
     @property
