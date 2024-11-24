@@ -483,16 +483,20 @@ _hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
 
 # まずは読み込み用
 # *****************************************************************************
-# テキスト基底(フォーマット済み)
-class UI_TEXT:
+class UI_TEXT_RO:
     # クラス定数
     SEPARATE_REGEXP:str = r"\\n"
 
-    def __init__(self, state:'UI_STATE', format_text_attr:str, draw_count_attr:str, page_no_attr:str, page_line_num:int, params:dict[str, Any]={}):
+    def __init__(self, state:'UI_STATE', format_text_attr:str, draw_count_attr:str, page_no_attr:str):
         self._state = state
         self._format_text_attr = format_text_attr  # 変換後テキスト置き場
         self._draw_count_attr = draw_count_attr
         self._page_no_attr = page_no_attr  # ページ番号置き場
+
+# テキスト基底(フォーマット済み)
+class UI_TEXT(UI_TEXT_RO):
+    def __init__(self, state:'UI_STATE', format_text_attr:str, draw_count_attr:str, page_no_attr:str, page_line_num:int, params:dict[str, Any]={}):
+        super().__init__(state, format_text_attr, draw_count_attr, page_no_attr)
 
         # 改行を\nに統一して全角化
         tmp_text = self.convertZenkaku(re.sub(self.SEPARATE_REGEXP, "\n", self._state.text.strip().format(**params)))
