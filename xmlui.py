@@ -481,6 +481,7 @@ _from_hanakaku += " !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"  # 半角記号を追加
 _to_zenkaku += "　！＂＃＄％＆＇（）＊＋，－．／：；＜＝＞？＠［￥］＾＿｀｛｜｝～"  # 全角記号を追加
 _hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
 
+# テキスト基底
 class UI_TEXT:
     # クラス定数
     SEPARATE_REGEXP:str = r"\\n"
@@ -505,11 +506,8 @@ class UI_TEXT:
         self._state.setAttr(self._display_text_attr, display_text)
         return self
 
-    # 文字列中の半角を全角に変換する
-    @classmethod
-    def convertZenkaku(cls, hankaku:str):
-        return unicodedata.normalize("NFKC", hankaku).translate(_hankaku_zenkaku_dict)
-
+    # テキストの状況
+    # -----------------------------------------------------
     @property
     def text(self) -> str:
         return self._state.attrStr(self._display_text_attr, self._state.text.strip())
@@ -517,6 +515,13 @@ class UI_TEXT:
     @property
     def length(self) -> int:
         return len(self.text.replace("\n", ""))
+
+    # ユーティリティ
+    # -----------------------------------------------------
+    # 文字列中の半角を全角に変換する
+    @classmethod
+    def convertZenkaku(cls, hankaku:str):
+        return unicodedata.normalize("NFKC", hankaku).translate(_hankaku_zenkaku_dict)
 
 # アニメーションテキスト表示用
 class UI_ANIM_TEXT(UI_TEXT):
@@ -529,6 +534,7 @@ class UI_ANIM_TEXT(UI_TEXT):
         return self
 
     # draw_countの操作
+    # -----------------------------------------------------
     def setDrawCount(self, draw_count:float) -> 'UI_ANIM_TEXT':
         self._state.setAttr(self._draw_count_attr, draw_count)
         return self
@@ -551,9 +557,7 @@ class UI_ANIM_TEXT(UI_TEXT):
         return math.ceil(self.draw_count) >= self.length
 
     # 分割
-    def split(self) -> list[str]:
-        return self._limitStr(self.text, self.draw_count).splitlines()
-
+    # -----------------------------------------------------
     # draw_countまでの文字列を改行分割
     @classmethod
     def _limitStr(cls, tmp_text, draw_count:float) -> str:
@@ -565,7 +569,12 @@ class UI_ANIM_TEXT(UI_TEXT):
                 break
         return tmp_text.strip("\n")
 
+    # リミット付き改行分割
+    def split(self) -> list[str]:
+        return self._limitStr(self.text, self.draw_count).splitlines()
+
     # イベントアクション
+    # -----------------------------------------------------
     def action(self):
         if not self.is_finish:
             self.finish()
@@ -576,6 +585,8 @@ class UI_PAGE(UI_TEXT):
         self._page_no_attr = page_no_attr  # ページ番号
         self._page_line_num = page_line_num  # ページ行数
 
+    # ページ関係
+    # -----------------------------------------------------
     # page_noの操作
     def setPageNo(self, page_no:int) -> 'UI_PAGE':
         self._ui_text._state.setAttr(self._page_no_attr, page_no)
@@ -584,14 +595,35 @@ class UI_PAGE(UI_TEXT):
     def nextPage(self, add:int=1) -> 'UI_PAGE':
         return self.setPageNo(self.page_no+add)
 
+    # 現在ページ
+    @property
+    def page_no(self) -> int:
+        return self._ui_text._state.attrInt(self._page_no_attr, 0)
+
+    # ページの最大数
+    @property
+    def page_max(self) -> int:
+        return len(self.splitPage())
+
+    # ページ全部表示済みかどうか
+    @property
+    def is_end_page(self) -> bool:
+        return self.page_no+1 >= self.page_max
+
     # 分割
+    # -----------------------------------------------------
+    # 現在ページを改行分割
     def split(self) -> list[str]:
         return self._ui_text.text.splitlines()
 
+    # 全てのページをベージごとに改行分割
     def splitPage(self) -> list[list[str]]:
         lines = self._ui_text.text.splitlines()
         return [lines[i:i+self._page_line_num] for i in range(0, len(lines), self._page_line_num)]
 
+    # テキストアクセス
+    # -----------------------------------------------------
+    # 現在ページテキスト
     @property
     def text(self) -> str:
         page_no = self._ui_text._state.attrInt(self._page_no_attr, 0)
@@ -601,45 +633,39 @@ class UI_PAGE(UI_TEXT):
     def length(self) -> int:
         return len(self.text.replace("\n", ""))
 
-    # ページ専用プロパティ
-    @property
-    def page_no(self) -> int:
-        return self._ui_text._state.attrInt(self._page_no_attr, 0)
-
-    @property
-    def page_max(self) -> int:
-        return len(self.splitPage())
-
-    @property
-    def is_end_page(self) -> bool:
-        return self.page_no+1 >= self.page_max
-
-# Page関係
+# アニメーション機能付きPage関係
 class UI_ANIM_PAGE(UI_PAGE):
     def __init__(self, text:UI_ANIM_TEXT, page_no_attr:str,  page_line_num:int):
         super().__init__(text, page_no_attr, page_line_num)
         self._ui_anim_text = text  # 型違いなので別記録
 
+    # ページ関係
+    # -----------------------------------------------------
     # page_noの操作
     def nextPage(self, add:int=1) -> 'UI_ANIM_PAGE':
         self._ui_anim_text.reset()  # draw_countをリセットしておく
         super().nextPage(add)
         return self
 
-    # 分割
+    # そのページの表示が終わっているか
+    @property
+    def is_finish(self) -> bool:
+        return math.ceil(self._ui_anim_text.draw_count) >= self.length
+
+    # リミット付き分割
+    # -----------------------------------------------------
+    # 現在のページを改行分割
     def split(self) -> list[str]:
         return self._ui_anim_text._limitStr(self.text, self._ui_anim_text.draw_count).splitlines()
 
     # イベントアクション
+    # -----------------------------------------------------
     def action(self):  # 結果が一意でないのでselfは返さない
         if not self.is_finish:
             self._ui_anim_text.action()
         elif not self.is_end_page:
             self.nextPage()
 
-    @property
-    def is_finish(self) -> bool:
-        return math.ceil(self._ui_anim_text.draw_count) >= self.length
 
 
 # メニュー系
