@@ -89,18 +89,17 @@ def msg_win_update(msg_win:UI_STATE, event:UI_EVENT):
     msg_text = msg_win.findByTag("msg_text")
 
     # 文字列更新
-    wrap = msg_text.attrInt("wrap", 1024)
-    text = UI_ANIM_TEXT(msg_text, "draw_count").bind(test_params, wrap).next(1.0)
+    text = UI_ANIM_TEXT(msg_text, "draw_count").bind(test_params, msg_text.wrap).next(1.0)
     page = text.usePage("page_no", msg_text.attrInt("lines", 1))
 
-    # カーソル表示
-    msg_cur.setVisible(not page.is_end_page and page.is_finish)  # 次のページあり
+    # 次のページありカーソル表示
+    msg_cur.setVisible(not page.is_end_page and page.is_finish)
 
     if "button_a" in event.trg or "button_b" in event.trg:
         # 表示しきっていたらメニューごと閉じる
         if page.is_end_page:
             msg_win.close("menu_command")
-        # 残っていたら適切なアクション
+        # なにか残っていたら適切なアクション(ライブラリにお任せ)
         else:
             page.action()
 
@@ -117,8 +116,7 @@ def msg_win_draw(msg_win:UI_STATE, event:UI_EVENT):
 @ui_worker.draw_func("msg_text")
 def msg_text_draw(msg_text:UI_STATE, event:UI_EVENT):
     # テキスト表示
-    wrap = msg_text.attrInt("wrap", 1024)
-    text = UI_ANIM_TEXT(msg_text, "draw_count").bind(test_params, wrap)
+    text = UI_ANIM_TEXT(msg_text, "draw_count").bind(test_params, msg_text.wrap)
     page = text.usePage("page_no", msg_text.attrInt("lines", 1))
 
     for i,text in enumerate(page.split()):

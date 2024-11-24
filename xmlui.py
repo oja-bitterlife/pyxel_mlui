@@ -559,6 +559,11 @@ class UI_ANIM_TEXT(UI_TEXT):
     def usePage(self, page_no_attr:str,  page_line_num:int) -> 'UI_ANIM_PAGE':
         return UI_ANIM_PAGE(self, page_no_attr, page_line_num)
 
+    @property
+    def wrap(self) -> int:
+        return self._state.wrap
+
+
 # Page関係
 class UI_ANIM_PAGE:
     def __init__(self, text:UI_ANIM_TEXT, page_no_attr:str,  page_line_num:int):
