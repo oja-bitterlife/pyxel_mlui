@@ -141,23 +141,17 @@ def msg_cur_draw(msg_cur:UI_STATE, event:UI_EVENT):
 def dial_win_update(dial_win:UI_STATE, event:UI_EVENT):
     dial = UI_DIAL(dial_win, "digits", "digit_no", 5)
 
-    digit_no = dial_win.attrInt("digit_no")
-    digits = dial_win.attrStr("digits")
+    # 数値変更
+    dial.changeByEvent(event.trg, "left", "right", "up", "down")
 
-    if event.active:
-        if "left" in event.trg:
-            digit_no = min(digit_no+1, dial._digit_num-1)
-            dial_win.setAttr("digit_no", digit_no)
-        if "right" in event.trg:
-            digit_no = max(digit_no-1, 0)
-            dial_win.setAttr("digit_no", digit_no)
-        if "up" in event.trg:
-            digits = digits[:digit_no] + dial._digit_list[(dial._digit_list.find(digits[digit_no])+1) % len(dial._digit_list)] + digits[digit_no+1:]
-            dial_win.setAttr("digits", digits)
-        if "down" in event.trg:
-            digits = digits[:digit_no] + dial._digit_list[(dial._digit_list.find(digits[digit_no])+len(dial._digit_list)-1) % len(dial._digit_list)] + digits[digit_no+1:]
-            dial_win.setAttr("digits", digits)
+    # 確定
+    if "button_a" in event.trg:
+        test_params["age"] = dial.number
+        dial_win.close() # 確定でも閉じる
 
+    # 閉じる
+    if "button_b" in event.trg:
+        dial_win.close()
 
 @ui_worker.draw_func("dial_win")
 def dial_win_draw(dial_win:UI_STATE, event:UI_EVENT):
@@ -167,10 +161,6 @@ def dial_win_draw(dial_win:UI_STATE, event:UI_EVENT):
 
     # 数値表示
     digit_no = dial_win.attrInt("digit_no")
-    digits =  xmlui.convertHZ(dial_win.attrStr("digits"))
+    digits =  UI_ANIM_TEXT.convertZenkaku(dial_win.attrStr("digits"))
     for i,digit in enumerate(digits):
         pyxel.text(dial_win.area.x+3+(4-i)*FONT_SIZE, dial_win.area.y+2, digit, 2 if digit_no == i else 7, font)
-
-    # 閉じる
-    if "button_b" in event.trg:
-        dial_win.close(dial_win.id)

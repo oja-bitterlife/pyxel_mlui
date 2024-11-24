@@ -475,12 +475,14 @@ _from_hanakaku += " !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"  # 半角記号を追加
 _to_zenkaku += "　！＂＃＄％＆＇（）＊＋，－．／：；＜＝＞？＠［￥］＾＿｀｛｜｝～"  # 全角記号を追加
 _hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
 
-# 文字列中の半角を全角に変換する
-def convertHZ(hankaku:str):
-    return unicodedata.normalize("NFKC", hankaku).translate(_hankaku_zenkaku_dict)
+class UI_TEXT:
+    # 文字列中の半角を全角に変換する
+    @classmethod
+    def convertZenkaku(cls, hankaku:str):
+        return unicodedata.normalize("NFKC", hankaku).translate(_hankaku_zenkaku_dict)
 
 # アニメーションテキスト表示用
-class UI_ANIM_TEXT:
+class UI_ANIM_TEXT(UI_TEXT):
     # クラス定数
     SEPARATE_REGEXP:str = r"\\n"
 
@@ -492,7 +494,7 @@ class UI_ANIM_TEXT:
 
     def bind(self, params:dict[str, Any]={}, wrap:int=4096) -> 'UI_ANIM_TEXT':
         wrap = max(1, wrap)  # 0だと無限になってしまうので最低1を入れておく
-        tmp_text = convertHZ(re.sub(self.SEPARATE_REGEXP, "\n", self._state.text).strip().format(**params))
+        tmp_text = self.convertZenkaku(re.sub(self.SEPARATE_REGEXP, "\n", self._state.text).strip().format(**params))
         # 各行に分解し、その行をさらにwrapで分解する
         self._display_text = "\n".join(["\n".join([line[i:i+wrap].strip("\n") for i in range(0, len(line), wrap)]) for line in tmp_text.splitlines()])
         return self
@@ -661,14 +663,49 @@ class UI_GRID_CURSOR:
 
 # ダイアル
 class UI_DIAL:
-    def __init__(self, state:'UI_STATE', digits_attr:str, digit_no_attr:str, digit_num:int, digit_list:str="0123456789"):
-        self._state = state
-        self._digits_attr = digits_attr
-        self._digit_no_attr = digit_no_attr
-        self._digit_num = digit_num
-        self._digit_list = digit_list
+    def __init__(self, state:'UI_STATE', digits_attr:str, digit_pos_attr:str, digit_num:int, digit_list:str="0123456789"):
+        self._state = state  # 記憶場所Element
+        self._digits_attr = digits_attr  # 数字リスト(文字列)
+        self._digit_pos_attr = digit_pos_attr  # 操作桁位置
+        self._digit_list = digit_list  # 数字リスト。基本は数字だけどどんな文字でもいける
 
         # 初期値
         if not state.hasAttr(self._digits_attr):
             state.setAttr(self._digits_attr, digit_list[0]*digit_num)
 
+    # 移動しすぎ禁止付きdigit_pos設定
+    def setDigitPos(self, digit_pos) -> 'UI_DIAL':
+        self._state.setAttr(self._digit_pos_attr, max(0, min(len(self.digits), digit_pos)))
+        return self
+
+    # 回り込み付きdigit増減
+    def _addDigit(self, digit:str, add:int) -> str:
+        return self._digit_list[(self._digit_list.find(digit)+len(self._digit_list)+add) % len(self._digit_list)]
+
+    # 
+    def changeDigit(self, digit_pos:int, digit:str) -> 'UI_DIAL':
+        self._state.setAttr(self._digits_attr, "".join([digit if i == digit_pos else d for i,d in enumerate(self._state.attrStr(self._digits_attr))]))
+        return self
+
+    def changeByEvent(self, input:set[str], leftEvent:str, rightEvent:str, upEvent:str, downEvent:str) -> 'UI_DIAL':
+        if leftEvent in input:
+            self.setDigitPos(self.digit_pos+1)  # 左移動
+        if rightEvent in input:
+            self.setDigitPos(self.digit_pos-1)  # 右移動
+        if upEvent in input:
+            self.changeDigit(self.digit_pos, self._addDigit(self.digits[self.digit_pos], +1))  # digitを増やす
+        if downEvent in input:
+            self.changeDigit(self.digit_pos, self._addDigit(self.digits[self.digit_pos], -1))  # digitを減らす
+        return self
+
+    @property
+    def digit_pos(self) -> int:
+        return self._state.attrInt(self._digit_pos_attr)
+
+    @property
+    def digits(self) -> str:
+        return self._state.attrStr(self._digits_attr)
+
+    @property
+    def number(self) -> int:
+        return int("".join(reversed([d for d in self.digits])))
