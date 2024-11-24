@@ -10,26 +10,46 @@ ui_worker = xmlui_pyxel.ui_worker
 ui_template = xmlui_pyxel.ui_template
 ui_worker.root.open(ui_template, "menu_command")
 
+ui_worker.setInputList("up", [
+    pyxel.GAMEPAD1_BUTTON_DPAD_UP,
+    pyxel.KEY_UP,
+    pyxel.KEY_W,
+])
+ui_worker.setInputList("down", [
+    pyxel.GAMEPAD1_BUTTON_DPAD_DOWN,
+    pyxel.KEY_DOWN,
+    pyxel.KEY_S,
+])
+ui_worker.setInputList("left", [
+    pyxel.GAMEPAD1_BUTTON_DPAD_LEFT,
+    pyxel.KEY_LEFT,
+    pyxel.KEY_A,
+])
+ui_worker.setInputList("right", [
+    pyxel.GAMEPAD1_BUTTON_DPAD_RIGHT,
+    pyxel.KEY_RIGHT,
+    pyxel.KEY_D,
+])
+ui_worker.setInputList("button_a", [
+    pyxel.GAMEPAD1_BUTTON_A,
+    pyxel.KEY_RETURN,
+    pyxel.KEY_SPACE,
+])
+ui_worker.setInputList("button_b", [
+    pyxel.GAMEPAD1_BUTTON_B,
+    pyxel.KEY_BACKSPACE,
+    pyxel.KEY_SHIFT,
+])
+ui_worker.setInputList("button_X", [
+    pyxel.GAMEPAD1_BUTTON_X,
+])
+ui_worker.setInputList("button_y", [
+    pyxel.GAMEPAD1_BUTTON_Y,
+])
 
 # Main
 def update(): # フレームの更新処理
-    if pyxel.btnp(pyxel.KEY_Q):
-        pyxel.quit()
-
-    if pyxel.btn(pyxel.KEY_LEFT):
-        ui_worker._event.on("left")
-    if pyxel.btn(pyxel.KEY_RIGHT):
-        ui_worker._event.on("right")
-    if pyxel.btn(pyxel.KEY_UP):
-        ui_worker._event.on("up")
-    if pyxel.btn(pyxel.KEY_DOWN):
-        ui_worker._event.on("down")
-
-    if pyxel.btn(pyxel.KEY_SPACE):
-        ui_worker._event.on("action")
-    if pyxel.btn(pyxel.KEY_BACKSPACE):
-        ui_worker._event.on("cancel")
-
+    ui_worker.onInputList(pyxel.btn)
     ui_worker.update()
 
 def draw(): # 描画処理

@@ -15,7 +15,7 @@ test_params = {"name":"world", "age":10}
 @ui_worker.update_func("my_ui")
 def my_ui_update(state:UI_STATE, event:UI_EVENT):
     # メインメニューを開く
-    if "action" in event.trg:
+    if "button_a" in event.trg:
         state.open(ui_template, "menu_command")
 
 
@@ -32,13 +32,13 @@ def menu_win_update(state:UI_STATE, event:UI_EVENT):
     cursor = UI_GRID_CURSOR(state.findByTag("menu_cur"), grid).moveByEvent(event.trg, "left", "right", "up", "down")
 
     # 選択アイテムの表示
-    if "action" in event.trg:
+    if "button_a" in event.trg:
         if cursor.selected.attrStr("action") == "speak":
             # メッセージウインドウ表示
             state.open(ui_template, "win_message")
 
     # 閉じる
-    if "cancel" in event.trg:
+    if "button_b" in event.trg:
         state.close(state.id)
 
 
@@ -94,7 +94,7 @@ def msg_win_update(state:UI_STATE, event:UI_EVENT):
     # カーソル表示
     msg_cur.setAttr("visible", not page.is_end_page and page.is_finish)  # 次のページあり
 
-    if "action" in event.trg:
+    if "button_a" in event.trg:
         # テキストを表示しきっていたら
         if page.is_finish:
             if page.is_end_page:
@@ -106,7 +106,7 @@ def msg_win_update(state:UI_STATE, event:UI_EVENT):
             text.finish()  # 一気に表示
 
     # メニューごと閉じる
-    if "cancel" in event.trg:
+    if "button_b" in event.trg:
         state.close("menu_command")
 
 

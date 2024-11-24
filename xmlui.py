@@ -163,10 +163,10 @@ class UI_ANIM_PAGE:
 class UI_EVENT:
     def __init__(self, init_active=False):
         self.active = init_active  # 現在アクティブかどうか
-        self._receive = set([])  # 次の状態受付
-        self._input = set([])
-        self._trg = set([])
-        self._release = set([])
+        self._receive:set[str] = set([])  # 次の状態受付
+        self._input:set[str] = set([])
+        self._trg:set[str] = set([])
+        self._release:set[str] = set([])
 
     # 更新
     def update(self):
@@ -501,10 +501,11 @@ class XMLUI:
     def __init__(self, dom:xml.etree.ElementTree.Element, root_tag:str|None=None):
         # 入力
         self._event = UI_EVENT(True)  # 唯一のactiveとする
+        self._input_lists:dict[str, list[int]] = {}
 
         # 処理関数の登録
-        self._update_funcs = {}
-        self._draw_funcs = {}
+        self._update_funcs:dict[str,Callable[[UI_STATE,UI_EVENT], None]] = {}
+        self._draw_funcs:dict[str,Callable[[UI_STATE], None]] = {}
 
         # root_tag指定が無ければ最上位エレメント
         if root_tag is None:
@@ -610,3 +611,27 @@ class XMLUI:
         def wrapper(draw_func:Callable[[UI_STATE], None]):
             self.setDrawFunc(tag_name, draw_func)
         return wrapper
+
+
+    # 入力
+    # *************************************************************************
+    # イベント入力
+    def on(self, input:str):
+        self._event.on(input)
+
+    # キー入力
+    def setInputList(self, input_type:str, list:list[int]):
+        self._input_lists[input_type] = list
+
+    def checkInput(self, check:str, check_func:Callable[[int], bool]) -> bool:
+        for button in self._input_lists[check]:
+            if check_func(button):
+                return True
+        return False
+
+    # 登録キー入力を全部調べて片っ端からイベントに登録
+    def onInputList(self, check_func:Callable[[int], bool]):
+        for key in self._input_lists:
+            if self.checkInput(key, check_func):
+                self._event.on(key)
+

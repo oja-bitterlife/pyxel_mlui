@@ -5,7 +5,7 @@
         <menu_grid x="12" y="14">
             <menu_row>
                 <menu_item action="speak">はなす</menu_item>
-                <menu_item action="tool">ダイアル</menu_item>
+                <menu_item action="dial">ダイアル</menu_item>
             </menu_row>
             <menu_row>
                 <menu_item action="satus">つよさ</menu_item>
