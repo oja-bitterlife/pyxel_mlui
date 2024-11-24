@@ -41,17 +41,13 @@ def menu_win_update(menu_win:UI_STATE, event:UI_EVENT):
     if "button_b" in event.trg:
         menu_win.close(menu_win.id)
 
-    # デバッグ用
-    if ui_worker.debug:
-       menu_win.setAttr("frame_color", 10 if event.active else 7)
-
 
 # 描画
 # ---------------------------------------------------------
 @ui_worker.draw_func("menu_win")
 def menu_win_draw(menu_win:UI_STATE, event:UI_EVENT):
     bg_color = 12
-    frame_color = menu_win.attrInt("frame_color", 7)
+    frame_color = 10 if event.active else 7
     title  = menu_win.attrStr("title")
 
     pyxel.rect(menu_win.area.x, menu_win.area.y, menu_win.area.w, menu_win.area.h, bg_color)
@@ -112,15 +108,12 @@ def msg_win_update(msg_win:UI_STATE, event:UI_EVENT):
     if "button_b" in event.trg:
         msg_win.close("menu_command")
 
-    # デバッグ用
-    if ui_worker.debug:
-       msg_win.setAttr("frame_color", 10 if event.active else 7)
 
 # 描画
 # ---------------------------------------------------------
 @ui_worker.draw_func("msg_win")
 def msg_win_draw(msg_win:UI_STATE, event:UI_EVENT):
-    frame_color = msg_win.attrInt("frame_color", 7)
+    frame_color = 10 if event.active else 7
     pyxel.rect(msg_win.area.x, msg_win.area.y, msg_win.area.w, msg_win.area.h, 12)
     pyxel.rectb(msg_win.area.x, msg_win.area.y, msg_win.area.w, msg_win.area.h, frame_color)
     pyxel.rectb(msg_win.area.x+1, msg_win.area.y+1, msg_win.area.w-2, msg_win.area.h-2, frame_color)

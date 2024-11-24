@@ -509,8 +509,6 @@ class XMLUI:
         # 処理関数の登録
         self._update_funcs:dict[str,Callable[[UI_STATE,UI_EVENT], None]] = {}
         self._draw_funcs:dict[str,Callable[[UI_STATE,UI_EVENT], None]] = {}
-        self._pre_update_func:Callable[[str,UI_STATE,UI_EVENT], None]|None = None
-        self._pre_draw_func:Callable[[str,UI_STATE,UI_EVENT], None]|None = None
 
         # 表示対象Elementを格納(update/draw連携用)
         self._draw_targets:list[UI_STATE] = []
@@ -618,16 +616,6 @@ class XMLUI:
         def wrapper(draw_func:Callable[[UI_STATE,UI_EVENT], None]):
             self.setDrawFunc(tag_name, draw_func)
         return wrapper
-
-    # def pre_update_func(self):
-    #     def wrapper(update_func:Callable[[str,UI_STATE,UI_EVENT], None]):
-    #         self._preUpdateFunc = update_func
-    #     return wrapper
-
-    # def pre_draw_func(self):
-    #     def wrapper(draw_func:Callable[[str,UI_STATE,UI_EVENT], None]):
-    #         self._preDrawFunc = draw_func
-    #     return wrapper
 
 
     # 入力
