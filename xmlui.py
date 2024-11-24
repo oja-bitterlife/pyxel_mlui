@@ -570,41 +570,27 @@ class UI_ANIM_TEXT(UI_TEXT):
         if not self.is_finish:
             self.finish()
 
-# Page関係
-class UI_ANIM_PAGE:
-    def __init__(self, text:UI_ANIM_TEXT, page_no_attr:str,  page_line_num:int):
+class UI_PAGE(UI_TEXT):
+    def __init__(self, text:UI_TEXT, page_no_attr:str,  page_line_num:int):
         self._ui_text = text  # 作成元
         self._page_no_attr = page_no_attr  # ページ番号
         self._page_line_num = page_line_num  # ページ行数
 
     # page_noの操作
-    def setPageNo(self, page_no:int) -> 'UI_ANIM_PAGE':
+    def setPageNo(self, page_no:int) -> 'UI_PAGE':
         self._ui_text._state.setAttr(self._page_no_attr, page_no)
         return self
 
-    def nextPage(self, add:int=1) -> 'UI_ANIM_PAGE':
-        self._ui_text.reset()  # draw_countをリセットしておく
+    def nextPage(self, add:int=1) -> 'UI_PAGE':
         return self.setPageNo(self.page_no+add)
 
     # 分割
     def split(self) -> list[str]:
-        return self._ui_text._limitStr(self.text, self._ui_text.draw_count).splitlines()
+        return self._ui_text.text.splitlines()
 
     def splitPage(self) -> list[list[str]]:
         lines = self._ui_text.text.splitlines()
         return [lines[i:i+self._page_line_num] for i in range(0, len(lines), self._page_line_num)]
-
-    # イベントアクション
-    def action(self):  # 結果が一意でないのでselfは返さない
-        if not self.is_finish:
-            self._ui_text.finish()
-        elif not self.is_end_page:
-            self.nextPage()
-
-    # textと同じIF
-    @property
-    def draw_count(self) -> float:
-        return self._ui_text.draw_count
 
     @property
     def text(self) -> str:
@@ -614,10 +600,6 @@ class UI_ANIM_PAGE:
     @property
     def length(self) -> int:
         return len(self.text.replace("\n", ""))
-
-    @property
-    def is_finish(self) -> bool:
-        return self._ui_text.is_finish
 
     # ページ専用プロパティ
     @property
@@ -631,6 +613,33 @@ class UI_ANIM_PAGE:
     @property
     def is_end_page(self) -> bool:
         return self.page_no+1 >= self.page_max
+
+# Page関係
+class UI_ANIM_PAGE(UI_PAGE):
+    def __init__(self, text:UI_ANIM_TEXT, page_no_attr:str,  page_line_num:int):
+        super().__init__(text, page_no_attr, page_line_num)
+        self._ui_anim_text = text  # 型違いなので別記録
+
+    # page_noの操作
+    def nextPage(self, add:int=1) -> 'UI_ANIM_PAGE':
+        self._ui_anim_text.reset()  # draw_countをリセットしておく
+        super().nextPage(add)
+        return self
+
+    # 分割
+    def split(self) -> list[str]:
+        return self._ui_anim_text._limitStr(self.text, self._ui_anim_text.draw_count).splitlines()
+
+    # イベントアクション
+    def action(self):  # 結果が一意でないのでselfは返さない
+        if not self.is_finish:
+            self._ui_anim_text.action()
+        elif not self.is_end_page:
+            self.nextPage()
+
+    @property
+    def is_finish(self) -> bool:
+        return self._ui_anim_text.is_finish
 
 
 # メニュー系
