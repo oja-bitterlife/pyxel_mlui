@@ -633,7 +633,7 @@ class XMLUI:
         return False
 
     # 登録キー入力を全部調べて片っ端からイベントに登録
-    def onInputList(self, check_func:Callable[[int], bool]):
+    def checkInputAndOn(self, check_func:Callable[[int], bool]):
         for key in self._input_lists:
             if self.checkInput(key, check_func):
                 self._event.on(key)

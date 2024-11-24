@@ -49,7 +49,7 @@ ui_worker.setInputList("button_y", [
 
 # Main
 def update(): # フレームの更新処理
-    ui_worker.onInputList(pyxel.btn)
+    ui_worker.checkInputAndOn(pyxel.btn)
 
     # UI更新
     ui_worker.update()
