@@ -23,6 +23,12 @@ class UI_RECT:
     def contains(self, x, y) -> bool:
         return self.x <= x < self.x+self.w and self.y <= y < self.y+self.h
 
+    def center_x(self, width:int=0) -> int:
+        return self.x + (self.w-width)//2
+
+    def center_y(self, height:int=0) -> int:
+        return self.y + (self.h-height)//2
+
     def __repr__(self) -> str:
         return f"RECT({self.x}, {self.y}, {self.w}, {self.h})"
 
