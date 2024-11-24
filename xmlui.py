@@ -507,6 +507,9 @@ class XMLUI:
         self._update_funcs:dict[str,Callable[[UI_STATE,UI_EVENT], None]] = {}
         self._draw_funcs:dict[str,Callable[[UI_STATE], None]] = {}
 
+        # 更新対象Elementを格納(update/draw連携用)
+        self._update_states_cache:list[UI_STATE] = []
+
         # root_tag指定が無ければ最上位エレメント
         if root_tag is None:
             xmlui_root = dom
@@ -547,7 +550,7 @@ class XMLUI:
         # (入力)イベントの更新
         self._event.update()
 
-        # 更新対象Elementを取得
+        # 更新対象(enable)Elementを取得
         self._update_states_cache = [UI_STATE(self, element) for element in self.root._element.iter() if element.attrib.get("enable", True)]
 
         # use_eventがTrueなstateだけ抜き出す
@@ -562,7 +565,7 @@ class XMLUI:
     # 描画用
     # *************************************************************************
     def draw(self):
-        # 更新対象を取得(Updateされたもののみ対象)
+        # 更新対象(visible)を取得(Updateされたもののみ対象)
         draw_states = [state for state in self._update_states_cache if state.visible]
 
         # エリア更新
