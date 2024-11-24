@@ -613,7 +613,7 @@ class UI_ANIM_PAGE:
 # メニュー系
 # ---------------------------------------------------------
 # グリッド情報
-class UI_GRID_CURSOR_RO:
+class UI_GRID_CURSOR_INFO:
     def __init__(self, state:'UI_STATE'):
         self._state = state  # カーソル位置保存用
 
@@ -625,7 +625,7 @@ class UI_GRID_CURSOR_RO:
         return self._state.cur_y
 
 # グリッド選択
-class UI_GRID_CURSOR(UI_GRID_CURSOR_RO):
+class UI_GRID_CURSOR(UI_GRID_CURSOR_INFO):
     def __init__(self, state:'UI_STATE', grid:list[list['UI_STATE']]):
         super().__init__(state)
         self._grid = grid  # グリッド保存
@@ -674,7 +674,7 @@ class UI_GRID_CURSOR(UI_GRID_CURSOR_RO):
 # ダイアル
 # ---------------------------------------------------------
 # 情報管理のみ
-class UI_DIAL_RO:
+class UI_DIAL_INFO:
     def __init__(self, state:'UI_STATE', digits_attr:str, digit_pos_attr:str):
         self._state = state  # 記憶場所Element
         self._digits_attr = digits_attr  # 数字リスト(文字列)
@@ -697,7 +697,7 @@ class UI_DIAL_RO:
         return int("".join(reversed([d for d in self.digits])))
 
 # ダイアル操作
-class UI_DIAL(UI_DIAL_RO):
+class UI_DIAL(UI_DIAL_INFO):
     def __init__(self, state:'UI_STATE', digits_attr:str, digit_pos_attr:str, digit_num:int, digit_list:str="0123456789"):
         super().__init__(state, digits_attr, digit_pos_attr)
         self._digit_list = digit_list  # 数字リスト。基本は数字だけどどんな文字でもいける

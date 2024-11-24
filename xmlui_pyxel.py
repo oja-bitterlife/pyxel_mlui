@@ -1,4 +1,4 @@
-from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_GRID_CURSOR,UI_ANIM_TEXT,UI_DIAL,UI_DIAL_RO
+from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_GRID_CURSOR,UI_ANIM_TEXT,UI_DIAL,UI_DIAL_INFO
 
 ui_template = XMLUI.createFromFile("assets/ui/test.xml")
 ui_worker = XMLUI.createWorker("my_ui")
@@ -33,10 +33,13 @@ def menu_win_update(menu_win:UI_STATE, event:UI_EVENT):
 
     # 選択アイテムの表示
     if "button_a" in event.trg:
+        # メッセージウインドウ表示
         if cursor.selected.attrStr("action") == "speak":
-            menu_win.open(ui_template, "win_message")  # メッセージウインドウ表示
+            menu_win.open(ui_template, "win_message")
+
+        # dialウインドウ表示
         if cursor.selected.attrStr("action") == "dial":
-            cursor.selected.open(ui_template, "win_dial").setPos(8, -2)  # dialウインドウ表示
+            cursor.selected.open(ui_template, "win_dial").setPos(8, -2)
 
     # 閉じる
     if "button_b" in event.trg:
@@ -159,6 +162,6 @@ def dial_win_draw(dial_win:UI_STATE, event:UI_EVENT):
     pyxel.rectb(dial_win.area.x, dial_win.area.y, dial_win.area.w, dial_win.area.h, frame_color)
 
     # 数値表示
-    dial = UI_DIAL_RO(dial_win, "digits", "digit_pos")
+    dial = UI_DIAL_INFO(dial_win, "digits", "digit_pos")
     for i,digit in enumerate(dial.zenkakuDigits):
         pyxel.text(dial_win.area.x+3+(4-i)*FONT_SIZE, dial_win.area.y+2, digit, 2 if dial.digit_pos == i else 7, font)
