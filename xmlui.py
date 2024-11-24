@@ -639,7 +639,7 @@ class UI_ANIM_PAGE(UI_PAGE):
 
     @property
     def is_finish(self) -> bool:
-        return self._ui_anim_text.is_finish
+        return math.ceil(self._ui_anim_text.draw_count) >= self.length
 
 
 # メニュー系
