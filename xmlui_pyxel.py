@@ -91,7 +91,7 @@ def msg_win_update(msg_win:UI_STATE, event:UI_EVENT):
     page = text.usePage("page_no", msg_text.attrInt("lines", 1))
 
     # カーソル表示
-    msg_cur.setAttr("visible", not page.is_end_page and page.is_finish)  # 次のページあり
+    msg_cur.setVisible(not page.is_end_page and page.is_finish)  # 次のページあり
 
     if "button_a" in event.trg or "button_b" in event.trg:
         # テキストを表示しきっていたら

@@ -127,11 +127,17 @@ class UI_STATE:
     def area(self) -> UI_RECT:
         return UI_RECT(self.area_x, self.area_y, self.area_w, self.area_h)
 
-    def setPos(self, x, y):
-        self.setAttr(["x", "y"], [x, y])
+    def setPos(self, x:int, y:int) -> 'UI_STATE':
+        return self.setAttr(["x", "y"], [x, y])
 
-    def setAbsPos(self, x, y):
-        self.setAttr(["abs_x", "abs_y"], [x, y])
+    def setAbsPos(self, x:int, y:int) -> 'UI_STATE':
+        return self.setAttr(["abs_x", "abs_y"], [x, y])
+
+    def setEnable(self, enable:bool):
+        return self.setAttr("enable", enable)
+
+    def setVisible(self, visible:bool):
+        return self.setAttr("visible", visible)
 
     # ツリー操作用
     # *************************************************************************
@@ -542,7 +548,7 @@ class UI_ANIM_TEXT(UI_TEXT):
         return len(self._display_text.replace("\n", ""))
 
     @property
-    def is_finish(self) -> int:
+    def is_finish(self) -> bool:
         return math.ceil(self.draw_count) >= self.length
 
     def usePage(self, page_no_attr:str,  page_line_num:int) -> 'UI_ANIM_PAGE':
@@ -587,7 +593,7 @@ class UI_ANIM_PAGE:
         return len(self.text.replace("\n", ""))
 
     @property
-    def is_finish(self) -> int:
+    def is_finish(self) -> bool:
         return math.ceil(self._text.draw_count) >= self.length
 
     # ページ専用プロパティ
