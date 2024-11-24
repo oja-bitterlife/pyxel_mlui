@@ -8,7 +8,7 @@ ui_worker = xmlui_pyxel.ui_worker
 
 # お試し
 ui_template = xmlui_pyxel.ui_template
-ui_worker.root.open(ui_template, "menu_command")
+# ui_worker.root.open(ui_template, "menu_command")
 
 ui_worker.setInputList("up", [
     pyxel.GAMEPAD1_BUTTON_DPAD_UP,
