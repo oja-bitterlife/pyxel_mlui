@@ -97,15 +97,12 @@ def msg_win_update(msg_win:UI_STATE, event:UI_EVENT):
     msg_cur.setVisible(not page.is_end_page and page.is_finish)  # 次のページあり
 
     if "button_a" in event.trg or "button_b" in event.trg:
-        # テキストを表示しきっていたら
-        if page.is_finish:
-            if page.is_end_page:
-                msg_win.close("menu_command")  # メニューごと閉じる
-            else:
-                page.nextPage()  # 次のページ
-        # テキストがまだ残っていたら
+        # 表示しきっていたらメニューごと閉じる
+        if page.is_end_page:
+            msg_win.close("menu_command")
+        # 残っていたら適切なアクション
         else:
-            text.finish()  # 一気に表示
+            page.action()
 
 # 描画
 # ---------------------------------------------------------
