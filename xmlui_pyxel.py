@@ -89,7 +89,7 @@ def msg_win_update(msg_win:UI_STATE, event:UI_EVENT):
     msg_text = msg_win.findByTag("msg_text")
 
     # 文字列更新
-    page = UI_ANIM_PAGE(msg_text, "format_text", "draw_count", "page_no", "page_line_num")
+    page = UI_ANIM_PAGE(msg_text, "format_text", "draw_count", "page_no", "page_line_num").bind(test_params)
 
     # 次のページありカーソル表示
     msg_cur.setVisible(not page.is_end_page and page.is_finish)

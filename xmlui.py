@@ -1,6 +1,6 @@
 import xml.etree.ElementTree
 from xml.etree.ElementTree import Element
-from typing import Callable,Any
+from typing import Callable,Any,Self
 
 import re, math, copy
 import unicodedata
@@ -102,7 +102,7 @@ class UI_STATE:
     def hasAttr(self, key: str) -> bool:
         return key in self._element.attrib
 
-    def setAttr(self, key:str|list[str], value: Any) -> 'UI_STATE':
+    def setAttr(self, key:str|list[str], value: Any) -> Self:
         # attribはdict[str,str]なのでstrで保存する
         if isinstance(key, list):
             for i, k in enumerate(key):
@@ -127,16 +127,16 @@ class UI_STATE:
     def area(self) -> UI_RECT:
         return UI_RECT(self.area_x, self.area_y, self.area_w, self.area_h)
 
-    def setPos(self, x:int, y:int) -> 'UI_STATE':
+    def setPos(self, x:int, y:int) -> Self:
         return self.setAttr(["x", "y"], [x, y])
 
-    def setAbsPos(self, x:int, y:int) -> 'UI_STATE':
+    def setAbsPos(self, x:int, y:int) -> Self:
         return self.setAttr(["abs_x", "abs_y"], [x, y])
 
-    def setEnable(self, enable:bool):
+    def setEnable(self, enable:bool) -> Self:
         return self.setAttr("enable", enable)
 
-    def setVisible(self, visible:bool):
+    def setVisible(self, visible:bool) -> Self:
         return self.setAttr("visible", visible)
 
     # ツリー操作用
@@ -159,7 +159,7 @@ class UI_STATE:
         return [UI_STATE(self.xmlui, element) for element in self._element.iter() if element.tag == tag]
 
     def findByTag(self, tag:str) -> 'UI_STATE':
-        elements = self.findByTagAll(tag)
+        elements:list[UI_STATE] = self.findByTagAll(tag)
         if elements:
             return elements[0]
         raise Exception(f"Tag '{tag}' not found in '{self.tag}' and children")
@@ -315,18 +315,18 @@ class XMLUI:
     # *************************************************************************
     # ファイルから読み込み
     @classmethod
-    def createFromFile(cls, fileName:str, root_tag:str|None=None):
+    def createFromFile(cls, fileName:str, root_tag:str|None=None) -> 'XMLUI':
         with open(fileName, "r", encoding="utf8") as f:
             return cls.createFromString(f.read())
 
     # リソースから読み込み
     @classmethod
-    def createFromString(cls, xml_data:str, root_tag:str|None=None):
+    def createFromString(cls, xml_data:str, root_tag:str|None=None) -> 'XMLUI':
         return XMLUI(xml.etree.ElementTree.fromstring(xml_data))
 
     # ワーカーの作成
     @classmethod
-    def createWorker(cls, root_tag:str):
+    def createWorker(cls, root_tag:str) -> 'XMLUI':
         return XMLUI(Element(root_tag))
 
     # 初期化。<xmlui>を持つXMLを突っ込む
@@ -633,7 +633,7 @@ class UI_FORMAT_TEXT(UI_FORMAT_TEXT_RO):
         # super
         self._init_format_text_ro(state, format_text_attr)
     
-    def bind(self, params:dict[str, Any]={}) -> 'UI_FORMAT_TEXT':
+    def bind(self, params:dict[str, Any]={}) -> Self:
         # パラメータ展開した後改行を改行コードに統一(ついでに全角化)
         if params:
             tmp_text = self.convertZenkaku(re.sub(self.SEPARATE_REGEXP, "\n", self._state.text.strip().format(**params)))
@@ -652,7 +652,7 @@ class UI_FORMAT_TEXT(UI_FORMAT_TEXT_RO):
     # -----------------------------------------------------
     # 文字列中の半角を全角に変換する
     @classmethod
-    def convertZenkaku(cls, hankaku:str):
+    def convertZenkaku(cls, hankaku:str) -> str:
         return unicodedata.normalize("NFKC", hankaku).translate(_hankaku_zenkaku_dict)
 
 # 変更用
