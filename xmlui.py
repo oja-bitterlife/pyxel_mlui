@@ -506,6 +506,12 @@ class UI_TEXT:
         self._state.setAttr(self._display_text_attr, display_text)
         return self
 
+    # 分割
+    # -----------------------------------------------------
+    # 現在ページを改行分割
+    def split(self) -> list[str]:
+        return self.text.splitlines()
+
     # テキストの状況
     # -----------------------------------------------------
     @property
@@ -522,6 +528,60 @@ class UI_TEXT:
     @classmethod
     def convertZenkaku(cls, hankaku:str):
         return unicodedata.normalize("NFKC", hankaku).translate(_hankaku_zenkaku_dict)
+
+class UI_PAGE(UI_TEXT):
+    def __init__(self, text:UI_TEXT, page_no_attr:str,  page_line_num:int):
+        self._ui_text = text  # 作成元
+        self._page_no_attr = page_no_attr  # ページ番号
+        self._page_line_num = page_line_num  # ページ行数
+
+    # ページ関係
+    # -----------------------------------------------------
+    # page_noの操作
+    def setPageNo(self, page_no:int) -> 'UI_PAGE':
+        self._ui_text._state.setAttr(self._page_no_attr, page_no)
+        return self
+
+    def nextPage(self, add:int=1) -> 'UI_PAGE':
+        return self.setPageNo(self.page_no+add)
+
+    # 現在ページ
+    @property
+    def page_no(self) -> int:
+        return self._ui_text._state.attrInt(self._page_no_attr, 0)
+
+    # ページの最大数
+    @property
+    def page_max(self) -> int:
+        return len(self.splitPage())
+
+    # ページ全部表示済みかどうか
+    @property
+    def is_end_page(self) -> bool:
+        return self.page_no+1 >= self.page_max
+
+    # 分割
+    # -----------------------------------------------------
+    # 現在ページを改行分割
+    def split(self) -> list[str]:
+        return self._ui_text.text.splitlines()
+
+    # 全てのページをベージごとに改行分割
+    def splitPage(self) -> list[list[str]]:
+        lines = self._ui_text.text.splitlines()
+        return [lines[i:i+self._page_line_num] for i in range(0, len(lines), self._page_line_num)]
+
+    # テキストアクセス
+    # -----------------------------------------------------
+    # 現在ページテキスト
+    @property
+    def text(self) -> str:
+        page_no = self._ui_text._state.attrInt(self._page_no_attr, 0)
+        return "\n".join(self.splitPage()[page_no])
+
+    @property
+    def length(self) -> int:
+        return len(self.text.replace("\n", ""))
 
 # アニメーションテキスト表示用
 class UI_ANIM_TEXT(UI_TEXT):
@@ -578,60 +638,6 @@ class UI_ANIM_TEXT(UI_TEXT):
     def action(self):
         if not self.is_finish:
             self.finish()
-
-class UI_PAGE(UI_TEXT):
-    def __init__(self, text:UI_TEXT, page_no_attr:str,  page_line_num:int):
-        self._ui_text = text  # 作成元
-        self._page_no_attr = page_no_attr  # ページ番号
-        self._page_line_num = page_line_num  # ページ行数
-
-    # ページ関係
-    # -----------------------------------------------------
-    # page_noの操作
-    def setPageNo(self, page_no:int) -> 'UI_PAGE':
-        self._ui_text._state.setAttr(self._page_no_attr, page_no)
-        return self
-
-    def nextPage(self, add:int=1) -> 'UI_PAGE':
-        return self.setPageNo(self.page_no+add)
-
-    # 現在ページ
-    @property
-    def page_no(self) -> int:
-        return self._ui_text._state.attrInt(self._page_no_attr, 0)
-
-    # ページの最大数
-    @property
-    def page_max(self) -> int:
-        return len(self.splitPage())
-
-    # ページ全部表示済みかどうか
-    @property
-    def is_end_page(self) -> bool:
-        return self.page_no+1 >= self.page_max
-
-    # 分割
-    # -----------------------------------------------------
-    # 現在ページを改行分割
-    def split(self) -> list[str]:
-        return self._ui_text.text.splitlines()
-
-    # 全てのページをベージごとに改行分割
-    def splitPage(self) -> list[list[str]]:
-        lines = self._ui_text.text.splitlines()
-        return [lines[i:i+self._page_line_num] for i in range(0, len(lines), self._page_line_num)]
-
-    # テキストアクセス
-    # -----------------------------------------------------
-    # 現在ページテキスト
-    @property
-    def text(self) -> str:
-        page_no = self._ui_text._state.attrInt(self._page_no_attr, 0)
-        return "\n".join(self.splitPage()[page_no])
-
-    @property
-    def length(self) -> int:
-        return len(self.text.replace("\n", ""))
 
 # アニメーション機能付きPage関係
 class UI_ANIM_PAGE(UI_PAGE):
