@@ -414,7 +414,7 @@ class UI_STATE:
 
 
     # xmluiで特別な意味を持つアトリビュート一覧
-    # わかりやすく全てプロパティを用意しておく(デフォルト値も書く)
+    # わかりやすく全てプロパティを用意しておく(デフォルト値も省略せず書く)
     # 面倒でも頑張って書く
     # *************************************************************************
     @property
@@ -466,7 +466,7 @@ class UI_STATE:
 
     @property
     def wrap(self) -> int:  # テキスト自動改行文字数
-        return self.attrInt("wrap", 1024)
+        return self.attrInt("wrap", 4096)
 
     @property
     def cur_x(self) -> int:  # 選択グリッドx

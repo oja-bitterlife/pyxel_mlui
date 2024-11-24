@@ -27,7 +27,7 @@ def my_ui_update(my_ui:UI_STATE, event:UI_EVENT):
 def menu_win_update(menu_win:UI_STATE, event:UI_EVENT):
     item_w, item_h = menu_win.attrInt("item_w"), menu_win.attrInt("item_h")
 
-    # メニューアイテム取得
+    # メニューアイテム
     grid = menu_win.arrangeGridByTag("menu_row", "menu_item", item_w, item_h)
     cursor = UI_GRID_CURSOR(menu_win.findByTag("menu_cur"), grid).moveByEvent(event.trg, "left", "right", "up", "down")
 
