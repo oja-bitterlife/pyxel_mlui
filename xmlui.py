@@ -482,27 +482,50 @@ _to_zenkaku += "　！＂＃＄％＆＇（）＊＋，－．／：；＜＝＞�
 _hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
 
 class UI_TEXT:
+    # クラス定数
+    SEPARATE_REGEXP:str = r"\\n"
+
+    def __init__(self, state:'UI_STATE', display_text_attr:str):
+        self._state = state
+        self._display_text_attr = display_text_attr  # 表示テキスト置き場
+        self.bind({})  # 最初は空パラメータで
+
+    def bind(self, params:dict[str, Any]={}) -> 'UI_TEXT':
+        # パラメータ展開した後改行を改行コードに統一(ついでに全角化)
+        if params:
+            tmp_text = self.convertZenkaku(re.sub(self.SEPARATE_REGEXP, "\n", self._state.text.strip().format(**params)))
+        else:
+            tmp_text = self.convertZenkaku(re.sub(self.SEPARATE_REGEXP, "\n", self._state.text.strip()))
+
+        # 各行に分解し、その行をさらにwrapで分解する
+        wrap = max(1, self._state.wrap)  # 0だと無限になってしまうので最低1を入れておく
+        display_text = "\n".join(["\n".join([line[i:i+wrap].strip("\n") for i in range(0, len(line), wrap)]) for line in tmp_text.splitlines()])
+
+        # stateに保存
+        self._state.setAttr(self._display_text_attr, display_text)
+        return self
+
     # 文字列中の半角を全角に変換する
     @classmethod
     def convertZenkaku(cls, hankaku:str):
         return unicodedata.normalize("NFKC", hankaku).translate(_hankaku_zenkaku_dict)
 
+    @property
+    def text(self) -> str:
+        return self._state.attrStr(self._display_text_attr, self._state.text.strip())
+
+    @property
+    def length(self) -> int:
+        return len(self.text.replace("\n", ""))
+
 # アニメーションテキスト表示用
 class UI_ANIM_TEXT(UI_TEXT):
-    # クラス定数
-    SEPARATE_REGEXP:str = r"\\n"
-
-    # 改行コードに変換しておく
-    def __init__(self, state:'UI_STATE', draw_count_attr:str):
-        self._state = state
+    def __init__(self, state:'UI_STATE', diisplay_text_attr:str, draw_count_attr:str):
+        super().__init__(state, diisplay_text_attr)
         self._draw_count_attr = draw_count_attr  # 描画文字数
-        self._display_text = re.sub(self.SEPARATE_REGEXP, "\n", self._state.text).strip()  # 最終テキスト
 
-    def bind(self, params:dict[str, Any]={}, wrap:int=4096) -> 'UI_ANIM_TEXT':
-        wrap = max(1, wrap)  # 0だと無限になってしまうので最低1を入れておく
-        tmp_text = self.convertZenkaku(re.sub(self.SEPARATE_REGEXP, "\n", self._state.text).strip().format(**params))
-        # 各行に分解し、その行をさらにwrapで分解する
-        self._display_text = "\n".join(["\n".join([line[i:i+wrap].strip("\n") for i in range(0, len(line), wrap)]) for line in tmp_text.splitlines()])
+    def bind(self, params:dict[str, Any]={}) -> 'UI_ANIM_TEXT':
+        super().bind(params)
         return self
 
     # draw_countの操作
@@ -517,11 +540,15 @@ class UI_ANIM_TEXT(UI_TEXT):
         return self.setDrawCount(0)
 
     def finish(self) -> 'UI_ANIM_TEXT':
-        return self.setDrawCount(len(self._display_text))
+        return self.setDrawCount(self.length)
 
     @property
     def draw_count(self) -> float:
         return self._state.attrFloat(self._draw_count_attr)
+
+    @property
+    def is_finish(self) -> bool:
+        return math.ceil(self.draw_count) >= self.length
 
     # 分割
     def split(self) -> list[str]:
@@ -542,27 +569,6 @@ class UI_ANIM_TEXT(UI_TEXT):
     def action(self):
         if not self.is_finish:
             self.finish()
-
-    # テキストアクセスプロパティ
-    @property
-    def text(self) -> str:
-        return self._display_text
-
-    @property
-    def length(self) -> int:
-        return len(self._display_text.replace("\n", ""))
-
-    @property
-    def is_finish(self) -> bool:
-        return math.ceil(self.draw_count) >= self.length
-
-    def usePage(self, page_no_attr:str,  page_line_num:int) -> 'UI_ANIM_PAGE':
-        return UI_ANIM_PAGE(self, page_no_attr, page_line_num)
-
-    @property
-    def wrap(self) -> int:
-        return self._state.wrap
-
 
 # Page関係
 class UI_ANIM_PAGE:
@@ -585,7 +591,7 @@ class UI_ANIM_PAGE:
         return self._ui_text._limitStr(self.text, self._ui_text.draw_count).splitlines()
 
     def splitPage(self) -> list[list[str]]:
-        lines = self._ui_text._display_text.splitlines()
+        lines = self._ui_text.text.splitlines()
         return [lines[i:i+self._page_line_num] for i in range(0, len(lines), self._page_line_num)]
 
     # イベントアクション
