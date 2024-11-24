@@ -274,6 +274,10 @@ class UI_STATE:
         return self.attrInt("area_h", 4096)
 
     @property
+    def update_count(self) -> int:  # テキスト自動改行文字数
+        return self.attrInt("update_count", 0)
+
+    @property
     def use_event(self) -> bool:  # eventを使うかどうか
         return self.attrBool("use_event", False)
 
@@ -378,7 +382,7 @@ class XMLUI:
         # 更新処理
         for state in self._draw_targets:
             self.updateElement(state.tag, state, self._event if state == self._active_state else UI_EVENT())
-
+            state.setAttr("update_count", state.update_count + 1)
 
     # 描画用
     # *************************************************************************
@@ -651,8 +655,10 @@ class UI_GRID_CURSOR:
 
 # ダイアル
 class UI_DIAL:
-    def __init__(self, state:'UI_STATE', digit:int, digit_list:str="0123456789"):
+    def __init__(self, state:'UI_STATE', digits_attr:str, digit_no_attr:str, digit_num:int, digit_list:str="0123456789"):
         self._state = state
-        self._digit = digit
+        self._digits_attr = digits_attr
+        self._digit_no_attr = digit_no_attr
+        self._digit_num = digit_num
         self._digit_list = digit_list
-        pass
+

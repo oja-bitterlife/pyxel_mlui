@@ -1,4 +1,4 @@
-from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_GRID_CURSOR,UI_ANIM_TEXT
+from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_GRID_CURSOR,UI_ANIM_TEXT,UI_DIAL
 
 ui_template = XMLUI.createFromFile("assets/ui/test.xml")
 ui_worker = XMLUI.createWorker("my_ui")
@@ -136,11 +136,26 @@ def msg_cur_draw(msg_cur:UI_STATE, event:UI_EVENT):
 
 # ダイアル
 # *****************************************************************************
+@ui_worker.update_func("dial_win")
+def dial_win_update(dial_win:UI_STATE, event:UI_EVENT):
+    dial = UI_DIAL(dial_win, "digits", "digit_no", 4)
+
+    if event.active:
+        if "left" in event.trg:
+            dial_win.setAttr("digit_no", min(dial_win.attrInt("digit_no")+1, dial._digit_num-1))
+        if "right" in event.trg:
+            dial_win.setAttr("digit_no", max(dial_win.attrInt("digit_no")-1, 0))
+
+
+
 @ui_worker.draw_func("dial_win")
 def dial_win_draw(dial_win:UI_STATE, event:UI_EVENT):
     frame_color = 10 if event.active else 7
     pyxel.rect(dial_win.area.x, dial_win.area.y, dial_win.area.w, dial_win.area.h, 12)
     pyxel.rectb(dial_win.area.x, dial_win.area.y, dial_win.area.w, dial_win.area.h, frame_color)
+
+    # 数値表示
+    digit_no = dial_win.attrInt("digit_no")
 
     # 閉じる
     if "button_b" in event.trg:
