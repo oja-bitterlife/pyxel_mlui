@@ -1,6 +1,6 @@
 import xml.etree.ElementTree
 from xml.etree.ElementTree import Element
-from typing import Callable,Any,Self
+from typing import Callable,Any
 
 import re, math, copy
 import unicodedata
@@ -102,7 +102,7 @@ class UI_STATE:
     def hasAttr(self, key: str) -> bool:
         return key in self._element.attrib
 
-    def setAttr(self, key:str|list[str], value: Any) -> Self:
+    def setAttr(self, key:str|list[str], value: Any) -> 'UI_STATE':
         # attribはdict[str,str]なのでstrで保存する
         if isinstance(key, list):
             for i, k in enumerate(key):
@@ -127,16 +127,16 @@ class UI_STATE:
     def area(self) -> UI_RECT:
         return UI_RECT(self.area_x, self.area_y, self.area_w, self.area_h)
 
-    def setPos(self, x:int, y:int) -> Self:
+    def setPos(self, x:int, y:int) -> 'UI_STATE':
         return self.setAttr(["x", "y"], [x, y])
 
-    def setAbsPos(self, x:int, y:int) -> Self:
+    def setAbsPos(self, x:int, y:int) -> 'UI_STATE':
         return self.setAttr(["abs_x", "abs_y"], [x, y])
 
-    def setEnable(self, enable:bool) -> Self:
+    def setEnable(self, enable:bool) -> 'UI_STATE':
         return self.setAttr("enable", enable)
 
-    def setVisible(self, visible:bool) -> Self:
+    def setVisible(self, visible:bool) -> 'UI_STATE':
         return self.setAttr("visible", visible)
 
     # ツリー操作用
@@ -484,106 +484,88 @@ _hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
 # まずは読み込み用
 # *****************************************************************************
 # テキスト基底(フォーマット済み)
-class UI_FORMAT_TEXT_RO:
+class UI_PAGE_TEXT:
     # クラス定数
     SEPARATE_REGEXP:str = r"\\n"
 
-    def __init__(self, state:'UI_STATE', format_text_attr:str):
-        self._init_format_text_ro(state, format_text_attr)
-
-    def _init_format_text_ro(self, state:'UI_STATE', format_text_attr:str):
+    def __init__(self, state:'UI_STATE', format_text_attr:str, page_no_attr:str, page_line_num:int, params:dict[str, Any]={}):
         self._state = state
-        self._format_text_attr = format_text_attr  # 表示テキスト置き場
+        self._format_text_attr = format_text_attr  # 変換後テキスト置き場
+        self._page_no_attr = page_no_attr  # ページ番号置き場
 
-    # 分割
+        # 改行を\nに統一して全角化
+        tmp_text = self.convertZenkaku(re.sub(self.SEPARATE_REGEXP, "\n", self._state.text.strip().format(**params)))
+
+        # 各行に分解し、その行をさらにwrapで分解する
+        wrap = max(1, self._state.wrap)  # 0だと無限になってしまうので最低1を入れておく
+        wrap_text =  [[line[i:i+wrap] for i in  range(0, len(line), wrap)] for line in tmp_text.splitlines()]
+
+        # ページごとに\0で分割
+        pages_text = self. _splitPage(sum(wrap_text, []), page_line_num)
+        self._state.setAttr(self._format_text_attr, pages_text)
+
+    # 全てのページをベージごとに\0分割
+    def _splitPage(self, lines:list[str], page_line_num:int) -> str:
+        return"\0".join(["\n".join(lines[i:i+page_line_num]) for i in range(0, len(lines), page_line_num)])
+
+    # ページ関係
     # -----------------------------------------------------
-    # 現在ページを改行分割
-    def split(self) -> list[str]:
-        return self.text.splitlines()
+    # page_noの操作
+    def nextPage(self, add:int=1):
+        self._state.setAttr(self._page_no_attr, self.page_no+1)
+        return self
 
-    # テキストの状況
-    # -----------------------------------------------------
-    @property
-    def text(self) -> str:
-        return self._state.attrStr(self._format_text_attr, self._state.text.strip())
-
-    @property
-    def length(self) -> int:
-        return len(self.text.replace("\n", ""))
-
-# フォーマット済みテキストをページ分割する
-class UI_PAGE_TEXT_RO(UI_FORMAT_TEXT_RO):
-    def __init__(self, state:'UI_STATE', format_text_attr:str, page_no_attr:str, page_line_num_attr:str):
-        self._init_format_text_ro(state, format_text_attr)  # super
-        self._init_page_text_ro(page_no_attr, page_line_num_attr)
-
-    def _init_page_text_ro(self, page_no_attr:str, page_line_num_attr:str):
-        self._page_no_attr = page_no_attr  # ページ番号
-        self._page_line_num_attr = page_line_num_attr  # ページ行数
-
-    # 出力用行配列取得
-    # -----------------------------------------------------
-    # 現在ページを改行分割
-    def split(self) -> list[str]:
-        return self.text.splitlines()
-
-    # 全てのページをベージごとに改行分割
-    def _splitPage(self) -> list[list[str]]:
-        lines = self._state.attrStr(self._format_text_attr).splitlines()
-        return [lines[i:i+self.page_line_num] for i in range(0, len(lines), self.page_line_num)]
-
-    # ページ状態取得
-    # -----------------------------------------------------
    # 現在ページ
     @property
     def page_no(self) -> int:
         return self._state.attrInt(self._page_no_attr, 0)
 
-    @property
-    def page_line_num(self) -> int:
-        return self._state.attrInt(self._page_line_num_attr, 1)
-
     # ページの最大数
     @property
     def page_max(self) -> int:
-        return len(self._splitPage())
+        return self.all_text.count("\0")+1
 
     # ページ全部表示済みかどうか
     @property
     def is_end_page(self) -> bool:
         return self.page_no+1 >= self.page_max
 
-    # テキスト情報
+    # テキストの状況
     # -----------------------------------------------------
-    # 現在ページテキスト
     @property
-    def text(self) -> str:
-        page_no = self._state.attrInt(self._page_no_attr, 0)
-        return "\n".join(self._splitPage()[page_no])
+    def all_text(self) -> str:
+        return self._state.attrStr(self._format_text_attr, self._state.text.strip())
 
-    # 現在ページテキスト長
+    @property
+    def page_text(self) -> str:
+        return self.all_text.split("\0")[self.page_no]
+
     @property
     def length(self) -> int:
         return len(self.text.replace("\n", ""))
 
-# アニメーションテキスト表示用
-class UI_ANIM_TEXT_RO(UI_FORMAT_TEXT_RO):
-    def __init__(self, state:'UI_STATE', format_text_attr:str, draw_count_attr:str):
-        self._init_format_text_ro(state, format_text_attr)  # super
-        self._init_anim_text_ro(draw_count_attr)
+    # ユーティリティ
+    # -----------------------------------------------------
+    # 文字列中の半角を全角に変換する
+    @classmethod
+    def convertZenkaku(cls, hankaku:str):
+        return unicodedata.normalize("NFKC", hankaku).translate(_hankaku_zenkaku_dict)
 
-    def _init_anim_text_ro(self, draw_count_attr:str):
-        self._draw_count_attr = draw_count_attr  # 描画文字数
+
+class UI_PAGE_ANIM:
+    def __init__(self, text:UI_PAGE_TEXT, draw_count_attr:str):
+        self._text = text
+        self._draw_count_attr = draw_count_attr
 
     # アニメーション情報
     # -----------------------------------------------------
     @property
     def draw_count(self) -> float:
-        return self._state.attrFloat(self._draw_count_attr)
+        return self._text._state.attrFloat(self._draw_count_attr)
 
     @property
     def is_finish(self) -> bool:
-        return math.ceil(self.draw_count) >= self.length
+        return math.ceil(self.draw_count) >= len(self._text.page_text.replace("\n", ""))
 
     # 出力用行配列取得
     # -----------------------------------------------------
@@ -593,136 +575,23 @@ class UI_ANIM_TEXT_RO(UI_FORMAT_TEXT_RO):
         limit = math.ceil(draw_count)
         # まずlimitまで縮める
         for i,c in enumerate(tmp_text):
-            if (limit := limit if c == "\n" else limit-1) < 0:
+            if (limit := limit if c == "\n" or c == "\0" else limit-1) < 0:
                 tmp_text = tmp_text[:i]
                 break
-        return tmp_text.strip("\n")
+        return tmp_text
 
-    # リミット付き改行分割
-    def split(self) -> list[str]:
-        return self._limitStr(self.text, self.draw_count).splitlines()
-
-
-# アニメーション機能付きPage分割
-class UI_ANIM_PAGE_RO(UI_PAGE_TEXT_RO, UI_ANIM_TEXT_RO):
-    def __init__(self, state:'UI_STATE', format_text_attr:str, page_no_attr:str, page_line_num_attr:str, draw_count_attr:str):
-        # super
-        self._init_format_text_ro(state, format_text_attr)
-        self._init_page_text_ro(page_no_attr, page_line_num_attr)
-        self._init_anim_text_ro(draw_count_attr)
-
-    # アニメーション情報
+    # アニメーション管理
     # -----------------------------------------------------
-    # そのページの表示が終わっているか
-    @property
-    def is_finish(self) -> bool:
-        return math.ceil(self.draw_count) >= self.length
-
-    # リミット付き分割
-    # -----------------------------------------------------
-    # 現在のページを改行分割
-    def split(self) -> list[str]:
-        return self._limitStr(self.text, self.draw_count).splitlines()
-
-
-# 続いて読み書き用
-# *****************************************************************************
-# element.textをformatして格納する
-class UI_FORMAT_TEXT(UI_FORMAT_TEXT_RO):
-    def __init__(self, state:'UI_STATE', format_text_attr:str):
-        # super
-        self._init_format_text_ro(state, format_text_attr)
-    
-    def bind(self, params:dict[str, Any]={}) -> Self:
-        # パラメータ展開した後改行を改行コードに統一(ついでに全角化)
-        if params:
-            tmp_text = self.convertZenkaku(re.sub(self.SEPARATE_REGEXP, "\n", self._state.text.strip().format(**params)))
-        else:
-            tmp_text = self.convertZenkaku(re.sub(self.SEPARATE_REGEXP, "\n", self._state.text.strip()))
-
-        # 各行に分解し、その行をさらにwrapで分解する
-        wrap = max(1, self._state.wrap)  # 0だと無限になってしまうので最低1を入れておく
-        format_text = "\n".join(["\n".join([line[i:i+wrap].strip("\n") for i in range(0, len(line), wrap)]) for line in tmp_text.splitlines()])
-
-        # stateに保存
-        self._state.setAttr(self._format_text_attr, format_text)
-        return self
-
-    # ユーティリティ
-    # -----------------------------------------------------
-    # 文字列中の半角を全角に変換する
-    @classmethod
-    def convertZenkaku(cls, hankaku:str) -> str:
-        return unicodedata.normalize("NFKC", hankaku).translate(_hankaku_zenkaku_dict)
-
-# 変更用
-# *****************************************************************************
-class UI_PAGE_TEXT(UI_FORMAT_TEXT, UI_PAGE_TEXT_RO):
-    def __init__(self, state:'UI_STATE', format_text_attr:str, page_no_attr:str,  page_line_num_attr:str):
-        # super
-        self._init_format_text_ro(state, format_text_attr)
-        self._init_page_text_ro(page_no_attr, page_line_num_attr)
-
-    # ページ関係
-    # -----------------------------------------------------
-    # page_noの設定
-    def setPageNo(self, page_no:int) -> 'UI_PAGE_TEXT':
-        self._state.setAttr(self._page_no_attr, page_no)
-        return self
-
-    # page_noを進める
-    def nextPage(self, add:int=1) -> 'UI_PAGE_TEXT':
-        return self.setPageNo(self.page_no+add)
-
-class UI_ANIM_TEXT(UI_FORMAT_TEXT, UI_ANIM_TEXT_RO):
-    def __init__(self, state:'UI_STATE', format_text_attr:str, draw_count_attr:str):
-        # super
-        self._init_format_text_ro(state, format_text_attr)
-        self._init_anim_text_ro(draw_count_attr)
-
-    # draw_countの操作
-    # -----------------------------------------------------
-    def setDrawCount(self, draw_count:float) -> 'UI_ANIM_TEXT':
-        self._state.setAttr(self._draw_count_attr, draw_count)
-        return self
-
-    def next(self, add:float=1) -> 'UI_ANIM_TEXT':
-        return self.setDrawCount(self.draw_count+add)
-
-    def reset(self) -> 'UI_ANIM_TEXT':
-        return self.setDrawCount(0)
-
-    def finish(self) -> 'UI_ANIM_TEXT':
-        return self.setDrawCount(self.length)
-
-    # イベントアクション
-    # -----------------------------------------------------
-    def action(self):
-        if not self.is_finish:
-            self.finish()
-
-class UI_ANIM_PAGE(UI_ANIM_TEXT, UI_PAGE_TEXT):
-    def __init__(self, state:'UI_STATE', format_text_attr:str, draw_count_attr:str, page_no_attr:str, page_line_attr:str):
-        # super
-        self._init_format_text_ro(state, format_text_attr)
-        self._init_page_text_ro(page_no_attr, page_line_attr)
-        self._init_anim_text_ro(draw_count_attr)
-
-    # ページ関係
-    # -----------------------------------------------------
-    # page_noの操作
-    def nextPage(self, add:int=1) -> 'UI_ANIM_PAGE':
-        self.reset()  # draw_countをリセットしておく
-        self.nextPage(add)
-        return self
+    def finish(self):
+        self._text._state.setAttr(self._draw_count_attr, 65536)
 
     # イベントアクション
     # -----------------------------------------------------
     def action(self):  # 結果が一意でないのでselfは返さない
         if not self.is_finish:
-            self.action()
-        elif not self.is_end_page:
-            self.nextPage()
+            self.finish()
+        elif not self._text.is_end_page:
+            self._text.nextPage()
 
 
 # メニュー系
