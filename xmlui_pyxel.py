@@ -41,14 +41,18 @@ def menu_win_update(menu_win:UI_STATE, event:UI_EVENT):
     if "button_b" in event.trg:
         menu_win.close(menu_win.id)
 
+    # デバッグ用
+    if ui_worker.debug:
+       menu_win.setAttr("frame_color", 10 if event.active else 7)
+
 
 # 描画
 # ---------------------------------------------------------
 @ui_worker.draw_func("menu_win")
-def menu_win_draw(menu_win:UI_STATE):
+def menu_win_draw(menu_win:UI_STATE, event:UI_EVENT):
     bg_color = 12
     frame_color = menu_win.attrInt("frame_color", 7)
-    title  = menu_win.attrStr("title", "")
+    title  = menu_win.attrStr("title")
 
     pyxel.rect(menu_win.area.x, menu_win.area.y, menu_win.area.w, menu_win.area.h, bg_color)
     pyxel.rectb(menu_win.area.x, menu_win.area.y, menu_win.area.w, menu_win.area.h, frame_color)
@@ -61,12 +65,12 @@ def menu_win_draw(menu_win:UI_STATE):
         pyxel.text(text_x, menu_win.area.y-2, title, frame_color, font)
 
 @ui_worker.draw_func("menu_item")
-def menu_item_draw(menu_item:UI_STATE):
+def menu_item_draw(menu_item:UI_STATE, event:UI_EVENT):
     color = menu_item.attrInt("color", 7)
     pyxel.text(menu_item.area.x, menu_item.area.y, menu_item.text, color, font)
 
 @ui_worker.draw_func("menu_cur")
-def menu_cur_draw(menu_cur:UI_STATE):
+def menu_cur_draw(menu_cur:UI_STATE, event:UI_EVENT):
     tri_size = menu_cur.attrInt("size", 6)
     color = menu_cur.attrInt("color", 7)
 
@@ -108,11 +112,14 @@ def msg_win_update(msg_win:UI_STATE, event:UI_EVENT):
     if "button_b" in event.trg:
         msg_win.close("menu_command")
 
+    # デバッグ用
+    if ui_worker.debug:
+       msg_win.setAttr("frame_color", 10 if event.active else 7)
 
 # 描画
 # ---------------------------------------------------------
 @ui_worker.draw_func("msg_win")
-def msg_win_draw(msg_win:UI_STATE):
+def msg_win_draw(msg_win:UI_STATE, event:UI_EVENT):
     frame_color = msg_win.attrInt("frame_color", 7)
     pyxel.rect(msg_win.area.x, msg_win.area.y, msg_win.area.w, msg_win.area.h, 12)
     pyxel.rectb(msg_win.area.x, msg_win.area.y, msg_win.area.w, msg_win.area.h, frame_color)
@@ -120,7 +127,7 @@ def msg_win_draw(msg_win:UI_STATE):
     pyxel.rectb(msg_win.area.x+3, msg_win.area.y+3, msg_win.area.w-6, msg_win.area.h-6, frame_color)
 
 @ui_worker.draw_func("msg_text")
-def msg_text_draw(msg_text:UI_STATE):
+def msg_text_draw(msg_text:UI_STATE, event:UI_EVENT):
     # テキスト表示
     wrap = msg_text.attrInt("wrap", 1024)
     text = msg_text.getAnimText("draw_count").bind(test_params, wrap)
@@ -130,7 +137,7 @@ def msg_text_draw(msg_text:UI_STATE):
         pyxel.text(msg_text.area.x, msg_text.area.y+i*FONT_SIZE, text, 7, font)
 
 @ui_worker.draw_func("msg_cur")
-def msg_cur_draw(msg_cur:UI_STATE):
+def msg_cur_draw(msg_cur:UI_STATE, event:UI_EVENT):
     tri_size = msg_cur.attrInt("size", 6)
     color = msg_cur.attrInt("color", 7)
 

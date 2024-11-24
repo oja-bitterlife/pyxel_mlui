@@ -479,6 +479,9 @@ class UI_STATE:
 # XMLでUIライブラリ本体
 # #############################################################################
 class XMLUI:
+    # デバッグ用フラグ
+    debug = True
+
     # 初期化
     # *************************************************************************
     # ファイルから読み込み
@@ -505,10 +508,13 @@ class XMLUI:
 
         # 処理関数の登録
         self._update_funcs:dict[str,Callable[[UI_STATE,UI_EVENT], None]] = {}
-        self._draw_funcs:dict[str,Callable[[UI_STATE], None]] = {}
+        self._draw_funcs:dict[str,Callable[[UI_STATE,UI_EVENT], None]] = {}
+        self._pre_update_func:Callable[[str,UI_STATE,UI_EVENT], None]|None = None
+        self._pre_draw_func:Callable[[str,UI_STATE,UI_EVENT], None]|None = None
 
-        # 更新対象Elementを格納(update/draw連携用)
-        self._update_states_cache:list[UI_STATE] = []
+        # 表示対象Elementを格納(update/draw連携用)
+        self._draw_targets:list[UI_STATE] = []
+        self._active_state:UI_STATE|None = None
 
         # root_tag指定が無ければ最上位エレメント
         if root_tag is None:
@@ -551,25 +557,26 @@ class XMLUI:
         self._event.update()
 
         # 更新対象(enable)Elementを取得
-        self._update_states_cache = [UI_STATE(self, element) for element in self.root._element.iter() if element.attrib.get("enable", True)]
+        updates = [UI_STATE(self, element) for element in self.root._element.iter() if element.attrib.get("enable", True)]
+        self._draw_targets = [state for state in updates if state.visible]
 
         # use_eventがTrueなstateだけ抜き出す
-        use_event_states = list(filter(lambda state: state.use_event, self._update_states_cache))
-        active_state = use_event_states[-1] if use_event_states else None  # 最後=Active
+        use_event_states = list(filter(lambda state: state.use_event, self._draw_targets))
+        self._active_state = use_event_states[-1] if use_event_states else None  # 最後=Active
 
         # 更新処理
-        for state in self._update_states_cache:
-            self.updateElement(state.tag, state, self._event if state == active_state else UI_EVENT())
+        for state in self._draw_targets:
+            self.updateElement(state.tag, state, self._event if state == self._active_state else UI_EVENT())
 
 
     # 描画用
     # *************************************************************************
     def draw(self):
         # 更新対象(visible)を取得(Updateされたもののみ対象)
-        draw_states = [state for state in self._update_states_cache if state.visible]
+        self._draw_targets = [state for state in self._draw_targets if state.visible]
 
         # エリア更新
-        for state in draw_states:
+        for state in self._draw_targets:
             if state.parent:  # rootは親を持たないので更新不要
                 # absがあれば絶対座標、なければ親からのオフセット
                 state.setAttr("area_x", state.abs_x if state.hasAttr("abs_x") else state.x + state.parent.area_x)
@@ -578,22 +585,19 @@ class XMLUI:
                 state.setAttr("area_h", state.attrInt("h", state.parent.area_h))
 
         # 描画処理
-        for state in draw_states:
-            self.drawElement(state.tag, state)
+        for state in self._draw_targets:
+            self.drawElement(state.tag, state, self._event if state == self._active_state else UI_EVENT())
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
     def updateElement(self, tag_name:str, state:UI_STATE, event:UI_EVENT):
-        # デバッグ用
-        state.setAttr("frame_color", 10 if event.active else 7)
-
         # 登録済みの関数だけ実行
         if tag_name in self._update_funcs:
             self._update_funcs[tag_name](state, event)
 
-    def drawElement(self, tag_name:str, state:UI_STATE):
+    def drawElement(self, tag_name:str, state:UI_STATE, event:UI_EVENT):
         # 登録済みの関数だけ実行
         if tag_name in self._draw_funcs:
-            self._draw_funcs[tag_name](state)
+            self._draw_funcs[tag_name](state, event)
 
 
     # 処理登録
@@ -601,7 +605,7 @@ class XMLUI:
     def setUpdateFunc(self, tag_name:str, func:Callable[[UI_STATE,UI_EVENT], None]):
         self._update_funcs[tag_name] = func
 
-    def setDrawFunc(self, tag_name:str, func:Callable[[UI_STATE], None]):
+    def setDrawFunc(self, tag_name:str, func:Callable[[UI_STATE,UI_EVENT], None]):
         self._draw_funcs[tag_name] = func
 
     # デコレータを用意
@@ -611,9 +615,19 @@ class XMLUI:
         return wrapper
 
     def draw_func(self, tag_name:str):
-        def wrapper(draw_func:Callable[[UI_STATE], None]):
+        def wrapper(draw_func:Callable[[UI_STATE,UI_EVENT], None]):
             self.setDrawFunc(tag_name, draw_func)
         return wrapper
+
+    # def pre_update_func(self):
+    #     def wrapper(update_func:Callable[[str,UI_STATE,UI_EVENT], None]):
+    #         self._preUpdateFunc = update_func
+    #     return wrapper
+
+    # def pre_draw_func(self):
+    #     def wrapper(draw_func:Callable[[str,UI_STATE,UI_EVENT], None]):
+    #         self._preDrawFunc = draw_func
+    #     return wrapper
 
 
     # 入力
