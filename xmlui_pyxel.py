@@ -1,4 +1,4 @@
-from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_GRID_CURSOR,UI_TEXT,UI_ANIM_TEXT,UI_ANIM_PAGE,UI_DIAL,UI_DIAL_INFO
+from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_GRID_CURSOR,UI_ANIM_PAGE,UI_ANIM_PAGE_RO,UI_DIAL,UI_DIAL_RO
 
 ui_template = XMLUI.createFromFile("assets/ui/test.xml")
 ui_worker = XMLUI.createWorker("my_ui")
@@ -89,8 +89,7 @@ def msg_win_update(msg_win:UI_STATE, event:UI_EVENT):
     msg_text = msg_win.findByTag("msg_text")
 
     # 文字列更新
-    text = UI_ANIM_TEXT(msg_text, "display_text", "draw_count").bind(test_params).next(1.0)
-    page = UI_ANIM_PAGE(text, "page_no", msg_text.attrInt("lines", 1))
+    page = UI_ANIM_PAGE(msg_text, "format_text", "draw_count", "page_no", "page_line_num")
 
     # 次のページありカーソル表示
     msg_cur.setVisible(not page.is_end_page and page.is_finish)
@@ -116,11 +115,7 @@ def msg_win_draw(msg_win:UI_STATE, event:UI_EVENT):
 @ui_worker.draw_func("msg_text")
 def msg_text_draw(msg_text:UI_STATE, event:UI_EVENT):
     # テキスト表示
-    # text = UI_ANIM_TEXT(msg_text, "display_text", "draw_count").bind(test_params)
-    # page = UI_ANIM_PAGE(text, "page_no", msg_text.attrInt("lines", 1))
-
-    text = UI_ANIM_TEXT(msg_text, "display_text", "draw_count")
-    page = UI_ANIM_PAGE(text, "page_no", msg_text.attrInt("lines", 1))
+    page = UI_ANIM_PAGE_RO(msg_text, "format_text", "draw_count", "page_no", "page_line_num")
 
     for i,text in enumerate(page.split()):
         pyxel.text(msg_text.area.x, msg_text.area.y+i*FONT_SIZE, text, 7, font)
@@ -159,6 +154,6 @@ def dial_win_draw(dial_win:UI_STATE, event:UI_EVENT):
     pyxel.rectb(dial_win.area.x, dial_win.area.y, dial_win.area.w, dial_win.area.h, frame_color)
 
     # 数値表示
-    dial = UI_DIAL_INFO(dial_win, "digits", "digit_pos")
+    dial = UI_DIAL_RO(dial_win, "digits", "digit_pos")
     for i,digit in enumerate(dial.zenkakuDigits):
         pyxel.text(dial_win.area.x+3+(4-i)*FONT_SIZE, dial_win.area.y+2, digit, 2 if dial.digit_pos == i else 7, font)
