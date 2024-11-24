@@ -664,13 +664,10 @@ class UI_GRID_CURSOR:
 
 
 # ダイアル
+# ---------------------------------------------------------
+# 情報管理のみ
 class UI_DIAL_RO:
     def __init__(self, state:'UI_STATE', digits_attr:str, digit_pos_attr:str):
-        if not state.hasAttr(digits_attr):
-            raise Exception(f"UI_DIAL: {digits_attr} is not found")
-        if not state.hasAttr(digit_pos_attr):
-            raise Exception(f"UI_DIAL: {digit_pos_attr} is not found")
-
         self._state = state  # 記憶場所Element
         self._digits_attr = digits_attr  # 数字リスト(文字列)
         self._digit_pos_attr = digit_pos_attr  # 操作桁位置
@@ -691,6 +688,7 @@ class UI_DIAL_RO:
     def number(self) -> int:
         return int("".join(reversed([d for d in self.digits])))
 
+# ダイアル操作
 class UI_DIAL(UI_DIAL_RO):
     def __init__(self, state:'UI_STATE', digits_attr:str, digit_pos_attr:str, digit_num:int, digit_list:str="0123456789"):
         # 初期化
