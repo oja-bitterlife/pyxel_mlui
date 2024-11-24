@@ -34,13 +34,13 @@ def menu_win_update(menu_win:UI_STATE, event:UI_EVENT):
     # 選択アイテムの表示
     if "button_a" in event.trg:
         if cursor.selected.attrStr("action") == "speak":
-            # メッセージウインドウ表示
-            menu_win.open(ui_template, "win_message")
+            menu_win.open(ui_template, "win_message")  # メッセージウインドウ表示
+        if cursor.selected.attrStr("action") == "dial":
+            cursor.selected.open(ui_template, "win_dial").setPos(8, -2)  # dialウインドウ表示
 
     # 閉じる
     if "button_b" in event.trg:
-        menu_win.close(menu_win.id)
-
+        menu_win.close()
 
 # 描画
 # ---------------------------------------------------------
@@ -85,10 +85,6 @@ def msg_win_update(msg_win:UI_STATE, event:UI_EVENT):
     msg_cur = msg_win.findByTag("msg_cur")
     msg_text = msg_win.findByTag("msg_text")
 
-
-    def getAnimText(self, draw_count_attr:str, params={}) -> 'UI_ANIM_TEXT':
-        return UI_ANIM_TEXT(self, draw_count_attr)
-
     # 文字列更新
     wrap = msg_text.attrInt("wrap", 1024)
     text = UI_ANIM_TEXT(msg_text, "draw_count").bind(test_params, wrap).next(1.0)
@@ -97,7 +93,7 @@ def msg_win_update(msg_win:UI_STATE, event:UI_EVENT):
     # カーソル表示
     msg_cur.setAttr("visible", not page.is_end_page and page.is_finish)  # 次のページあり
 
-    if "button_a" in event.trg:
+    if "button_a" in event.trg or "button_b" in event.trg:
         # テキストを表示しきっていたら
         if page.is_finish:
             if page.is_end_page:
@@ -107,11 +103,6 @@ def msg_win_update(msg_win:UI_STATE, event:UI_EVENT):
         # テキストがまだ残っていたら
         else:
             text.finish()  # 一気に表示
-
-    # メニューごと閉じる
-    if "button_b" in event.trg:
-        msg_win.close("menu_command")
-
 
 # 描画
 # ---------------------------------------------------------
@@ -142,3 +133,15 @@ def msg_cur_draw(msg_cur:UI_STATE, event:UI_EVENT):
     x, y = msg_cur.area.x, msg_cur.area.y
     pyxel.tri(x, y, x+tri_size, y, x+tri_size//2, y+tri_size//2, color)
 
+
+# ダイアル
+# *****************************************************************************
+@ui_worker.draw_func("dial_win")
+def dial_win_draw(dial_win:UI_STATE, event:UI_EVENT):
+    frame_color = 10 if event.active else 7
+    pyxel.rect(dial_win.area.x, dial_win.area.y, dial_win.area.w, dial_win.area.h, 12)
+    pyxel.rectb(dial_win.area.x, dial_win.area.y, dial_win.area.w, dial_win.area.h, frame_color)
+
+    # 閉じる
+    if "button_b" in event.trg:
+        dial_win.close(dial_win.id)

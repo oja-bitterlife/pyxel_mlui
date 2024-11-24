@@ -21,5 +21,9 @@
         </msg_text>
         <msg_cur x="109" y="51" size="6"/>
     </msg_win>
+
+    <dial_win w="64" h="16" id="win_dial">
+    </dial_win>
+
 </xmlui>
 

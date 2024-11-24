@@ -121,6 +121,12 @@ class UI_STATE:
     def area(self) -> UI_RECT:
         return UI_RECT(self.area_x, self.area_y, self.area_w, self.area_h)
 
+    def setPos(self, x, y):
+        self.setAttr(["x", "y"], [x, y])
+
+    def setAbsPos(self, x, y):
+        self.setAttr(["abs_x", "abs_y"], [x, y])
+
     # ツリー操作用
     # *************************************************************************
     def addChild(self, child:'UI_STATE'):
@@ -203,9 +209,9 @@ class UI_STATE:
             self.addChild(opend.setAttr("use_event", True))
             return opend
 
-    def close(self, id:str):
+    def close(self, id:str|None=None):
         try:
-            state = self.xmlui.root.findByID(id)
+            state = self.xmlui.root.findByID(id if id else self.id)
             state.remove()
         finally:
             return None
@@ -598,7 +604,7 @@ class UI_GRID_CURSOR:
     def setCurPos(self, x:int, y:int, wrap:bool=False) -> 'UI_GRID_CURSOR':
         self._state.setAttr("cur_x", (x + self.grid_w) % self.grid_w if wrap else max(min(x, self.grid_w-1), 0))
         self._state.setAttr("cur_y", (y + self.grid_h) % self.grid_h if wrap else max(min(y, self.grid_h-1), 0))
-        self.setPos(self.selected.x, self.selected.y)
+        self._state.setPos(self.selected.x, self.selected.y)
         return self
 
     def moveLeft(self, wrap:bool=False) -> 'UI_GRID_CURSOR':
@@ -639,12 +645,14 @@ class UI_GRID_CURSOR:
     def selected(self) -> 'UI_STATE':
         return self._grid[self.cur_y][self.cur_x]
 
-    # 表示位置設定
-    def setPos(self, x, y):
-        self._state.setAttr(["x", "y"], [x, y])
-
     def __repr__(self) -> str:
         return f"UI_CURSOR({self._state.x}, {self._state.y}, {self.grid_w}, {self.grid_h})"
 
 
 # ダイアル
+class UI_DIAL:
+    def __init__(self, state:'UI_STATE', digit:int, digit_list:str="0123456789"):
+        self._state = state
+        self._digit = digit
+        self._digit_list = digit_list
+        pass
