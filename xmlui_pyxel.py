@@ -1,4 +1,4 @@
-from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_GRID_CURSOR
+from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_GRID_CURSOR,UI_ANIM_TEXT
 
 ui_template = XMLUI.createFromFile("assets/ui/test.xml")
 ui_worker = XMLUI.createWorker("my_ui")
@@ -85,9 +85,13 @@ def msg_win_update(msg_win:UI_STATE, event:UI_EVENT):
     msg_cur = msg_win.findByTag("msg_cur")
     msg_text = msg_win.findByTag("msg_text")
 
+
+    def getAnimText(self, draw_count_attr:str, params={}) -> 'UI_ANIM_TEXT':
+        return UI_ANIM_TEXT(self, draw_count_attr)
+
     # 文字列更新
     wrap = msg_text.attrInt("wrap", 1024)
-    text = msg_text.getAnimText("draw_count").bind(test_params, wrap).next(1.0)
+    text = UI_ANIM_TEXT(msg_text, "draw_count").bind(test_params, wrap).next(1.0)
     page = text.usePage("page_no", msg_text.attrInt("lines", 1))
 
     # カーソル表示
@@ -123,7 +127,7 @@ def msg_win_draw(msg_win:UI_STATE, event:UI_EVENT):
 def msg_text_draw(msg_text:UI_STATE, event:UI_EVENT):
     # テキスト表示
     wrap = msg_text.attrInt("wrap", 1024)
-    text = msg_text.getAnimText("draw_count").bind(test_params, wrap)
+    text = UI_ANIM_TEXT(msg_text, "draw_count").bind(test_params, wrap)
     page = text.usePage("page_no", msg_text.attrInt("lines", 1))
 
     for i,text in enumerate(page.split()):
