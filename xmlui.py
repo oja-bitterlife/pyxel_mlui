@@ -619,6 +619,7 @@ class UI_GRID_CURSOR:
         self._state.setPos(self.selected.x, self.selected.y)
         return self
 
+    # それぞれの移動
     def moveLeft(self, wrap:bool=False) -> 'UI_GRID_CURSOR':
         return self.setCurPos(self._state.cur_x-1, self._state.cur_y, wrap)
     def moveRight(self, wrap:bool=False) -> 'UI_GRID_CURSOR':
@@ -628,6 +629,7 @@ class UI_GRID_CURSOR:
     def moveDown(self, wrap:bool=False) -> 'UI_GRID_CURSOR':
         return self.setCurPos(self._state.cur_x, self._state.cur_y+1, wrap)
 
+    # 入力に応じた挙動一括
     def moveByEvent(self, input:set[str], leftEvent:str, rightEvent:str, upEvent:str, downEvent:str, x_wrap:bool=False, y_wrap:bool=False) -> 'UI_GRID_CURSOR':
         if leftEvent in input:
             self.moveLeft(x_wrap)
@@ -662,41 +664,16 @@ class UI_GRID_CURSOR:
 
 
 # ダイアル
-class UI_DIAL:
-    def __init__(self, state:'UI_STATE', digits_attr:str, digit_pos_attr:str, digit_num:int, digit_list:str="0123456789"):
+class UI_DIAL_RO:
+    def __init__(self, state:'UI_STATE', digits_attr:str, digit_pos_attr:str):
+        if not state.hasAttr(digits_attr):
+            raise Exception(f"UI_DIAL: {digits_attr} is not found")
+        if not state.hasAttr(digit_pos_attr):
+            raise Exception(f"UI_DIAL: {digit_pos_attr} is not found")
+
         self._state = state  # 記憶場所Element
         self._digits_attr = digits_attr  # 数字リスト(文字列)
         self._digit_pos_attr = digit_pos_attr  # 操作桁位置
-        self._digit_list = digit_list  # 数字リスト。基本は数字だけどどんな文字でもいける
-
-        # 初期値
-        if not state.hasAttr(self._digits_attr):
-            state.setAttr(self._digits_attr, digit_list[0]*digit_num)
-
-    # 移動しすぎ禁止付きdigit_pos設定
-    def setDigitPos(self, digit_pos) -> 'UI_DIAL':
-        self._state.setAttr(self._digit_pos_attr, max(0, min(len(self.digits), digit_pos)))
-        return self
-
-    # 回り込み付きdigit増減
-    def _addDigit(self, digit:str, add:int) -> str:
-        return self._digit_list[(self._digit_list.find(digit)+len(self._digit_list)+add) % len(self._digit_list)]
-
-    # 
-    def changeDigit(self, digit_pos:int, digit:str) -> 'UI_DIAL':
-        self._state.setAttr(self._digits_attr, "".join([digit if i == digit_pos else d for i,d in enumerate(self._state.attrStr(self._digits_attr))]))
-        return self
-
-    def changeByEvent(self, input:set[str], leftEvent:str, rightEvent:str, upEvent:str, downEvent:str) -> 'UI_DIAL':
-        if leftEvent in input:
-            self.setDigitPos(self.digit_pos+1)  # 左移動
-        if rightEvent in input:
-            self.setDigitPos(self.digit_pos-1)  # 右移動
-        if upEvent in input:
-            self.changeDigit(self.digit_pos, self._addDigit(self.digits[self.digit_pos], +1))  # digitを増やす
-        if downEvent in input:
-            self.changeDigit(self.digit_pos, self._addDigit(self.digits[self.digit_pos], -1))  # digitを減らす
-        return self
 
     @property
     def digit_pos(self) -> int:
@@ -707,5 +684,47 @@ class UI_DIAL:
         return self._state.attrStr(self._digits_attr)
 
     @property
+    def zenkakuDigits(self) -> str:
+        return UI_TEXT.convertZenkaku(self.digits)
+
+    @property
     def number(self) -> int:
         return int("".join(reversed([d for d in self.digits])))
+
+class UI_DIAL(UI_DIAL_RO):
+    def __init__(self, state:'UI_STATE', digits_attr:str, digit_pos_attr:str, digit_num:int, digit_list:str="0123456789"):
+        # 初期化
+        if not state.hasAttr(digits_attr):
+            state.setAttr(digits_attr, digit_list[0]*digit_num)
+        state.setAttr(digit_pos_attr, state.attrInt(digit_pos_attr))
+
+        # super()の前にattributeの事前追加をしておくこと
+        super().__init__(state, digits_attr, digit_pos_attr)
+
+        self._digit_list = digit_list  # 数字リスト。基本は数字だけどどんな文字でもいける
+
+    # 移動しすぎ禁止付きdigit_pos設定
+    def setDigitPos(self, digit_pos) -> 'UI_DIAL':
+        self._state.setAttr(self._digit_pos_attr, max(0, min(len(self.digits), digit_pos)))
+        return self
+
+    # 回り込み付きdigit増減
+    def _addDigit(self, digit:str, add:int) -> str:
+        return self._digit_list[(self._digit_list.find(digit)+len(self._digit_list)+add) % len(self._digit_list)]
+
+    # 指定位置のdigitを変更する
+    def changeDigit(self, digit_pos:int, digit:str) -> 'UI_DIAL':
+        self._state.setAttr(self._digits_attr, "".join([digit if i == digit_pos else d for i,d in enumerate(self._state.attrStr(self._digits_attr))]))
+        return self
+
+    # 入力に応じた挙動一括
+    def changeByEvent(self, input:set[str], leftEvent:str, rightEvent:str, upEvent:str, downEvent:str) -> 'UI_DIAL':
+        if leftEvent in input:
+            self.setDigitPos(self.digit_pos+1)  # 左移動
+        if rightEvent in input:
+            self.setDigitPos(self.digit_pos-1)  # 右移動
+        if upEvent in input:
+            self.changeDigit(self.digit_pos, self._addDigit(self.digits[self.digit_pos], +1))  # digitを増やす
+        if downEvent in input:
+            self.changeDigit(self.digit_pos, self._addDigit(self.digits[self.digit_pos], -1))  # digitを減らす
+        return self

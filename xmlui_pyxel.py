@@ -1,5 +1,4 @@
-from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_GRID_CURSOR,UI_ANIM_TEXT,UI_DIAL
-import xmlui
+from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_GRID_CURSOR,UI_ANIM_TEXT,UI_DIAL,UI_DIAL_RO
 
 ui_template = XMLUI.createFromFile("assets/ui/test.xml")
 ui_worker = XMLUI.createWorker("my_ui")
@@ -139,7 +138,7 @@ def msg_cur_draw(msg_cur:UI_STATE, event:UI_EVENT):
 # *****************************************************************************
 @ui_worker.update_func("dial_win")
 def dial_win_update(dial_win:UI_STATE, event:UI_EVENT):
-    dial = UI_DIAL(dial_win, "digits", "digit_no", 5)
+    dial = UI_DIAL(dial_win, "digits", "digit_pos", 5)
 
     # 数値変更
     dial.changeByEvent(event.trg, "left", "right", "up", "down")
@@ -160,7 +159,6 @@ def dial_win_draw(dial_win:UI_STATE, event:UI_EVENT):
     pyxel.rectb(dial_win.area.x, dial_win.area.y, dial_win.area.w, dial_win.area.h, frame_color)
 
     # 数値表示
-    digit_no = dial_win.attrInt("digit_no")
-    digits =  UI_ANIM_TEXT.convertZenkaku(dial_win.attrStr("digits"))
-    for i,digit in enumerate(digits):
-        pyxel.text(dial_win.area.x+3+(4-i)*FONT_SIZE, dial_win.area.y+2, digit, 2 if digit_no == i else 7, font)
+    dial = UI_DIAL_RO(dial_win, "digits", "digit_pos")
+    for i,digit in enumerate(dial.zenkakuDigits):
+        pyxel.text(dial_win.area.x+3+(4-i)*FONT_SIZE, dial_win.area.y+2, digit, 2 if dial.digit_pos == i else 7, font)
