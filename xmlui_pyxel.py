@@ -28,18 +28,18 @@ def menu_win_update(menu_win:UI_STATE, event:UI_EVENT):
     item_w, item_h = menu_win.attrInt("item_w"), menu_win.attrInt("item_h")
 
     # メニューアイテム
-    grid = menu_win.arrangeGridByTag("menu_row", "menu_item", item_w, item_h)
-    cursor = UI_GRID_CURSOR(menu_win.findByTag("menu_cur"), grid).moveByEvent(event.trg, "left", "right", "up", "down")
+    items = menu_win.arrangeGridByTag("menu_row", "menu_item", item_w, item_h)
+    grid = UI_GRID_CURSOR(menu_win.findByTag("menu_cur"), items).moveByEvent(event.trg, "left", "right", "up", "down")
 
     # 選択アイテムの表示
     if "button_a" in event.trg:
         # メッセージウインドウ表示
-        if cursor.selected.attrStr("action") == "speak":
+        if grid.selected.attrStr("action") == "speak":
             menu_win.open(ui_template, "win_message")
 
         # dialウインドウ表示
-        if cursor.selected.attrStr("action") == "dial":
-            cursor.selected.open(ui_template, "win_dial").setPos(8, -2)
+        if grid.selected.attrStr("action") == "dial":
+            grid.selected.open(ui_template, "win_dial").setPos(8, -2)
 
     # 閉じる
     if "button_b" in event.trg:
@@ -115,10 +115,10 @@ def msg_win_draw(msg_win:UI_STATE, event:UI_EVENT):
 @ui_worker.draw_func("msg_text")
 def msg_text_draw(msg_text:UI_STATE, event:UI_EVENT):
     # テキスト表示
-    text = UI_PAGE_RO(msg_text)
+    page = UI_PAGE_RO(msg_text)
 
-    for i,text in enumerate(text.page_text.split()):
-        pyxel.text(msg_text.area.x, msg_text.area.y+i*FONT_SIZE, text, 7, font)
+    for i,page in enumerate(page.page_text.split()):
+        pyxel.text(msg_text.area.x, msg_text.area.y+i*FONT_SIZE, page, 7, font)
 
 @ui_worker.draw_func("msg_cur")
 def msg_cur_draw(msg_cur:UI_STATE, event:UI_EVENT):
@@ -156,4 +156,4 @@ def dial_win_draw(dial_win:UI_STATE, event:UI_EVENT):
     # 数値表示
     dial = UI_DIAL_RO(dial_win)
     for i,digit in enumerate(dial.zenkakuDigits):
-        pyxel.text(dial_win.area.x+3+(4-i)*FONT_SIZE, dial_win.area.y+2, digit, 2 if dial.digit_pos == i else 7, font)
+        pyxel.text(dial_win.area.x+3+(4-i)*FONT_SIZE, dial_win.area.y+2, digit, 2 if dial.edit_pos == i else 7, font)

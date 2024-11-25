@@ -655,26 +655,20 @@ class UI_GRID_CURSOR(UI_GRID_CURSOR_RO):
         self.setPos(self.selected.x, self.selected.y)
         return self
 
-    # それぞれの移動
-    def moveLeft(self, wrap:bool=False) -> 'UI_GRID_CURSOR':
-        return self.setCurPos(self.cur_x-1, self.cur_y, wrap)
-    def moveRight(self, wrap:bool=False) -> 'UI_GRID_CURSOR':
-        return self.setCurPos(self.cur_x+1, self.cur_y, wrap)
-    def moveUp(self, wrap:bool=False) -> 'UI_GRID_CURSOR':
-        return self.setCurPos(self.cur_x, self.cur_y-1, wrap)
-    def moveDown(self, wrap:bool=False) -> 'UI_GRID_CURSOR':
-        return self.setCurPos(self.cur_x, self.cur_y+1, wrap)
+    # カーソル移動
+    def moveCurPos(self, add_x:int, add_y:int, wrap:bool=False) -> 'UI_GRID_CURSOR':
+        return self.setCurPos(self.cur_x+add_x, self.cur_y+add_y, wrap)
 
     # 入力に応じた挙動一括
     def moveByEvent(self, input:set[str], leftEvent:str, rightEvent:str, upEvent:str, downEvent:str, x_wrap:bool=False, y_wrap:bool=False) -> 'UI_GRID_CURSOR':
         if leftEvent in input:
-            self.moveLeft(x_wrap)
+            self.moveCurPos(-1, 0, x_wrap)
         if rightEvent in input:
-            self.moveRight(x_wrap)
+            self.moveCurPos(1, 0, x_wrap)
         if upEvent in input:
-            self.moveUp(y_wrap)
+            self.moveCurPos(0, -1, y_wrap)
         if downEvent in input:
-            self.moveDown(y_wrap)
+            self.moveCurPos(0, 1, y_wrap)
         return self
 
     @property
@@ -696,14 +690,14 @@ class UI_DIAL_RO(_UI_UTIL_TREE):
     ROOT_TAG = "xmlui_dial_root"
     DIGIT_TAG = "xmlui_dial_digit"
 
-    DIGIT_POS_ATTR = "digit_pos"  # 操作位置
+    EDIT_POS_ATTR = "edit_pos"  # 操作位置
 
     def __init__(self, parent:UI_STATE):
         super().__init__(parent, self.ROOT_TAG)
 
     @property
-    def digit_pos(self) -> int:
-        return self.attrInt(self.DIGIT_POS_ATTR)
+    def edit_pos(self) -> int:
+        return self.attrInt(self.EDIT_POS_ATTR)
 
     @property
     def digits(self) -> list[str]:
@@ -730,31 +724,35 @@ class UI_DIAL(UI_DIAL_RO):
 
         self._digit_list = digit_list
 
-    # 移動しすぎ禁止付きdigit_pos設定
-    def setDigitPos(self, digit_pos) -> 'UI_DIAL':
-        self.setAttr(self.DIGIT_POS_ATTR, max(0, min(len(self.digits)-1, digit_pos)))
+    # 移動しすぎ禁止付き操作位置の設定
+    def setEditPos(self, edit_pos:int) -> 'UI_DIAL':
+        self.setAttr(self.EDIT_POS_ATTR, max(0, min(len(self.digits)-1, edit_pos)))
         return self
 
+    # 操作位置の移動
+    def moveEditPos(self, add:int) -> 'UI_DIAL':
+        return self.setEditPos(self.edit_pos+add)
+
     # 指定位置のdigitを変更する
-    def setDigit(self, digit_pos:int, digit:str) -> 'UI_DIAL':
-        state = self.findByTagAll(self.DIGIT_TAG)[digit_pos]
+    def setDigit(self, edit_pos:int, digit:str) -> 'UI_DIAL':
+        state = self.findByTagAll(self.DIGIT_TAG)[edit_pos]
         state.setText(digit)
         return self
 
     # 回り込み付きdigit増減
-    def addDigit(self, digit_pos:int, add:int) -> 'UI_DIAL':
-        old_digit = self.digits[digit_pos]
+    def addDigit(self, edit_pos:int, add:int) -> 'UI_DIAL':
+        old_digit = self.digits[edit_pos]
         new_digit = self._digit_list[(self._digit_list.find(old_digit)+len(self._digit_list)+add) % len(self._digit_list)]
-        return self.setDigit(digit_pos, new_digit)
+        return self.setDigit(edit_pos, new_digit)
 
     # 入力に応じた挙動一括
     def changeByEvent(self, input:set[str], leftEvent:str, rightEvent:str, upEvent:str, downEvent:str) -> 'UI_DIAL':
         if leftEvent in input:
-            self.setDigitPos(self.digit_pos+1)  # 左移動
+            self.moveEditPos(1)
         if rightEvent in input:
-            self.setDigitPos(self.digit_pos-1)  # 右移動
+            self.moveEditPos(-1)
         if upEvent in input:
-            self.addDigit(self.digit_pos, +1)  # digitを増やす
+            self.addDigit(self.edit_pos, +1)  # digitを増やす
         if downEvent in input:
-            self.addDigit(self.digit_pos, -1)  # digitを減らす
+            self.addDigit(self.edit_pos, -1)  # digitを減らす
         return self
