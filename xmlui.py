@@ -472,7 +472,9 @@ class XMLUI:
 # ユーティリティークラス
 # #############################################################################
 # StateベースのUtility用基底クラス
-class UI_UTIL_BASE(UI_STATE):
+# ---------------------------------------------------------
+# ツリーでぶら下げる(rootの追加)
+class _UI_UTIL_STATE(UI_STATE):
     # 親になければ新規で作って追加する。あればそれを利用する
     # 新規作成時Trueを返す
     def createIfNotExists(self, parent:UI_STATE, root_tag:str) -> bool:
@@ -484,6 +486,11 @@ class UI_UTIL_BASE(UI_STATE):
             super().__init__(parent.xmlui, Element(root_tag))
             parent.addChild(self)  # 無ければ登録
             return True  # created
+
+# Stateをそのまま利用する(attribute中心操作)
+class _UI_UTIL(UI_STATE):
+    def __init__(self, state:UI_STATE):
+        super().__init__(state.xmlui, state._element)
 
 # テキスト系
 # ---------------------------------------------------------
@@ -497,7 +504,7 @@ _hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
 # まずは読み込み用
 # *****************************************************************************
 # テキスト基底
-class _UI_PAGE_BASE(UI_UTIL_BASE):
+class _UI_PAGE_BASE(_UI_UTIL_STATE):
     # クラス定数
     ROOT_TAG ="xmlui_page_root"
     PAGE_TAG ="xmlui_page"
@@ -573,9 +580,6 @@ class UI_PAGE_RO(_UI_PAGE_BASE):
 class UI_PAGE(_UI_PAGE_BASE):
     def __init__(self, parent:UI_STATE, text:str, page_line_num:int, wrap:int=4096):
         if self.createIfNotExists(parent, self.ROOT_TAG):
-            self.setAttr(self.DRAW_COUNT_ATTR, 0)
-            self.setAttr(self.PAGE_NO_ATTR, 0)
-
             # 改行を\nに統一して全角化
             tmp_text = self.convertZenkaku(re.sub(self.SEPARATE_REGEXP, "\n", text).strip())
 
@@ -631,16 +635,13 @@ class UI_PAGE(_UI_PAGE_BASE):
 # メニュー系
 # ---------------------------------------------------------
 # グリッド情報
-class _UI_GRID_CURSOR_BASE:
-    def __init__(self, state:'UI_STATE'):
-        self._state = state  # カーソル位置保存用
-
+class _UI_GRID_CURSOR_BASE(_UI_UTIL):
     @property
     def cur_x(self) -> int:
-        return self._state.cur_x
+        return self.attrInt("cur_x", 0)
     @property
     def cur_y(self) -> int:
-        return self._state.cur_y
+        return self.attrInt("cur_y", 0)
 
 class UI_GRID_CURSOR_RO(_UI_GRID_CURSOR_BASE):
     pass
@@ -653,20 +654,20 @@ class UI_GRID_CURSOR(_UI_GRID_CURSOR_BASE):
 
     # 範囲限定付き座標設定
     def setCurPos(self, x:int, y:int, wrap:bool=False) -> 'UI_GRID_CURSOR':
-        self._state.setAttr("cur_x", (x + self.grid_w) % self.grid_w if wrap else max(min(x, self.grid_w-1), 0))
-        self._state.setAttr("cur_y", (y + self.grid_h) % self.grid_h if wrap else max(min(y, self.grid_h-1), 0))
-        self._state.setPos(self.selected.x, self.selected.y)
+        self.setAttr("cur_x", (x + self.grid_w) % self.grid_w if wrap else max(min(x, self.grid_w-1), 0))
+        self.setAttr("cur_y", (y + self.grid_h) % self.grid_h if wrap else max(min(y, self.grid_h-1), 0))
+        self.setPos(self.selected.x, self.selected.y)
         return self
 
     # それぞれの移動
     def moveLeft(self, wrap:bool=False) -> 'UI_GRID_CURSOR':
-        return self.setCurPos(self._state.cur_x-1, self._state.cur_y, wrap)
+        return self.setCurPos(self.cur_x-1, self.cur_y, wrap)
     def moveRight(self, wrap:bool=False) -> 'UI_GRID_CURSOR':
-        return self.setCurPos(self._state.cur_x+1, self._state.cur_y, wrap)
+        return self.setCurPos(self.cur_x+1, self.cur_y, wrap)
     def moveUp(self, wrap:bool=False) -> 'UI_GRID_CURSOR':
-        return self.setCurPos(self._state.cur_x, self._state.cur_y-1, wrap)
+        return self.setCurPos(self.cur_x, self.cur_y-1, wrap)
     def moveDown(self, wrap:bool=False) -> 'UI_GRID_CURSOR':
-        return self.setCurPos(self._state.cur_x, self._state.cur_y+1, wrap)
+        return self.setCurPos(self.cur_x, self.cur_y+1, wrap)
 
     # 入力に応じた挙動一括
     def moveByEvent(self, input:set[str], leftEvent:str, rightEvent:str, upEvent:str, downEvent:str, x_wrap:bool=False, y_wrap:bool=False) -> 'UI_GRID_CURSOR':
@@ -695,7 +696,7 @@ class UI_GRID_CURSOR(_UI_GRID_CURSOR_BASE):
 # ダイアル
 # ---------------------------------------------------------
 # 情報管理のみ
-class _UI_DIAL_BASE(UI_UTIL_BASE):
+class _UI_DIAL_BASE(_UI_UTIL_STATE):
     ROOT_TAG = "xmlui_dial_root"
     DIGIT_TAG = "xmlui_dial_digit"
 
