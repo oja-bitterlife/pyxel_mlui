@@ -294,10 +294,6 @@ class UI_STATE:
         return self.attrBool("use_event", False)
 
     @property
-    def wrap(self) -> int:  # テキスト自動改行文字数
-        return self.attrInt("wrap", 4096)
-
-    @property
     def cur_x(self) -> int:  # 選択グリッドx
         return self.attrInt("cur_x", 0)
     @property
@@ -483,108 +479,120 @@ _hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
 
 # まずは読み込み用
 # *****************************************************************************
-class UI_TEXT_RO:
+# テキスト基底
+class _UI_TEXT_BASE(UI_STATE):
     # クラス定数
-    SEPARATE_REGEXP:str = r"\\n"
+    ROOT_TAG ="xmlui_text_root"
+    PAGE_TAG ="xmlui_page"
 
-    def __init__(self, state:'UI_STATE', format_text_attr:str, draw_count_attr:str, page_no_attr:str):
-        self._state = state
-        self._format_text_attr = format_text_attr  # 変換後テキスト置き場
-        self._draw_count_attr = draw_count_attr
-        self._page_no_attr = page_no_attr  # ページ番号置き場
+    SEPARATE_REGEXP = r"\\n"
 
-# テキスト基底(フォーマット済み)
-class UI_TEXT(UI_TEXT_RO):
-    def __init__(self, state:'UI_STATE', format_text_attr:str, draw_count_attr:str, page_no_attr:str, page_line_num:int, params:dict[str, Any]={}):
-        super().__init__(state, format_text_attr, draw_count_attr, page_no_attr)
-
-        # 改行を\nに統一して全角化
-        tmp_text = self.convertZenkaku(re.sub(self.SEPARATE_REGEXP, "\n", self._state.text.strip().format(**params)))
-
-        # 各行に分解し、その行をさらにwrapで分解する
-        wrap = max(1, self._state.wrap)  # 0だと無限になってしまうので最低1を入れておく
-        wrap_text =  [[line[i:i+wrap] for i in  range(0, len(line), wrap)] for line in tmp_text.splitlines()]
-
-        # ページごとに\0で分割されたキーワード置換された改行が\nで統一された文字列を保存
-        pages_text = self. _splitPage(sum(wrap_text, []), page_line_num)
-        self._state.setAttr(self._format_text_attr, pages_text)
-
-    # 全てのページをベージごとに\0分割
-    def _splitPage(self, lines:list[str], page_line_num:int) -> str:
-        return"\0".join(["\n".join(lines[i:i+page_line_num]) for i in range(0, len(lines), page_line_num)])
+    DRAW_COUNT_ATTR = "draw_count"
+    PAGE_NO_ATTR = "page_no"
 
     # ページ関係
     # -----------------------------------------------------
-    # page_noの操作
-    def nextPage(self, add:int=1):
-        self._state.setAttr(self._page_no_attr, self.page_no+1)
-        return self
-
    # 現在ページ
     @property
     def page_no(self) -> int:
-        return self._state.attrInt(self._page_no_attr, 0)
+        return self.attrInt(self.PAGE_NO_ATTR, 0)
 
     # ページの最大数
     @property
     def page_max(self) -> int:
-        return self.all_text.count("\0")+1
+        return len(self.findByTagAll(self.PAGE_TAG))
 
     # ページ全部表示済みかどうか
     @property
     def is_end_page(self) -> bool:
-        return self.page_no+1 >= self.page_max
+        return self.page_no >= self.page_max
 
-    # テキストの状況
-    # -----------------------------------------------------
-    @property
-    def all_text(self) -> str:
-        return self._state.attrStr(self._format_text_attr, self._state.text.strip())
-
+    # ページテキスト
     @property
     def page_text(self) -> str:
-        return "" if self.page_max else self.all_text.split("\0")[self.page_no]
+        return self._limitStr(self.findByTagAll(self.PAGE_TAG)[self.page_no].text if not self.is_end_page else "", self.draw_count)
+
+    # アニメーション用
+    # -----------------------------------------------------
+    # draw_countまでの文字列を改行分割
+    def _limitStr(self, tmp_text, draw_count:float) -> str:
+        limit = math.ceil(draw_count)
+        # まずlimitまで縮める
+        for i,c in enumerate(tmp_text):
+            if (limit := limit if c == "\n" else limit-1) < 0:  # 改行は数えない
+                tmp_text = tmp_text[:i]
+                break
+        return tmp_text
+
+    # 表示カウンタ取得
+    @property
+    def draw_count(self) -> float:
+        return self.attrFloat(self.DRAW_COUNT_ATTR)
+
+    # 現在ページを表示しきったかどうか
+    @property
+    def is_finish(self) -> bool:
+        return math.ceil(self.draw_count) >= len(self.page_text.replace("\n", ""))
 
     # ユーティリティ
     # -----------------------------------------------------
     # 文字列中の半角を全角に変換する
     @classmethod
-    def convertZenkaku(cls, hankaku:str):
+    def convertZenkaku(cls, hankaku:str) -> str:
         return unicodedata.normalize("NFKC", hankaku).translate(_hankaku_zenkaku_dict)
 
-    # アニメーション情報
-    # -----------------------------------------------------
-    @property
-    def draw_count(self) -> float:
-        return self._state.attrFloat(self._draw_count_attr)
+# 読み込み専用
+class UI_TEXT_RO(_UI_TEXT_BASE):
+    def __init__(self, find_root:UI_STATE):
+        super().__init__(find_root.xmlui, find_root._element)
 
-    @property
-    def is_finish(self) -> bool:
-        return math.ceil(self.draw_count) >= len(self.page_text.replace("\n", ""))
+# アニメーションテキストページ管理
+class UI_TEXT(_UI_TEXT_BASE):
+    def __init__(self, xmlui:XMLUI, text:str, page_line_num:int, wrap:int=4096):
+        super().__init__(xmlui, Element(self.ROOT_TAG))
+        self.setAttr(self.DRAW_COUNT_ATTR, 0)
+        self.setAttr(self.PAGE_NO_ATTR, 0)
 
-    # 出力用行配列取得
-    # -----------------------------------------------------
-    # draw_countまでの文字列を改行分割
-    @classmethod
-    def _limitStr(cls, tmp_text, draw_count:float) -> str:
-        limit = math.ceil(draw_count)
-        # まずlimitまで縮める
-        for i,c in enumerate(tmp_text):
-            if (limit := limit if c == "\n" or c == "\0" else limit-1) < 0:
-                tmp_text = tmp_text[:i]
-                break
-        return tmp_text
+        # 改行を\nに統一して全角化
+        tmp_text = self.convertZenkaku(re.sub(self.SEPARATE_REGEXP, "\n", text).strip())
 
-    # アニメーション管理
+        # 各行に分解し、その行をさらにwrapで分解する
+        wrap = max(1, wrap)  # 0だと無限になってしまうので最低1を入れておく
+        lines =  sum([[line[i:i+wrap] for i in  range(0, len(line), wrap)] for line in tmp_text.splitlines()], [])
+
+        # ページごとにElementを追加
+        for i in range(0, len(lines), page_line_num):
+            page_text = "\n".join(lines[i:i+page_line_num])  # 改行を\nにして全部文字列に
+            page = UI_STATE(xmlui, Element(self.PAGE_TAG))
+            page._element.text = page_text
+            self.addChild(page)
+
+    # ページ関係
     # -----------------------------------------------------
+    # page_noの操作
+    def nextPage(self, add:int=1) -> 'UI_TEXT':
+        self.reset()  # ページが変わればまた最初から
+        self.setAttr(self.PAGE_NO_ATTR, self.page_no+1)
+        return self
+
+    # アニメーション用
+    # -----------------------------------------------------
+    # 表示カウンタのリセット
+    def reset(self):
+        self.setAttr(self.DRAW_COUNT_ATTR, 0)
+
+    # 一気に表示
     def finish(self):
-        self._state.setAttr(self._draw_count_attr, len(self.page_textl))
+        self.setAttr(self.DRAW_COUNT_ATTR, len(self.page_text))
 
     # イベントアクション
     # -----------------------------------------------------
+    # 状況に応じた決定ボタン操作を行う
     def action(self):  # 結果が一意でないのでselfは返さない
+        # ページ中に残りがあるなら一気に表示
         if not self.is_finish:
             self.finish()
+        # ページが残っていたら次のページへ
         elif not self.is_end_page:
             self.nextPage()
 
@@ -592,7 +600,7 @@ class UI_TEXT(UI_TEXT_RO):
 # メニュー系
 # ---------------------------------------------------------
 # グリッド情報
-class UI_GRID_CURSOR_RO:
+class _UI_GRID_CURSOR_BASE:
     def __init__(self, state:'UI_STATE'):
         self._state = state  # カーソル位置保存用
 
@@ -603,8 +611,11 @@ class UI_GRID_CURSOR_RO:
     def cur_y(self) -> int:
         return self._state.cur_y
 
+class UI_GRID_CURSOR_RO(_UI_GRID_CURSOR_BASE):
+    pass
+
 # グリッド選択
-class UI_GRID_CURSOR(UI_GRID_CURSOR_RO):
+class UI_GRID_CURSOR(_UI_GRID_CURSOR_BASE):
     def __init__(self, state:'UI_STATE', grid:list[list['UI_STATE']]):
         super().__init__(state)
         self._grid = grid  # グリッド保存
@@ -653,7 +664,7 @@ class UI_GRID_CURSOR(UI_GRID_CURSOR_RO):
 # ダイアル
 # ---------------------------------------------------------
 # 情報管理のみ
-class UI_DIAL_RO:
+class _UI_DIAL_BASE:
     def __init__(self, state:'UI_STATE', digits_attr:str, digit_pos_attr:str):
         self._state = state  # 記憶場所Element
         self._digits_attr = digits_attr  # 数字リスト(文字列)
@@ -669,14 +680,17 @@ class UI_DIAL_RO:
 
     @property
     def zenkakuDigits(self) -> str:
-        return UI_FORMAT_TEXT.convertZenkaku(self.digits)
+        return _UI_TEXT_BASE.convertZenkaku(self.digits)
 
     @property
     def number(self) -> int:
         return int("".join(reversed([d for d in self.digits])))
 
+class UI_DIAL_RO(_UI_DIAL_BASE):
+    pass
+
 # ダイアル操作
-class UI_DIAL(UI_DIAL_RO):
+class UI_DIAL(_UI_DIAL_BASE):
     def __init__(self, state:'UI_STATE', digits_attr:str, digit_pos_attr:str, digit_num:int, digit_list:str="0123456789"):
         super().__init__(state, digits_attr, digit_pos_attr)
         self._digit_list = digit_list  # 数字リスト。基本は数字だけどどんな文字でもいける
