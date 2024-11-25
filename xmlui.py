@@ -241,7 +241,6 @@ class UI_STATE:
             out += "\n" + UI_STATE(self.xmlui, element).strTree(indent, pre+indent)
         return out
 
-
     # xmluiで特別な意味を持つアトリビュート一覧
     # わかりやすく全てプロパティを用意しておく(デフォルト値も省略せず書く)
     # 面倒でも頑張って書く
@@ -484,15 +483,16 @@ _hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
 # まずは読み込み用
 # *****************************************************************************
 # テキスト基底
-class _UI_TEXT_BASE(UI_STATE):
+class _UI_PAGE_BASE(UI_STATE):
     # クラス定数
-    ROOT_TAG ="xmlui_text_root"
+    ROOT_TAG ="xmlui_page_root"
     PAGE_TAG ="xmlui_page"
 
+    # 改行に変換する正規表現
     SEPARATE_REGEXP = r"\\n"
 
-    DRAW_COUNT_ATTR = "draw_count"
-    PAGE_NO_ATTR = "page_no"
+    DRAW_COUNT_ATTR = "draw_count"  # 文字アニメ用
+    PAGE_NO_ATTR = "page_no"  # ページ管理用
 
     # ページ関係
     # -----------------------------------------------------
@@ -511,10 +511,15 @@ class _UI_TEXT_BASE(UI_STATE):
     def is_end_page(self) -> bool:
         return self.page_no >= self.page_max
 
+    # ページタグリスト
+    @property
+    def pages(self) -> list[UI_STATE]:
+        return self.findByTagAll(self.PAGE_TAG)
+
     # ページテキスト
     @property
     def page_text(self) -> str:
-        return self._limitStr(self.findByTagAll(self.PAGE_TAG)[self.page_no].text if not self.is_end_page else "", self.draw_count)
+        return self._limitStr(self.pages[self.page_no].text if not self.is_end_page else "", self.draw_count)
 
     # アニメーション用
     # -----------------------------------------------------
@@ -546,35 +551,41 @@ class _UI_TEXT_BASE(UI_STATE):
         return unicodedata.normalize("NFKC", hankaku).translate(_hankaku_zenkaku_dict)
 
 # 読み込み専用
-class UI_TEXT_RO(_UI_TEXT_BASE):
+class UI_PAGE_RO(_UI_PAGE_BASE):
     def __init__(self, find_root:UI_STATE):
         super().__init__(find_root.xmlui, find_root._element)
 
 # アニメーションテキストページ管理
-class UI_TEXT(_UI_TEXT_BASE):
-    def __init__(self, xmlui:XMLUI, text:str, page_line_num:int, wrap:int=4096):
-        super().__init__(xmlui, Element(self.ROOT_TAG))
-        self.setAttr(self.DRAW_COUNT_ATTR, 0)
-        self.setAttr(self.PAGE_NO_ATTR, 0)
+class UI_PAGE(_UI_PAGE_BASE):
+    def __init__(self, parent:UI_STATE, text:str, page_line_num:int, wrap:int=4096):
+        try:
+            exists = parent.findByTag(self.ROOT_TAG)  # 存在チェック
+            super().__init__(parent.xmlui, exists._element)
+        except:
+            super().__init__(parent.xmlui, Element(self.ROOT_TAG))
+            parent.addChild(self)  # 無ければ登録
 
-        # 改行を\nに統一して全角化
-        tmp_text = self.convertZenkaku(re.sub(self.SEPARATE_REGEXP, "\n", text).strip())
+            self.setAttr(self.DRAW_COUNT_ATTR, 0)
+            self.setAttr(self.PAGE_NO_ATTR, 0)
 
-        # 各行に分解し、その行をさらにwrapで分解する
-        wrap = max(1, wrap)  # 0だと無限になってしまうので最低1を入れておく
-        lines =  sum([[line[i:i+wrap] for i in  range(0, len(line), wrap)] for line in tmp_text.splitlines()], [])
+            # 改行を\nに統一して全角化
+            tmp_text = self.convertZenkaku(re.sub(self.SEPARATE_REGEXP, "\n", text).strip())
 
-        # ページごとにElementを追加
-        for i in range(0, len(lines), page_line_num):
-            page_text = "\n".join(lines[i:i+page_line_num])  # 改行を\nにして全部文字列に
-            page = UI_STATE(xmlui, Element(self.PAGE_TAG))
-            page.setText(page_text)
-            self.addChild(page)
+            # 各行に分解し、その行をさらにwrapで分解する
+            wrap = max(1, wrap)  # 0だと無限になってしまうので最低1を入れておく
+            lines =  sum([[line[i:i+wrap] for i in  range(0, len(line), wrap)] for line in tmp_text.splitlines()], [])
+
+            # ページごとにElementを追加
+            for i in range(0, len(lines), page_line_num):
+                page_text = "\n".join(lines[i:i+page_line_num])  # 改行を\nにして全部文字列に
+                page = UI_STATE(self.xmlui, Element(self.PAGE_TAG))
+                page.setText(page_text)
+                self.addChild(page)
 
     # ページ関係
     # -----------------------------------------------------
     # page_noの操作
-    def nextPage(self, add:int=1) -> 'UI_TEXT':
+    def nextPage(self, add:int=1) -> 'UI_PAGE':
         self.reset()  # ページが変わればまた最初から
         self.setAttr(self.PAGE_NO_ATTR, self.page_no+1)
         return self
@@ -620,7 +631,7 @@ class UI_GRID_CURSOR_RO(_UI_GRID_CURSOR_BASE):
 
 # グリッド選択
 class UI_GRID_CURSOR(_UI_GRID_CURSOR_BASE):
-    def __init__(self, state:'UI_STATE', grid:list[list['UI_STATE']]):
+    def __init__(self, state:UI_STATE, grid:list[list['UI_STATE']]):
         super().__init__(state)
         self._grid = grid  # グリッド保存
 
@@ -672,7 +683,7 @@ class _UI_DIAL_BASE(UI_STATE):
     ROOT_TAG = "xmlui_dial_root"
     DIGIT_TAG = "xmlui_dial_digit"
 
-    DIGIT_POS_ATTR = "digit_pos"
+    DIGIT_POS_ATTR = "digit_pos"  # 操作位置
 
     @property
     def digit_pos(self) -> int:
@@ -684,7 +695,7 @@ class _UI_DIAL_BASE(UI_STATE):
 
     @property
     def zenkakuDigits(self) -> list[str]:
-        return [_UI_TEXT_BASE.convertZenkaku(digit) for digit in self.digits]
+        return [_UI_PAGE_BASE.convertZenkaku(digit) for digit in self.digits]
 
     @property
     def number(self) -> int:
@@ -696,14 +707,17 @@ class UI_DIAL_RO(_UI_DIAL_BASE):
 
 # ダイアル操作
 class UI_DIAL(_UI_DIAL_BASE):
-    def __init__(self, state:'UI_STATE', digit_length:int, digit_list:str="0123456789"):
-        super().__init__(state.xmlui, Element(self.ROOT_TAG))
+    def __init__(self, parent:UI_STATE, digit_length:int, digit_list:str="0123456789"):
+        super().__init__(parent.xmlui, Element(self.ROOT_TAG))
+        if parent.findByTag(self.ROOT_TAG):
+            parent.addChild(self)  # 無ければ登録
+
         self._digit_list = digit_list
         self.setAttr(self.DIGIT_POS_ATTR, digit_length-1)  # 右端開始
 
         # 初期化
         for i in range(digit_length):
-            digit = UI_STATE(state.xmlui, Element(self.DIGIT_TAG))
+            digit = UI_STATE(self.xmlui, Element(self.DIGIT_TAG))
             digit.setText(digit_list[0])
             self.addChild(digit)
 

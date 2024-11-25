@@ -54,6 +54,11 @@ def update(): # フレームの更新処理
     # UI更新
     ui_worker.update()
 
+    # デバッグ
+    if ui_worker.debug:
+        if pyxel.btnp(pyxel.KEY_T):
+            print(ui_worker.root.strTree())
+
 def draw(): # 描画処理
     pyxel.cls(0)
 

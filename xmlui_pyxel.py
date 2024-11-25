@@ -1,4 +1,4 @@
-from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_GRID_CURSOR,UI_TEXT,UI_TEXT_RO,UI_DIAL,UI_DIAL_RO
+from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_GRID_CURSOR,UI_PAGE,UI_PAGE_RO,UI_DIAL,UI_DIAL_RO
 
 ui_template = XMLUI.createFromFile("assets/ui/test.xml")
 ui_worker = XMLUI.createWorker("my_ui")
@@ -89,7 +89,7 @@ def msg_win_update(msg_win:UI_STATE, event:UI_EVENT):
     msg_text = msg_win.findByTag("msg_text")
 
     # 文字列更新
-    text = UI_TEXT(ui_worker, msg_text.text.format(**test_params), 3)
+    text = UI_PAGE(msg_win, msg_text.text.format(**test_params), 3)
 
     # 次のページありカーソル表示
     msg_cur.setVisible(not text.is_end_page and text.is_finish)
@@ -115,7 +115,7 @@ def msg_win_draw(msg_win:UI_STATE, event:UI_EVENT):
 @ui_worker.draw_func("msg_text")
 def msg_text_draw(msg_text:UI_STATE, event:UI_EVENT):
     # テキスト表示
-    text = UI_TEXT_RO(msg_text)
+    text = UI_PAGE_RO(msg_text)
 
     for i,text in enumerate(text.page_text.split()):
         pyxel.text(msg_text.area.x, msg_text.area.y+i*FONT_SIZE, text, 7, font)
