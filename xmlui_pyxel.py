@@ -1,4 +1,4 @@
-from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_GRID_CURSOR,UI_PAGE,UI_PAGE_RO,UI_DIAL,UI_DIAL_RO
+from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_SELECT_GRID,UI_PAGE,UI_PAGE_RO,UI_DIAL,UI_DIAL_RO
 
 ui_template = XMLUI.createFromFile("assets/ui/test.xml")
 ui_worker = XMLUI.createWorker("my_ui")
@@ -29,7 +29,7 @@ def menu_win_update(menu_win:UI_STATE, event:UI_EVENT):
 
     # メニューアイテム
     items = menu_win.arrangeGridByTag("menu_row", "menu_item", item_w, item_h)
-    grid = UI_GRID_CURSOR(menu_win.findByTag("menu_cur"), items).moveByEvent(event.trg, "left", "right", "up", "down")
+    grid = UI_SELECT_GRID(menu_win.findByTag("menu_cur"), items).moveByEvent(event.trg, "left", "right", "up", "down")
 
     # 選択アイテムの表示
     if "button_a" in event.trg:
@@ -39,7 +39,7 @@ def menu_win_update(menu_win:UI_STATE, event:UI_EVENT):
 
         # dialウインドウ表示
         if grid.selected.attrStr("action") == "dial":
-            grid.selected.open(ui_template, "win_dial").setPos(8, -2)
+            grid.selected.open(ui_template, "win_dial").setPos(8, 2)
 
     # 閉じる
     if "button_b" in event.trg:

@@ -1,6 +1,6 @@
 import xml.etree.ElementTree
 from xml.etree.ElementTree import Element
-from typing import Callable,Any
+from typing import Callable,Any,Self
 
 import re, math, copy
 import unicodedata
@@ -639,33 +639,20 @@ class UI_GRID_CURSOR_RO(_UI_UTIL):
     def cur_y(self) -> int:
         return self.attrInt("cur_y", 0)
 
-# グリッド選択
-class UI_GRID_CURSOR(UI_GRID_CURSOR_RO):
+class UI_SELECT_BASE(UI_GRID_CURSOR_RO):
     def __init__(self, state:UI_STATE, grid:list[list[UI_STATE]]):
         super().__init__(state)
         self._grid = grid  # グリッド保存
 
     # 範囲限定付き座標設定
-    def setCurPos(self, x:int, y:int, wrap:bool=False) -> 'UI_GRID_CURSOR':
-        self.setAttr("cur_x", (x + self.grid_w) % self.grid_w if wrap else max(min(x, self.grid_w-1), 0))
-        self.setAttr("cur_y", (y + self.grid_h) % self.grid_h if wrap else max(min(y, self.grid_h-1), 0))
-        self.setPos(self.selected.x, self.selected.y)
+    def select(self, x:int, y:int, x_wrap:bool=False, y_wrap:bool=False) -> Self:
+        self.setAttr("cur_x", (x + self.grid_w) % self.grid_w if x_wrap else max(min(x, self.grid_w-1), 0))
+        self.setAttr("cur_y", (y + self.grid_h) % self.grid_h if y_wrap else max(min(y, self.grid_h-1), 0))
         return self
 
-    # カーソル移動
-    def moveCurPos(self, add_x:int, add_y:int, wrap:bool=False) -> 'UI_GRID_CURSOR':
-        return self.setCurPos(self.cur_x+add_x, self.cur_y+add_y, wrap)
-
-    # 入力に応じた挙動一括
-    def moveByEvent(self, input:set[str], leftEvent:str, rightEvent:str, upEvent:str, downEvent:str, x_wrap:bool=False, y_wrap:bool=False) -> 'UI_GRID_CURSOR':
-        if leftEvent in input:
-            self.moveCurPos(-1, 0, x_wrap)
-        if rightEvent in input:
-            self.moveCurPos(1, 0, x_wrap)
-        if upEvent in input:
-            self.moveCurPos(0, -1, y_wrap)
-        if downEvent in input:
-            self.moveCurPos(0, 1, y_wrap)
+    # カーソルの移動
+    def moveToSelected(self, offset_x:int=0, offset_y:int=0) -> Self:
+        self.setPos(self.selected.x+offset_x, self.selected.y+offset_y)
         return self
 
     @property
@@ -676,22 +663,46 @@ class UI_GRID_CURSOR(UI_GRID_CURSOR_RO):
         return len(self._grid)
 
     @property
-    def selected(self) -> 'UI_STATE':
+    def selected(self) -> UI_STATE:
         return self._grid[self.cur_y][self.cur_x]
 
-# リスト選択。よく使うのでGIRD拡張
-class UI_SELECT_LIST(UI_GRID_CURSOR):
+# グリッド選択
+class UI_SELECT_GRID(UI_SELECT_BASE):
+    # 入力に応じた挙動一括
+    def selectByEvent(self, input:set[str], leftEvent:str, rightEvent:str, upEvent:str, downEvent:str, x_wrap:bool=False, y_wrap:bool=False) -> 'UI_SELECT_GRID':
+        if leftEvent in input:
+            self.select(self.cur_x-1, self.cur_y, x_wrap)
+        elif rightEvent in input:
+            self.select(self.cur_x+1, self.cur_y, x_wrap)
+        elif upEvent in input:
+            self.select(self.cur_x, self.cur_y-1, False, y_wrap)
+        elif downEvent in input:
+            self.select(self.cur_x, self.cur_y+1, False, y_wrap)
+        return self
+
+    def moveByEvent(self, input:set[str], leftEvent:str, rightEvent:str, upEvent:str, downEvent:str, x_wrap:bool=False, y_wrap:bool=False) -> 'UI_SELECT_GRID':
+        self.selectByEvent(input, leftEvent, rightEvent, upEvent, downEvent, x_wrap, y_wrap)
+        self.moveToSelected()
+        return self
+
+# リスト選択
+class UI_SELECT_LIST(UI_SELECT_BASE):
+    # 縦に入れる
     def __init__(self, state:UI_STATE, grid:list[UI_STATE]):
         super().__init__(state, [[g] for g in grid])
 
     # 入力に応じた挙動一括。選択リストは通常上下ラップする
     def selectByEvent(self, input:set[str], upEvent:str, downEvent:str, y_wrap:bool=True) -> 'UI_SELECT_LIST':
         if upEvent in input:
-            self.moveCurPos(0, -1, y_wrap)
-        if downEvent in input:
-            self.moveCurPos(0, 1, y_wrap)
+            self.select(0, self.cur_y-1, False, y_wrap)
+        elif downEvent in input:
+            self.select(0, self.cur_y+1, False, y_wrap)
         return self
- 
+
+    def moveByEvent(self, input:set[str], upEvent:str, downEvent:str, y_wrap:bool=True) -> 'UI_SELECT_LIST':
+        self.selectByEvent(input, upEvent, downEvent, y_wrap)
+        self.moveToSelected()
+        return self
 
 # ダイアル
 # ---------------------------------------------------------
