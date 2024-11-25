@@ -641,7 +641,7 @@ class UI_GRID_CURSOR_RO(_UI_UTIL):
 
 # グリッド選択
 class UI_GRID_CURSOR(UI_GRID_CURSOR_RO):
-    def __init__(self, state:UI_STATE, grid:list[list['UI_STATE']]):
+    def __init__(self, state:UI_STATE, grid:list[list[UI_STATE]]):
         super().__init__(state)
         self._grid = grid  # グリッド保存
 
@@ -679,6 +679,19 @@ class UI_GRID_CURSOR(UI_GRID_CURSOR_RO):
     def selected(self) -> 'UI_STATE':
         return self._grid[self.cur_y][self.cur_x]
 
+# リスト選択。よく使うのでGIRD拡張
+class UI_SELECT_LIST(UI_GRID_CURSOR):
+    def __init__(self, state:UI_STATE, grid:list[UI_STATE]):
+        super().__init__(state, [[g] for g in grid])
+
+    # 入力に応じた挙動一括。選択リストは通常上下ラップする
+    def selectByEvent(self, input:set[str], upEvent:str, downEvent:str, y_wrap:bool=True) -> 'UI_SELECT_LIST':
+        if upEvent in input:
+            self.moveCurPos(0, -1, y_wrap)
+        if downEvent in input:
+            self.moveCurPos(0, 1, y_wrap)
+        return self
+ 
 
 # ダイアル
 # ---------------------------------------------------------
