@@ -552,8 +552,9 @@ class _UI_PAGE_BASE(UI_STATE):
 
 # 読み込み専用
 class UI_PAGE_RO(_UI_PAGE_BASE):
-    def __init__(self, find_root:UI_STATE):
-        super().__init__(find_root.xmlui, find_root._element)
+    def __init__(self, parent:UI_STATE):
+        page_root = parent.findByTag(self.ROOT_TAG)  # 存在チェック
+        super().__init__(parent.xmlui, page_root._element)
 
 # アニメーションテキストページ管理
 class UI_PAGE(_UI_PAGE_BASE):
@@ -592,6 +593,11 @@ class UI_PAGE(_UI_PAGE_BASE):
 
     # アニメーション用
     # -----------------------------------------------------
+    # 表示カウンタを進める
+    def next(self, add:float=1) -> 'UI_PAGE':
+        self.setAttr(self.DRAW_COUNT_ATTR, self.draw_count+add)
+        return self
+
     # 表示カウンタのリセット
     def reset(self):
         self.setAttr(self.DRAW_COUNT_ATTR, 0)
