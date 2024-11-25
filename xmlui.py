@@ -82,7 +82,7 @@ class UI_STATE:
 
     # UI_STATEは都度使い捨てなので、対象となるElementで比較する
     def __eq__(self, other) -> bool:
-        return other._element == self._element if isinstance(other, UI_STATE) else False
+        return other._element is self._element if isinstance(other, UI_STATE) else False
 
     # attribアクセス用
     # *************************************************************************
