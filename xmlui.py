@@ -477,15 +477,15 @@ class XMLUI:
 class _UI_UTIL_STATE(UI_STATE):
     # 親になければ新規で作って追加する。あればそれを利用する
     # 新規作成時Trueを返す
-    def createIfNotExists(self, parent:UI_STATE, root_tag:str) -> bool:
+    def __init__(self, parent:UI_STATE, root_tag:str):
         try:
             exists = parent.findByTag(root_tag)  # 存在チェック
             super().__init__(parent.xmlui, exists._element)
-            return False  # not created
+            self.createNewElement = False
         except:
             super().__init__(parent.xmlui, Element(root_tag))
             parent.addChild(self)  # 無ければ登録
-            return True  # created
+            self.createNewElement = True
 
 # Stateをそのまま利用する(attribute中心操作)
 class _UI_UTIL(UI_STATE):
@@ -504,7 +504,7 @@ _hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
 # まずは読み込み用
 # *****************************************************************************
 # テキスト基底
-class _UI_PAGE_BASE(_UI_UTIL_STATE):
+class UI_PAGE_RO(_UI_UTIL_STATE):
     # クラス定数
     ROOT_TAG ="xmlui_page_root"
     PAGE_TAG ="xmlui_page"
@@ -514,6 +514,9 @@ class _UI_PAGE_BASE(_UI_UTIL_STATE):
 
     DRAW_COUNT_ATTR = "draw_count"  # 文字アニメ用
     PAGE_NO_ATTR = "page_no"  # ページ管理用
+
+    def __init__(self, parent: UI_STATE):
+        super().__init__(parent, self.ROOT_TAG)
 
     # ページ関係
     # -----------------------------------------------------
@@ -571,15 +574,11 @@ class _UI_PAGE_BASE(_UI_UTIL_STATE):
     def convertZenkaku(cls, hankaku:str) -> str:
         return unicodedata.normalize("NFKC", hankaku).translate(_hankaku_zenkaku_dict)
 
-# 読み込み専用
-class UI_PAGE_RO(_UI_PAGE_BASE):
-    def __init__(self, parent:UI_STATE):
-        self.createIfNotExists(parent, self.ROOT_TAG)
-
 # アニメーションテキストページ管理
-class UI_PAGE(_UI_PAGE_BASE):
+class UI_PAGE(UI_PAGE_RO):
     def __init__(self, parent:UI_STATE, text:str, page_line_num:int, wrap:int=4096):
-        if self.createIfNotExists(parent, self.ROOT_TAG):
+        super().__init__(parent)
+        if self.createNewElement:
             # 改行を\nに統一して全角化
             tmp_text = self.convertZenkaku(re.sub(self.SEPARATE_REGEXP, "\n", text).strip())
 
@@ -635,7 +634,7 @@ class UI_PAGE(_UI_PAGE_BASE):
 # メニュー系
 # ---------------------------------------------------------
 # グリッド情報
-class _UI_GRID_CURSOR_BASE(_UI_UTIL):
+class UI_GRID_CURSOR_RO(_UI_UTIL):
     @property
     def cur_x(self) -> int:
         return self.attrInt("cur_x", 0)
@@ -643,11 +642,8 @@ class _UI_GRID_CURSOR_BASE(_UI_UTIL):
     def cur_y(self) -> int:
         return self.attrInt("cur_y", 0)
 
-class UI_GRID_CURSOR_RO(_UI_GRID_CURSOR_BASE):
-    pass
-
 # グリッド選択
-class UI_GRID_CURSOR(_UI_GRID_CURSOR_BASE):
+class UI_GRID_CURSOR(UI_GRID_CURSOR_RO):
     def __init__(self, state:UI_STATE, grid:list[list['UI_STATE']]):
         super().__init__(state)
         self._grid = grid  # グリッド保存
@@ -696,11 +692,14 @@ class UI_GRID_CURSOR(_UI_GRID_CURSOR_BASE):
 # ダイアル
 # ---------------------------------------------------------
 # 情報管理のみ
-class _UI_DIAL_BASE(_UI_UTIL_STATE):
+class UI_DIAL_RO(_UI_UTIL_STATE):
     ROOT_TAG = "xmlui_dial_root"
     DIGIT_TAG = "xmlui_dial_digit"
 
     DIGIT_POS_ATTR = "digit_pos"  # 操作位置
+
+    def __init__(self, parent:UI_STATE):
+        super().__init__(parent, self.ROOT_TAG)
 
     @property
     def digit_pos(self) -> int:
@@ -712,20 +711,18 @@ class _UI_DIAL_BASE(_UI_UTIL_STATE):
 
     @property
     def zenkakuDigits(self) -> list[str]:
-        return [_UI_PAGE_BASE.convertZenkaku(digit) for digit in self.digits]
+        return [UI_PAGE_RO.convertZenkaku(digit) for digit in self.digits]
 
     @property
     def number(self) -> int:
         return int("".join(reversed(self.digits)))
 
-class UI_DIAL_RO(_UI_DIAL_BASE):
-    def __init__(self, parent:UI_STATE):
-        super().createIfNotExists(parent, self.ROOT_TAG)
-
 # ダイアル操作
-class UI_DIAL(_UI_DIAL_BASE):
+class UI_DIAL(UI_DIAL_RO):
     def __init__(self, parent:UI_STATE, digit_length:int, digit_list:str="0123456789"):
-        if super().createIfNotExists(parent, self.ROOT_TAG):
+        super().__init__(parent)
+
+        if self.createNewElement:
             # 初期値は最小埋め
             for i in range(digit_length):
                 digit = UI_STATE(self.xmlui, Element(self.DIGIT_TAG))
