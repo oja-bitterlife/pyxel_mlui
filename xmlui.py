@@ -506,17 +506,14 @@ _hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
 # テキスト基底
 class UI_PAGE_RO(_UI_UTIL_TREE):
     # クラス定数
-    ROOT_TAG ="xmlui_page_root"
-    PAGE_TAG ="xmlui_page"
-
-    # 改行に変換する正規表現
-    SEPARATE_REGEXP = r"\\n"
+    PAGE_TAG ="_xmlui_page"
+    SEPARATE_REGEXP = r"\\n"  # 改行に変換する正規表現
 
     DRAW_COUNT_ATTR = "draw_count"  # 文字アニメ用
     PAGE_NO_ATTR = "page_no"  # ページ管理用
 
     def __init__(self, parent: UI_STATE):
-        super().__init__(parent, self.ROOT_TAG)
+        super().__init__(parent, "_xmlui_page_root")
 
     # ページ関係
     # -----------------------------------------------------
@@ -687,13 +684,12 @@ class UI_GRID_CURSOR(UI_GRID_CURSOR_RO):
 # ---------------------------------------------------------
 # 情報管理のみ
 class UI_DIAL_RO(_UI_UTIL_TREE):
-    ROOT_TAG = "xmlui_dial_root"
-    DIGIT_TAG = "xmlui_dial_digit"
+    DIGIT_TAG = "_xmlui_dial_digit"
 
     EDIT_POS_ATTR = "edit_pos"  # 操作位置
 
     def __init__(self, parent:UI_STATE):
-        super().__init__(parent, self.ROOT_TAG)
+        super().__init__(parent, "_xmlui_dial_root")
 
     @property
     def edit_pos(self) -> int:
