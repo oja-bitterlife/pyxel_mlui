@@ -474,18 +474,18 @@ class XMLUI:
 # StateベースのUtility用基底クラス
 # ---------------------------------------------------------
 # ツリーでぶら下げる(rootの追加)
-class _UI_UTIL_STATE(UI_STATE):
+class _UI_UTIL_TREE(UI_STATE):
     # 親になければ新規で作って追加する。あればそれを利用する
     # 新規作成時Trueを返す
     def __init__(self, parent:UI_STATE, root_tag:str):
         try:
             exists = parent.findByTag(root_tag)  # 存在チェック
             super().__init__(parent.xmlui, exists._element)
-            self.createNewElement = False
+            self._need_init = False
         except:
             super().__init__(parent.xmlui, Element(root_tag))
             parent.addChild(self)  # 無ければ登録
-            self.createNewElement = True
+            self._need_init = True
 
 # Stateをそのまま利用する(attribute中心操作)
 class _UI_UTIL(UI_STATE):
@@ -504,7 +504,7 @@ _hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
 # まずは読み込み用
 # *****************************************************************************
 # テキスト基底
-class UI_PAGE_RO(_UI_UTIL_STATE):
+class UI_PAGE_RO(_UI_UTIL_TREE):
     # クラス定数
     ROOT_TAG ="xmlui_page_root"
     PAGE_TAG ="xmlui_page"
@@ -578,7 +578,7 @@ class UI_PAGE_RO(_UI_UTIL_STATE):
 class UI_PAGE(UI_PAGE_RO):
     def __init__(self, parent:UI_STATE, text:str, page_line_num:int, wrap:int=4096):
         super().__init__(parent)
-        if self.createNewElement:
+        if self._need_init:
             # 改行を\nに統一して全角化
             tmp_text = self.convertZenkaku(re.sub(self.SEPARATE_REGEXP, "\n", text).strip())
 
@@ -692,7 +692,7 @@ class UI_GRID_CURSOR(UI_GRID_CURSOR_RO):
 # ダイアル
 # ---------------------------------------------------------
 # 情報管理のみ
-class UI_DIAL_RO(_UI_UTIL_STATE):
+class UI_DIAL_RO(_UI_UTIL_TREE):
     ROOT_TAG = "xmlui_dial_root"
     DIGIT_TAG = "xmlui_dial_digit"
 
@@ -721,8 +721,7 @@ class UI_DIAL_RO(_UI_UTIL_STATE):
 class UI_DIAL(UI_DIAL_RO):
     def __init__(self, parent:UI_STATE, digit_length:int, digit_list:str="0123456789"):
         super().__init__(parent)
-
-        if self.createNewElement:
+        if self._need_init:
             # 初期値は最小埋め
             for i in range(digit_length):
                 digit = UI_STATE(self.xmlui, Element(self.DIGIT_TAG))
