@@ -499,7 +499,7 @@ class _UI_PAGE_BASE(UI_STATE):
    # 現在ページ
     @property
     def page_no(self) -> int:
-        return self.attrInt(self.PAGE_NO_ATTR, 0)
+        return min(max(self.attrInt(self.PAGE_NO_ATTR, 0), 0), self.page_max)
 
     # ページの最大数
     @property
@@ -509,7 +509,7 @@ class _UI_PAGE_BASE(UI_STATE):
     # ページ全部表示済みかどうか
     @property
     def is_end_page(self) -> bool:
-        return self.page_no >= self.page_max
+        return self.page_no+1 >= self.page_max  # 1オリジンで数える
 
     # ページタグリスト
     @property
@@ -519,7 +519,7 @@ class _UI_PAGE_BASE(UI_STATE):
     # ページテキスト
     @property
     def page_text(self) -> str:
-        return self._limitStr(self.pages[self.page_no].text if not self.is_end_page else "", self.draw_count)
+        return self._limitStr(self.pages[self.page_no].text, self.draw_count)
 
     # アニメーション用
     # -----------------------------------------------------
@@ -553,8 +553,8 @@ class _UI_PAGE_BASE(UI_STATE):
 # 読み込み専用
 class UI_PAGE_RO(_UI_PAGE_BASE):
     def __init__(self, parent:UI_STATE):
-        page_root = parent.findByTag(self.ROOT_TAG)  # 存在チェック
-        super().__init__(parent.xmlui, page_root._element)
+        exists = parent.findByTag(self.ROOT_TAG)  # 存在チェック
+        super().__init__(parent.xmlui, exists._element)
 
 # アニメーションテキストページ管理
 class UI_PAGE(_UI_PAGE_BASE):
@@ -599,23 +599,26 @@ class UI_PAGE(_UI_PAGE_BASE):
         return self
 
     # 表示カウンタのリセット
-    def reset(self):
+    def reset(self) -> 'UI_PAGE':
         self.setAttr(self.DRAW_COUNT_ATTR, 0)
+        return self
 
     # 一気に表示
-    def finish(self):
+    def finish(self) -> 'UI_PAGE':
         self.setAttr(self.DRAW_COUNT_ATTR, len(self.page_text))
+        return self
 
     # イベントアクション
     # -----------------------------------------------------
     # 状況に応じた決定ボタン操作を行う
-    def action(self):  # 結果が一意でないのでselfは返さない
+    def action(self) -> 'UI_PAGE':
         # ページ中に残りがあるなら一気に表示
         if not self.is_finish:
             self.finish()
         # ページが残っていたら次のページへ
         elif not self.is_end_page:
             self.nextPage()
+        return self
 
 
 # メニュー系
@@ -708,24 +711,28 @@ class _UI_DIAL_BASE(UI_STATE):
         return int("".join(reversed(self.digits)))
 
 class UI_DIAL_RO(_UI_DIAL_BASE):
-    def __init__(self, state:UI_STATE):
-        super().__init__(state.xmlui, state._element)
+    def __init__(self, parent:UI_STATE):
+        exists = parent.findByTag(self.ROOT_TAG)  # 存在チェック
+        super().__init__(parent.xmlui, exists._element)
 
 # ダイアル操作
 class UI_DIAL(_UI_DIAL_BASE):
     def __init__(self, parent:UI_STATE, digit_length:int, digit_list:str="0123456789"):
-        super().__init__(parent.xmlui, Element(self.ROOT_TAG))
-        if parent.findByTag(self.ROOT_TAG):
+        try:
+            exists = parent.findByTag(self.ROOT_TAG)  # 存在チェック
+            super().__init__(parent.xmlui, exists._element)
+        except:
+            super().__init__(parent.xmlui, Element(self.ROOT_TAG))
             parent.addChild(self)  # 無ければ登録
 
-        self._digit_list = digit_list
-        self.setAttr(self.DIGIT_POS_ATTR, digit_length-1)  # 右端開始
+            self._digit_list = digit_list
+            self.setAttr(self.DIGIT_POS_ATTR, digit_length-1)  # 右端開始
 
-        # 初期化
-        for i in range(digit_length):
-            digit = UI_STATE(self.xmlui, Element(self.DIGIT_TAG))
-            digit.setText(digit_list[0])
-            self.addChild(digit)
+            # 初期化
+            for i in range(digit_length):
+                digit = UI_STATE(self.xmlui, Element(self.DIGIT_TAG))
+                digit.setText(digit_list[0])
+                self.addChild(digit)
 
     # 移動しすぎ禁止付きdigit_pos設定
     def setDigitPos(self, digit_pos) -> 'UI_DIAL':
