@@ -117,6 +117,10 @@ class UI_STATE:
     def text(self) -> str:
         return self._element.text.strip() if self._element.text else ""
 
+    def setText(self, text:str) -> 'UI_STATE':
+        self._element.text = text
+        return self
+
     # その他
     # *************************************************************************
     @property
@@ -564,7 +568,7 @@ class UI_TEXT(_UI_TEXT_BASE):
         for i in range(0, len(lines), page_line_num):
             page_text = "\n".join(lines[i:i+page_line_num])  # 改行を\nにして全部文字列に
             page = UI_STATE(xmlui, Element(self.PAGE_TAG))
-            page._element.text = page_text
+            page.setText(page_text)
             self.addChild(page)
 
     # ページ関係
@@ -664,44 +668,48 @@ class UI_GRID_CURSOR(_UI_GRID_CURSOR_BASE):
 # ダイアル
 # ---------------------------------------------------------
 # 情報管理のみ
-class _UI_DIAL_BASE:
-    def __init__(self, state:'UI_STATE', digits_attr:str, digit_pos_attr:str):
-        self._state = state  # 記憶場所Element
-        self._digits_attr = digits_attr  # 数字リスト(文字列)
-        self._digit_pos_attr = digit_pos_attr  # 操作桁位置
+class _UI_DIAL_BASE(UI_STATE):
+    ROOT_TAG = "xmlui_dial_root"
+    DIGIT_TAG = "xmlui_dial_digit"
+
+    DIGIT_POS_ATTR = "digit_pos"
 
     @property
     def digit_pos(self) -> int:
-        return self._state.attrInt(self._digit_pos_attr)
+        return self.attrInt(self.DIGIT_POS_ATTR)
 
     @property
-    def digits(self) -> str:
-        return self._state.attrStr(self._digits_attr)
+    def digits(self) -> list[str]:
+        return [state.text for state in self.findByTagAll(self.DIGIT_TAG)]
 
     @property
-    def zenkakuDigits(self) -> str:
-        return _UI_TEXT_BASE.convertZenkaku(self.digits)
+    def zenkakuDigits(self) -> list[str]:
+        return [_UI_TEXT_BASE.convertZenkaku(digit) for digit in self.digits]
 
     @property
     def number(self) -> int:
-        return int("".join(reversed([d for d in self.digits])))
+        return int("".join(reversed(self.digits)))
 
 class UI_DIAL_RO(_UI_DIAL_BASE):
-    pass
+    def __init__(self, state:UI_STATE):
+        super().__init__(state.xmlui, state._element)
 
 # ダイアル操作
 class UI_DIAL(_UI_DIAL_BASE):
-    def __init__(self, state:'UI_STATE', digits_attr:str, digit_pos_attr:str, digit_num:int, digit_list:str="0123456789"):
-        super().__init__(state, digits_attr, digit_pos_attr)
-        self._digit_list = digit_list  # 数字リスト。基本は数字だけどどんな文字でもいける
+    def __init__(self, state:'UI_STATE', digit_length:int, digit_list:str="0123456789"):
+        super().__init__(state.xmlui, Element(self.ROOT_TAG))
+        self._digit_list = digit_list
+        self.setAttr(self.DIGIT_POS_ATTR, digit_length-1)  # 右端開始
 
         # 初期化
-        if not state.hasAttr(digits_attr):
-            state.setAttr(digits_attr, digit_list[0]*digit_num)
+        for i in range(digit_length):
+            digit = UI_STATE(state.xmlui, Element(self.DIGIT_TAG))
+            digit.setText(digit_list[0])
+            self.addChild(digit)
 
     # 移動しすぎ禁止付きdigit_pos設定
     def setDigitPos(self, digit_pos) -> 'UI_DIAL':
-        self._state.setAttr(self._digit_pos_attr, max(0, min(len(self.digits), digit_pos)))
+        self.setAttr(self.DIGIT_POS_ATTR, max(0, min(len(self.digits), digit_pos)))
         return self
 
     # 回り込み付きdigit増減
@@ -710,7 +718,8 @@ class UI_DIAL(_UI_DIAL_BASE):
 
     # 指定位置のdigitを変更する
     def changeDigit(self, digit_pos:int, digit:str) -> 'UI_DIAL':
-        self._state.setAttr(self._digits_attr, "".join([digit if i == digit_pos else d for i,d in enumerate(self._state.attrStr(self._digits_attr))]))
+        state = self.findByTagAll(self.DIGIT_TAG)[self.digit_pos]
+        state.setText(digit)
         return self
 
     # 入力に応じた挙動一括
