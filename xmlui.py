@@ -471,6 +471,20 @@ class XMLUI:
 
 # ユーティリティークラス
 # #############################################################################
+# StateベースのUtility用基底クラス
+class UI_UTIL_BASE(UI_STATE):
+    # 親になければ新規で作って追加する。あればそれを利用する
+    # 新規作成時Trueを返す
+    def createIfNotExists(self, parent:UI_STATE, root_tag:str) -> bool:
+        try:
+            exists = parent.findByTag(root_tag)  # 存在チェック
+            super().__init__(parent.xmlui, exists._element)
+            return False  # not created
+        except:
+            super().__init__(parent.xmlui, Element(root_tag))
+            parent.addChild(self)  # 無ければ登録
+            return True  # created
+
 # テキスト系
 # ---------------------------------------------------------
 # 半角を全角に変換
@@ -483,7 +497,7 @@ _hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
 # まずは読み込み用
 # *****************************************************************************
 # テキスト基底
-class _UI_PAGE_BASE(UI_STATE):
+class _UI_PAGE_BASE(UI_UTIL_BASE):
     # クラス定数
     ROOT_TAG ="xmlui_page_root"
     PAGE_TAG ="xmlui_page"
@@ -553,19 +567,12 @@ class _UI_PAGE_BASE(UI_STATE):
 # 読み込み専用
 class UI_PAGE_RO(_UI_PAGE_BASE):
     def __init__(self, parent:UI_STATE):
-        exists = parent.findByTag(self.ROOT_TAG)  # 存在チェック
-        super().__init__(parent.xmlui, exists._element)
+        self.createIfNotExists(parent, self.ROOT_TAG)
 
 # アニメーションテキストページ管理
 class UI_PAGE(_UI_PAGE_BASE):
     def __init__(self, parent:UI_STATE, text:str, page_line_num:int, wrap:int=4096):
-        try:
-            exists = parent.findByTag(self.ROOT_TAG)  # 存在チェック
-            super().__init__(parent.xmlui, exists._element)
-        except:
-            super().__init__(parent.xmlui, Element(self.ROOT_TAG))
-            parent.addChild(self)  # 無ければ登録
-
+        if self.createIfNotExists(parent, self.ROOT_TAG):
             self.setAttr(self.DRAW_COUNT_ATTR, 0)
             self.setAttr(self.PAGE_NO_ATTR, 0)
 
@@ -688,7 +695,7 @@ class UI_GRID_CURSOR(_UI_GRID_CURSOR_BASE):
 # ダイアル
 # ---------------------------------------------------------
 # 情報管理のみ
-class _UI_DIAL_BASE(UI_STATE):
+class _UI_DIAL_BASE(UI_UTIL_BASE):
     ROOT_TAG = "xmlui_dial_root"
     DIGIT_TAG = "xmlui_dial_digit"
 
@@ -712,20 +719,13 @@ class _UI_DIAL_BASE(UI_STATE):
 
 class UI_DIAL_RO(_UI_DIAL_BASE):
     def __init__(self, parent:UI_STATE):
-        exists = parent.findByTag(self.ROOT_TAG)  # 存在チェック
-        super().__init__(parent.xmlui, exists._element)
+        super().createIfNotExists(parent, self.ROOT_TAG)
 
 # ダイアル操作
 class UI_DIAL(_UI_DIAL_BASE):
     def __init__(self, parent:UI_STATE, digit_length:int, digit_list:str="0123456789"):
-        try:
-            exists = parent.findByTag(self.ROOT_TAG)  # 存在チェック
-            super().__init__(parent.xmlui, exists._element)
-        except:
-            super().__init__(parent.xmlui, Element(self.ROOT_TAG))
-            parent.addChild(self)  # 無ければ登録
-
-            # 初期化
+        if super().createIfNotExists(parent, self.ROOT_TAG):
+            # 初期値は最小埋め
             for i in range(digit_length):
                 digit = UI_STATE(self.xmlui, Element(self.DIGIT_TAG))
                 digit.setText(digit_list[0])
