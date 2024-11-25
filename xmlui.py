@@ -725,29 +725,30 @@ class UI_DIAL(_UI_DIAL_BASE):
             super().__init__(parent.xmlui, Element(self.ROOT_TAG))
             parent.addChild(self)  # 無ければ登録
 
-            self._digit_list = digit_list
-            self.setAttr(self.DIGIT_POS_ATTR, digit_length-1)  # 右端開始
-
             # 初期化
             for i in range(digit_length):
                 digit = UI_STATE(self.xmlui, Element(self.DIGIT_TAG))
                 digit.setText(digit_list[0])
                 self.addChild(digit)
 
+        self._digit_list = digit_list
+
     # 移動しすぎ禁止付きdigit_pos設定
     def setDigitPos(self, digit_pos) -> 'UI_DIAL':
-        self.setAttr(self.DIGIT_POS_ATTR, max(0, min(len(self.digits), digit_pos)))
+        self.setAttr(self.DIGIT_POS_ATTR, max(0, min(len(self.digits)-1, digit_pos)))
+        return self
+
+    # 指定位置のdigitを変更する
+    def setDigit(self, digit_pos:int, digit:str) -> 'UI_DIAL':
+        state = self.findByTagAll(self.DIGIT_TAG)[digit_pos]
+        state.setText(digit)
         return self
 
     # 回り込み付きdigit増減
-    def _addDigit(self, digit:str, add:int) -> str:
-        return self._digit_list[(self._digit_list.find(digit)+len(self._digit_list)+add) % len(self._digit_list)]
-
-    # 指定位置のdigitを変更する
-    def changeDigit(self, digit_pos:int, digit:str) -> 'UI_DIAL':
-        state = self.findByTagAll(self.DIGIT_TAG)[self.digit_pos]
-        state.setText(digit)
-        return self
+    def addDigit(self, digit_pos:int, add:int) -> 'UI_DIAL':
+        old_digit = self.digits[digit_pos]
+        new_digit = self._digit_list[(self._digit_list.find(old_digit)+len(self._digit_list)+add) % len(self._digit_list)]
+        return self.setDigit(digit_pos, new_digit)
 
     # 入力に応じた挙動一括
     def changeByEvent(self, input:set[str], leftEvent:str, rightEvent:str, upEvent:str, downEvent:str) -> 'UI_DIAL':
@@ -756,7 +757,7 @@ class UI_DIAL(_UI_DIAL_BASE):
         if rightEvent in input:
             self.setDigitPos(self.digit_pos-1)  # 右移動
         if upEvent in input:
-            self.changeDigit(self.digit_pos, self._addDigit(self.digits[self.digit_pos], +1))  # digitを増やす
+            self.addDigit(self.digit_pos, +1)  # digitを増やす
         if downEvent in input:
-            self.changeDigit(self.digit_pos, self._addDigit(self.digits[self.digit_pos], -1))  # digitを減らす
+            self.addDigit(self.digit_pos, -1)  # digitを減らす
         return self
