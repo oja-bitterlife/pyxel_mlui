@@ -34,11 +34,11 @@ def menu_win_update(menu_win:UI_STATE, event:UI_EVENT):
     # 選択アイテムの表示
     if "button_a" in event.trg:
         # メッセージウインドウ表示
-        if grid.selected_item.attrStr("action") == "speak":
+        if grid.selected_item.value == "speak":
             grid.selected_item.open(ui_template, "win_message")
 
         # dialウインドウ表示
-        if grid.selected_item.attrStr("action") == "dial":
+        if grid.selected_item.value == "dial":
             grid.selected_item.open(ui_template, "win_dial").setPos(8, 2)
 
     # 閉じる
@@ -166,12 +166,12 @@ def dial_yes_no_update(dial_yes_no:UI_STATE, event:UI_EVENT):
     # 決定
     if "button_a" in event.trg:
         # Yes時処理
-        if grid.selected_item.attrStr("action") == "yes":
+        if grid.selected_item.value == "yes":
             test_params["age"] = UI_DIAL_RO(dial_yes_no.findByTagR("win_dial")).number
             dial_yes_no.xmlui.close("menu_command")
 
         # No時処理
-        if grid.selected_item.attrStr("action") == "no":
+        if grid.selected_item.value == "no":
             dial_yes_no.close()
 
 
@@ -183,9 +183,7 @@ def dial_yes_no_draw(dial_yes_no:UI_STATE, event:UI_EVENT):
 
 @ui_worker.draw_func("yes_no_item")
 def dial_yes_no_item_draw(item:UI_STATE, event:UI_EVENT):
-    # アイテム表示
-    pyxel.text(item.area.x+6, item.area.y, item.text, 7, font)
-
+    pyxel.text(item.area.x+6, item.area.y, item.text, 7, font)  # Yes/No表示
     # カーソル表示
     if item.selected:
         pyxel.tri(item.area.x, item.area.y+2, item.area.x, item.area.y+2+6, item.area.x+6//2, item.area.y+2+6//2, 7)

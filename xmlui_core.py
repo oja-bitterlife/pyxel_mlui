@@ -235,6 +235,10 @@ class UI_STATE:
         return self.attrStr("id", "")
 
     @property
+    def value(self) -> str:  # 汎用値取得
+        return self.attrStr("value", "")
+
+    @property
     def enable(self) -> bool:  # 有効フラグ
         return self.attrBool("enable", True)
     @property

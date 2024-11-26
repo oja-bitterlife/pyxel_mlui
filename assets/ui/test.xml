@@ -4,12 +4,12 @@
     <menu_win x="32" y="16" w="128" h="52" item_w="58" item_h="18" title="コマンド" id="menu_command">
         <menu_grid x="6" y="14">
             <menu_row>
-                <menu_item action="speak">はなす</menu_item>
-                <menu_item action="dial">ダイアル</menu_item>
+                <menu_item value="speak">はなす</menu_item>
+                <menu_item value="dial">ダイアル</menu_item>
             </menu_row>
             <menu_row>
-                <menu_item action="satus">つよさ</menu_item>
-                <menu_item action="check">しらべる</menu_item>
+                <menu_item value="satus">つよさ</menu_item>
+                <menu_item value="check">しらべる</menu_item>
             </menu_row>
         </menu_grid>
     </menu_win>
@@ -18,8 +18,8 @@
 
     <yes_no w="48" h="40" item_h="14" title="ok?" id="yes_no">
         <yes_no_grid x="8" y="14">
-            <yes_no_item action="yes">はい</yes_no_item>
-            <yes_no_item action="no">いいえ</yes_no_item>
+            <yes_no_item value="yes">はい</yes_no_item>
+            <yes_no_item value="no">いいえ</yes_no_item>
         </yes_no_grid>
     </yes_no>
 
