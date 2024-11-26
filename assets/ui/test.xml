@@ -18,8 +18,8 @@
 
     <yes_no w="48" h="40" item_h="14" title="ok?" id="yes_no">
         <yes_no_grid x="8" y="14">
-            <yes_no_item>はい</yes_no_item>
-            <yes_no_item>いいえ</yes_no_item>
+            <yes_no_item action="yes">はい</yes_no_item>
+            <yes_no_item action="no">いいえ</yes_no_item>
         </yes_no_grid>
     </yes_no>
 

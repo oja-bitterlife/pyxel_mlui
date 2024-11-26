@@ -210,17 +210,18 @@ class UI_STATE:
             return opend
 
     def close(self, id:str|None=None):  # closeの後なにもしないのでNone
-        try:
-            state = self.xmlui.root.findByID(id if id else self.id)
+        if id is not None:
+            state = self.xmlui.root.findByID(id)
             state.remove()
-        finally:
-            return None
+        else:
+            self.remove()
 
     # デバッグ用
     # *************************************************************************
     def strTree(self, indent:str="  ", pre:str="") -> str:
         out = pre + self.tag
-        out += ": " + self.id if self.id else ""
+        out += f": {self.id}" if self.id else ""
+        out += f" {self.marker}"
         for element in self._element:
             out += "\n" + UI_STATE(self.xmlui, element).strTree(indent, pre+indent)
         return out
@@ -287,6 +288,10 @@ class UI_STATE:
     @property
     def layer(self) -> int:  # 描画レイヤ
         return self.attrInt("layer", 0)
+
+    @property
+    def marker(self) -> str:  # デバッグ用
+        return self.attrStr("marker", "")
 
 
 # XMLでUIライブラリ本体

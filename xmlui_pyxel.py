@@ -134,7 +134,6 @@ def win_dial_update(win_dial:UI_STATE, event:UI_EVENT):
 
     # 確定
     if "button_a" in event.trg:
-        test_params["age"] = dial.number
         win_dial.open(ui_template, "yes_no", "dial_yes_no")
         # dial_win.close() # 確定でも閉じる
 
@@ -159,6 +158,19 @@ def dial_yes_no_update(dial_yes_no:UI_STATE, event:UI_EVENT):
 
     grid = UI_SELECT_LIST(dial_yes_no, "yes_no_item").arrangeItems(0, item_h)
     grid.selectByEvent(event.trg, "up", "down")
+
+    # 閉じる
+    if "button_b" in event.trg:
+        dial_yes_no.close()
+
+    # 決定
+    if "button_a" in event.trg:
+        if grid.selected_item.attrStr("action") == "yes":
+            dial = UI_DIAL_RO(dial_yes_no.findByTagR("win_dial"))
+            test_params["age"] = dial.number
+            dial.setAttr("marker", "<-")
+            # dial.close()
+
 
 @ui_worker.draw_func("dial_yes_no")
 def dial_yes_no_draw(dial_yes_no:UI_STATE, event:UI_EVENT):
