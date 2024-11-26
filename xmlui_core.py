@@ -222,7 +222,6 @@ class UI_STATE:
         out = pre + self.tag
         out += f": {self.id}" if self.id else ""
         out += f" {self.marker}"
-        out += f" {self.layer}"
         for element in self._element:
             out += "\n" + UI_STATE(self.xmlui, element).strTree(indent, pre+indent)
         return out
