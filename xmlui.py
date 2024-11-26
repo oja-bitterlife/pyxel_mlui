@@ -150,11 +150,16 @@ class UI_STATE:
         self._element.append(child._element)
 
     def remove(self):  # removeの後なにかすることはないのでNone
-        self.setAttr("enable", False)  # 処理対象から外れるように
+        # 処理対象から外れるように
+        self.setAttr("enable", False)
+
         # 親から外す
-        parent = self.parent
-        if parent:
-            parent._element.remove(self._element)
+        if self.parent:
+            self.parent._element.remove(self._element)
+
+        # 子も全部外す
+        for child in self._element:
+            UI_STATE(self.xmlui, child).remove()
 
     def findByID(self, id:str) -> 'UI_STATE':
         for element in self._element.iter():
