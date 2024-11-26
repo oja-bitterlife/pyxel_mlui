@@ -146,15 +146,15 @@ def win_dial_update(win_dial:UI_STATE, event:UI_EVENT):
         win_dial.close()
 
 @ui_worker.draw_func("win_dial")
-def win_dial_draw(win_dial:UI_STATE, event:UI_EVENT):
+def dial_win_draw(dial_win:UI_STATE, event:UI_EVENT):
     frame_color = 10 if event.active else 7
-    pyxel.rect(win_dial.area.x, win_dial.area.y, win_dial.area.w, win_dial.area.h, 12)
-    pyxel.rectb(win_dial.area.x, win_dial.area.y, win_dial.area.w, win_dial.area.h, frame_color)
+    pyxel.rect(dial_win.area.x, dial_win.area.y, dial_win.area.w, dial_win.area.h, 12)
+    pyxel.rectb(dial_win.area.x, dial_win.area.y, dial_win.area.w, dial_win.area.h, frame_color)
 
     # 数値表示
-    dial = UI_DIAL_RO(win_dial)
+    dial = UI_DIAL_RO(dial_win)
     for i,digit in enumerate(dial.zenkakuDigits):
-        pyxel.text(win_dial.area.x+3+(4-i)*FONT_SIZE, win_dial.area.y+2, digit, 2 if dial.edit_pos == i else 7, font)
+        pyxel.text(dial_win.area.x+3+(4-i)*FONT_SIZE, dial_win.area.y+2, digit, 2 if dial.edit_pos == i else 7, font)
 
 @ui_worker.draw_func("dial_yes_no")
 def dial_yes_no_draw(dial_yes_no:UI_STATE, event:UI_EVENT):

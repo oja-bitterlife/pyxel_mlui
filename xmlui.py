@@ -149,6 +149,8 @@ class UI_STATE:
         self._element.append(child._element)
 
     def remove(self):  # removeの後なにかすることはないのでNone
+        self.setAttr("enable", False)  # 処理対象から外れるように
+        # 親から外す
         parent = self.parent
         if parent:
             parent._element.remove(self._element)
@@ -377,11 +379,11 @@ class XMLUI:
     # *************************************************************************
     def draw(self):
         # 更新対象(visible)を取得(Updateされたもののみ対象)
-        self._draw_targets = [state for state in self._draw_targets if state.visible]
+        self._draw_targets = [state for state in self._draw_targets if state.enable and state.visible]
 
         # エリア更新
         for state in self._draw_targets:
-            if state.parent:  # rootは親を持たないので更新不要
+            if state.parent:  # 親を持たないElementは更新不要
                 # absがあれば絶対座標、なければ親からのオフセット
                 state.setAttr("area_x", state.abs_x if state.hasAttr("abs_x") else state.x + state.parent.area_x)
                 state.setAttr("area_y", state.abs_y if state.hasAttr("abs_y") else state.y + state.parent.area_y)
