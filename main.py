@@ -38,7 +38,6 @@ ui_worker.setInputList("button_a", [
 ui_worker.setInputList("button_b", [
     pyxel.GAMEPAD1_BUTTON_B,
     pyxel.KEY_BACKSPACE,
-    pyxel.KEY_SHIFT,
 ])
 ui_worker.setInputList("button_X", [
     pyxel.GAMEPAD1_BUTTON_X,
