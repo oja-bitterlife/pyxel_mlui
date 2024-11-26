@@ -480,10 +480,10 @@ class _UI_UTIL_TREE(UI_STATE):
             exists = parent.findByTag(child_root_tag)
             super().__init__(parent.xmlui, exists._element)
             self._need_init = False  # 初期化は不要
-        except:
+        except Exception as e:
             # 作成が許可されていないときは例外
             if not allow_create:
-                raise Exception(f"<{child_root_tag}> not found")
+                raise e
 
             # 新規作成
             super().__init__(parent.xmlui, Element(child_root_tag))
