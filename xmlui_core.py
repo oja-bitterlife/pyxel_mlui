@@ -798,9 +798,9 @@ class UI_DIAL(UI_DIAL_RO):
 
         self._digit_list = digit_list
 
-    # 移動しすぎ禁止付き操作位置の設定
+    # 回り込み付き操作位置の設定
     def setEditPos(self, edit_pos:int) -> Self:
-        self.setAttr(self.EDIT_POS_ATTR, max(0, min(len(self.digits)-1, edit_pos)))
+        self.setAttr(self.EDIT_POS_ATTR, (edit_pos+len(self.digits))%len(self.digits))
         return self
 
     # 操作位置の移動
