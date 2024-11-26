@@ -607,7 +607,12 @@ class _UI_SELECT_BASE(_UI_UTIL):
     def __init__(self, state:UI_STATE, grid:list[list[UI_STATE]]):
         super().__init__(state)
         self._grid = grid
-        self.select(0, 0)
+
+        # タグにselected=Trueがあればそれを使う。無ければgrid[0][0]を選択
+        try:
+            self.selected_item
+        except:
+            self.select(0, 0)  # 最初の選択
 
     # GRID用
     @classmethod
