@@ -846,7 +846,12 @@ class UI_WINDOW:
 
         self.patterns = []
         for i in range(9):
-            self.patterns.append([[7,-1,7,-1]]*pat_h)
+            self.patterns.append([
+                [7,-1,7,-1],
+                [-1,7,-1, 7],
+                [7,-1,7,-1],
+                [-1,7,-1, 7],
+            ])
 
     # バッファに書き込む
     def draw_buf(self, px:int, py:int, w:int, h:int, screen_buf):
