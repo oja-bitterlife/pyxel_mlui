@@ -46,6 +46,16 @@ ui_worker.setInputList("button_y", [
     pyxel.GAMEPAD1_BUTTON_Y,
 ])
 
+from xmlui_core import UI_WINDOW
+
+
+screen = pyxel.screen.data_ptr()
+screen_width = pyxel.width
+def draw(px:int, py:int, color:int):
+        screen[py*screen_width +  px] = color
+
+win = UI_WINDOW(4, 4, draw)
+
 # Main
 def update(): # フレームの更新処理
     ui_worker.checkInputAndOn(pyxel.btn)
@@ -63,6 +73,8 @@ def draw(): # 描画処理
 
     # UI描画
     ui_worker.draw()
+
+    win.draw(10, 10, 160, 160)
 
 # アプリケーションの実行
 pyxel.run(update, draw)

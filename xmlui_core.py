@@ -830,3 +830,54 @@ class UI_DIAL(UI_DIAL_RO):
         if downEvent in input:
             self.addDigit(self.edit_pos, -1)  # digitを減らす
         return self
+
+
+# ウインドウサポート
+# ---------------------------------------------------------
+class UI_NINE_PATCH:
+    # 0 1 2
+    # 3 4 5
+    # 6 7 8
+    def __init__(self, pat_w:int, pat_h:int):
+        self.pat_w = pat_w
+        self.pat_h = pat_h
+
+        self.patterns = []
+        for i in range(9):
+            self.patterns.append([[7]*pat_w]*pat_h)
+
+class UI_WINDOW(UI_NINE_PATCH):
+    def __init__(self, pat_w:int, pat_h:int, draw_func):
+        super().__init__(pat_w, pat_h)
+        self.draw_func = draw_func
+
+    def draw(self, px:int, py:int, w:int, h:int):
+        poses = (
+            (px, py),
+            (px+self.pat_w, py),
+            (px+w-self.pat_w, py),
+            (px, py+self.pat_h),
+            (px+self.pat_w, py+self.pat_h),
+            (px+w-self.pat_w, py+self.pat_h),
+            (px, py+h-self.pat_h),
+            (px+self.pat_w, py+h-self.pat_h),
+            (px+w-self.pat_w, py+h-self.pat_h),
+        )
+        wh = (
+            (self.pat_w, self.pat_h),
+            (w-self.pat_w*2, self.pat_h),
+            (self.pat_w, self.pat_h),
+            (self.pat_w, h-self.pat_h*2),
+            (w-self.pat_w*2, h-self.pat_h*2),
+            (self.pat_w, h-self.pat_h*2),
+            (self.pat_w, self.pat_h),
+            (w-self.pat_w*2, self.pat_h),
+            (self.pat_w, self.pat_h),
+        )
+
+        for i in range(9):
+            for y in range(wh[i][1]):
+                pat_y = min(y, self.pat_h-1)
+                for x in range(wh[i][0]):
+                    pat_x = min(x, self.pat_w-1)
+                    self.draw_func(poses[i][0]+x, poses[i][1]+y, self.patterns[i][pat_y][pat_x])
