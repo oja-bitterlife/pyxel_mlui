@@ -177,31 +177,6 @@ class UI_STATE:
             parent = parent.parent
         raise Exception(f"Tag '{tag}' not found in parents")
 
-    # GRID用
-    def findGridByTag(self, tag_outside:str, tag_inside:str) -> list[list['UI_STATE']]:
-        return [outside.findByTagAll(tag_inside) for outside in self.findByTagAll(tag_outside)]
-
-    # 転置(Transpose)GRID
-    def findGridByTagT(self, tag_outside:str, tag_inside:str) -> list[list['UI_STATE']]:
-        grid = self.findGridByTag(tag_outside, tag_inside)
-        grid = [[grid[y][x] for y in range(len(grid))] for x in range(len(grid[0]))]  # 転置
-        return grid
-
-    # グリッド各アイテムの座標設定
-    def _arrangeGrid(self, grid:list[list['UI_STATE']], w:int, h:int):
-        for y,cols in enumerate(grid):
-            for x,rows in enumerate(cols):
-                rows.setAttr(["x", "y"], (x*w, y*h))
-        return grid
-
-    # 横並びグリッド
-    def arrangeGridByTag(self, tag_outside:str, tag_inside:str, w:int, h:int) -> list[list['UI_STATE']]:
-        return self._arrangeGrid(self.findGridByTag(tag_outside, tag_inside), w, h)
-
-    # 転置縦並びグリッド
-    def arrangeGridByTagT(self, tag_outside:str, tag_inside:str, w:int, h:int) -> list[list['UI_STATE']]:
-        return self._arrangeGrid(self.findGridByTagT(tag_outside, tag_inside), w, h)
-
     @property
     def parent(self) -> 'UI_STATE|None':
         def _rec_parentSearch(element:Element, me:Element) -> Element|None:
@@ -631,7 +606,36 @@ class UI_PAGE(UI_PAGE_RO):
 class _UI_SELECT_BASE(_UI_UTIL):
     def __init__(self, state:UI_STATE, grid:list[list[UI_STATE]]):
         super().__init__(state)
-        self._grid = grid  # グリッド保存
+        self._grid = grid
+        self.select(0, 0)
+
+    # GRID用
+    @classmethod
+    def findGridByTag(cls, state:UI_STATE, tag_group:str, tag_item:str) -> list[list['UI_STATE']]:
+        return [group.findByTagAll(tag_item) for group in state.findByTagAll(tag_group)]
+
+    # 転置(Transpose)GRID
+    @classmethod
+    def findGridByTagT(cls, state:UI_STATE, tag_group:str, tag_item:str) -> list[list['UI_STATE']]:
+        grid = cls.findGridByTag(state, tag_group, tag_item)
+        grid = [[grid[y][x] for y in range(len(grid))] for x in range(len(grid[0]))]  # 転置
+        return grid
+
+    # グリッド各アイテムの座標設定
+    # def _arrangeGrid(self, grid:list[list['UI_STATE']], w:int, h:int):
+    #     for y,cols in enumerate(grid):
+    #         for x,rows in enumerate(cols):
+    #             rows.setAttr(["x", "y"], (x*w, y*h))
+    #     return grid
+
+    # # 横並びグリッド
+    # def arrangeGridByTag(self, tag_outside:str, tag_inside:str, w:int, h:int) -> list[list['UI_STATE']]:
+    #     return self._arrangeGrid(self.findGridByTag(tag_outside, tag_inside), w, h)
+
+    # # 転置縦並びグリッド
+    # def arrangeGridByTagT(self, tag_outside:str, tag_inside:str, w:int, h:int) -> list[list['UI_STATE']]:
+    #     return self._arrangeGrid(self.findGridByTagT(tag_outside, tag_inside), w, h)
+
 
     # 範囲限定付き座標設定
     def select(self, x:int, y:int, x_wrap:bool=False, y_wrap:bool=False) -> Self:
@@ -641,18 +645,26 @@ class _UI_SELECT_BASE(_UI_UTIL):
         return self
 
     @property
+    def selected_item(self) -> UI_STATE:
+        for rows in self._grid:
+            for item in rows:
+                if item.selected:
+                    return item
+        raise Exception("selected item not found")
+
+    @property
     def cur_x(self) -> int:
-        for y in range(self.grid_h):
-            for x in range(self.grid_w):
-                if self._grid[y][x].hasAttr("selected"):
+        for group in self._grid:
+            for x, item in enumerate(group):
+                if item.selected:
                     return x
         return 0
 
     @property
     def cur_y(self) -> int:
-        for y in range(self.grid_h):
-            for x in range(self.grid_w):
-                if self._grid[y][x].hasAttr("selected"):
+        for y, group in enumerate(self._grid):
+            for item in group:
+                if item.selected:
                     return y
         return 0
 
@@ -664,8 +676,12 @@ class _UI_SELECT_BASE(_UI_UTIL):
     def grid_h(self) -> int:
         return len(self._grid)
 
+
 # グリッド選択
 class UI_SELECT_GRID(_UI_SELECT_BASE):
+    def __init__(self, state:UI_STATE, tag_group:str, tag_item:str):
+        super().__init__(state, self.findGridByTag(state, tag_group, tag_item))
+
     # 入力に応じた挙動一括
     def selectByEvent(self, input:set[str], leftEvent:str, rightEvent:str, upEvent:str, downEvent:str, x_wrap:bool=False, y_wrap:bool=False) -> Self:
         if leftEvent in input:
@@ -681,8 +697,8 @@ class UI_SELECT_GRID(_UI_SELECT_BASE):
 # リスト選択
 class UI_SELECT_LIST(_UI_SELECT_BASE):
     # 縦に入れる
-    def __init__(self, state:UI_STATE, grid:list[UI_STATE]):
-        super().__init__(state, [[g] for g in grid])
+    def __init__(self, state:UI_STATE, tag_item:str):
+        super().__init__(state, self.findGridByTagT(state, state.tag, tag_item))
 
     # 入力に応じた挙動一括。選択リストは通常上下ラップする
     def selectByEvent(self, input:set[str], upEvent:str, downEvent:str, y_wrap:bool=True) -> Self:

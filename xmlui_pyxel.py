@@ -28,18 +28,17 @@ def menu_win_update(menu_win:UI_STATE, event:UI_EVENT):
     item_w, item_h = menu_win.attrInt("item_w"), menu_win.attrInt("item_h")
 
     # メニューアイテム
-    items = menu_win.arrangeGridByTag("menu_row", "menu_item", item_w, item_h)
-    grid = UI_SELECT_GRID(menu_win.findByTag("menu_cur"), items).moveByEvent(event.trg, "left", "right", "up", "down")
+    grid = UI_SELECT_GRID(menu_win, "menu_row", "menu_item").selectByEvent(event.trg, "left", "right", "up", "down")
 
     # 選択アイテムの表示
     if "button_a" in event.trg:
         # メッセージウインドウ表示
-        if grid.selected.attrStr("action") == "speak":
-            menu_win.open(ui_template, "win_message")
+        if grid.selected_item.attrStr("action") == "speak":
+            grid.selected_item.open(ui_template, "win_message")
 
         # dialウインドウ表示
-        if grid.selected.attrStr("action") == "dial":
-            grid.selected.open(ui_template, "win_dial").setPos(8, 2)
+        if grid.selected_item.attrStr("action") == "dial":
+            grid.selected_item.open(ui_template, "win_dial").setPos(8, 2)
 
     # 閉じる
     if "button_b" in event.trg:
