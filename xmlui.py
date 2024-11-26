@@ -279,7 +279,7 @@ class UI_STATE:
         return self.attrInt("area_h", 4096)
 
     @property
-    def update_count(self) -> int:  # テキスト自動改行文字数
+    def update_count(self) -> int:  # updateが行われた回数
         return self.attrInt("update_count", 0)
 
     @property
@@ -333,10 +333,6 @@ class XMLUI:
         self._update_funcs:dict[str,Callable[[UI_STATE,UI_EVENT], None]] = {}
         self._draw_funcs:dict[str,Callable[[UI_STATE,UI_EVENT], None]] = {}
 
-        # 表示対象Elementを格納(update/draw連携用)
-        self._draw_targets:list[UI_STATE] = []
-        self._active_state:UI_STATE|None = None
-
         # root_tag指定が無ければ最上位エレメント
         if root_tag is None:
             xmlui_root = dom
@@ -380,24 +376,29 @@ class XMLUI:
         # (入力)イベントの更新
         self._event.update()
 
-        # 更新対象(enable)Elementを取得
-        updates = [UI_STATE(self, element) for element in self.root._element.iter() if element.attrib.get("enable", True)]
-        self._draw_targets = [state for state in updates if state.visible]
+        # 更新対象を取得
+        update_targets = [UI_STATE(self, element) for element in self.root._element.iter() if element.attrib.get("enable", True)]
 
-        # use_eventがTrueなstateだけ抜き出す
-        use_event_states = list(filter(lambda state: state.use_event, self._draw_targets))
-        self._active_state = use_event_states[-1] if use_event_states else None  # 最後=Active
+        # イベント発生対象は表示物のみ
+        event_targets = list(filter(lambda state: state.visible and state.use_event, update_targets))
+        active_state = event_targets[-1] if event_targets else None  # Active=最後
 
         # 更新処理
-        for state in updates:
-            self.updateElement(state.tag, state, self._event if state == self._active_state else UI_EVENT())
-            state.setAttr("update_count", state.update_count + 1)
+        for state in update_targets:
+            if state.enable:  # update中にdisable(remove)になる場合があるので毎回チェック
+                state.setAttr("update_count", state.update_count+1)  # 1スタート(0は初期化時)
+                self.updateElement(state.tag, state, self._event if state == active_state else UI_EVENT())
 
     # 描画用
     # *************************************************************************
     def draw(self):
-        # 更新対象(visible)を取得(Updateされたもののみ対象)
-        draw_targets = [state for state in self._draw_targets if state.enable and state.visible]
+        # 描画対象を取得
+        update_targets = [UI_STATE(self, element) for element in self.root._element.iter() if element.attrib.get("enable", True)]
+        draw_targets = [state for state in update_targets if state.visible and state.update_count>0]  # visibleでupdateが1回以上発生したもの
+
+        # イベント発生対象は表示物のみ
+        event_targets = list(filter(lambda state: state.use_event, draw_targets))
+        active_state = event_targets[-1] if event_targets else None  # Active=最後
 
         # 更新処理
         for state in draw_targets:
@@ -417,7 +418,7 @@ class XMLUI:
 
         # 描画処理
         for state in sorted(draw_targets, key=lambda state: state._draw_layer):
-            self.drawElement(state.tag, state, self._event if state == self._active_state else UI_EVENT())
+            self.drawElement(state.tag, state, self._event if state == active_state else UI_EVENT())
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
     def updateElement(self, tag_name:str, state:UI_STATE, event:UI_EVENT):
