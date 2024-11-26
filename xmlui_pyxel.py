@@ -70,10 +70,7 @@ def menu_item_draw(menu_item:UI_STATE, event:UI_EVENT):
 
     # カーソル表示
     if menu_item.selected:
-        tri_size = 6
-        x = menu_item.area.x
-        y = menu_item.area.y+2
-        pyxel.tri(x, y, x, y+tri_size, x+tri_size//2, y+tri_size//2, color)
+        pyxel.tri(menu_item.area.x, menu_item.area.y+2, menu_item.area.x, menu_item.area.y+2+6, menu_item.area.x+6//2, menu_item.area.y+2+6//2, color)
 
 
 # メッセージウインドウ
@@ -156,9 +153,23 @@ def dial_win_draw(dial_win:UI_STATE, event:UI_EVENT):
     for i,digit in enumerate(dial.zenkakuDigits):
         pyxel.text(dial_win.area.x+3+(4-i)*FONT_SIZE, dial_win.area.y+2, digit, 2 if dial.edit_pos == i else 7, font)
 
+@ui_worker.update_func("dial_yes_no")
+def dial_yes_no_update(dial_yes_no:UI_STATE, event:UI_EVENT):
+    item_h = dial_yes_no.attrInt("item_h")
+
+    grid = UI_SELECT_LIST(dial_yes_no, "yes_no_item").arrangeItems(0, item_h)
+    grid.selectByEvent(event.trg, "up", "down")
+
 @ui_worker.draw_func("dial_yes_no")
 def dial_yes_no_draw(dial_yes_no:UI_STATE, event:UI_EVENT):
     frame_color = 10 if event.active else 7
     pyxel.rect(dial_yes_no.area.x+4, dial_yes_no.area.y+4, dial_yes_no.area.w, dial_yes_no.area.h, 12)
     pyxel.rectb(dial_yes_no.area.x+4, dial_yes_no.area.y+4, dial_yes_no.area.w, dial_yes_no.area.h, frame_color)
 
+    # アイテム表示
+    for item in dial_yes_no.findByTagAll("yes_no_item"):
+        pyxel.text(item.area.x+6, item.area.y, item.text, 7, font)
+
+        # カーソル表示
+        if item.selected:
+            pyxel.tri(item.area.x, item.area.y+2, item.area.x, item.area.y+2+6, item.area.x+6//2, item.area.y+2+6//2, 7)

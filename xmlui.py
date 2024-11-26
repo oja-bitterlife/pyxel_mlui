@@ -388,13 +388,16 @@ class XMLUI:
 
         # 更新処理
         for state in draw_targets:
-            if state.parent is None:  # 親を持たないElementは更新不要
+            # 親を持たないElementは更新不要
+            if state.parent is None:
                 continue
+
             # エリア更新。absがあれば絶対座標、なければ親からのオフセット
             state.setAttr("area_x", state.abs_x if state.hasAttr("abs_x") else state.x + state.parent.area_x)
             state.setAttr("area_y", state.abs_y if state.hasAttr("abs_y") else state.y + state.parent.area_y)
             state.setAttr("area_w", state.attrInt("w", state.parent.area_w))
             state.setAttr("area_h", state.attrInt("h", state.parent.area_h))
+
             # layer処理
             if not state.hasAttr("layer"):
                 state._draw_layer = state.parent._draw_layer  # 自身がlayerを持っていなければ親から引き継ぐ
