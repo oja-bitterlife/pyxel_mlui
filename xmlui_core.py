@@ -852,16 +852,16 @@ class UI_WINDOW(UI_NINE_PATCH):
         self.draw_func = draw_func
 
     def draw(self, px:int, py:int, w:int, h:int):
-        poses = (
-            (px, py),
-            (px+self.pat_w, py),
-            (px+w-self.pat_w, py),
-            (px, py+self.pat_h),
-            (px+self.pat_w, py+self.pat_h),
-            (px+w-self.pat_w, py+self.pat_h),
-            (px, py+h-self.pat_h),
-            (px+self.pat_w, py+h-self.pat_h),
-            (px+w-self.pat_w, py+h-self.pat_h),
+        xy = (
+            (0, 0),
+            (self.pat_w, 0),
+            (w-self.pat_w, 0),
+            (0, self.pat_h),
+            (self.pat_w, self.pat_h),
+            (w-self.pat_w, self.pat_h),
+            (0, h-self.pat_h),
+            (self.pat_w, h-self.pat_h),
+            (w-self.pat_w, h-self.pat_h),
         )
         wh = (
             (self.pat_w, self.pat_h),
@@ -877,7 +877,15 @@ class UI_WINDOW(UI_NINE_PATCH):
 
         for i in range(9):
             for y in range(wh[i][1]):
+                sy = py+xy[i][1]+y
+                if sy < 0 or 256 <= sy:
+                    continue
                 pat_y = min(y, self.pat_h-1)
+
                 for x in range(wh[i][0]):
+                    sx = px+xy[i][0]+x
+                    if  sx < 0 or 256 <= sx:
+                        continue
                     pat_x = min(x, self.pat_w-1)
-                    self.draw_func(poses[i][0]+x, poses[i][1]+y, self.patterns[i][pat_y][pat_x])
+
+                    self.draw_func(sx, sy, self.patterns[i][pat_y][pat_x])

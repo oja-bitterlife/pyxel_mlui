@@ -74,7 +74,7 @@ def draw(): # 描画処理
     # UI描画
     ui_worker.draw()
 
-    win.draw(10, 10, 160, 160)
+    win.draw(-100, -100, 160, 160)
 
 # アプリケーションの実行
 pyxel.run(update, draw)
