@@ -627,19 +627,11 @@ class _UI_SELECT_BASE(_UI_UTIL):
         return grid
 
     # グリッド各アイテムの座標設定
-    # def _arrangeGrid(self, grid:list[list['UI_STATE']], w:int, h:int):
-    #     for y,cols in enumerate(grid):
-    #         for x,rows in enumerate(cols):
-    #             rows.setAttr(["x", "y"], (x*w, y*h))
-    #     return grid
-
-    # # 横並びグリッド
-    # def arrangeGridByTag(self, tag_outside:str, tag_inside:str, w:int, h:int) -> list[list['UI_STATE']]:
-    #     return self._arrangeGrid(self.findGridByTag(tag_outside, tag_inside), w, h)
-
-    # # 転置縦並びグリッド
-    # def arrangeGridByTagT(self, tag_outside:str, tag_inside:str, w:int, h:int) -> list[list['UI_STATE']]:
-    #     return self._arrangeGrid(self.findGridByTagT(tag_outside, tag_inside), w, h)
+    def arrangeItems(self, w:int, h:int) -> Self:
+        for y,group in enumerate(self._grid):
+            for x,item in enumerate(group):
+                item.setAttr(["x", "y"], (x*w, y*h))
+        return self
 
 
     # 範囲限定付き座標設定
@@ -662,14 +654,14 @@ class _UI_SELECT_BASE(_UI_UTIL):
     @property
     def cur_x(self) -> int:
         for group in self._grid:
-            for x, item in enumerate(group):
+            for x,item in enumerate(group):
                 if item.selected:
                     return x
         return 0
 
     @property
     def cur_y(self) -> int:
-        for y, group in enumerate(self._grid):
+        for y,group in enumerate(self._grid):
             for item in group:
                 if item.selected:
                     return y

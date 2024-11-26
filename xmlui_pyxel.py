@@ -28,7 +28,8 @@ def menu_win_update(menu_win:UI_STATE, event:UI_EVENT):
     item_w, item_h = menu_win.attrInt("item_w"), menu_win.attrInt("item_h")
 
     # メニューアイテム
-    grid = UI_SELECT_GRID(menu_win, "menu_row", "menu_item").selectByEvent(event.trg, "left", "right", "up", "down")
+    grid = UI_SELECT_GRID(menu_win, "menu_row", "menu_item").arrangeItems(item_w, item_h)
+    grid.selectByEvent(event.trg, "left", "right", "up", "down")
 
     # 選択アイテムの表示
     if "button_a" in event.trg:
