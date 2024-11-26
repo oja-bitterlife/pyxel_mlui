@@ -53,7 +53,7 @@ class UI_EVENT:
         self._receive = set([])
 
     # 入力
-    def on(self, text:str) -> 'UI_EVENT':
+    def on(self, text:str) -> Self:
         self._receive.add(text)
         return self
 
@@ -77,7 +77,7 @@ class UI_STATE:
         self.xmlui = xmlui  # ライブラリへのIF
         self._element = element  # 自身のElement
 
-    def disableEvent(self) -> 'UI_STATE':
+    def disableEvent(self) -> Self:
         return self.setAttr("use_event", False)
 
     # UI_STATEは都度使い捨てなので、対象となるElementで比較する
@@ -102,7 +102,7 @@ class UI_STATE:
     def hasAttr(self, key: str) -> bool:
         return key in self._element.attrib
 
-    def setAttr(self, key:str|list[str], value: Any) -> 'UI_STATE':
+    def setAttr(self, key:str|list[str], value: Any) -> Self:
         # attribはdict[str,str]なのでstrで保存する
         if isinstance(key, list):
             for i, k in enumerate(key):
@@ -131,24 +131,24 @@ class UI_STATE:
     def area(self) -> UI_RECT:
         return UI_RECT(self.area_x, self.area_y, self.area_w, self.area_h)
 
-    def setPos(self, x:int, y:int) -> 'UI_STATE':
+    def setPos(self, x:int, y:int) -> Self:
         return self.setAttr(["x", "y"], [x, y])
 
-    def setAbsPos(self, x:int, y:int) -> 'UI_STATE':
+    def setAbsPos(self, x:int, y:int) -> Self:
         return self.setAttr(["abs_x", "abs_y"], [x, y])
 
-    def setEnable(self, enable:bool) -> 'UI_STATE':
+    def setEnable(self, enable:bool) -> Self:
         return self.setAttr("enable", enable)
 
-    def setVisible(self, visible:bool) -> 'UI_STATE':
+    def setVisible(self, visible:bool) -> Self:
         return self.setAttr("visible", visible)
 
     # ツリー操作用
     # *************************************************************************
-    def addChild(self, child:'UI_STATE'):
+    def addChild(self, child:'UI_STATE'):  # selfとchildどっちが返るかややこしいのでNone
         self._element.append(child._element)
 
-    def remove(self):
+    def remove(self):  # removeの後なにかすることはないのでNone
         parent = self.parent
         if parent:
             parent._element.remove(self._element)
@@ -168,6 +168,7 @@ class UI_STATE:
             return elements[0]
         raise Exception(f"Tag '{tag}' not found in '{self.tag}' and children")
 
+    # 下階層ではなく、上(root)に向かって探索する
     def findByTagR(self, tag:str) -> 'UI_STATE':
         parent = self.parent
         while(parent):
@@ -225,7 +226,7 @@ class UI_STATE:
             self.addChild(opend.setAttr("use_event", True))
             return opend
 
-    def close(self, id:str|None=None):
+    def close(self, id:str|None=None):  # closeの後なにもしないのでNone
         try:
             state = self.xmlui.root.findByID(id if id else self.id)
             state.remove()
@@ -297,11 +298,8 @@ class UI_STATE:
         return self.attrBool("use_event", False)
 
     @property
-    def cur_x(self) -> int:  # 選択グリッドx
-        return self.attrInt("cur_x", 0)
-    @property
-    def cur_y(self) -> int:  # 選択グリッドy
-        return self.attrInt("cur_y", 0)
+    def selected(self) -> int:  # 選択されている
+        return self.attrBool("selected", False)
 
 
 # XMLでUIライブラリ本体
@@ -593,7 +591,7 @@ class UI_PAGE(UI_PAGE_RO):
     # ページ関係
     # -----------------------------------------------------
     # page_noの操作
-    def nextPage(self, add:int=1) -> 'UI_PAGE':
+    def nextPage(self, add:int=1) -> Self:
         self.reset()  # ページが変わればまた最初から
         self.setAttr(self.PAGE_NO_ATTR, self.page_no+1)
         return self
@@ -601,75 +599,75 @@ class UI_PAGE(UI_PAGE_RO):
     # アニメーション用
     # -----------------------------------------------------
     # 表示カウンタを進める
-    def next(self, add:float=1) -> 'UI_PAGE':
+    def next(self, add:float=1) -> Self:
         self.setAttr(self.DRAW_COUNT_ATTR, self.draw_count+add)
         return self
 
     # 表示カウンタのリセット
-    def reset(self) -> 'UI_PAGE':
+    def reset(self) -> Self:
         self.setAttr(self.DRAW_COUNT_ATTR, 0)
         return self
 
     # 一気に表示
-    def finish(self) -> 'UI_PAGE':
+    def finish(self) -> Self:
         self.setAttr(self.DRAW_COUNT_ATTR, len(self.page_text))
         return self
 
     # イベントアクション
     # -----------------------------------------------------
     # 状況に応じた決定ボタン操作を行う
-    def action(self) -> 'UI_PAGE':
+    def action(self):
         # ページ中に残りがあるなら一気に表示
         if not self.is_finish:
             self.finish()
         # ページが残っていたら次のページへ
         elif not self.is_end_page:
             self.nextPage()
-        return self
 
 
 # メニュー系
 # ---------------------------------------------------------
 # グリッド情報
-class UI_GRID_CURSOR_RO(_UI_UTIL):
-    @property
-    def cur_x(self) -> int:
-        return self.attrInt("cur_x", 0)
-    @property
-    def cur_y(self) -> int:
-        return self.attrInt("cur_y", 0)
-
-class UI_SELECT_BASE(UI_GRID_CURSOR_RO):
+class _UI_SELECT_BASE(_UI_UTIL):
     def __init__(self, state:UI_STATE, grid:list[list[UI_STATE]]):
         super().__init__(state)
         self._grid = grid  # グリッド保存
 
     # 範囲限定付き座標設定
     def select(self, x:int, y:int, x_wrap:bool=False, y_wrap:bool=False) -> Self:
-        self.setAttr("cur_x", (x + self.grid_w) % self.grid_w if x_wrap else max(min(x, self.grid_w-1), 0))
-        self.setAttr("cur_y", (y + self.grid_h) % self.grid_h if y_wrap else max(min(y, self.grid_h-1), 0))
+        cur_x = (x + self.grid_w) % self.grid_w if x_wrap else max(min(x, self.grid_w-1), 0)
+        cur_y = (y + self.grid_h) % self.grid_h if y_wrap else max(min(y, self.grid_h-1), 0)
+        self._grid[cur_y][cur_x].setAttr("selected", True)
         return self
 
-    # カーソルの移動
-    def moveToSelected(self, offset_x:int=0, offset_y:int=0) -> Self:
-        self.setPos(self.selected.x+offset_x, self.selected.y+offset_y)
-        return self
+    @property
+    def cur_x(self) -> int:
+        for y in range(self.grid_h):
+            for x in range(self.grid_w):
+                if self._grid[y][x].hasAttr("selected"):
+                    return x
+        return 0
+
+    @property
+    def cur_y(self) -> int:
+        for y in range(self.grid_h):
+            for x in range(self.grid_w):
+                if self._grid[y][x].hasAttr("selected"):
+                    return y
+        return 0
 
     @property
     def grid_w(self) -> int:
         return len(self._grid[0])
+
     @property
     def grid_h(self) -> int:
         return len(self._grid)
 
-    @property
-    def selected(self) -> UI_STATE:
-        return self._grid[self.cur_y][self.cur_x]
-
 # グリッド選択
-class UI_SELECT_GRID(UI_SELECT_BASE):
+class UI_SELECT_GRID(_UI_SELECT_BASE):
     # 入力に応じた挙動一括
-    def selectByEvent(self, input:set[str], leftEvent:str, rightEvent:str, upEvent:str, downEvent:str, x_wrap:bool=False, y_wrap:bool=False) -> 'UI_SELECT_GRID':
+    def selectByEvent(self, input:set[str], leftEvent:str, rightEvent:str, upEvent:str, downEvent:str, x_wrap:bool=False, y_wrap:bool=False) -> Self:
         if leftEvent in input:
             self.select(self.cur_x-1, self.cur_y, x_wrap)
         elif rightEvent in input:
@@ -680,29 +678,20 @@ class UI_SELECT_GRID(UI_SELECT_BASE):
             self.select(self.cur_x, self.cur_y+1, False, y_wrap)
         return self
 
-    def moveByEvent(self, input:set[str], leftEvent:str, rightEvent:str, upEvent:str, downEvent:str, x_wrap:bool=False, y_wrap:bool=False) -> 'UI_SELECT_GRID':
-        self.selectByEvent(input, leftEvent, rightEvent, upEvent, downEvent, x_wrap, y_wrap)
-        self.moveToSelected()
-        return self
-
 # リスト選択
-class UI_SELECT_LIST(UI_SELECT_BASE):
+class UI_SELECT_LIST(_UI_SELECT_BASE):
     # 縦に入れる
     def __init__(self, state:UI_STATE, grid:list[UI_STATE]):
         super().__init__(state, [[g] for g in grid])
 
     # 入力に応じた挙動一括。選択リストは通常上下ラップする
-    def selectByEvent(self, input:set[str], upEvent:str, downEvent:str, y_wrap:bool=True) -> 'UI_SELECT_LIST':
+    def selectByEvent(self, input:set[str], upEvent:str, downEvent:str, y_wrap:bool=True) -> Self:
         if upEvent in input:
             self.select(0, self.cur_y-1, False, y_wrap)
         elif downEvent in input:
             self.select(0, self.cur_y+1, False, y_wrap)
         return self
 
-    def moveByEvent(self, input:set[str], upEvent:str, downEvent:str, y_wrap:bool=True) -> 'UI_SELECT_LIST':
-        self.selectByEvent(input, upEvent, downEvent, y_wrap)
-        self.moveToSelected()
-        return self
 
 # ダイアル
 # ---------------------------------------------------------
@@ -745,28 +734,28 @@ class UI_DIAL(UI_DIAL_RO):
         self._digit_list = digit_list
 
     # 移動しすぎ禁止付き操作位置の設定
-    def setEditPos(self, edit_pos:int) -> 'UI_DIAL':
+    def setEditPos(self, edit_pos:int) -> Self:
         self.setAttr(self.EDIT_POS_ATTR, max(0, min(len(self.digits)-1, edit_pos)))
         return self
 
     # 操作位置の移動
-    def moveEditPos(self, add:int) -> 'UI_DIAL':
+    def moveEditPos(self, add:int) -> Self:
         return self.setEditPos(self.edit_pos+add)
 
     # 指定位置のdigitを変更する
-    def setDigit(self, edit_pos:int, digit:str) -> 'UI_DIAL':
+    def setDigit(self, edit_pos:int, digit:str) -> Self:
         state = self.findByTagAll(self.DIGIT_TAG)[edit_pos]
         state.setText(digit)
         return self
 
     # 回り込み付きdigit増減
-    def addDigit(self, edit_pos:int, add:int) -> 'UI_DIAL':
+    def addDigit(self, edit_pos:int, add:int) -> Self:
         old_digit = self.digits[edit_pos]
         new_digit = self._digit_list[(self._digit_list.find(old_digit)+len(self._digit_list)+add) % len(self._digit_list)]
         return self.setDigit(edit_pos, new_digit)
 
     # 入力に応じた挙動一括
-    def changeByEvent(self, input:set[str], leftEvent:str, rightEvent:str, upEvent:str, downEvent:str) -> 'UI_DIAL':
+    def changeByEvent(self, input:set[str], leftEvent:str, rightEvent:str, upEvent:str, downEvent:str) -> Self:
         if leftEvent in input:
             self.moveEditPos(1)
         if rightEvent in input:
