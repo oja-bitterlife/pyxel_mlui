@@ -474,15 +474,21 @@ class XMLUI:
 class _UI_UTIL_TREE(UI_STATE):
     # 親になければ新規で作って追加する。あればそれを利用する
     # 新規作成時Trueを返す
-    def __init__(self, parent:UI_STATE, root_tag:str):
+    def __init__(self, parent:UI_STATE, child_root_tag:str, allow_create:bool=True):
         try:
-            exists = parent.findByTag(root_tag)  # 存在チェック
+            # すでに存在するElementを回収
+            exists = parent.findByTag(child_root_tag)
             super().__init__(parent.xmlui, exists._element)
-            self._need_init = False
+            self._need_init = False  # 初期化は不要
         except:
-            super().__init__(parent.xmlui, Element(root_tag))
-            parent.addChild(self)  # 無ければ登録
-            self._need_init = True
+            # 作成が許可されていないときは例外
+            if not allow_create:
+                raise Exception(f"<{child_root_tag}> not found")
+
+            # 新規作成
+            super().__init__(parent.xmlui, Element(child_root_tag))
+            parent.addChild(self)
+            self._need_init = True  # 初期化が必要
 
 # Stateをそのまま利用する(attribute中心操作)
 class _UI_UTIL(UI_STATE):
@@ -509,8 +515,8 @@ class UI_PAGE_RO(_UI_UTIL_TREE):
     DRAW_COUNT_ATTR = "draw_count"  # 文字アニメ用
     PAGE_NO_ATTR = "page_no"  # ページ管理用
 
-    def __init__(self, parent: UI_STATE):
-        super().__init__(parent, "_xmlui_page_root")
+    def __init__(self, parent: UI_STATE, allow_create:bool=False):
+        super().__init__(parent, "_xmlui_page_root", allow_create)
 
     # ページ関係
     # -----------------------------------------------------
@@ -571,7 +577,7 @@ class UI_PAGE_RO(_UI_UTIL_TREE):
 # アニメーションテキストページ管理
 class UI_PAGE(UI_PAGE_RO):
     def __init__(self, parent:UI_STATE, text:str, page_line_num:int, wrap:int=4096):
-        super().__init__(parent)
+        super().__init__(parent, True)
         if self._need_init:
             # 改行を\nに統一して全角化
             tmp_text = self.convertZenkaku(re.sub(self.SEPARATE_REGEXP, "\n", text).strip())
@@ -740,8 +746,8 @@ class UI_DIAL_RO(_UI_UTIL_TREE):
 
     EDIT_POS_ATTR = "edit_pos"  # 操作位置
 
-    def __init__(self, parent:UI_STATE):
-        super().__init__(parent, "_xmlui_dial_root")
+    def __init__(self, parent:UI_STATE, allow_create:bool=False):
+        super().__init__(parent, "_xmlui_dial_root", allow_create)
 
     @property
     def edit_pos(self) -> int:
@@ -762,7 +768,7 @@ class UI_DIAL_RO(_UI_UTIL_TREE):
 # ダイアル操作
 class UI_DIAL(UI_DIAL_RO):
     def __init__(self, parent:UI_STATE, digit_length:int, digit_list:str="0123456789"):
-        super().__init__(parent)
+        super().__init__(parent, True)
         if self._need_init:
             # 初期値は最小埋め
             for i in range(digit_length):
