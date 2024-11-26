@@ -181,10 +181,11 @@ def dial_yes_no_draw(dial_yes_no:UI_STATE, event:UI_EVENT):
     pyxel.rect(dial_yes_no.area.x+4, dial_yes_no.area.y+4, dial_yes_no.area.w, dial_yes_no.area.h, 12)
     pyxel.rectb(dial_yes_no.area.x+4, dial_yes_no.area.y+4, dial_yes_no.area.w, dial_yes_no.area.h, frame_color)
 
+@ui_worker.draw_func("yes_no_item")
+def dial_yes_no_item_draw(item:UI_STATE, event:UI_EVENT):
     # アイテム表示
-    for item in dial_yes_no.findByTagAll("yes_no_item"):
-        pyxel.text(item.area.x+6, item.area.y, item.text, 7, font)
+    pyxel.text(item.area.x+6, item.area.y, item.text, 7, font)
 
-        # カーソル表示
-        if item.selected:
-            pyxel.tri(item.area.x, item.area.y+2, item.area.x, item.area.y+2+6, item.area.x+6//2, item.area.y+2+6//2, 7)
+    # カーソル表示
+    if item.selected:
+        pyxel.tri(item.area.x, item.area.y+2, item.area.x, item.area.y+2+6, item.area.x+6//2, item.area.y+2+6//2, 7)

@@ -154,14 +154,8 @@ class UI_STATE:
     def remove(self):  # removeの後なにかすることはないのでNone
         # 処理対象から外れるように
         self.setAttr("enable", False)
-
-        # 親から外す
-        if self.parent:
+        if self.parent:  # 親から外す
             self.parent._element.remove(self._element)
-
-        # 子も全部外す
-        for child in self._element:
-            UI_STATE(self.xmlui, child).remove()
 
     def findByID(self, id:str) -> 'UI_STATE':
         for element in self._element.iter():
@@ -229,6 +223,7 @@ class UI_STATE:
         out = pre + self.tag
         out += f": {self.id}" if self.id else ""
         out += f" {self.marker}"
+        out += f" {self.layer}"
         for element in self._element:
             out += "\n" + UI_STATE(self.xmlui, element).strTree(indent, pre+indent)
         return out
@@ -374,15 +369,22 @@ class XMLUI:
 
     # 更新用
     # *************************************************************************
+    def _getUpdateTargets(self, element:Element):
+        if element.attrib.get("enable", True):
+            yield UI_STATE(self, element)
+            # enableの子だけ回収(disableの子は削除)
+            for child in element:
+                yield from self._getUpdateTargets(child)
+
     def update(self):
         # (入力)イベントの更新
         self._event.update()
 
         # 更新対象を取得
-        update_targets = [UI_STATE(self, element) for element in self.root._element.iter() if element.attrib.get("enable", True)]
+        update_targets = list(self._getUpdateTargets(self.root._element))
 
         # イベント発生対象は表示物のみ
-        event_targets = list(filter(lambda state: state.visible and state.use_event, update_targets))
+        event_targets = [state for state in update_targets if state.visible and state.use_event]
         active_state = event_targets[-1] if event_targets else None  # Active=最後
 
         # 更新処理
@@ -395,14 +397,14 @@ class XMLUI:
     # *************************************************************************
     def draw(self):
         # 描画対象を取得
-        update_targets = [UI_STATE(self, element) for element in self.root._element.iter() if element.attrib.get("enable", True)]
-        draw_targets = [state for state in update_targets if state.visible and state.update_count>0]  # visibleでupdateが1回以上発生したもの
+        update_targets = list(self._getUpdateTargets(self.root._element))
 
-        # イベント発生対象
-        event_targets = list(filter(lambda state: state.use_event, draw_targets))
+        # イベント発生対象は表示物のみ
+        event_targets = [state for state in update_targets if state.visible and state.use_event]
         active_state = event_targets[-1] if event_targets else None  # Active=最後
 
         # 更新処理
+        draw_targets = [state for state in update_targets if state.visible and state.update_count>0]  # visibleでupdateが1回以上発生したもの
         for state in draw_targets:
             # 親を持たないElementは更新不要
             if state.parent is None:
@@ -415,7 +417,7 @@ class XMLUI:
             state.setAttr("area_h", state.attrInt("h", state.parent.area_h))
 
             # layer処理
-            if not state.hasAttr("layer"):
+            if not state.hasAttr("layer") and state.parent:
                 state._draw_layer = state.parent._draw_layer  # 自身がlayerを持っていなければ親から引き継ぐ
 
         # 描画処理
