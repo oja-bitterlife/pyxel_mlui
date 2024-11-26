@@ -365,6 +365,9 @@ class XMLUI:
     def findByTag(self, tag:str) -> UI_STATE:
         return self.root.findByTag(tag)
 
+    def close(self, id:str):
+        self.root.findByID(id).close()
+
 
     # 更新用
     # *************************************************************************

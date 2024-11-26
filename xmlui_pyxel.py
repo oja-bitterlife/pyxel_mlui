@@ -165,10 +165,14 @@ def dial_yes_no_update(dial_yes_no:UI_STATE, event:UI_EVENT):
 
     # 決定
     if "button_a" in event.trg:
+        # Yes時処理
         if grid.selected_item.attrStr("action") == "yes":
-            win_dial = dial_yes_no.findByTagR("win_dial")
-            test_params["age"] = UI_DIAL_RO(win_dial).number
-            win_dial.close()
+            test_params["age"] = UI_DIAL_RO(dial_yes_no.findByTagR("win_dial")).number
+            dial_yes_no.xmlui.close("menu_command")
+
+        # No時処理
+        if grid.selected_item.attrStr("action") == "no":
+            dial_yes_no.close()
 
 
 @ui_worker.draw_func("dial_yes_no")
