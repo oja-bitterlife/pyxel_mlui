@@ -76,6 +76,7 @@ class UI_STATE:
     def __init__(self, xmlui:'XMLUI', element:Element):
         self.xmlui = xmlui  # ライブラリへのIF
         self._element = element  # 自身のElement
+        self._draw_layer = self.layer
 
     def disableEvent(self) -> Self:
         return self.setAttr("use_event", False)
@@ -283,6 +284,10 @@ class UI_STATE:
     def selected(self) -> int:  # 選択されている
         return self.attrBool("selected", False)
 
+    @property
+    def layer(self) -> int:  # 描画レイヤ
+        return self.attrInt("layer", 0)
+
 
 # XMLでUIライブラリ本体
 # #############################################################################
@@ -379,19 +384,23 @@ class XMLUI:
     # *************************************************************************
     def draw(self):
         # 更新対象(visible)を取得(Updateされたもののみ対象)
-        self._draw_targets = [state for state in self._draw_targets if state.enable and state.visible]
+        draw_targets = [state for state in self._draw_targets if state.enable and state.visible]
 
-        # エリア更新
-        for state in self._draw_targets:
-            if state.parent:  # 親を持たないElementは更新不要
-                # absがあれば絶対座標、なければ親からのオフセット
-                state.setAttr("area_x", state.abs_x if state.hasAttr("abs_x") else state.x + state.parent.area_x)
-                state.setAttr("area_y", state.abs_y if state.hasAttr("abs_y") else state.y + state.parent.area_y)
-                state.setAttr("area_w", state.attrInt("w", state.parent.area_w))
-                state.setAttr("area_h", state.attrInt("h", state.parent.area_h))
+        # 更新処理
+        for state in draw_targets:
+            if state.parent is None:  # 親を持たないElementは更新不要
+                continue
+            # エリア更新。absがあれば絶対座標、なければ親からのオフセット
+            state.setAttr("area_x", state.abs_x if state.hasAttr("abs_x") else state.x + state.parent.area_x)
+            state.setAttr("area_y", state.abs_y if state.hasAttr("abs_y") else state.y + state.parent.area_y)
+            state.setAttr("area_w", state.attrInt("w", state.parent.area_w))
+            state.setAttr("area_h", state.attrInt("h", state.parent.area_h))
+            # layer処理
+            if not state.hasAttr("layer"):
+                state._draw_layer = state.parent._draw_layer  # 自身がlayerを持っていなければ親から引き継ぐ
 
         # 描画処理
-        for state in self._draw_targets:
+        for state in sorted(draw_targets, key=lambda state: state._draw_layer):
             self.drawElement(state.tag, state, self._event if state == self._active_state else UI_EVENT())
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい

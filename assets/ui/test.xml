@@ -14,7 +14,7 @@
         </menu_grid>
     </menu_win>
 
-    <yes_no title="ok?" id="yes_no">
+    <yes_no title="ok?" id="yes_no" layer="1">
         <yes_no_item>はい</yes_no_item>
         <yes_no_item>いいえ</yes_no_item>
     </yes_no>
