@@ -396,7 +396,7 @@ class XMLUI:
         update_targets = [UI_STATE(self, element) for element in self.root._element.iter() if element.attrib.get("enable", True)]
         draw_targets = [state for state in update_targets if state.visible and state.update_count>0]  # visibleでupdateが1回以上発生したもの
 
-        # イベント発生対象は表示物のみ
+        # イベント発生対象
         event_targets = list(filter(lambda state: state.use_event, draw_targets))
         active_state = event_targets[-1] if event_targets else None  # Active=最後
 
