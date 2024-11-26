@@ -389,7 +389,7 @@ class XMLUI:
         self._active_state = use_event_states[-1] if use_event_states else None  # 最後=Active
 
         # 更新処理
-        for state in self._draw_targets:
+        for state in updates:
             self.updateElement(state.tag, state, self._event if state == self._active_state else UI_EVENT())
             state.setAttr("update_count", state.update_count + 1)
 
