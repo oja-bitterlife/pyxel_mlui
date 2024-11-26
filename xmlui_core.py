@@ -78,7 +78,6 @@ class UI_STATE:
     def __init__(self, xmlui:'XMLUI', element:Element):
         self.xmlui = xmlui  # ライブラリへのIF
         self._element = element  # 自身のElement
-        self._draw_layer = self.layer
 
     def disableEvent(self) -> Self:
         return self.setAttr("use_event", False)
@@ -369,19 +368,19 @@ class XMLUI:
 
     # 更新用
     # *************************************************************************
-    def _getUpdateTargets(self, element:Element):
-        if element.attrib.get("enable", True):
-            yield UI_STATE(self, element)
+    def _getUpdateTargets(self, state:UI_STATE):
+        if state.enable:
+            yield state
             # enableの子だけ回収(disableの子は削除)
-            for child in element:
-                yield from self._getUpdateTargets(child)
+            for child in state._element:
+                yield from self._getUpdateTargets(UI_STATE(self, child))
 
     def update(self):
         # (入力)イベントの更新
         self._event.update()
 
         # 更新対象を取得
-        update_targets = list(self._getUpdateTargets(self.root._element))
+        update_targets = list(self._getUpdateTargets(self.root))
 
         # イベント発生対象は表示物のみ
         event_targets = [state for state in update_targets if state.visible and state.use_event]
@@ -395,16 +394,22 @@ class XMLUI:
 
     # 描画用
     # *************************************************************************
+    def _getDrawTargets(self, state:UI_STATE):
+        if state.enable and state.visible and state.update_count>0:  # count==0はUpdateで追加されたばかりのもの(未Update)
+            yield state
+            # visibleの子だけ回収(invisibleの子は削除)
+            for child in state._element:
+                yield from self._getDrawTargets(UI_STATE(self, child))
+
     def draw(self):
         # 描画対象を取得
-        update_targets = list(self._getUpdateTargets(self.root._element))
+        draw_targets = list(self._getDrawTargets(self.root))
 
         # イベント発生対象は表示物のみ
-        event_targets = [state for state in update_targets if state.visible and state.use_event]
+        event_targets = [state for state in draw_targets if state.use_event]
         active_state = event_targets[-1] if event_targets else None  # Active=最後
 
         # 更新処理
-        draw_targets = [state for state in update_targets if state.visible and state.update_count>0]  # visibleでupdateが1回以上発生したもの
         for state in draw_targets:
             # 親を持たないElementは更新不要
             if state.parent is None:
@@ -416,12 +421,11 @@ class XMLUI:
             state.setAttr("area_w", state.attrInt("w", state.parent.area_w))
             state.setAttr("area_h", state.attrInt("h", state.parent.area_h))
 
-            # layer処理
             if not state.hasAttr("layer") and state.parent:
-                state._draw_layer = state.parent._draw_layer  # 自身がlayerを持っていなければ親から引き継ぐ
+                state.setAttr("layer", state.parent.layer)  # 自身がlayerを持っていなければ親から引き継ぐ
 
         # 描画処理
-        for state in sorted(draw_targets, key=lambda state: state._draw_layer):
+        for state in sorted(draw_targets, key=lambda state: state.layer):
             self.drawElement(state.tag, state, self._event if state == active_state else UI_EVENT())
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
