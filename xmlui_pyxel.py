@@ -66,17 +66,14 @@ def menu_win_draw(menu_win:UI_STATE, event:UI_EVENT):
 @ui_worker.draw_func("menu_item")
 def menu_item_draw(menu_item:UI_STATE, event:UI_EVENT):
     color = menu_item.attrInt("color", 7)
-    pyxel.text(menu_item.area.x, menu_item.area.y, menu_item.text, color, font)
-
-@ui_worker.draw_func("menu_cur")
-def menu_cur_draw(menu_cur:UI_STATE, event:UI_EVENT):
-    tri_size = menu_cur.attrInt("size", 6)
-    color = menu_cur.attrInt("color", 7)
+    pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, color, font)
 
     # カーソル表示
-    x = menu_cur.area.x-6
-    y = menu_cur.area.y+2
-    pyxel.tri(x, y, x, y+tri_size, x+tri_size//2, y+tri_size//2, color)
+    if menu_item.selected:
+        tri_size = 6
+        x = menu_item.area.x
+        y = menu_item.area.y+2
+        pyxel.tri(x, y, x, y+tri_size, x+tri_size//2, y+tri_size//2, color)
 
 
 # メッセージウインドウ
