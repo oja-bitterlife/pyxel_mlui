@@ -129,32 +129,32 @@ def msg_cur_draw(msg_cur:UI_STATE, event:UI_EVENT):
 
 # ダイアル
 # *****************************************************************************
-@ui_worker.update_func("dial_win")
-def dial_win_update(dial_win:UI_STATE, event:UI_EVENT):
+@ui_worker.update_func("win_dial")
+def win_dial_update(win_dial:UI_STATE, event:UI_EVENT):
     # 数値変更
-    dial = UI_DIAL(dial_win, 5)
+    dial = UI_DIAL(win_dial, 5)
     dial.changeByEvent(event.trg, "left", "right", "up", "down")
 
     # 確定
     if "button_a" in event.trg:
         test_params["age"] = dial.number
-        dial_win.open(ui_template, "yes_no", "dial_yes_no")
+        win_dial.open(ui_template, "yes_no", "dial_yes_no")
         # dial_win.close() # 確定でも閉じる
 
     # 閉じる
     if "button_b" in event.trg:
-        dial_win.close()
+        win_dial.close()
 
-@ui_worker.draw_func("dial_win")
-def dial_win_draw(dial_win:UI_STATE, event:UI_EVENT):
+@ui_worker.draw_func("win_dial")
+def win_dial_draw(win_dial:UI_STATE, event:UI_EVENT):
     frame_color = 10 if event.active else 7
-    pyxel.rect(dial_win.area.x, dial_win.area.y, dial_win.area.w, dial_win.area.h, 12)
-    pyxel.rectb(dial_win.area.x, dial_win.area.y, dial_win.area.w, dial_win.area.h, frame_color)
+    pyxel.rect(win_dial.area.x, win_dial.area.y, win_dial.area.w, win_dial.area.h, 12)
+    pyxel.rectb(win_dial.area.x, win_dial.area.y, win_dial.area.w, win_dial.area.h, frame_color)
 
     # 数値表示
-    dial = UI_DIAL_RO(dial_win)
+    dial = UI_DIAL_RO(win_dial)
     for i,digit in enumerate(dial.zenkakuDigits):
-        pyxel.text(dial_win.area.x+3+(4-i)*FONT_SIZE, dial_win.area.y+2, digit, 2 if dial.edit_pos == i else 7, font)
+        pyxel.text(win_dial.area.x+3+(4-i)*FONT_SIZE, win_dial.area.y+2, digit, 2 if dial.edit_pos == i else 7, font)
 
 @ui_worker.draw_func("dial_yes_no")
 def dial_yes_no_draw(dial_yes_no:UI_STATE, event:UI_EVENT):
