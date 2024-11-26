@@ -191,13 +191,18 @@ class UI_STATE:
         return UI_STATE(self.xmlui, parent) if parent else None
 
     # 子に別Element一式を追加する
-    def open(self, template:'XMLUI|UI_STATE', id:str) -> 'UI_STATE':
+    def open(self, template:'XMLUI|UI_STATE', id:str, alias:str|None=None) -> 'UI_STATE':
         src = template.root if isinstance(template, XMLUI) else template
+
         try:
-            return self.findByID(id)  # すでにいたらなにもしない
+            return self.findByID(id if alias is None else alias)  # すでにいたらなにもしない
         except:
             # eventを有効にして追加する
             opend  = self.xmlui.duplicate(src.findByID(id))
+            # aliasでtagとidをリネーム
+            if alias is not None:
+                opend.setAttr("id", alias)
+                opend._element.tag = alias
             self.addChild(opend.setAttr("use_event", True))
             return opend
 

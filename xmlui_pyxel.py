@@ -1,4 +1,4 @@
-from xmlui import XMLUI,UI_STATE,UI_EVENT,UI_SELECT_GRID,UI_PAGE,UI_PAGE_RO,UI_DIAL,UI_DIAL_RO
+from xmlui import *
 
 ui_template = XMLUI.createFromFile("assets/ui/test.xml")
 ui_worker = XMLUI.createWorker("my_ui")
@@ -138,7 +138,8 @@ def dial_win_update(dial_win:UI_STATE, event:UI_EVENT):
     # 確定
     if "button_a" in event.trg:
         test_params["age"] = dial.number
-        dial_win.close() # 確定でも閉じる
+        dial_win.open(ui_template, "yes_no", "dial_yes_no")
+        # dial_win.close() # 確定でも閉じる
 
     # 閉じる
     if "button_b" in event.trg:
@@ -154,3 +155,10 @@ def dial_win_draw(dial_win:UI_STATE, event:UI_EVENT):
     dial = UI_DIAL_RO(dial_win)
     for i,digit in enumerate(dial.zenkakuDigits):
         pyxel.text(dial_win.area.x+3+(4-i)*FONT_SIZE, dial_win.area.y+2, digit, 2 if dial.edit_pos == i else 7, font)
+
+@ui_worker.draw_func("dial_yes_no")
+def dial_yes_no_draw(dial_yes_no:UI_STATE, event:UI_EVENT):
+    frame_color = 10 if event.active else 7
+    pyxel.rect(dial_yes_no.area.x+4, dial_yes_no.area.y+4, dial_yes_no.area.w, dial_yes_no.area.h, 12)
+    pyxel.rectb(dial_yes_no.area.x+4, dial_yes_no.area.y+4, dial_yes_no.area.w, dial_yes_no.area.h, frame_color)
+
