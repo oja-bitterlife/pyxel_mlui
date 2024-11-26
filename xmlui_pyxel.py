@@ -1,4 +1,4 @@
-from xmlui import *
+from xmlui_core import *
 
 ui_template = XMLUI.createFromFile("assets/ui/test.xml")
 ui_worker = XMLUI.createWorker("my_ui")

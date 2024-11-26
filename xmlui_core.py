@@ -1,9 +1,11 @@
+# XMLを使うよ
 import xml.etree.ElementTree
 from xml.etree.ElementTree import Element
-from typing import Callable,Any,Self
 
-import re, math, copy
-import unicodedata
+from typing import Callable,Any,Self  # 型を使うよ
+import unicodedata  # 全角化用
+import re, math, copy  # その他よく使う奴
+
 
 # 描画領域計算用
 class UI_RECT:
