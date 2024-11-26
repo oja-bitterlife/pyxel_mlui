@@ -846,7 +846,7 @@ class UI_WINDOW:
 
         self.patterns = []
         for i in range(9):
-            self.patterns.append([[1,2,3,4]]*pat_h)
+            self.patterns.append([[7,-1,7,-1]]*pat_h)
 
     # バッファに書き込む
     def draw_buf(self, px:int, py:int, w:int, h:int, screen_buf):
@@ -878,13 +878,13 @@ class UI_WINDOW:
                 sy = py+xy[i][1]+y
                 if sy < 0 or self.screen_w <= sy:
                     continue
-                pat_y = min(y, self.pat_h-1)
+                pat_y = y%self.pat_h
 
                 for x in range(wh[i][0]):
                     sx = px+xy[i][0]+x
                     if  sx < 0 or self.screen_h <= sx:
                         continue
-                    pat_x = min(x, self.pat_w-1)
+                    pat_x = x%self.pat_w
 
                     # -1は描かない
                     color = self.patterns[i][pat_y][pat_x]
