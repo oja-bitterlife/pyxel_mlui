@@ -844,7 +844,7 @@ class UI_NINE_PATCH:
 
         self.patterns = []
         for i in range(9):
-            self.patterns.append([[7]*pat_w]*pat_h)
+            self.patterns.append([[1,2,3,4]]*pat_h)
 
 class UI_WINDOW(UI_NINE_PATCH):
     def __init__(self, pat_w:int, pat_h:int, screen_w:int, screen_h:int):
@@ -890,4 +890,7 @@ class UI_WINDOW(UI_NINE_PATCH):
                         continue
                     pat_x = min(x, self.pat_w-1)
 
-                    screen_buf[sy*self.screen_w + sx] = self.patterns[i][pat_y][pat_x]
+                    # -1は描かない
+                    color = self.patterns[i][pat_y][pat_x]
+                    if color >= 0:
+                        screen_buf[sy*self.screen_w + sx] = color
