@@ -646,13 +646,15 @@ class _UI_SELECT_BASE(_UI_UTIL):
     def select(self, x:int, y:int, x_wrap:bool=False, y_wrap:bool=False) -> Self:
         cur_x = (x + self.grid_w) % self.grid_w if x_wrap else max(min(x, self.grid_w-1), 0)
         cur_y = (y + self.grid_h) % self.grid_h if y_wrap else max(min(y, self.grid_h-1), 0)
-        self._grid[cur_y][cur_x].setAttr("selected", True)
+        for y, group in enumerate(self._grid):
+            for x, item in enumerate(group):
+                item.setAttr("selected", x == cur_x and y == cur_y)
         return self
 
     @property
     def selected_item(self) -> UI_STATE:
-        for rows in self._grid:
-            for item in rows:
+        for group in self._grid:
+            for item in group:
                 if item.selected:
                     return item
         raise Exception("selected item not found")
