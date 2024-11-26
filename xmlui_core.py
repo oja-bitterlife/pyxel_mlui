@@ -847,11 +847,13 @@ class UI_NINE_PATCH:
             self.patterns.append([[7]*pat_w]*pat_h)
 
 class UI_WINDOW(UI_NINE_PATCH):
-    def __init__(self, pat_w:int, pat_h:int, draw_func):
+    def __init__(self, pat_w:int, pat_h:int, screen_w:int, screen_h:int):
         super().__init__(pat_w, pat_h)
-        self.draw_func = draw_func
+        self.screen_w = screen_w
+        self.screen_h = screen_h
 
-    def draw(self, px:int, py:int, w:int, h:int):
+    # バッファに書き込む
+    def draw_buf(self, px:int, py:int, w:int, h:int, screen_buf):
         xy = (
             (0, 0),
             (self.pat_w, 0),
@@ -878,14 +880,14 @@ class UI_WINDOW(UI_NINE_PATCH):
         for i in range(9):
             for y in range(wh[i][1]):
                 sy = py+xy[i][1]+y
-                if sy < 0 or 256 <= sy:
+                if sy < 0 or self.screen_w <= sy:
                     continue
                 pat_y = min(y, self.pat_h-1)
 
                 for x in range(wh[i][0]):
                     sx = px+xy[i][0]+x
-                    if  sx < 0 or 256 <= sx:
+                    if  sx < 0 or self.screen_h <= sx:
                         continue
                     pat_x = min(x, self.pat_w-1)
 
-                    self.draw_func(sx, sy, self.patterns[i][pat_y][pat_x])
+                    screen_buf[sy*self.screen_w + sx] = self.patterns[i][pat_y][pat_x]

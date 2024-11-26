@@ -48,13 +48,8 @@ ui_worker.setInputList("button_y", [
 
 from xmlui_core import UI_WINDOW
 
-
-screen = pyxel.screen.data_ptr()
-screen_width = pyxel.width
-def draw(px:int, py:int, color:int):
-        screen[py*screen_width +  px] = color
-
-win = UI_WINDOW(4, 4, draw)
+screen_buf = pyxel.screen.data_ptr()
+win = UI_WINDOW(4, 4, pyxel.width, pyxel.height)
 
 # Main
 def update(): # フレームの更新処理
@@ -74,7 +69,7 @@ def draw(): # 描画処理
     # UI描画
     ui_worker.draw()
 
-    win.draw(-100, -100, 160, 160)
+    win.draw_buf(-100, -100, 160, 160, screen_buf)
 
 # アプリケーションの実行
 pyxel.run(update, draw)
