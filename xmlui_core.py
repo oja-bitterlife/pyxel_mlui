@@ -832,25 +832,21 @@ class UI_DIAL(UI_DIAL_RO):
         return self
 
 
-# ウインドウサポート
+# ウインドウサポート(9patch)
 # ---------------------------------------------------------
-class UI_NINE_PATCH:
+class UI_WINDOW:
     # 0 1 2
     # 3 4 5
     # 6 7 8
-    def __init__(self, pat_w:int, pat_h:int):
+    def __init__(self, pat_w:int, pat_h:int, screen_w:int, screen_h:int):
         self.pat_w = pat_w
         self.pat_h = pat_h
+        self.screen_w = screen_w
+        self.screen_h = screen_h
 
         self.patterns = []
         for i in range(9):
             self.patterns.append([[1,2,3,4]]*pat_h)
-
-class UI_WINDOW(UI_NINE_PATCH):
-    def __init__(self, pat_w:int, pat_h:int, screen_w:int, screen_h:int):
-        super().__init__(pat_w, pat_h)
-        self.screen_w = screen_w
-        self.screen_h = screen_h
 
     # バッファに書き込む
     def draw_buf(self, px:int, py:int, w:int, h:int, screen_buf):
