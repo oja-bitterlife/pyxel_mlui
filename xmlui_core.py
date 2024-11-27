@@ -925,26 +925,3 @@ class UI_WIN_RECT(UI_WIN_BASE):
             return h-1-y if w-1-x > h-1-y else w-1-x
         return self._get13574Index(x, y, w, h)
 
-class UI_WIN_CUT(UI_WIN_BASE):
-    def __init__(self, pattern:list[int], fill:int, screen_w:int, screen_h:int):
-        super().__init__(pattern, fill, screen_w, screen_h, self._getPatternIndex)
-
-    def _getVecLen(self, x:int, y:int, org_x:int, org_y:int) -> int:
-        return abs(x-org_x) + abs(y-org_y)  # マンハッタン距離でカット
-
-    def _getPatternIndex(self, x:int, y:int, w:int, h:int) -> int:
-        size = self._pattern_len
-        area = self.getArea(x, y, w, h)
-        if area == 0:
-            l = size-1-self._getVecLen(x, y, size-1, size-1)
-            return l if l < size else -1
-        elif area == 2:
-            l = size-1-self._getVecLen(x, y, w-size, size-1)
-            return l if l < size else -1
-        elif area == 6:
-            l = size-1-self._getVecLen(x, y, size-1, h-size)
-            return l if l < size else -1
-        elif area == 8:
-            l = size-1-self._getVecLen(x, y, w-size, h-size)
-            return l if l < size else -1
-        return self._get13574Index(x, y, w, h)
