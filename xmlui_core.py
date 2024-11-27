@@ -832,66 +832,53 @@ class UI_DIAL(UI_DIAL_RO):
         return self
 
 
-# ウインドウサポート(9patch)
+# ウインドウサポート
 # ---------------------------------------------------------
 class UI_WINDOW:
     # 0 1 2
     # 3 4 5
     # 6 7 8
-    def __init__(self, pat_w:int, pat_h:int, screen_w:int, screen_h:int):
-        self.pat_w = pat_w
-        self.pat_h = pat_h
+    def __init__(self, screen_w:int, screen_h:int):
         self.screen_w = screen_w
         self.screen_h = screen_h
 
-        self.patterns = []
-        for i in range(9):
-            self.patterns.append([
-                [7,-1,7,-1],
-                [-1,7,-1, 7],
-                [7,-1,7,-1],
-                [-1,7,-1, 7],
-            ])
+    def getVecLen(self, x:int, y:int, org_x:int, org_y:int) -> int:
+        return math.floor(math.sqrt((x-org_x)**2 + (y-org_y)**2))
+
+    def getPatternIndex(self, x:int, y:int, w:int, h:int, size:int) -> int:
+        if x < size and y < size:  # 0
+            l = size-1-self.getVecLen(x, y, size-1, size-1)
+            return l if l < size else -1
+        elif x >= w-size and y < size:  # 2
+            l = size-1-self.getVecLen(x, y, w-size, size-1)
+            return l if l < size else -1
+        elif x < size and y >= h-size:  # 6
+            l = size-1-self.getVecLen(x, y, size-1, h-size)
+            return l if l < size else -1
+        elif x >= w-size and y >= h-size:  # 8
+            l = size-1-self.getVecLen(x, y, w-size, h-size)
+            return l if l < size else -1
+        elif size <= x < w-size and y < size:  # 1
+            return y
+        elif x < size and size <= y < h-size:  # 3
+            return x
+        elif w-size <= x and size <= y < h-size:  # 5
+            return w-1-x
+        elif size <= x < w-size and h-size <= y:  # 7
+            return h-1-y
+        # 4
+        return size
 
     # バッファに書き込む
-    def draw_buf(self, px:int, py:int, w:int, h:int, screen_buf):
-        xy = (
-            (0, 0),
-            (self.pat_w, 0),
-            (w-self.pat_w, 0),
-            (0, self.pat_h),
-            (self.pat_w, self.pat_h),
-            (w-self.pat_w, self.pat_h),
-            (0, h-self.pat_h),
-            (self.pat_w, h-self.pat_h),
-            (w-self.pat_w, h-self.pat_h),
-        )
-        wh = (
-            (self.pat_w, self.pat_h),
-            (w-self.pat_w*2, self.pat_h),
-            (self.pat_w, self.pat_h),
-            (self.pat_w, h-self.pat_h*2),
-            (w-self.pat_w*2, h-self.pat_h*2),
-            (self.pat_w, h-self.pat_h*2),
-            (self.pat_w, self.pat_h),
-            (w-self.pat_w*2, self.pat_h),
-            (self.pat_w, self.pat_h),
-        )
-
-        for i in range(9):
-            for y in range(wh[i][1]):
-                sy = py+xy[i][1]+y
-                if sy < 0 or self.screen_w <= sy:
+    def draw_buf(self, pattern:list[int], fill:int, x:int, y:int, w:int, h:int, screen_buf):
+        tmp_pat = pattern + [fill]  # fillをお尻にくっつけておく(4用)
+        for y_ in range(h):
+            for x_ in range(w):
+                index = self.getPatternIndex(x_, y_, w, h, len(pattern))
+                if index < 0:
                     continue
-                pat_y = y%self.pat_h
+                color = tmp_pat[index]
+                if color == -1:
+                    continue
+                screen_buf[(y+y_)*self.screen_w + (x+x_)] = color
 
-                for x in range(wh[i][0]):
-                    sx = px+xy[i][0]+x
-                    if  sx < 0 or self.screen_h <= sx:
-                        continue
-                    pat_x = x%self.pat_w
-
-                    # -1は描かない
-                    color = self.patterns[i][pat_y][pat_x]
-                    if color >= 0:
-                        screen_buf[sy*self.screen_w + sx] = color
