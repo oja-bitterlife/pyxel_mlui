@@ -70,7 +70,8 @@ def draw(): # 描画処理
     # UI描画
     ui_worker.draw()
 
-    win.draw_buf(10, 10, 160, min(160, ui_worker.root.update_count*16), screen_buf)
+    win.clip.w = ui_worker.root.update_count
+    win.draw_buf(10, 10, 160, 160 , screen_buf)
 
 # アプリケーションの実行
 pyxel.run(update, draw)

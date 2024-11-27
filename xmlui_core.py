@@ -845,6 +845,9 @@ class UI_WIN_BASE:
         self.screen_h = screen_h
         self._getPatIdxFunc = getPatternIndexFunc  # 枠外は-1を返す
 
+        # クリッピングエリア
+        self.clip = UI_RECT(0, 0, screen_w, screen_h)
+
     # 1,3,5,7,4のエリア(カド以外)は特に計算が必要ない
     def _get13574Index(self, x:int, y:int, w:int, h:int) -> int:
         return [-1, y, -1, x, self._pattern_len, w-1-x, -1, h-1-y][self.getArea(x, y, w, h)]
@@ -872,9 +875,9 @@ class UI_WIN_BASE:
             self._patterns[3][index+i] = color
 
     # バッファに書き込む
-    def draw_buf(self, x:int, y:int, w:int, h:int, screen_buf, max_line:int=65536):
-        for y_ in range(min(h, max_line)):
-            for x_ in range(w):
+    def draw_buf(self, x:int, y:int, w:int, h:int, screen_buf):
+        for y_ in range(self.clip.y, min(self.clip.h, h)):
+            for x_ in range(self.clip.x, min(self.clip.w, w)):
                 index = self._getPatIdxFunc(x_, y_, w, h)
                 if index >= 0:  # 枠外チェック
                     color = self._patterns[self.getArea(x_, y_, w, h)][index]
