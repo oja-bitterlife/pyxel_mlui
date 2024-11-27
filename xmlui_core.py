@@ -9,7 +9,7 @@ import unicodedata
 import re
 import math
 import copy
-from typing import Callable,Any,Self  # 型を使うよ
+from typing import Generator,Callable,Any,Self  # 型を使うよ
 
 
 # 描画領域計算用
@@ -389,7 +389,7 @@ class XMLUI:
 
     # 更新用
     # *************************************************************************
-    def _get_updatetargets(self, state:XUState):
+    def _get_updatetargets(self, state:XUState) -> Generator[XUState, None, None]:
         if state.enable:
             yield state
             # enableの子だけ回収(disableの子は削除)
@@ -415,7 +415,7 @@ class XMLUI:
 
     # 描画用
     # *************************************************************************
-    def _get_drawtargets(self, state:XUState):
+    def _get_drawtargets(self, state:XUState) -> Generator[XUState, None, None]:
         if state.enable and state.visible and state.update_count>0:  # count==0はUpdateで追加されたばかりのもの(未Update)
             yield state
             # visibleの子だけ回収(invisibleの子は削除)
