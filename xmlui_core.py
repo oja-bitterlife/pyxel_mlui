@@ -834,31 +834,17 @@ class UI_DIAL(UI_DIAL_RO):
 
 # ウインドウサポート
 # ---------------------------------------------------------
-class UI_WINDOW:
+class UI_WIN_BASE:
     # 0 1 2
     # 3 4 5
     # 6 7 8
-    def __init__(self, screen_w:int, screen_h:int):
+    def __init__(self, screen_w:int, screen_h:int, getPatternIndexFunc):
         self.screen_w = screen_w
         self.screen_h = screen_h
+        self._getPatIdxFunc = getPatternIndexFunc
 
-    def getVecLen(self, x:int, y:int, org_x:int, org_y:int) -> int:
-        return math.floor(math.sqrt((x-org_x)**2 + (y-org_y)**2))
-
-    def getPatternIndex(self, x:int, y:int, w:int, h:int, size:int) -> int:
-        if x < size and y < size:  # 0
-            l = size-1-self.getVecLen(x, y, size-1, size-1)
-            return l if l < size else -1
-        elif x >= w-size and y < size:  # 2
-            l = size-1-self.getVecLen(x, y, w-size, size-1)
-            return l if l < size else -1
-        elif x < size and y >= h-size:  # 6
-            l = size-1-self.getVecLen(x, y, size-1, h-size)
-            return l if l < size else -1
-        elif x >= w-size and y >= h-size:  # 8
-            l = size-1-self.getVecLen(x, y, w-size, h-size)
-            return l if l < size else -1
-        elif size <= x < w-size and y < size:  # 1
+    def _get13574Index(self, x:int, y:int, w:int, h:int, size) -> int:
+        if size <= x < w-size and y < size:  # 1
             return y
         elif x < size and size <= y < h-size:  # 3
             return x
@@ -874,7 +860,7 @@ class UI_WINDOW:
         tmp_pat = pattern + [fill]  # fillをお尻にくっつけておく(4用)
         for y_ in range(h):
             for x_ in range(w):
-                index = self.getPatternIndex(x_, y_, w, h, len(pattern))
+                index = self._getPatIdxFunc(x_, y_, w, h, len(pattern))
                 if index < 0:
                     continue
                 color = tmp_pat[index]
@@ -882,3 +868,61 @@ class UI_WINDOW:
                     continue
                 screen_buf[(y+y_)*self.screen_w + (x+x_)] = color
 
+class UI_WIN_ROUND(UI_WIN_BASE):
+    def __init__(self, screen_w:int, screen_h:int):
+        super().__init__(screen_w, screen_h, self._getPatternIndex)
+
+    def _getVecLen(self, x:int, y:int, org_x:int, org_y:int) -> int:
+        return math.floor(math.sqrt((x-org_x)**2 + (y-org_y)**2))
+
+    def _getPatternIndex(self, x:int, y:int, w:int, h:int, size:int) -> int:
+        if x < size and y < size:  # 0
+            l = size-1-self._getVecLen(x, y, size-1, size-1)
+            return l if l < size else -1
+        elif x >= w-size and y < size:  # 2
+            l = size-1-self._getVecLen(x, y, w-size, size-1)
+            return l if l < size else -1
+        elif x < size and y >= h-size:  # 6
+            l = size-1-self._getVecLen(x, y, size-1, h-size)
+            return l if l < size else -1
+        elif x >= w-size and y >= h-size:  # 8
+            l = size-1-self._getVecLen(x, y, w-size, h-size)
+            return l if l < size else -1
+        return self._get13574Index(x, y, w, h, size)
+
+class UI_WIN_RECT(UI_WIN_BASE):
+    def __init__(self, screen_w:int, screen_h:int):
+        super().__init__(screen_w, screen_h, self._getPatternIndex)
+
+    def _getPatternIndex(self, x:int, y:int, w:int, h:int, size:int) -> int:
+        if x < size and y < size:  # 0
+            return y if x > y else x
+        elif x >= w-size and y < size:  # 2
+            return y if w-1-x > y else w-1-x
+        elif x < size and y >= h-size:  # 6
+            return h-1-y if x > h-1-y else x
+        elif x >= w-size and y >= h-size:  # 8
+            return h-1-y if w-1-x > h-1-y else w-1-x
+        return self._get13574Index(x, y, w, h, size)
+
+class UI_WIN_CUT(UI_WIN_BASE):
+    def __init__(self, screen_w:int, screen_h:int):
+        super().__init__(screen_w, screen_h, self._getPatternIndex)
+
+    def _getVecLen(self, x:int, y:int, org_x:int, org_y:int) -> int:
+        return abs(x-org_x) + abs(y-org_y)
+
+    def _getPatternIndex(self, x:int, y:int, w:int, h:int, size:int) -> int:
+        if x < size and y < size:  # 0
+            l = size-1-self._getVecLen(x, y, size-1, size-1)
+            return l if l < size else -1
+        elif x >= w-size and y < size:  # 2
+            l = size-1-self._getVecLen(x, y, w-size, size-1)
+            return l if l < size else -1
+        elif x < size and y >= h-size:  # 6
+            l = size-1-self._getVecLen(x, y, size-1, h-size)
+            return l if l < size else -1
+        elif x >= w-size and y >= h-size:  # 8
+            l = size-1-self._getVecLen(x, y, w-size, h-size)
+            return l if l < size else -1
+        return self._get13574Index(x, y, w, h, size)

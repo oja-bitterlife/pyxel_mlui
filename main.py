@@ -46,10 +46,10 @@ ui_worker.setInputList("button_y", [
     pyxel.GAMEPAD1_BUTTON_Y,
 ])
 
-from xmlui_core import UI_WINDOW
+from xmlui_core import *
 
 screen_buf = pyxel.screen.data_ptr()
-win = UI_WINDOW(pyxel.width, pyxel.height)
+win = UI_WIN_CUT(pyxel.width, pyxel.height)
 
 # Main
 def update(): # フレームの更新処理
@@ -69,7 +69,7 @@ def draw(): # 描画処理
     # UI描画
     ui_worker.draw()
 
-    win.draw_buf([7,7,12,7,12,12,12,12], 12, 10, 10, 160, 160, screen_buf)
+    win.draw_buf([7,12,12,12], 12, 10, 10, 160, min(160, ui_worker.root.update_count*16), screen_buf)
 
 # アプリケーションの実行
 pyxel.run(update, draw)
