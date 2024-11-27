@@ -80,21 +80,24 @@ def draw(): # 描画処理
     ui_worker.draw()
 
     win_size = 64
-    count = ui_worker.root.update_count*2
+    count = ui_worker.root.update_count*2-100
     for i,win in enumerate(wins):
+        win_w = win_size
+        win_h = win_size
+
         if i == 0:
             win.clip.h = count
         elif i == 1:
             win.clip.w = count
         elif i == 2:
-            win.clip.h = count
+            win_h = min(win_size, count)
         elif i == 3:
             win.clip.x = win_size//2 - count//2
             win.clip.w = count
             win.clip.y = win_size//2 - count//2
             win.clip.h = count
 
-        win.drawBuf((i%4)*win_size, (i//4)*win_size, win_size, win_size , screen_buf)
+        win.drawBuf((i%4)*win_size, (i//4)*win_size, win_w, win_h , screen_buf)
 
 # アプリケーションの実行
 pyxel.run(update, draw)
