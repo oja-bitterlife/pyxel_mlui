@@ -97,7 +97,7 @@ def draw(): # 描画処理
             win.clip.y = win_size//2 - count//2
             win.clip.h = count
 
-        win.draw_buf((i%4)*win_size, (i//4)*win_size, win_w, win_h , screen_buf)
+#        win.draw_buf((i%4)*win_size, (i//4)*win_size, win_w, win_h , screen_buf)
 
 # アプリケーションの実行
 pyxel.run(update, draw)

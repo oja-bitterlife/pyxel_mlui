@@ -55,9 +55,11 @@ def menu_win_draw(menu_win:XUState, event:XUEvent):
     frame_color = 10 if event.active else 7
     title  = menu_win.attr_str("title")
 
-    pyxel.rect(menu_win.area.x, menu_win.area.y, menu_win.area.w, menu_win.area.h, bg_color)
-    pyxel.rectb(menu_win.area.x, menu_win.area.y, menu_win.area.w, menu_win.area.h, frame_color)
-    pyxel.rectb(menu_win.area.x+1, menu_win.area.y+1, menu_win.area.w-2, menu_win.area.h-2, frame_color)
+    xui.Window(menu_win).draw_win()
+
+#    pyxel.rect(menu_win.area.x, menu_win.area.y, menu_win.area.w, menu_win.area.h, bg_color)
+#    pyxel.rectb(menu_win.area.x, menu_win.area.y, menu_win.area.w, menu_win.area.h, frame_color)
+#    pyxel.rectb(menu_win.area.x+1, menu_win.area.y+1, menu_win.area.w-2, menu_win.area.h-2, frame_color)
 
     if title:
         str_w = FONT_SIZE*len(title)
