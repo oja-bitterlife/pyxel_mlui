@@ -1,7 +1,7 @@
 from xmlui_core import *
 
-ui_template = XMLUI.createFromFile("assets/ui/test.xml")
-ui_worker = XMLUI.createWorker("my_ui")
+ui_template = XMLUI.fromfile("assets/ui/test.xml")
+ui_worker = XMLUI.mk_worker("my_ui")
 
 import pyxel
 font = pyxel.Font("assets/font/b12.bdf")
@@ -25,11 +25,11 @@ def my_ui_update(my_ui:XUState, event:XUEvent):
 # ---------------------------------------------------------
 @ui_worker.update_func("menu_win")
 def menu_win_update(menu_win:XUState, event:XUEvent):
-    item_w, item_h = menu_win.attrInt("item_w"), menu_win.attrInt("item_h")
+    item_w, item_h = menu_win.attr_int("item_w"), menu_win.attr_int("item_h")
 
     # メニューアイテム
-    grid = XUSelectGrid(menu_win, "menu_row", "menu_item").arrangeItems(item_w, item_h)
-    grid.selectByEvent(event.trg, "left", "right", "up", "down")
+    grid = XUSelectGrid(menu_win, "menu_row", "menu_item").arrange_items(item_w, item_h)
+    grid.select_by_event(event.trg, "left", "right", "up", "down")
 
     # 選択アイテムの表示
     if "button_a" in event.trg:
@@ -39,7 +39,7 @@ def menu_win_update(menu_win:XUState, event:XUEvent):
 
         # dialウインドウ表示
         if grid.selected_item.value == "dial":
-            grid.selected_item.open(ui_template, "win_dial").setPos(8, 2)
+            grid.selected_item.open(ui_template, "win_dial").set_pos(8, 2)
 
     # 閉じる
     if "button_b" in event.trg:
@@ -51,7 +51,7 @@ def menu_win_update(menu_win:XUState, event:XUEvent):
 def menu_win_draw(menu_win:XUState, event:XUEvent):
     bg_color = 12
     frame_color = 10 if event.active else 7
-    title  = menu_win.attrStr("title")
+    title  = menu_win.attr_str("title")
 
     pyxel.rect(menu_win.area.x, menu_win.area.y, menu_win.area.w, menu_win.area.h, bg_color)
     pyxel.rectb(menu_win.area.x, menu_win.area.y, menu_win.area.w, menu_win.area.h, frame_color)
@@ -65,7 +65,7 @@ def menu_win_draw(menu_win:XUState, event:XUEvent):
 
 @ui_worker.draw_func("menu_item")
 def menu_item_draw(menu_item:XUState, event:XUEvent):
-    color = menu_item.attrInt("color", 7)
+    color = menu_item.attr_int("color", 7)
     pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, color, font)
 
     # カーソル表示
@@ -79,14 +79,14 @@ def menu_item_draw(menu_item:XUState, event:XUEvent):
 # ---------------------------------------------------------
 @ui_worker.update_func("msg_win")
 def msg_win_update(msg_win:XUState, event:XUEvent):
-    msg_cur = msg_win.findByTag("msg_cur")
-    msg_text = msg_win.findByTag("msg_text")
+    msg_cur = msg_win.find_by_tag("msg_cur")
+    msg_text = msg_win.find_by_tag("msg_text")
 
     # 文字列更新
-    text = XUPage(msg_text, msg_text.text.format(**test_params), 3, msg_text.attrInt("wrap")).next()
+    text = XUPage(msg_text, msg_text.text.format(**test_params), 3, msg_text.attr_int("wrap")).nextcount()
 
     # 次のページありカーソル表示
-    msg_cur.setVisible(not text.is_end_page and text.is_finish)
+    msg_cur.set_visible(not text.is_end_page and text.is_finish)
 
     if "button_a" in event.trg or "button_b" in event.trg:
         # 表示しきっていたらメニューごと閉じる
@@ -116,8 +116,8 @@ def msg_text_draw(msg_text:XUState, event:XUEvent):
 
 @ui_worker.draw_func("msg_cur")
 def msg_cur_draw(msg_cur:XUState, event:XUEvent):
-    tri_size = msg_cur.attrInt("size", 6)
-    color = msg_cur.attrInt("color", 7)
+    tri_size = msg_cur.attr_int("size", 6)
+    color = msg_cur.attr_int("color", 7)
 
     # カーソル表示
     x, y = msg_cur.area.x, msg_cur.area.y
@@ -130,7 +130,7 @@ def msg_cur_draw(msg_cur:XUState, event:XUEvent):
 def win_dial_update(win_dial:XUState, event:XUEvent):
     # 数値変更
     dial = XUDial(win_dial, 5)
-    dial.changeByEvent(event.trg, "left", "right", "up", "down")
+    dial.change_by_event(event.trg, "left", "right", "up", "down")
 
     # 確定
     if "button_a" in event.trg:
@@ -149,15 +149,15 @@ def dial_win_draw(dial_win:XUState, event:XUEvent):
 
     # 数値表示
     dial = XUDialRO(dial_win)
-    for i,digit in enumerate(dial.zenkakuDigits):
+    for i,digit in enumerate(dial.zenkaku_digits):
         pyxel.text(dial_win.area.x+3+(4-i)*FONT_SIZE, dial_win.area.y+2, digit, 2 if dial.edit_pos == i else 7, font)
 
 @ui_worker.update_func("dial_yes_no")
 def dial_yes_no_update(dial_yes_no:XUState, event:XUEvent):
-    item_h = dial_yes_no.attrInt("item_h")
+    item_h = dial_yes_no.attr_int("item_h")
 
-    grid = XUSelectList(dial_yes_no, "yes_no_item").arrangeItems(0, item_h)
-    grid.selectByEvent(event.trg, "up", "down")
+    grid = XUSelectList(dial_yes_no, "yes_no_item").arrange_items(0, item_h)
+    grid.select_by_event(event.trg, "up", "down")
 
     # 閉じる
     if "button_b" in event.trg:
@@ -167,7 +167,7 @@ def dial_yes_no_update(dial_yes_no:XUState, event:XUEvent):
     if "button_a" in event.trg:
         # Yes時処理
         if grid.selected_item.value == "yes":
-            test_params["age"] = XUDialRO(dial_yes_no.findByTagR("win_dial")).number
+            test_params["age"] = XUDialRO(dial_yes_no.find_by_tagR("win_dial")).number
             dial_yes_no.xmlui.close("menu_command")
 
         # No時処理

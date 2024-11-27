@@ -59,7 +59,7 @@ class XURect:
 # イベント管理用
 class XUEvent:
     def __init__(self, init_active=False):
-        self.active = init_active  # 現在アクティブかどうか
+        self.active = init_active  # アクティブなイベントかどうか
         self._receive:set[str] = set([])  # 次の状態受付
         self._input:set[str] = set([])
         self._trg:set[str] = set([])
@@ -100,32 +100,29 @@ class XUState:
         self.xmlui = xmlui  # ライブラリへのIF
         self._element = element  # 自身のElement
 
-    def disableEvent(self) -> Self:
-        return self.setAttr("use_event", False)
-
     # UI_Stateは都度使い捨てなので、対象となるElementで比較する
     def __eq__(self, other) -> bool:
         return other._element is self._element if isinstance(other, XUState) else False
 
     # attribアクセス用
     # *************************************************************************
-    def attrInt(self, key:str, default:int=0) -> int:
+    def attr_int(self, key:str, default:int=0) -> int:
         return int(self._element.attrib.get(key, default))
 
-    def attrFloat(self, key:str, default:float=0) -> float:
+    def attr_float(self, key:str, default:float=0) -> float:
         return float(self._element.attrib.get(key, default))
 
-    def attrStr(self, key:str, default:str="") -> str:
+    def attr_str(self, key:str, default:str="") -> str:
         return self._element.attrib.get(key, default)
 
-    def attrBool(self, key:str, default:bool=False) -> bool:
+    def attr_bool(self, key:str, default:bool=False) -> bool:
         attr = self._element.attrib.get(key)
         return default if attr is None else (True if attr.lower() in ["true", "ok", "yes", "on"] else False)
 
-    def hasAttr(self, key: str) -> bool:
+    def has_attr(self, key: str) -> bool:
         return key in self._element.attrib
 
-    def setAttr(self, key:str|list[str], value: Any) -> Self:
+    def set_attr(self, key:str|list[str], value: Any) -> Self:
         # attribはdict[str,str]なのでstrで保存する
         if isinstance(key, list):
             for i, k in enumerate(key):
@@ -140,7 +137,7 @@ class XUState:
     def text(self) -> str:
         return self._element.text.strip() if self._element.text else ""
 
-    def setText(self, text:str) -> 'XUState':
+    def set_text(self, text:str) -> 'XUState':
         self._element.text = text
         return self
 
@@ -154,46 +151,46 @@ class XUState:
     def area(self) -> XURect:
         return XURect(self.area_x, self.area_y, self.area_w, self.area_h)
 
-    def setPos(self, x:int, y:int) -> Self:
-        return self.setAttr(["x", "y"], [x, y])
+    def set_pos(self, x:int, y:int) -> Self:
+        return self.set_attr(["x", "y"], [x, y])
 
-    def setAbsPos(self, x:int, y:int) -> Self:
-        return self.setAttr(["abs_x", "abs_y"], [x, y])
+    def set_abspos(self, x:int, y:int) -> Self:
+        return self.set_attr(["abs_x", "abs_y"], [x, y])
 
-    def setEnable(self, enable:bool) -> Self:
-        return self.setAttr("enable", enable)
+    def set_enable(self, enable:bool) -> Self:
+        return self.set_attr("enable", enable)
 
-    def setVisible(self, visible:bool) -> Self:
-        return self.setAttr("visible", visible)
+    def set_visible(self, visible:bool) -> Self:
+        return self.set_attr("visible", visible)
 
     # ツリー操作用
     # *************************************************************************
-    def addChild(self, child:'XUState'):  # selfとchildどっちが返るかややこしいのでNone
+    def add_child(self, child:'XUState'):  # selfとchildどっちが返るかややこしいのでNone
         self._element.append(child._element)
 
     def remove(self):  # removeの後なにかすることはないのでNone
         # 処理対象から外れるように
-        self.setAttr("enable", False)
+        self.set_attr("enable", False)
         if self.parent:  # 親から外す
             self.parent._element.remove(self._element)
 
-    def findByID(self, id:str) -> 'XUState':
+    def find_by_ID(self, id:str) -> 'XUState':
         for element in self._element.iter():
             if element.attrib.get("id") == id:
                 return XUState(self.xmlui, element)
         raise Exception(f"ID '{id}' not found in '{self.tag}' and children")
 
-    def findByTagAll(self, tag:str) -> list['XUState']:
+    def find_by_tagall(self, tag:str) -> list['XUState']:
         return [XUState(self.xmlui, element) for element in self._element.iter() if element.tag == tag]
 
-    def findByTag(self, tag:str) -> 'XUState':
-        elements:list[XUState] = self.findByTagAll(tag)
+    def find_by_tag(self, tag:str) -> 'XUState':
+        elements:list[XUState] = self.find_by_tagall(tag)
         if elements:
             return elements[0]
         raise Exception(f"Tag '{tag}' not found in '{self.tag}' and children")
 
     # 下階層ではなく、上(root)に向かって探索する
-    def findByTagR(self, tag:str) -> 'XUState':
+    def find_by_tagR(self, tag:str) -> 'XUState':
         parent = self.parent
         while(parent):
             if parent.tag == tag:
@@ -219,32 +216,32 @@ class XUState:
         src = template.root if isinstance(template, XMLUI) else template
 
         try:
-            return self.findByID(id if alias is None else alias)  # すでにいたらなにもしない
+            return self.find_by_ID(id if alias is None else alias)  # すでにいたらなにもしない
         except:
             # eventを有効にして追加する
-            opend  = self.xmlui.duplicate(src.findByID(id))
+            opend  = self.xmlui.duplicate(src.find_by_ID(id))
             # aliasでtagとidをリネーム
             if alias is not None:
-                opend.setAttr("id", alias)
+                opend.set_attr("id", alias)
                 opend._element.tag = alias
-            self.addChild(opend.setAttr("use_event", True))
+            self.add_child(opend.set_attr("use_event", True))
             return opend
 
     def close(self, id:str|None=None):  # closeの後なにもしないのでNone
         if id is not None:
-            state = self.xmlui.root.findByID(id)
+            state = self.xmlui.root.find_by_ID(id)
             state.remove()
         else:
             self.remove()
 
     # デバッグ用
     # *************************************************************************
-    def strTree(self, indent:str="  ", pre:str="") -> str:
+    def strtree(self, indent:str="  ", pre:str="") -> str:
         out = pre + self.tag
         out += f": {self.id}" if self.id else ""
         out += f" {self.marker}"
         for element in self._element:
-            out += "\n" + XUState(self.xmlui, element).strTree(indent, pre+indent)
+            out += "\n" + XUState(self.xmlui, element).strtree(indent, pre+indent)
         return out
 
     # xmluiで特別な意味を持つアトリビュート一覧
@@ -253,70 +250,70 @@ class XUState:
     # *************************************************************************
     @property
     def id(self) -> str:  # ID。xmlではかぶらないように(精神論)
-        return self.attrStr("id", "")
+        return self.attr_str("id", "")
 
     @property
     def value(self) -> str:  # 汎用値取得
-        return self.attrStr("value", "")
+        return self.attr_str("value", "")
 
     @property
     def enable(self) -> bool:  # 有効フラグ
-        return self.attrBool("enable", True)
+        return self.attr_bool("enable", True)
     @property
     def visible(self) -> bool:  # 表示フラグ
-        return self.attrBool("visible", True)
+        return self.attr_bool("visible", True)
 
     @property
     def x(self) -> int:  # 親からの相対座標x
-        return self.attrInt("x", 0)
+        return self.attr_int("x", 0)
     @property
     def y(self) -> int:  # 親からの相対座標y
-        return self.attrInt("y", 0)
+        return self.attr_int("y", 0)
     @property
     def abs_x(self) -> int:  # 絶対座標x
-        return self.attrInt("abs_x", 0)
+        return self.attr_int("abs_x", 0)
     @property
     def abs_y(self) -> int:  # 絶対座標y
-        return self.attrInt("abs_y", 0)
+        return self.attr_int("abs_y", 0)
     @property
     def w(self) -> int:  # elementの幅
-        return self.attrInt("w", 4096)
+        return self.attr_int("w", 4096)
     @property
     def h(self) -> int:  # elementの高さ
-        return self.attrInt("h", 4096)
+        return self.attr_int("h", 4096)
 
     @property
     def area_x(self) -> int:  # 表示最終座標x
-        return self.attrInt("area_x", 0)
+        return self.attr_int("area_x", 0)
     @property
     def area_y(self) -> int:  # 表示最終座標y
-        return self.attrInt("area_y", 0)
+        return self.attr_int("area_y", 0)
     @property
     def area_w(self) -> int:  #  表示最終幅
-        return self.attrInt("area_w", 4096)
+        return self.attr_int("area_w", 4096)
     @property
     def area_h(self) -> int:  #  表示最終高さ
-        return self.attrInt("area_h", 4096)
+        return self.attr_int("area_h", 4096)
 
     @property
     def update_count(self) -> int:  # updateが行われた回数
-        return self.attrInt("update_count", 0)
+        return self.attr_int("update_count", 0)
 
     @property
     def use_event(self) -> bool:  # eventを使うかどうか
-        return self.attrBool("use_event", False)
+        return self.attr_bool("use_event", False)
 
     @property
     def selected(self) -> int:  # 選択されている
-        return self.attrBool("selected", False)
+        return self.attr_bool("selected", False)
 
     @property
     def layer(self) -> int:  # 描画レイヤ
-        return self.attrInt("layer", 0)
+        return self.attr_int("layer", 0)
 
     @property
     def marker(self) -> str:  # デバッグ用
-        return self.attrStr("marker", "")
+        return self.attr_str("marker", "")
 
 
 # XMLでUIライブラリ本体
@@ -329,18 +326,18 @@ class XMLUI:
     # *************************************************************************
     # ファイルから読み込み
     @classmethod
-    def createFromFile(cls, fileName:str, root_tag:str|None=None) -> 'XMLUI':
+    def fromfile(cls, fileName:str, root_tag:str|None=None) -> 'XMLUI':
         with open(fileName, "r", encoding="utf8") as f:
-            return cls.createFromString(f.read())
+            return cls.fromstring(f.read())
 
     # リソースから読み込み
     @classmethod
-    def createFromString(cls, xml_data:str, root_tag:str|None=None) -> 'XMLUI':
+    def fromstring(cls, xml_data:str, root_tag:str|None=None) -> 'XMLUI':
         return XMLUI(xml.etree.ElementTree.fromstring(xml_data))
 
     # ワーカーの作成
     @classmethod
-    def createWorker(cls, root_tag:str) -> 'XMLUI':
+    def mk_worker(cls, root_tag:str) -> 'XMLUI':
         return XMLUI(Element(root_tag))
 
     # 初期化。<xmlui>を持つXMLを突っ込む
@@ -365,7 +362,7 @@ class XMLUI:
 
         # rootを取り出しておく
         self.root = XUState(self, xmlui_root)
-        self.root.setAttr("use_event", True)  # rootはデフォルトではイベントをとるように
+        self.root.set_attr("use_event", True)  # rootはデフォルトではイベントをとるように
 
     # Elmentを複製する
     def duplicate(self, src:Element|XUState) -> XUState:
@@ -374,37 +371,37 @@ class XMLUI:
 
     # XML操作
     # *************************************************************************
-    def addChild(self, child:'XUState'):
-        self.root.addChild(child)
+    def add_child(self, child:'XUState'):
+        self.root.add_child(child)
 
-    def findByID(self, id:str) -> XUState:
-        return self.root.findByID(id)
+    def findby_ID(self, id:str) -> XUState:
+        return self.root.find_by_ID(id)
 
-    def findByTagAll(self, tag:str) -> list[XUState]:
-        return self.root.findByTagAll(tag)
+    def findby_tagall(self, tag:str) -> list[XUState]:
+        return self.root.find_by_tagall(tag)
 
-    def findByTag(self, tag:str) -> XUState:
-        return self.root.findByTag(tag)
+    def findby_tag(self, tag:str) -> XUState:
+        return self.root.find_by_tag(tag)
 
     def close(self, id:str):
-        self.root.findByID(id).close()
+        self.root.find_by_ID(id).close()
 
 
     # 更新用
     # *************************************************************************
-    def _getUpdateTargets(self, state:XUState):
+    def _get_updatetargets(self, state:XUState):
         if state.enable:
             yield state
             # enableの子だけ回収(disableの子は削除)
             for child in state._element:
-                yield from self._getUpdateTargets(XUState(self, child))
+                yield from self._get_updatetargets(XUState(self, child))
 
     def update(self):
         # (入力)イベントの更新
         self._event.update()
 
         # 更新対象を取得
-        update_targets = list(self._getUpdateTargets(self.root))
+        update_targets = list(self._get_updatetargets(self.root))
 
         # イベント発生対象は表示物のみ
         event_targets = [state for state in update_targets if state.visible and state.use_event]
@@ -413,21 +410,21 @@ class XMLUI:
         # 更新処理
         for state in update_targets:
             if state.enable:  # update中にdisable(remove)になる場合があるので毎回チェック
-                state.setAttr("update_count", state.update_count+1)  # 1スタート(0は初期化時)
-                self.updateElement(state.tag, state, self._event if state == active_state else XUEvent())
+                state.set_attr("update_count", state.update_count+1)  # 1スタート(0は初期化時)
+                self.update_element(state.tag, state, self._event if state == active_state else XUEvent())
 
     # 描画用
     # *************************************************************************
-    def _getDrawTargets(self, state:XUState):
+    def _get_drawtargets(self, state:XUState):
         if state.enable and state.visible and state.update_count>0:  # count==0はUpdateで追加されたばかりのもの(未Update)
             yield state
             # visibleの子だけ回収(invisibleの子は削除)
             for child in state._element:
-                yield from self._getDrawTargets(XUState(self, child))
+                yield from self._get_drawtargets(XUState(self, child))
 
     def draw(self):
         # 描画対象を取得
-        draw_targets = list(self._getDrawTargets(self.root))
+        draw_targets = list(self._get_drawtargets(self.root))
 
         # イベント発生対象は表示物のみ
         event_targets = [state for state in draw_targets if state.use_event]
@@ -440,25 +437,25 @@ class XMLUI:
                 continue
 
             # エリア更新。absがあれば絶対座標、なければ親からのオフセット
-            state.setAttr("area_x", state.abs_x if state.hasAttr("abs_x") else state.x + state.parent.area_x)
-            state.setAttr("area_y", state.abs_y if state.hasAttr("abs_y") else state.y + state.parent.area_y)
-            state.setAttr("area_w", state.attrInt("w", state.parent.area_w))
-            state.setAttr("area_h", state.attrInt("h", state.parent.area_h))
+            state.set_attr("area_x", state.abs_x if state.has_attr("abs_x") else state.x + state.parent.area_x)
+            state.set_attr("area_y", state.abs_y if state.has_attr("abs_y") else state.y + state.parent.area_y)
+            state.set_attr("area_w", state.attr_int("w", state.parent.area_w))
+            state.set_attr("area_h", state.attr_int("h", state.parent.area_h))
 
-            if not state.hasAttr("layer") and state.parent:
-                state.setAttr("layer", state.parent.layer)  # 自身がlayerを持っていなければ親から引き継ぐ
+            if not state.has_attr("layer") and state.parent:
+                state.set_attr("layer", state.parent.layer)  # 自身がlayerを持っていなければ親から引き継ぐ
 
         # 描画処理
         for state in sorted(draw_targets, key=lambda state: state.layer):
-            self.drawElement(state.tag, state, self._event if state == active_state else XUEvent())
+            self.draw_element(state.tag, state, self._event if state == active_state else XUEvent())
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
-    def updateElement(self, tag_name:str, state:XUState, event:XUEvent):
+    def update_element(self, tag_name:str, state:XUState, event:XUEvent):
         # 登録済みの関数だけ実行
         if tag_name in self._update_funcs:
             self._update_funcs[tag_name](state, event)
 
-    def drawElement(self, tag_name:str, state:XUState, event:XUEvent):
+    def draw_element(self, tag_name:str, state:XUState, event:XUEvent):
         # 登録済みの関数だけ実行
         if tag_name in self._draw_funcs:
             self._draw_funcs[tag_name](state, event)
@@ -466,21 +463,21 @@ class XMLUI:
 
     # 処理登録
     # *************************************************************************
-    def setUpdateFunc(self, tag_name:str, func:Callable[[XUState,XUEvent], None]):
+    def set_updatefunc(self, tag_name:str, func:Callable[[XUState,XUEvent], None]):
         self._update_funcs[tag_name] = func
 
-    def setDrawFunc(self, tag_name:str, func:Callable[[XUState,XUEvent], None]):
+    def set_drawfunc(self, tag_name:str, func:Callable[[XUState,XUEvent], None]):
         self._draw_funcs[tag_name] = func
 
     # デコレータを用意
     def update_func(self, tag_name:str):
         def wrapper(update_func:Callable[[XUState,XUEvent], None]):
-            self.setUpdateFunc(tag_name, update_func)
+            self.set_updatefunc(tag_name, update_func)
         return wrapper
 
     def draw_func(self, tag_name:str):
         def wrapper(draw_func:Callable[[XUState,XUEvent], None]):
-            self.setDrawFunc(tag_name, draw_func)
+            self.set_drawfunc(tag_name, draw_func)
         return wrapper
 
 
@@ -491,19 +488,19 @@ class XMLUI:
         self._event.on(input)
 
     # キー入力
-    def setInputList(self, input_type:str, list:list[int]):
+    def set_inputlist(self, input_type:str, list:list[int]):
         self._input_lists[input_type] = list
 
-    def checkInput(self, check:str, check_func:Callable[[int], bool]) -> bool:
+    def check_input(self, check:str, check_func:Callable[[int], bool]) -> bool:
         for button in self._input_lists[check]:
             if check_func(button):
                 return True
         return False
 
     # 登録キー入力を全部調べて片っ端からイベントに登録
-    def checkInputAndOn(self, check_func:Callable[[int], bool]):
+    def check_input_on(self, check_func:Callable[[int], bool]):
         for key in self._input_lists:
-            if self.checkInput(key, check_func):
+            if self.check_input(key, check_func):
                 self._event.on(key)
 
 
@@ -518,7 +515,7 @@ class _XUUtilTree(XUState):
     def __init__(self, parent:XUState, child_root_tag:str, allow_create:bool=True):
         try:
             # すでに存在するElementを回収
-            exists = parent.findByTag(child_root_tag)
+            exists = parent.find_by_tag(child_root_tag)
             super().__init__(parent.xmlui, exists._element)
             self._need_init = False  # 初期化は不要
         except Exception as e:
@@ -528,7 +525,7 @@ class _XUUtilTree(XUState):
 
             # 新規作成
             super().__init__(parent.xmlui, Element(child_root_tag))
-            parent.addChild(self)
+            parent.add_child(self)
             self._need_init = True  # 初期化が必要
 
 # Stateをそのまま利用する(attribute中心操作)
@@ -564,12 +561,12 @@ class XUPageRO(_XUUtilTree):
    # 現在ページ
     @property
     def page_no(self) -> int:
-        return min(max(self.attrInt(self.PAGE_NO_ATTR, 0), 0), self.page_max)
+        return min(max(self.attr_int(self.PAGE_NO_ATTR, 0), 0), self.page_max)
 
     # ページの最大数
     @property
     def page_max(self) -> int:
-        return len(self.findByTagAll(self.PAGE_TAG))
+        return len(self.find_by_tagall(self.PAGE_TAG))
 
     # ページ全部表示済みかどうか
     @property
@@ -579,17 +576,17 @@ class XUPageRO(_XUUtilTree):
     # ページタグリスト
     @property
     def pages(self) -> list[XUState]:
-        return self.findByTagAll(self.PAGE_TAG)
+        return self.find_by_tagall(self.PAGE_TAG)
 
     # ページテキスト
     @property
     def page_text(self) -> str:
-        return self._limitStr(self.pages[self.page_no].text, self.draw_count)
+        return self._limitstr(self.pages[self.page_no].text, self.draw_count)
 
     # アニメーション用
     # -----------------------------------------------------
     # draw_countまでの文字列を改行分割
-    def _limitStr(self, tmp_text, draw_count:float) -> str:
+    def _limitstr(self, tmp_text, draw_count:float) -> str:
         limit = math.ceil(draw_count)
         # まずlimitまで縮める
         for i,c in enumerate(tmp_text):
@@ -601,7 +598,7 @@ class XUPageRO(_XUUtilTree):
     # 表示カウンタ取得
     @property
     def draw_count(self) -> float:
-        return self.attrFloat(self.DRAW_COUNT_ATTR)
+        return self.attr_float(self.DRAW_COUNT_ATTR)
 
     # 現在ページを表示しきったかどうか
     @property
@@ -612,7 +609,7 @@ class XUPageRO(_XUUtilTree):
     # -----------------------------------------------------
     # 文字列中の半角を全角に変換する
     @classmethod
-    def convertZenkaku(cls, hankaku:str) -> str:
+    def convert_zenkaku(cls, hankaku:str) -> str:
         return unicodedata.normalize("NFKC", hankaku).translate(_hankaku_zenkaku_dict)
 
 # アニメーションテキストページ管理
@@ -621,7 +618,7 @@ class XUPage(XUPageRO):
         super().__init__(parent, True)
         if self._need_init:
             # 改行を\nに統一して全角化
-            tmp_text = self.convertZenkaku(re.sub(self.SEPARATE_REGEXP, "\n", text).strip())
+            tmp_text = self.convert_zenkaku(re.sub(self.SEPARATE_REGEXP, "\n", text).strip())
 
             # 各行に分解し、その行をさらにwrapで分解する
             wrap = max(1, wrap)  # 0だと無限になってしまうので最低1を入れておく
@@ -631,32 +628,32 @@ class XUPage(XUPageRO):
             for i in range(0, len(lines), page_line_num):
                 page_text = "\n".join(lines[i:i+page_line_num])  # 改行を\nにして全部文字列に
                 page = XUState(self.xmlui, Element(self.PAGE_TAG))
-                page.setText(page_text)
-                self.addChild(page)
+                page.set_text(page_text)
+                self.add_child(page)
 
     # ページ関係
     # -----------------------------------------------------
     # page_noの操作
-    def nextPage(self, add:int=1) -> Self:
+    def nextpage(self, add:int=1) -> Self:
         self.reset()  # ページが変わればまた最初から
-        self.setAttr(self.PAGE_NO_ATTR, self.page_no+1)
+        self.set_attr(self.PAGE_NO_ATTR, self.page_no+1)
         return self
 
     # アニメーション用
     # -----------------------------------------------------
     # 表示カウンタを進める
-    def next(self, add:float=1) -> Self:
-        self.setAttr(self.DRAW_COUNT_ATTR, self.draw_count+add)
+    def nextcount(self, add:float=1) -> Self:
+        self.set_attr(self.DRAW_COUNT_ATTR, self.draw_count+add)
         return self
 
     # 表示カウンタのリセット
     def reset(self) -> Self:
-        self.setAttr(self.DRAW_COUNT_ATTR, 0)
+        self.set_attr(self.DRAW_COUNT_ATTR, 0)
         return self
 
     # 一気に表示
     def finish(self) -> Self:
-        self.setAttr(self.DRAW_COUNT_ATTR, len(self.page_text))
+        self.set_attr(self.DRAW_COUNT_ATTR, len(self.page_text))
         return self
 
     # イベントアクション
@@ -668,7 +665,7 @@ class XUPage(XUPageRO):
             self.finish()
         # ページが残っていたら次のページへ
         elif not self.is_end_page:
-            self.nextPage()
+            self.nextpage()
 
 
 # メニュー系
@@ -687,21 +684,21 @@ class _XUSelectBase(_XUIUtil):
 
     # GRID用
     @classmethod
-    def findGridByTag(cls, state:XUState, tag_group:str, tag_item:str) -> list[list['XUState']]:
-        return [group.findByTagAll(tag_item) for group in state.findByTagAll(tag_group)]
+    def findgrid_bytag(cls, state:XUState, tag_group:str, tag_item:str) -> list[list['XUState']]:
+        return [group.find_by_tagall(tag_item) for group in state.find_by_tagall(tag_group)]
 
     # 転置(Transpose)GRID
     @classmethod
-    def findGridByTagT(cls, state:XUState, tag_group:str, tag_item:str) -> list[list['XUState']]:
-        grid = cls.findGridByTag(state, tag_group, tag_item)
+    def findgrid_bytagT(cls, state:XUState, tag_group:str, tag_item:str) -> list[list['XUState']]:
+        grid = cls.findgrid_bytag(state, tag_group, tag_item)
         grid = [[grid[y][x] for y in range(len(grid))] for x in range(len(grid[0]))]  # 転置
         return grid
 
     # グリッド各アイテムの座標設定
-    def arrangeItems(self, w:int, h:int) -> Self:
+    def arrange_items(self, w:int, h:int) -> Self:
         for y,group in enumerate(self._grid):
             for x,item in enumerate(group):
-                item.setAttr(["x", "y"], (x*w, y*h))
+                item.set_attr(["x", "y"], (x*w, y*h))
         return self
 
 
@@ -711,7 +708,7 @@ class _XUSelectBase(_XUIUtil):
         cur_y = (y + self.grid_h) % self.grid_h if y_wrap else max(min(y, self.grid_h-1), 0)
         for y, group in enumerate(self._grid):
             for x, item in enumerate(group):
-                item.setAttr("selected", x == cur_x and y == cur_y)
+                item.set_attr("selected", x == cur_x and y == cur_y)
         return self
 
     @property
@@ -750,10 +747,10 @@ class _XUSelectBase(_XUIUtil):
 # グリッド選択
 class XUSelectGrid(_XUSelectBase):
     def __init__(self, state:XUState, tag_group:str, tag_item:str):
-        super().__init__(state, self.findGridByTag(state, tag_group, tag_item))
+        super().__init__(state, self.findgrid_bytag(state, tag_group, tag_item))
 
     # 入力に応じた挙動一括
-    def selectByEvent(self, input:set[str], leftEvent:str, rightEvent:str, upEvent:str, downEvent:str, x_wrap:bool=False, y_wrap:bool=False) -> Self:
+    def select_by_event(self, input:set[str], leftEvent:str, rightEvent:str, upEvent:str, downEvent:str, x_wrap:bool=False, y_wrap:bool=False) -> Self:
         if leftEvent in input:
             self.select(self.cur_x-1, self.cur_y, x_wrap)
         elif rightEvent in input:
@@ -768,10 +765,10 @@ class XUSelectGrid(_XUSelectBase):
 class XUSelectList(_XUSelectBase):
     # 縦に入れる
     def __init__(self, state:XUState, tag_item:str):
-        super().__init__(state, self.findGridByTagT(state, state.tag, tag_item))
+        super().__init__(state, self.findgrid_bytagT(state, state.tag, tag_item))
 
     # 入力に応じた挙動一括。選択リストは通常上下ラップする
-    def selectByEvent(self, input:set[str], upEvent:str, downEvent:str, y_wrap:bool=True) -> Self:
+    def select_by_event(self, input:set[str], upEvent:str, downEvent:str, y_wrap:bool=True) -> Self:
         if upEvent in input:
             self.select(0, self.cur_y-1, False, y_wrap)
         elif downEvent in input:
@@ -792,15 +789,15 @@ class XUDialRO(_XUUtilTree):
 
     @property
     def edit_pos(self) -> int:
-        return self.attrInt(self.EDIT_POS_ATTR)
+        return self.attr_int(self.EDIT_POS_ATTR)
 
     @property
     def digits(self) -> list[str]:
-        return [state.text for state in self.findByTagAll(self.DIGIT_TAG)]
+        return [state.text for state in self.find_by_tagall(self.DIGIT_TAG)]
 
     @property
-    def zenkakuDigits(self) -> list[str]:
-        return [XUPageRO.convertZenkaku(digit) for digit in self.digits]
+    def zenkaku_digits(self) -> list[str]:
+        return [XUPageRO.convert_zenkaku(digit) for digit in self.digits]
 
     @property
     def number(self) -> int:
@@ -814,42 +811,42 @@ class XUDial(XUDialRO):
             # 初期値は最小埋め
             for i in range(digit_length):
                 digit = XUState(self.xmlui, Element(self.DIGIT_TAG))
-                digit.setText(digit_list[0])
-                self.addChild(digit)
+                digit.set_text(digit_list[0])
+                self.add_child(digit)
 
         self._digit_list = digit_list
 
     # 回り込み付き操作位置の設定
-    def setEditPos(self, edit_pos:int) -> Self:
-        self.setAttr(self.EDIT_POS_ATTR, (edit_pos+len(self.digits))%len(self.digits))
+    def set_editpos(self, edit_pos:int) -> Self:
+        self.set_attr(self.EDIT_POS_ATTR, (edit_pos+len(self.digits))%len(self.digits))
         return self
 
     # 操作位置の移動
-    def moveEditPos(self, add:int) -> Self:
-        return self.setEditPos(self.edit_pos+add)
+    def move_editpos(self, add:int) -> Self:
+        return self.set_editpos(self.edit_pos+add)
 
     # 指定位置のdigitを変更する
-    def setDigit(self, edit_pos:int, digit:str) -> Self:
-        state = self.findByTagAll(self.DIGIT_TAG)[edit_pos]
-        state.setText(digit)
+    def set_digit(self, edit_pos:int, digit:str) -> Self:
+        state = self.find_by_tagall(self.DIGIT_TAG)[edit_pos]
+        state.set_text(digit)
         return self
 
     # 回り込み付きdigit増減
-    def addDigit(self, edit_pos:int, add:int) -> Self:
+    def add_digit(self, edit_pos:int, add:int) -> Self:
         old_digit = self.digits[edit_pos]
         new_digit = self._digit_list[(self._digit_list.find(old_digit)+len(self._digit_list)+add) % len(self._digit_list)]
-        return self.setDigit(edit_pos, new_digit)
+        return self.set_digit(edit_pos, new_digit)
 
     # 入力に応じた挙動一括
-    def changeByEvent(self, input:set[str], leftEvent:str, rightEvent:str, upEvent:str, downEvent:str) -> Self:
+    def change_by_event(self, input:set[str], leftEvent:str, rightEvent:str, upEvent:str, downEvent:str) -> Self:
         if leftEvent in input:
-            self.moveEditPos(1)
+            self.move_editpos(1)
         if rightEvent in input:
-            self.moveEditPos(-1)
+            self.move_editpos(-1)
         if upEvent in input:
-            self.addDigit(self.edit_pos, +1)  # digitを増やす
+            self.add_digit(self.edit_pos, +1)  # digitを増やす
         if downEvent in input:
-            self.addDigit(self.edit_pos, -1)  # digitを減らす
+            self.add_digit(self.edit_pos, -1)  # digitを減らす
         return self
 
 
@@ -869,10 +866,10 @@ class _XUWinBase:
 
     # 1,3,5,7,4のエリア(カド以外)は特に計算が必要ない
     def _get13574Index(self, x:int, y:int, w:int, h:int) -> int:
-        return [-1, y, -1, x, self.pattern_size-1, w-1-x, -1, h-1-y][self.getArea(x, y, w, h)]
+        return [-1, y, -1, x, self.pattern_size-1, w-1-x, -1, h-1-y][self.get_area(x, y, w, h)]
 
     # どのエリアに所属するかを返す
-    def getArea(self, x:int, y:int, w:int, h:int) -> int:
+    def get_area(self, x:int, y:int, w:int, h:int) -> int:
         if x < self.pattern_size:
             if y < self.pattern_size:
                 return 0
@@ -887,7 +884,7 @@ class _XUWinBase:
             return 5 if y < h-self.pattern_size else 8
 
     # シャドウ対応(0,1,3のパターン上書き)
-    def setShadow(self, index:int, shadow:list[int]) -> Self:
+    def set_shadow(self, index:int, shadow:list[int]) -> Self:
         for i,color in enumerate(shadow):
             self._patterns[0][index+i] = color
             self._patterns[1][index+i] = color
@@ -896,12 +893,12 @@ class _XUWinBase:
         return self
 
     # バッファに書き込む
-    def drawBuf(self, x:int, y:int, w:int, h:int, screen_buf):
+    def draw_buf(self, x:int, y:int, w:int, h:int, screen_buf):
         for y_ in range(max(0, self.clip.y), min(self.clip.bottom, h)):
             for x_ in range(max(0, self.clip.x), min(self.clip.right, w)):
                 index = self._getPatIdxFunc(x_, y_, w, h)
                 if index >= 0:  # 枠外チェック
-                    color = self._patterns[self.getArea(x_, y_, w, h)][index]
+                    color = self._patterns[self.get_area(x_, y_, w, h)][index]
                     if color == -1:  # 透明チェック
                         continue
                     screen_buf[(y+y_)*self.screen_w + (x+x_)] = color
@@ -913,34 +910,34 @@ class _XUWinBase:
 
 class XUWinRound(_XUWinBase):
     def __init__(self, pattern:list[int], screen_w:int, screen_h:int):
-        super().__init__(pattern, screen_w, screen_h, self._getPatternIndex)
+        super().__init__(pattern, screen_w, screen_h, self._get_patternindex)
 
-    def _getVecLen(self, x:int, y:int, org_x:int, org_y:int) -> int:
+    def _get_veclen(self, x:int, y:int, org_x:int, org_y:int) -> int:
         return math.ceil(math.sqrt((x-org_x)**2 + (y-org_y)**2))
 
-    def _getPatternIndex(self, x:int, y:int, w:int, h:int) -> int:
+    def _get_patternindex(self, x:int, y:int, w:int, h:int) -> int:
         size = self.pattern_size
-        area = self.getArea(x, y, w, h)
+        area = self.get_area(x, y, w, h)
         if area == 0:
-            l = size-1-self._getVecLen(x, y, size-1, size-1)
+            l = size-1-self._get_veclen(x, y, size-1, size-1)
             return l if l < size else -1
         elif area == 2:
-            l = size-1-self._getVecLen(x, y, w-size, size-1)
+            l = size-1-self._get_veclen(x, y, w-size, size-1)
             return l if l < size else -1
         elif area == 6:
-            l = size-1-self._getVecLen(x, y, size-1, h-size)
+            l = size-1-self._get_veclen(x, y, size-1, h-size)
             return l if l < size else -1
         elif area == 8:
-            l = size-1-self._getVecLen(x, y, w-size, h-size)
+            l = size-1-self._get_veclen(x, y, w-size, h-size)
             return l if l < size else -1
         return self._get13574Index(x, y, w, h)
 
 class XUWinRect(_XUWinBase):
     def __init__(self, pattern:list[int], screen_w:int, screen_h:int):
-        super().__init__(pattern, screen_w, screen_h, self._getPatternIndex)
+        super().__init__(pattern, screen_w, screen_h, self._get_pattern_index)
 
-    def _getPatternIndex(self, x:int, y:int, w:int, h:int) -> int:
-        area = self.getArea(x, y, w, h)
+    def _get_pattern_index(self, x:int, y:int, w:int, h:int) -> int:
+        area = self.get_area(x, y, w, h)
         if area == 0:
             return y if x > y else x
         elif area == 2:
