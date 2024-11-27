@@ -200,15 +200,15 @@ class XUState:
 
     @property
     def parent(self) -> 'XUState|None':
-        def _rec_parentSearch(element:Element, me:Element) -> Element|None:
+        def _rec_parent_search(element:Element, me:Element) -> Element|None:
             if me in element:
                 return element
             for child in element:
-                result = _rec_parentSearch(child, me)
+                result = _rec_parent_search(child, me)
                 if result:
                     return result
             return None
-        parent = _rec_parentSearch(self.xmlui.root._element, self._element)
+        parent = _rec_parent_search(self.xmlui.root._element, self._element)
         return XUState(self.xmlui, parent) if parent else None
 
     # 子に別Element一式を追加する
@@ -374,13 +374,13 @@ class XMLUI:
     def add_child(self, child:'XUState'):
         self.root.add_child(child)
 
-    def findby_ID(self, id:str) -> XUState:
+    def find_by_ID(self, id:str) -> XUState:
         return self.root.find_by_ID(id)
 
-    def findby_tagall(self, tag:str) -> list[XUState]:
+    def find_by_tagall(self, tag:str) -> list[XUState]:
         return self.root.find_by_tagall(tag)
 
-    def findby_tag(self, tag:str) -> XUState:
+    def find_by_tag(self, tag:str) -> XUState:
         return self.root.find_by_tag(tag)
 
     def close(self, id:str):
@@ -678,19 +678,19 @@ class _XUSelectBase(_XUIUtil):
 
         # タグにselected=Trueがあればそれを使う。無ければgrid[0][0]を選択
         try:
-            self.selected_item
+            self.item
         except:
             self.select(0, 0)  # 最初の選択
 
     # GRID用
     @classmethod
-    def findgrid_bytag(cls, state:XUState, tag_group:str, tag_item:str) -> list[list['XUState']]:
+    def find_grid(cls, state:XUState, tag_group:str, tag_item:str) -> list[list['XUState']]:
         return [group.find_by_tagall(tag_item) for group in state.find_by_tagall(tag_group)]
 
     # 転置(Transpose)GRID
     @classmethod
-    def findgrid_bytagT(cls, state:XUState, tag_group:str, tag_item:str) -> list[list['XUState']]:
-        grid = cls.findgrid_bytag(state, tag_group, tag_item)
+    def find_gridT(cls, state:XUState, tag_group:str, tag_item:str) -> list[list['XUState']]:
+        grid = cls.find_grid(state, tag_group, tag_item)
         grid = [[grid[y][x] for y in range(len(grid))] for x in range(len(grid[0]))]  # 転置
         return grid
 
@@ -712,7 +712,7 @@ class _XUSelectBase(_XUIUtil):
         return self
 
     @property
-    def selected_item(self) -> XUState:
+    def item(self) -> XUState:
         for group in self._grid:
             for item in group:
                 if item.selected:
@@ -747,17 +747,17 @@ class _XUSelectBase(_XUIUtil):
 # グリッド選択
 class XUSelectGrid(_XUSelectBase):
     def __init__(self, state:XUState, tag_group:str, tag_item:str):
-        super().__init__(state, self.findgrid_bytag(state, tag_group, tag_item))
+        super().__init__(state, self.find_grid(state, tag_group, tag_item))
 
     # 入力に応じた挙動一括
-    def select_by_event(self, input:set[str], leftEvent:str, rightEvent:str, upEvent:str, downEvent:str, x_wrap:bool=False, y_wrap:bool=False) -> Self:
-        if leftEvent in input:
+    def select_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str, x_wrap:bool=False, y_wrap:bool=False) -> Self:
+        if left_event in input:
             self.select(self.cur_x-1, self.cur_y, x_wrap)
-        elif rightEvent in input:
+        elif right_event in input:
             self.select(self.cur_x+1, self.cur_y, x_wrap)
-        elif upEvent in input:
+        elif up_event in input:
             self.select(self.cur_x, self.cur_y-1, False, y_wrap)
-        elif downEvent in input:
+        elif down_event in input:
             self.select(self.cur_x, self.cur_y+1, False, y_wrap)
         return self
 
@@ -765,13 +765,13 @@ class XUSelectGrid(_XUSelectBase):
 class XUSelectList(_XUSelectBase):
     # 縦に入れる
     def __init__(self, state:XUState, tag_item:str):
-        super().__init__(state, self.findgrid_bytagT(state, state.tag, tag_item))
+        super().__init__(state, self.find_gridT(state, state.tag, tag_item))
 
     # 入力に応じた挙動一括。選択リストは通常上下ラップする
-    def select_by_event(self, input:set[str], upEvent:str, downEvent:str, y_wrap:bool=True) -> Self:
-        if upEvent in input:
+    def select_by_event(self, input:set[str], up_event:str, down_event:str, y_wrap:bool=True) -> Self:
+        if up_event in input:
             self.select(0, self.cur_y-1, False, y_wrap)
-        elif downEvent in input:
+        elif down_event in input:
             self.select(0, self.cur_y+1, False, y_wrap)
         return self
 
@@ -838,14 +838,14 @@ class XUDial(XUDialRO):
         return self.set_digit(edit_pos, new_digit)
 
     # 入力に応じた挙動一括
-    def change_by_event(self, input:set[str], leftEvent:str, rightEvent:str, upEvent:str, downEvent:str) -> Self:
-        if leftEvent in input:
+    def change_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> Self:
+        if left_event in input:
             self.move_editpos(1)
-        if rightEvent in input:
+        if right_event in input:
             self.move_editpos(-1)
-        if upEvent in input:
+        if up_event in input:
             self.add_digit(self.edit_pos, +1)  # digitを増やす
-        if downEvent in input:
+        if down_event in input:
             self.add_digit(self.edit_pos, -1)  # digitを減らす
         return self
 
@@ -856,16 +856,16 @@ class _XUWinBase:
     # 0 1 2
     # 3 4 5
     # 6 7 8
-    def __init__(self, pattern:list[int], screen_w:int, screen_h:int, getPatternIndexFunc:Callable[[int,int,int,int], int]):
+    def __init__(self, pattern:list[int], screen_w:int, screen_h:int, pattern_index_func:Callable[[int,int,int,int], int]):
         self._patterns = [pattern.copy() for i in range(9)]
         self.screen_w, self.screen_h = screen_w, screen_h
-        self._getPatIdxFunc = getPatternIndexFunc  # 枠外は-1を返す
+        self._get_patidx_func = pattern_index_func  # 枠外は-1を返す
 
         # クリッピングエリア
         self.clip = XURect(0, 0, screen_w, screen_h)
 
     # 1,3,5,7,4のエリア(カド以外)は特に計算が必要ない
-    def _get13574Index(self, x:int, y:int, w:int, h:int) -> int:
+    def _get13574index(self, x:int, y:int, w:int, h:int) -> int:
         return [-1, y, -1, x, self.pattern_size-1, w-1-x, -1, h-1-y][self.get_area(x, y, w, h)]
 
     # どのエリアに所属するかを返す
@@ -896,7 +896,7 @@ class _XUWinBase:
     def draw_buf(self, x:int, y:int, w:int, h:int, screen_buf):
         for y_ in range(max(0, self.clip.y), min(self.clip.bottom, h)):
             for x_ in range(max(0, self.clip.x), min(self.clip.right, w)):
-                index = self._getPatIdxFunc(x_, y_, w, h)
+                index = self._get_patidx_func(x_, y_, w, h)
                 if index >= 0:  # 枠外チェック
                     color = self._patterns[self.get_area(x_, y_, w, h)][index]
                     if color == -1:  # 透明チェック
@@ -930,7 +930,7 @@ class XUWinRound(_XUWinBase):
         elif area == 8:
             l = size-1-self._get_veclen(x, y, w-size, h-size)
             return l if l < size else -1
-        return self._get13574Index(x, y, w, h)
+        return self._get13574index(x, y, w, h)
 
 class XUWinRect(_XUWinBase):
     def __init__(self, pattern:list[int], screen_w:int, screen_h:int):
@@ -946,5 +946,5 @@ class XUWinRect(_XUWinBase):
             return h-1-y if x > h-1-y else x
         elif area == 8:
             return h-1-y if w-1-x > h-1-y else w-1-x
-        return self._get13574Index(x, y, w, h)
+        return self._get13574index(x, y, w, h)
 
