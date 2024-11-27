@@ -850,7 +850,7 @@ class UI_DIAL(UI_DIAL_RO):
 
 # ウインドウサポート
 # ---------------------------------------------------------
-class UI_WIN_BASE:
+class _UI_WIN_BASE:
     # 0 1 2
     # 3 4 5
     # 6 7 8
@@ -906,7 +906,7 @@ class UI_WIN_BASE:
     def pattern_size(self) -> int:
         return len(self._patterns[0])
 
-class UI_WIN_ROUND(UI_WIN_BASE):
+class UI_WIN_ROUND(_UI_WIN_BASE):
     def __init__(self, pattern:list[int], screen_w:int, screen_h:int):
         super().__init__(pattern, screen_w, screen_h, self._getPatternIndex)
 
@@ -930,7 +930,7 @@ class UI_WIN_ROUND(UI_WIN_BASE):
             return l if l < size else -1
         return self._get13574Index(x, y, w, h)
 
-class UI_WIN_RECT(UI_WIN_BASE):
+class UI_WIN_RECT(_UI_WIN_BASE):
     def __init__(self, pattern:list[int], screen_w:int, screen_h:int):
         super().__init__(pattern, screen_w, screen_h, self._getPatternIndex)
 
