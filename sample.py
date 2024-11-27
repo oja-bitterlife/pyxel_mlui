@@ -1,3 +1,5 @@
+from xui_pyxel import components as xui
+
 from xmlui_core import *
 
 ui_template = XMLUI.fromfile("assets/ui/test.xml")
