@@ -49,15 +49,15 @@ ui_worker.setInputList("button_y", [
 from xmlui_core import *
 
 screen_buf = pyxel.screen.data_ptr()
-win1 = XUIWinRound([7,7,12,12,12], pyxel.width, pyxel.height).setShadow(2, [1])
-win2 = XUIWinRound([7,7,12,12,12], pyxel.width, pyxel.height).setShadow(2, [1])
-win3 = XUIWinRound([7,7,12,12,12], pyxel.width, pyxel.height).setShadow(2, [1])
-win4 = XUIWinRound([7,7,12,12,12], pyxel.width, pyxel.height).setShadow(2, [1])
+win1 = XUWinRound([7,7,12,12,12], pyxel.width, pyxel.height).setShadow(2, [1])
+win2 = XUWinRound([7,7,12,12,12], pyxel.width, pyxel.height).setShadow(2, [1])
+win3 = XUWinRound([7,7,12,12,12], pyxel.width, pyxel.height).setShadow(2, [1])
+win4 = XUWinRound([7,7,12,12,12], pyxel.width, pyxel.height).setShadow(2, [1])
 
-win5 = XUIWinRound([7,7,12,12,12,12,12,12,12,12,12,12], pyxel.width, pyxel.height).setShadow(2, [1])
-win6 = XUIWinRect([7,7,12], pyxel.width, pyxel.height).setShadow(2, [1])
-win7 = XUIWinRound([3,11,12,8,-1], pyxel.width, pyxel.height)
-win8 = XUIWinRound([1,2,3,4,5,6,7,8,12], pyxel.width, pyxel.height).setShadow(2, [1])
+win5 = XUWinRound([7,7,12,12,12,12,12,12,12,12,12,12], pyxel.width, pyxel.height).setShadow(2, [1])
+win6 = XUWinRect([7,7,12], pyxel.width, pyxel.height).setShadow(2, [1])
+win7 = XUWinRound([3,11,12,8,-1], pyxel.width, pyxel.height)
+win8 = XUWinRound([1,2,3,4,5,6,7,8,12], pyxel.width, pyxel.height).setShadow(2, [1])
 
 wins = [win1, win2, win3, win4, win5, win6, win7, win8]
 
