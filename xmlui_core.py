@@ -856,9 +856,9 @@ class UI_WIN_BASE:
         return size
 
     # バッファに書き込む
-    def draw_buf(self, pattern:list[int], fill:int, x:int, y:int, w:int, h:int, screen_buf):
+    def draw_buf(self, pattern:list[int], fill:int, x:int, y:int, w:int, h:int, screen_buf, max_line:int=65536):
         tmp_pat = pattern + [fill]  # fillをお尻にくっつけておく(4用)
-        for y_ in range(h):
+        for y_ in range(min(h, max_line)):
             for x_ in range(w):
                 index = self._getPatIdxFunc(x_, y_, w, h, len(pattern))
                 if index < 0:
@@ -873,7 +873,7 @@ class UI_WIN_ROUND(UI_WIN_BASE):
         super().__init__(screen_w, screen_h, self._getPatternIndex)
 
     def _getVecLen(self, x:int, y:int, org_x:int, org_y:int) -> int:
-        return math.floor(math.sqrt((x-org_x)**2 + (y-org_y)**2))
+        return round(math.sqrt((x-org_x)**2 + (y-org_y)**2))
 
     def _getPatternIndex(self, x:int, y:int, w:int, h:int, size:int) -> int:
         if x < size and y < size:  # 0
