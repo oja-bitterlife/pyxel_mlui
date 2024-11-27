@@ -1,7 +1,7 @@
 from xmlui_core import *
 
 ui_template = XMLUI.fromfile("assets/ui/test.xml")
-ui_worker = XMLUI.mk_worker("my_ui")
+ui_worker = XMLUI.mkworker("my_ui")
 
 import pyxel
 font = pyxel.Font("assets/font/b12.bdf")

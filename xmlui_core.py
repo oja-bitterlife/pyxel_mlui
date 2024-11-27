@@ -337,7 +337,7 @@ class XMLUI:
 
     # ワーカーの作成
     @classmethod
-    def mk_worker(cls, root_tag:str) -> 'XMLUI':
+    def mkworker(cls, root_tag:str) -> 'XMLUI':
         return XMLUI(Element(root_tag))
 
     # 初期化。<xmlui>を持つXMLを突っ込む
