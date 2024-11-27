@@ -53,7 +53,9 @@ win1 = UI_WIN_ROUND([7,7,12,12,12], pyxel.width, pyxel.height).setShadow(2, [1])
 win2 = UI_WIN_ROUND([7,7,12,12,12], pyxel.width, pyxel.height).setShadow(2, [1])
 win3 = UI_WIN_ROUND([7,7,12,12,12], pyxel.width, pyxel.height).setShadow(2, [1])
 
-wins = [win1, win2, win3]
+win4 = UI_WIN_ROUND([7,7,12,12,12], pyxel.width, pyxel.height).setShadow(2, [1])
+
+wins = [win1, win2, win3, win4]
 
 # Main
 def update(): # フレームの更新処理
@@ -74,13 +76,19 @@ def draw(): # 描画処理
     ui_worker.draw()
 
     win_size = 64
+    count = ui_worker.root.update_count*2
     for i,win in enumerate(wins):
         if i == 0:
-            win.clip.h = ui_worker.root.update_count
-        if i == 1:
-            win.clip.w = ui_worker.root.update_count
-        if i == 2:
-            win.clip.h = win.clip.w = ui_worker.root.update_count
+            win.clip.h = count
+        elif i == 1:
+            win.clip.w = count
+        elif i == 2:
+            win.clip.h = count
+        elif i == 3:
+            win.clip.x = win_size//2 - count//2
+            win.clip.w = count
+            win.clip.y = win_size//2 - count//2
+            win.clip.h = count
 
         win.drawBuf((i%4)*win_size, (i//4)*win_size, win_size, win_size , screen_buf)
 

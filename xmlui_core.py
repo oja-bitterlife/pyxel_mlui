@@ -31,6 +31,22 @@ class UI_RECT:
     def center_y(self, height:int=0) -> int:
         return self.y + (self.h-height)//2
 
+    @property
+    def cx(self) -> int:
+        return self.center_x()
+
+    @property
+    def cy(self) -> int:
+        return self.center_x()
+
+    @property
+    def right(self) -> int:
+        return self.x + self.w
+
+    @property
+    def bottom(self) -> int:
+        return self.y + self.h
+
     def __repr__(self) -> str:
         return f"RECT({self.x}, {self.y}, {self.w}, {self.h})"
 
@@ -875,8 +891,8 @@ class UI_WIN_BASE:
 
     # バッファに書き込む
     def drawBuf(self, x:int, y:int, w:int, h:int, screen_buf):
-        for y_ in range(self.clip.y, min(self.clip.h, h)):
-            for x_ in range(self.clip.x, min(self.clip.w, w)):
+        for y_ in range(max(0, self.clip.y), min(self.clip.bottom, h)):
+            for x_ in range(max(0, self.clip.x), min(self.clip.right, w)):
                 index = self._getPatIdxFunc(x_, y_, w, h)
                 if index >= 0:  # 枠外チェック
                     color = self._patterns[self.getArea(x_, y_, w, h)][index]
