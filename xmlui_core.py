@@ -838,91 +838,118 @@ class UI_WIN_BASE:
     # 0 1 2
     # 3 4 5
     # 6 7 8
-    def __init__(self, screen_w:int, screen_h:int, getPatternIndexFunc):
+    def __init__(self, pattern:list[int], fill:int, screen_w:int, screen_h:int, getPatternIndexFunc:Callable[[int,int,int,int], int]):
+        self._patterns = [pattern+[fill] for i in range(9)]
+        self._pattern_len = len(pattern)
         self.screen_w = screen_w
         self.screen_h = screen_h
-        self._getPatIdxFunc = getPatternIndexFunc
+        self._getPatIdxFunc = getPatternIndexFunc  # 枠外は-1を返す
 
-    def _get13574Index(self, x:int, y:int, w:int, h:int, size) -> int:
+    # 1,3,5,7,4のエリア(カド以外)は特に計算が必要ない
+    def _get13574Index(self, x:int, y:int, w:int, h:int) -> int:
+        return [-1, y, -1, x, self._pattern_len, w-1-x, -1, h-1-y][self.getAreaIndex(x, y, w, h)]
+
+    # どのエリアに所属するかを返す
+    def getAreaIndex(self, x:int, y:int, w:int, h:int) -> int:
+        size = self._pattern_len
+        if x < size and y < size:  # 0
+            return 0
         if size <= x < w-size and y < size:  # 1
-            return y
+            return 1
+        elif x >= w-size and y < size:  # 2
+            return 2
         elif x < size and size <= y < h-size:  # 3
-            return x
+            return 3
         elif w-size <= x and size <= y < h-size:  # 5
-            return w-1-x
+            return 5
+        elif x < size and y >= h-size:  # 6
+            return 6
         elif size <= x < w-size and h-size <= y:  # 7
-            return h-1-y
-        # 4
-        return size
+            return 7
+        elif x >= w-size and y >= h-size:  # 8
+            return 8
+        else:
+            return 4
+
+    # シャドウ対応
+    def set_shadow(self, index:int, shadow:list[int]):
+        for i,color in enumerate(shadow):
+            self._patterns[0][index] = color
+            self._patterns[1][index] = color
+            self._patterns[3][index] = color
 
     # バッファに書き込む
-    def draw_buf(self, pattern:list[int], fill:int, x:int, y:int, w:int, h:int, screen_buf, max_line:int=65536):
-        tmp_pat = pattern + [fill]  # fillをお尻にくっつけておく(4用)
+    def draw_buf(self, x:int, y:int, w:int, h:int, screen_buf, max_line:int=65536):
+        print(self.getAreaIndex(0, 0, w, h), self._patterns[self.getAreaIndex(0, 0, w, h)])
         for y_ in range(min(h, max_line)):
             for x_ in range(w):
-                index = self._getPatIdxFunc(x_, y_, w, h, len(pattern))
-                if index < 0:
-                    continue
-                color = tmp_pat[index]
-                if color == -1:
-                    continue
-                screen_buf[(y+y_)*self.screen_w + (x+x_)] = color
+                index = self._getPatIdxFunc(x_, y_, w, h)
+                if index >= 0:  # 枠外
+                    color = self._patterns[self.getAreaIndex(x, y, w, h)][index]
+                    if color == -1:  # 透明
+                        continue
+                    screen_buf[(y+y_)*self.screen_w + (x+x_)] = color
 
 class UI_WIN_ROUND(UI_WIN_BASE):
-    def __init__(self, screen_w:int, screen_h:int):
-        super().__init__(screen_w, screen_h, self._getPatternIndex)
+    def __init__(self, pattern:list[int], fill:int, screen_w:int, screen_h:int):
+        super().__init__(pattern, fill, screen_w, screen_h, self._getPatternIndex)
 
     def _getVecLen(self, x:int, y:int, org_x:int, org_y:int) -> int:
         return math.ceil(math.sqrt((x-org_x)**2 + (y-org_y)**2))
 
-    def _getPatternIndex(self, x:int, y:int, w:int, h:int, size:int) -> int:
-        if x < size and y < size:  # 0
+    def _getPatternIndex(self, x:int, y:int, w:int, h:int) -> int:
+        size = self._pattern_len
+        area = self.getAreaIndex(x, y, w, h)
+        if area == 0:
             l = size-1-self._getVecLen(x, y, size-1, size-1)
             return l if l < size else -1
-        elif x >= w-size and y < size:  # 2
+        elif area == 2:
             l = size-1-self._getVecLen(x, y, w-size, size-1)
             return l if l < size else -1
-        elif x < size and y >= h-size:  # 6
+        elif area == 6:
             l = size-1-self._getVecLen(x, y, size-1, h-size)
             return l if l < size else -1
-        elif x >= w-size and y >= h-size:  # 8
+        elif area == 8:
             l = size-1-self._getVecLen(x, y, w-size, h-size)
             return l if l < size else -1
-        return self._get13574Index(x, y, w, h, size)
+        return self._get13574Index(x, y, w, h)
 
 class UI_WIN_RECT(UI_WIN_BASE):
-    def __init__(self, screen_w:int, screen_h:int):
-        super().__init__(screen_w, screen_h, self._getPatternIndex)
+    def __init__(self, pattern:list[int], fill:int, screen_w:int, screen_h:int):
+        super().__init__(pattern, fill, screen_w, screen_h, self._getPatternIndex)
 
-    def _getPatternIndex(self, x:int, y:int, w:int, h:int, size:int) -> int:
-        if x < size and y < size:  # 0
+    def _getPatternIndex(self, x:int, y:int, w:int, h:int) -> int:
+        area = self.getAreaIndex(x, y, w, h)
+        if area == 0:
             return y if x > y else x
-        elif x >= w-size and y < size:  # 2
+        elif area == 2:
             return y if w-1-x > y else w-1-x
-        elif x < size and y >= h-size:  # 6
+        elif area == 6:
             return h-1-y if x > h-1-y else x
-        elif x >= w-size and y >= h-size:  # 8
+        elif area == 8:
             return h-1-y if w-1-x > h-1-y else w-1-x
-        return self._get13574Index(x, y, w, h, size)
+        return self._get13574Index(x, y, w, h)
 
 class UI_WIN_CUT(UI_WIN_BASE):
-    def __init__(self, screen_w:int, screen_h:int):
-        super().__init__(screen_w, screen_h, self._getPatternIndex)
+    def __init__(self, pattern:list[int], fill:int, screen_w:int, screen_h:int):
+        super().__init__(pattern, fill, screen_w, screen_h, self._getPatternIndex)
 
     def _getVecLen(self, x:int, y:int, org_x:int, org_y:int) -> int:
         return abs(x-org_x) + abs(y-org_y)
 
-    def _getPatternIndex(self, x:int, y:int, w:int, h:int, size:int) -> int:
-        if x < size and y < size:  # 0
+    def _getPatternIndex(self, x:int, y:int, w:int, h:int) -> int:
+        size = self._pattern_len
+        area = self.getAreaIndex(x, y, w, h)
+        if area == 0:
             l = size-1-self._getVecLen(x, y, size-1, size-1)
             return l if l < size else -1
-        elif x >= w-size and y < size:  # 2
+        elif area == 2:
             l = size-1-self._getVecLen(x, y, w-size, size-1)
             return l if l < size else -1
-        elif x < size and y >= h-size:  # 6
+        elif area == 6:
             l = size-1-self._getVecLen(x, y, size-1, h-size)
             return l if l < size else -1
-        elif x >= w-size and y >= h-size:  # 8
+        elif area == 8:
             l = size-1-self._getVecLen(x, y, w-size, h-size)
             return l if l < size else -1
-        return self._get13574Index(x, y, w, h, size)
+        return self._get13574Index(x, y, w, h)
