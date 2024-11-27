@@ -30,8 +30,8 @@ def menu_win_update(menu_win:XUState, event:XUEvent):
     item_w, item_h = menu_win.attr_int("item_w"), menu_win.attr_int("item_h")
 
     # メニューアイテム
-    grid = XUSelectGrid(menu_win, "menu_row", "menu_item").arrange_items(item_w, item_h)
-    grid.select_by_event(event.trg, "left", "right", "up", "down")
+    menu = xui.MenuWindow(menu_win, "menu_row", "menu_item", item_w, item_h)
+    menu.select_by_event("left", "right", "up", "down")
 
     # 選択アイテムの表示
     if "button_a" in event.trg:
@@ -56,10 +56,6 @@ def menu_win_draw(menu_win:XUState, event:XUEvent):
     title  = menu_win.attr_str("title")
 
     xui.Window(menu_win).draw_win()
-
-#    pyxel.rect(menu_win.area.x, menu_win.area.y, menu_win.area.w, menu_win.area.h, bg_color)
-#    pyxel.rectb(menu_win.area.x, menu_win.area.y, menu_win.area.w, menu_win.area.h, frame_color)
-#    pyxel.rectb(menu_win.area.x+1, menu_win.area.y+1, menu_win.area.w-2, menu_win.area.h-2, frame_color)
 
     if title:
         str_w = FONT_SIZE*len(title)

@@ -363,6 +363,7 @@ class XMLUI:
         # rootを取り出しておく
         self.root = XUState(self, xmlui_root)
         self.root.set_attr("use_event", True)  # rootはデフォルトではイベントをとるように
+        self.active_state = self.root
 
     # Elmentを複製する
     def duplicate(self, src:Element|XUState) -> XUState:
@@ -405,13 +406,13 @@ class XMLUI:
 
         # イベント発生対象は表示物のみ
         event_targets = [state for state in update_targets if state.visible and state.use_event]
-        active_state = event_targets[-1] if event_targets else None  # Active=最後
+        self.active_state = event_targets[-1] if event_targets else self.root  # Active=最後
 
         # 更新処理
         for state in update_targets:
             if state.enable:  # update中にdisable(remove)になる場合があるので毎回チェック
                 state.set_attr("update_count", state.update_count+1)  # 1スタート(0は初期化時)
-                self.update_element(state.tag, state, self._event if state == active_state else XUEvent())
+                self.update_element(state.tag, state, self._event if state == self.active_state else XUEvent())
 
     # 描画用
     # *************************************************************************
