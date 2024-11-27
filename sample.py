@@ -36,12 +36,12 @@ def menu_win_update(menu_win:XUState, event:XUEvent):
     # 選択アイテムの表示
     if "button_a" in event.trg:
         # メッセージウインドウ表示
-        if grid.item.value == "speak":
-            grid.item.open(ui_template, "win_message")
+        if menu == "speak":
+            menu.open(ui_template, "win_message")
 
         # dialウインドウ表示
-        if grid.item.value == "dial":
-            grid.item.open(ui_template, "win_dial").set_pos(8, 2)
+        if menu == "dial":
+            menu.open(ui_template, "win_dial").set_pos(8, 2)
 
     # 閉じる
     if "button_b" in event.trg:
@@ -51,11 +51,14 @@ def menu_win_update(menu_win:XUState, event:XUEvent):
 # ---------------------------------------------------------
 @ui_worker.draw_func("menu_win")
 def menu_win_draw(menu_win:XUState, event:XUEvent):
+    item_w, item_h = menu_win.attr_int("item_w"), menu_win.attr_int("item_h")
+
     bg_color = 12
     frame_color = 10 if event.active else 7
     title  = menu_win.attr_str("title")
 
-    xui.Window(menu_win).draw_win()
+    menu = xui.MenuWindow(menu_win, "menu_row", "menu_item", item_w, item_h)
+    menu.draw_win()
 
     if title:
         str_w = FONT_SIZE*len(title)
@@ -166,12 +169,12 @@ def dial_yes_no_update(dial_yes_no:XUState, event:XUEvent):
     # 決定
     if "button_a" in event.trg:
         # Yes時処理
-        if grid.item.value == "yes":
+        if grid.selected_item.value == "yes":
             test_params["age"] = XUDialRO(dial_yes_no.find_by_tagR("win_dial")).number
             dial_yes_no.xmlui.close("menu_command")
 
         # No時処理
-        if grid.item.value == "no":
+        if grid.selected_item.value == "no":
             dial_yes_no.close()
 
 

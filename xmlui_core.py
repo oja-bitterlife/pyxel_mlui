@@ -679,7 +679,7 @@ class _XUSelectBase(_XUIUtil):
 
         # タグにselected=Trueがあればそれを使う。無ければgrid[0][0]を選択
         try:
-            self.item
+            self.selected_item
         except:
             self.select(0, 0)  # 最初の選択
 
@@ -713,7 +713,7 @@ class _XUSelectBase(_XUIUtil):
         return self
 
     @property
-    def item(self) -> XUState:
+    def selected_item(self) -> XUState:
         for group in self._grid:
             for item in group:
                 if item.selected:

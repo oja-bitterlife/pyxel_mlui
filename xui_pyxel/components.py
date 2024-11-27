@@ -31,7 +31,16 @@ class MenuWindow(Window):
         if self.xmlui.active_state == self:
             self.grid.select_by_event(self.xmlui._event.trg, left, right, up, down)
 
+    @property
+    def selected_item(self):
+        return self.grid.selected_item
 
+    # 文字列との比較はイベントチェックに使う
+    def __eq__(self, obj):
+        if isinstance(obj, str):
+            return self.selected_item.value == obj
+        else:
+            return super().__eq__(obj)
 
 class Label(XUState):
     def __init__(self, state:XUState, text:str, pat:list[int]=[7,7,12]):
