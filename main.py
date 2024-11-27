@@ -49,7 +49,7 @@ ui_worker.setInputList("button_y", [
 from xmlui_core import *
 
 screen_buf = pyxel.screen.data_ptr()
-win = UI_WIN_ROUND([7,7,12,12], 12, pyxel.width, pyxel.height)
+win = UI_WIN_ROUND([7,7,12,12,12], pyxel.width, pyxel.height)
 win.set_shadow(2, [1])
 
 # Main
