@@ -886,6 +886,7 @@ class UI_WIN_BASE:
         for i,color in enumerate(shadow):
             self._patterns[0][index+i] = color
             self._patterns[1][index+i] = color
+            self._patterns[2][index+i] = color
             self._patterns[3][index+i] = color
         return self
 

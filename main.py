@@ -52,10 +52,14 @@ screen_buf = pyxel.screen.data_ptr()
 win1 = UI_WIN_ROUND([7,7,12,12,12], pyxel.width, pyxel.height).setShadow(2, [1])
 win2 = UI_WIN_ROUND([7,7,12,12,12], pyxel.width, pyxel.height).setShadow(2, [1])
 win3 = UI_WIN_ROUND([7,7,12,12,12], pyxel.width, pyxel.height).setShadow(2, [1])
-
 win4 = UI_WIN_ROUND([7,7,12,12,12], pyxel.width, pyxel.height).setShadow(2, [1])
 
-wins = [win1, win2, win3, win4]
+win5 = UI_WIN_ROUND([7,7,12,12,12,12,12,12,12,12,12,12], pyxel.width, pyxel.height).setShadow(2, [1])
+win6 = UI_WIN_RECT([7,7,12], pyxel.width, pyxel.height).setShadow(2, [1])
+win7 = UI_WIN_ROUND([3,11,12,8,-1], pyxel.width, pyxel.height)
+win8 = UI_WIN_ROUND([1,2,3,4,5,6,7,8,12], pyxel.width, pyxel.height).setShadow(2, [1])
+
+wins = [win1, win2, win3, win4, win5, win6, win7, win8]
 
 # Main
 def update(): # フレームの更新処理
