@@ -851,25 +851,18 @@ class UI_WIN_BASE:
 
     # どのエリアに所属するかを返す
     def getArea(self, x:int, y:int, w:int, h:int) -> int:
-        size = self._pattern_len
-        if x < size and y < size:  # 0
-            return 0
-        if size <= x < w-size and y < size:  # 1
-            return 1
-        elif x >= w-size and y < size:  # 2
-            return 2
-        elif x < size and size <= y < h-size:  # 3
-            return 3
-        elif w-size <= x and size <= y < h-size:  # 5
-            return 5
-        elif x < size and y >= h-size:  # 6
-            return 6
-        elif size <= x < w-size and h-size <= y:  # 7
-            return 7
-        elif x >= w-size and y >= h-size:  # 8
-            return 8
+        if x < self._pattern_len:
+            if y < self._pattern_len:
+                return 0
+            return 3 if y < h-self._pattern_len else 6
+        elif x < w-self._pattern_len:
+            if y < self._pattern_len:
+                return 1
+            return 4 if y < h-self._pattern_len else 7
         else:
-            return 4
+            if y < self._pattern_len:
+                return 2
+            return 5 if y < h-self._pattern_len else 8
 
     # シャドウ対応(0,1,3のパターン上書き)
     def set_shadow(self, index:int, shadow:list[int]):
@@ -885,8 +878,6 @@ class UI_WIN_BASE:
                 index = self._getPatIdxFunc(x_, y_, w, h)
                 if index >= 0:  # 枠外チェック
                     color = self._patterns[self.getArea(x_, y_, w, h)][index]
-                    if color==0:
-                        print("ok")
                     if color == -1:  # 透明チェック
                         continue
                     screen_buf[(y+y_)*self.screen_w + (x+x_)] = color
