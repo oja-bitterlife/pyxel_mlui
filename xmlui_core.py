@@ -847,10 +847,10 @@ class UI_WIN_BASE:
 
     # 1,3,5,7,4のエリア(カド以外)は特に計算が必要ない
     def _get13574Index(self, x:int, y:int, w:int, h:int) -> int:
-        return [-1, y, -1, x, self._pattern_len, w-1-x, -1, h-1-y][self.getAreaIndex(x, y, w, h)]
+        return [-1, y, -1, x, self._pattern_len, w-1-x, -1, h-1-y][self.getArea(x, y, w, h)]
 
     # どのエリアに所属するかを返す
-    def getAreaIndex(self, x:int, y:int, w:int, h:int) -> int:
+    def getArea(self, x:int, y:int, w:int, h:int) -> int:
         size = self._pattern_len
         if x < size and y < size:  # 0
             return 0
@@ -871,22 +871,23 @@ class UI_WIN_BASE:
         else:
             return 4
 
-    # シャドウ対応
+    # シャドウ対応(0,1,3のパターン上書き)
     def set_shadow(self, index:int, shadow:list[int]):
         for i,color in enumerate(shadow):
-            self._patterns[0][index] = color
-            self._patterns[1][index] = color
-            self._patterns[3][index] = color
+            self._patterns[0][index+i] = color
+            self._patterns[1][index+i] = color
+            self._patterns[3][index+i] = color
 
     # バッファに書き込む
     def draw_buf(self, x:int, y:int, w:int, h:int, screen_buf, max_line:int=65536):
-        print(self.getAreaIndex(0, 0, w, h), self._patterns[self.getAreaIndex(0, 0, w, h)])
         for y_ in range(min(h, max_line)):
             for x_ in range(w):
                 index = self._getPatIdxFunc(x_, y_, w, h)
-                if index >= 0:  # 枠外
-                    color = self._patterns[self.getAreaIndex(x, y, w, h)][index]
-                    if color == -1:  # 透明
+                if index >= 0:  # 枠外チェック
+                    color = self._patterns[self.getArea(x_, y_, w, h)][index]
+                    if color==0:
+                        print("ok")
+                    if color == -1:  # 透明チェック
                         continue
                     screen_buf[(y+y_)*self.screen_w + (x+x_)] = color
 
@@ -899,7 +900,7 @@ class UI_WIN_ROUND(UI_WIN_BASE):
 
     def _getPatternIndex(self, x:int, y:int, w:int, h:int) -> int:
         size = self._pattern_len
-        area = self.getAreaIndex(x, y, w, h)
+        area = self.getArea(x, y, w, h)
         if area == 0:
             l = size-1-self._getVecLen(x, y, size-1, size-1)
             return l if l < size else -1
@@ -919,7 +920,7 @@ class UI_WIN_RECT(UI_WIN_BASE):
         super().__init__(pattern, fill, screen_w, screen_h, self._getPatternIndex)
 
     def _getPatternIndex(self, x:int, y:int, w:int, h:int) -> int:
-        area = self.getAreaIndex(x, y, w, h)
+        area = self.getArea(x, y, w, h)
         if area == 0:
             return y if x > y else x
         elif area == 2:
@@ -935,11 +936,11 @@ class UI_WIN_CUT(UI_WIN_BASE):
         super().__init__(pattern, fill, screen_w, screen_h, self._getPatternIndex)
 
     def _getVecLen(self, x:int, y:int, org_x:int, org_y:int) -> int:
-        return abs(x-org_x) + abs(y-org_y)
+        return abs(x-org_x) + abs(y-org_y)  # マンハッタン距離でカット
 
     def _getPatternIndex(self, x:int, y:int, w:int, h:int) -> int:
         size = self._pattern_len
-        area = self.getAreaIndex(x, y, w, h)
+        area = self.getArea(x, y, w, h)
         if area == 0:
             l = size-1-self._getVecLen(x, y, size-1, size-1)
             return l if l < size else -1

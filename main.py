@@ -50,7 +50,7 @@ from xmlui_core import *
 
 screen_buf = pyxel.screen.data_ptr()
 win = UI_WIN_ROUND([7,7,12,12,12,12,12,12], 12, pyxel.width, pyxel.height)
-win.set_shadow(2, [0])
+win.set_shadow(2, [1])
 
 # Main
 def update(): # フレームの更新処理
