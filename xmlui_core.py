@@ -839,10 +839,8 @@ class UI_WIN_BASE:
     # 3 4 5
     # 6 7 8
     def __init__(self, pattern:list[int], screen_w:int, screen_h:int, getPatternIndexFunc:Callable[[int,int,int,int], int]):
-        self._patterns = [list(pattern) for i in range(9)]
-        self._pattern_len = len(pattern)
-        self.screen_w = screen_w
-        self.screen_h = screen_h
+        self._patterns = [pattern.copy() for i in range(9)]
+        self.screen_w, self.screen_h = screen_w, screen_h
         self._getPatIdxFunc = getPatternIndexFunc  # 枠外は-1を返す
 
         # クリッピングエリア
@@ -850,22 +848,22 @@ class UI_WIN_BASE:
 
     # 1,3,5,7,4のエリア(カド以外)は特に計算が必要ない
     def _get13574Index(self, x:int, y:int, w:int, h:int) -> int:
-        return [-1, y, -1, x, self._pattern_len-1, w-1-x, -1, h-1-y][self.getArea(x, y, w, h)]
+        return [-1, y, -1, x, self.pattern_size-1, w-1-x, -1, h-1-y][self.getArea(x, y, w, h)]
 
     # どのエリアに所属するかを返す
     def getArea(self, x:int, y:int, w:int, h:int) -> int:
-        if x < self._pattern_len:
-            if y < self._pattern_len:
+        if x < self.pattern_size:
+            if y < self.pattern_size:
                 return 0
-            return 3 if y < h-self._pattern_len else 6
-        elif x < w-self._pattern_len:
-            if y < self._pattern_len:
+            return 3 if y < h-self.pattern_size else 6
+        elif x < w-self.pattern_size:
+            if y < self.pattern_size:
                 return 1
-            return 4 if y < h-self._pattern_len else 7
+            return 4 if y < h-self.pattern_size else 7
         else:
-            if y < self._pattern_len:
+            if y < self.pattern_size:
                 return 2
-            return 5 if y < h-self._pattern_len else 8
+            return 5 if y < h-self.pattern_size else 8
 
     # シャドウ対応(0,1,3のパターン上書き)
     def set_shadow(self, index:int, shadow:list[int]):
@@ -885,6 +883,11 @@ class UI_WIN_BASE:
                         continue
                     screen_buf[(y+y_)*self.screen_w + (x+x_)] = color
 
+    # パターン長
+    @property
+    def pattern_size(self) -> int:
+        return len(self._patterns[0])
+
 class UI_WIN_ROUND(UI_WIN_BASE):
     def __init__(self, pattern:list[int], screen_w:int, screen_h:int):
         super().__init__(pattern, screen_w, screen_h, self._getPatternIndex)
@@ -893,7 +896,7 @@ class UI_WIN_ROUND(UI_WIN_BASE):
         return math.ceil(math.sqrt((x-org_x)**2 + (y-org_y)**2))
 
     def _getPatternIndex(self, x:int, y:int, w:int, h:int) -> int:
-        size = self._pattern_len
+        size = self.pattern_size
         area = self.getArea(x, y, w, h)
         if area == 0:
             l = size-1-self._getVecLen(x, y, size-1, size-1)
