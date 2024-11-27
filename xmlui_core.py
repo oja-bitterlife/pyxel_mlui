@@ -866,14 +866,15 @@ class UI_WIN_BASE:
             return 5 if y < h-self.pattern_size else 8
 
     # シャドウ対応(0,1,3のパターン上書き)
-    def set_shadow(self, index:int, shadow:list[int]):
+    def setShadow(self, index:int, shadow:list[int]) -> Self:
         for i,color in enumerate(shadow):
             self._patterns[0][index+i] = color
             self._patterns[1][index+i] = color
             self._patterns[3][index+i] = color
+        return self
 
     # バッファに書き込む
-    def draw_buf(self, x:int, y:int, w:int, h:int, screen_buf):
+    def drawBuf(self, x:int, y:int, w:int, h:int, screen_buf):
         for y_ in range(self.clip.y, min(self.clip.h, h)):
             for x_ in range(self.clip.x, min(self.clip.w, w)):
                 index = self._getPatIdxFunc(x_, y_, w, h)

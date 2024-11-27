@@ -49,8 +49,11 @@ ui_worker.setInputList("button_y", [
 from xmlui_core import *
 
 screen_buf = pyxel.screen.data_ptr()
-win = UI_WIN_ROUND([7,7,12,12,12], pyxel.width, pyxel.height)
-win.set_shadow(2, [1])
+win1 = UI_WIN_ROUND([7,7,12,12,12], pyxel.width, pyxel.height).setShadow(2, [1])
+win2 = UI_WIN_ROUND([7,7,12,12,12], pyxel.width, pyxel.height).setShadow(2, [1])
+win3 = UI_WIN_ROUND([7,7,12,12,12], pyxel.width, pyxel.height).setShadow(2, [1])
+
+wins = [win1, win2, win3]
 
 # Main
 def update(): # フレームの更新処理
@@ -70,8 +73,16 @@ def draw(): # 描画処理
     # UI描画
     ui_worker.draw()
 
-    win.clip.w = ui_worker.root.update_count
-    win.draw_buf(10, 10, 160, 160 , screen_buf)
+    win_size = 64
+    for i,win in enumerate(wins):
+        if i == 0:
+            win.clip.h = ui_worker.root.update_count
+        if i == 1:
+            win.clip.w = ui_worker.root.update_count
+        if i == 2:
+            win.clip.h = win.clip.w = ui_worker.root.update_count
+
+        win.drawBuf((i%4)*win_size, (i//4)*win_size, win_size, win_size , screen_buf)
 
 # アプリケーションの実行
 pyxel.run(update, draw)
