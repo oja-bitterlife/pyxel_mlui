@@ -2,13 +2,18 @@
 import xml.etree.ElementTree
 from xml.etree.ElementTree import Element
 
+# 日本語対応
+import unicodedata
+
+# その他よく使う奴
+import re
+import math
+import copy
 from typing import Callable,Any,Self  # 型を使うよ
-import unicodedata  # 全角化用
-import re, math, copy  # その他よく使う奴
 
 
 # 描画領域計算用
-class UI_RECT:
+class XUIRect:
     def __init__(self, x:int, y:int, w:int, h:int):
         self.x = x
         self.y = y
@@ -20,7 +25,7 @@ class UI_RECT:
         left = max(self.x, other.x)
         bottom = min(self.y+self.h, other.y+other.h)
         top = max(self.y, other.y)
-        return UI_RECT(left, top, right-left, bottom-top)
+        return XUIRect(left, top, right-left, bottom-top)
     
     def contains(self, x, y) -> bool:
         return self.x <= x < self.x+self.w and self.y <= y < self.y+self.h
@@ -52,7 +57,7 @@ class UI_RECT:
 
 
 # イベント管理用
-class UI_EVENT:
+class XUIEvent:
     def __init__(self, init_active=False):
         self.active = init_active  # 現在アクティブかどうか
         self._receive:set[str] = set([])  # 次の状態受付
@@ -90,7 +95,7 @@ class UI_EVENT:
 
 
 # UIパーツの状態管理ラッパー
-class UI_STATE:
+class XUIState:
     def __init__(self, xmlui:'XMLUI', element:Element):
         self.xmlui = xmlui  # ライブラリへのIF
         self._element = element  # 自身のElement
@@ -98,9 +103,9 @@ class UI_STATE:
     def disableEvent(self) -> Self:
         return self.setAttr("use_event", False)
 
-    # UI_STATEは都度使い捨てなので、対象となるElementで比較する
+    # UI_Stateは都度使い捨てなので、対象となるElementで比較する
     def __eq__(self, other) -> bool:
-        return other._element is self._element if isinstance(other, UI_STATE) else False
+        return other._element is self._element if isinstance(other, XUIState) else False
 
     # attribアクセス用
     # *************************************************************************
@@ -135,7 +140,7 @@ class UI_STATE:
     def text(self) -> str:
         return self._element.text.strip() if self._element.text else ""
 
-    def setText(self, text:str) -> 'UI_STATE':
+    def setText(self, text:str) -> 'XUIState':
         self._element.text = text
         return self
 
@@ -146,8 +151,8 @@ class UI_STATE:
         return self._element.tag
 
     @property
-    def area(self) -> UI_RECT:
-        return UI_RECT(self.area_x, self.area_y, self.area_w, self.area_h)
+    def area(self) -> XUIRect:
+        return XUIRect(self.area_x, self.area_y, self.area_w, self.area_h)
 
     def setPos(self, x:int, y:int) -> Self:
         return self.setAttr(["x", "y"], [x, y])
@@ -163,7 +168,7 @@ class UI_STATE:
 
     # ツリー操作用
     # *************************************************************************
-    def addChild(self, child:'UI_STATE'):  # selfとchildどっちが返るかややこしいのでNone
+    def addChild(self, child:'XUIState'):  # selfとchildどっちが返るかややこしいのでNone
         self._element.append(child._element)
 
     def remove(self):  # removeの後なにかすることはないのでNone
@@ -172,23 +177,23 @@ class UI_STATE:
         if self.parent:  # 親から外す
             self.parent._element.remove(self._element)
 
-    def findByID(self, id:str) -> 'UI_STATE':
+    def findByID(self, id:str) -> 'XUIState':
         for element in self._element.iter():
             if element.attrib.get("id") == id:
-                return UI_STATE(self.xmlui, element)
+                return XUIState(self.xmlui, element)
         raise Exception(f"ID '{id}' not found in '{self.tag}' and children")
 
-    def findByTagAll(self, tag:str) -> list['UI_STATE']:
-        return [UI_STATE(self.xmlui, element) for element in self._element.iter() if element.tag == tag]
+    def findByTagAll(self, tag:str) -> list['XUIState']:
+        return [XUIState(self.xmlui, element) for element in self._element.iter() if element.tag == tag]
 
-    def findByTag(self, tag:str) -> 'UI_STATE':
-        elements:list[UI_STATE] = self.findByTagAll(tag)
+    def findByTag(self, tag:str) -> 'XUIState':
+        elements:list[XUIState] = self.findByTagAll(tag)
         if elements:
             return elements[0]
         raise Exception(f"Tag '{tag}' not found in '{self.tag}' and children")
 
     # 下階層ではなく、上(root)に向かって探索する
-    def findByTagR(self, tag:str) -> 'UI_STATE':
+    def findByTagR(self, tag:str) -> 'XUIState':
         parent = self.parent
         while(parent):
             if parent.tag == tag:
@@ -197,7 +202,7 @@ class UI_STATE:
         raise Exception(f"Tag '{tag}' not found in parents")
 
     @property
-    def parent(self) -> 'UI_STATE|None':
+    def parent(self) -> 'XUIState|None':
         def _rec_parentSearch(element:Element, me:Element) -> Element|None:
             if me in element:
                 return element
@@ -207,10 +212,10 @@ class UI_STATE:
                     return result
             return None
         parent = _rec_parentSearch(self.xmlui.root._element, self._element)
-        return UI_STATE(self.xmlui, parent) if parent else None
+        return XUIState(self.xmlui, parent) if parent else None
 
     # 子に別Element一式を追加する
-    def open(self, template:'XMLUI|UI_STATE', id:str, alias:str|None=None) -> 'UI_STATE':
+    def open(self, template:'XMLUI|XUIState', id:str, alias:str|None=None) -> 'XUIState':
         src = template.root if isinstance(template, XMLUI) else template
 
         try:
@@ -239,7 +244,7 @@ class UI_STATE:
         out += f": {self.id}" if self.id else ""
         out += f" {self.marker}"
         for element in self._element:
-            out += "\n" + UI_STATE(self.xmlui, element).strTree(indent, pre+indent)
+            out += "\n" + XUIState(self.xmlui, element).strTree(indent, pre+indent)
         return out
 
     # xmluiで特別な意味を持つアトリビュート一覧
@@ -341,12 +346,12 @@ class XMLUI:
     # 初期化。<xmlui>を持つXMLを突っ込む
     def __init__(self, dom:xml.etree.ElementTree.Element, root_tag:str|None=None):
         # 入力
-        self._event = UI_EVENT(True)  # 唯一のactiveとする
+        self._event = XUIEvent(True)  # 唯一のactiveとする
         self._input_lists:dict[str, list[int]] = {}
 
         # 処理関数の登録
-        self._update_funcs:dict[str,Callable[[UI_STATE,UI_EVENT], None]] = {}
-        self._draw_funcs:dict[str,Callable[[UI_STATE,UI_EVENT], None]] = {}
+        self._update_funcs:dict[str,Callable[[XUIState,XUIEvent], None]] = {}
+        self._draw_funcs:dict[str,Callable[[XUIState,XUIEvent], None]] = {}
 
         # root_tag指定が無ければ最上位エレメント
         if root_tag is None:
@@ -359,26 +364,26 @@ class XMLUI:
                 raise Exception(f"<{root_tag}> not found")
 
         # rootを取り出しておく
-        self.root = UI_STATE(self, xmlui_root)
+        self.root = XUIState(self, xmlui_root)
         self.root.setAttr("use_event", True)  # rootはデフォルトではイベントをとるように
 
     # Elmentを複製する
-    def duplicate(self, src:Element|UI_STATE) -> UI_STATE:
-        return UI_STATE(self, copy.deepcopy(src._element if isinstance(src, UI_STATE) else src))
+    def duplicate(self, src:Element|XUIState) -> XUIState:
+        return XUIState(self, copy.deepcopy(src._element if isinstance(src, XUIState) else src))
 
 
     # XML操作
     # *************************************************************************
-    def addChild(self, child:'UI_STATE'):
+    def addChild(self, child:'XUIState'):
         self.root.addChild(child)
 
-    def findByID(self, id:str) -> UI_STATE:
+    def findByID(self, id:str) -> XUIState:
         return self.root.findByID(id)
 
-    def findByTagAll(self, tag:str) -> list[UI_STATE]:
+    def findByTagAll(self, tag:str) -> list[XUIState]:
         return self.root.findByTagAll(tag)
 
-    def findByTag(self, tag:str) -> UI_STATE:
+    def findByTag(self, tag:str) -> XUIState:
         return self.root.findByTag(tag)
 
     def close(self, id:str):
@@ -387,12 +392,12 @@ class XMLUI:
 
     # 更新用
     # *************************************************************************
-    def _getUpdateTargets(self, state:UI_STATE):
+    def _getUpdateTargets(self, state:XUIState):
         if state.enable:
             yield state
             # enableの子だけ回収(disableの子は削除)
             for child in state._element:
-                yield from self._getUpdateTargets(UI_STATE(self, child))
+                yield from self._getUpdateTargets(XUIState(self, child))
 
     def update(self):
         # (入力)イベントの更新
@@ -409,16 +414,16 @@ class XMLUI:
         for state in update_targets:
             if state.enable:  # update中にdisable(remove)になる場合があるので毎回チェック
                 state.setAttr("update_count", state.update_count+1)  # 1スタート(0は初期化時)
-                self.updateElement(state.tag, state, self._event if state == active_state else UI_EVENT())
+                self.updateElement(state.tag, state, self._event if state == active_state else XUIEvent())
 
     # 描画用
     # *************************************************************************
-    def _getDrawTargets(self, state:UI_STATE):
+    def _getDrawTargets(self, state:XUIState):
         if state.enable and state.visible and state.update_count>0:  # count==0はUpdateで追加されたばかりのもの(未Update)
             yield state
             # visibleの子だけ回収(invisibleの子は削除)
             for child in state._element:
-                yield from self._getDrawTargets(UI_STATE(self, child))
+                yield from self._getDrawTargets(XUIState(self, child))
 
     def draw(self):
         # 描画対象を取得
@@ -445,15 +450,15 @@ class XMLUI:
 
         # 描画処理
         for state in sorted(draw_targets, key=lambda state: state.layer):
-            self.drawElement(state.tag, state, self._event if state == active_state else UI_EVENT())
+            self.drawElement(state.tag, state, self._event if state == active_state else XUIEvent())
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
-    def updateElement(self, tag_name:str, state:UI_STATE, event:UI_EVENT):
+    def updateElement(self, tag_name:str, state:XUIState, event:XUIEvent):
         # 登録済みの関数だけ実行
         if tag_name in self._update_funcs:
             self._update_funcs[tag_name](state, event)
 
-    def drawElement(self, tag_name:str, state:UI_STATE, event:UI_EVENT):
+    def drawElement(self, tag_name:str, state:XUIState, event:XUIEvent):
         # 登録済みの関数だけ実行
         if tag_name in self._draw_funcs:
             self._draw_funcs[tag_name](state, event)
@@ -461,20 +466,20 @@ class XMLUI:
 
     # 処理登録
     # *************************************************************************
-    def setUpdateFunc(self, tag_name:str, func:Callable[[UI_STATE,UI_EVENT], None]):
+    def setUpdateFunc(self, tag_name:str, func:Callable[[XUIState,XUIEvent], None]):
         self._update_funcs[tag_name] = func
 
-    def setDrawFunc(self, tag_name:str, func:Callable[[UI_STATE,UI_EVENT], None]):
+    def setDrawFunc(self, tag_name:str, func:Callable[[XUIState,XUIEvent], None]):
         self._draw_funcs[tag_name] = func
 
     # デコレータを用意
     def update_func(self, tag_name:str):
-        def wrapper(update_func:Callable[[UI_STATE,UI_EVENT], None]):
+        def wrapper(update_func:Callable[[XUIState,XUIEvent], None]):
             self.setUpdateFunc(tag_name, update_func)
         return wrapper
 
     def draw_func(self, tag_name:str):
-        def wrapper(draw_func:Callable[[UI_STATE,UI_EVENT], None]):
+        def wrapper(draw_func:Callable[[XUIState,XUIEvent], None]):
             self.setDrawFunc(tag_name, draw_func)
         return wrapper
 
@@ -507,10 +512,10 @@ class XMLUI:
 # StateベースのUtility用基底クラス
 # ---------------------------------------------------------
 # ツリーでぶら下げる(rootの追加)
-class _UI_UTIL_TREE(UI_STATE):
+class _XUIUtilTree(XUIState):
     # 親になければ新規で作って追加する。あればそれを利用する
     # 新規作成時Trueを返す
-    def __init__(self, parent:UI_STATE, child_root_tag:str, allow_create:bool=True):
+    def __init__(self, parent:XUIState, child_root_tag:str, allow_create:bool=True):
         try:
             # すでに存在するElementを回収
             exists = parent.findByTag(child_root_tag)
@@ -527,8 +532,8 @@ class _UI_UTIL_TREE(UI_STATE):
             self._need_init = True  # 初期化が必要
 
 # Stateをそのまま利用する(attribute中心操作)
-class _UI_UTIL(UI_STATE):
-    def __init__(self, state:UI_STATE):
+class _XUIUtil(XUIState):
+    def __init__(self, state:XUIState):
         super().__init__(state.xmlui, state._element)
 
 # テキスト系
@@ -543,7 +548,7 @@ _hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
 # まずは読み込み用
 # *****************************************************************************
 # テキスト基底
-class UI_PAGE_RO(_UI_UTIL_TREE):
+class XUIPageRO(_XUIUtilTree):
     # クラス定数
     PAGE_TAG ="_xmlui_page"
     SEPARATE_REGEXP = r"\\n"  # 改行に変換する正規表現
@@ -551,7 +556,7 @@ class UI_PAGE_RO(_UI_UTIL_TREE):
     DRAW_COUNT_ATTR = "draw_count"  # 文字アニメ用
     PAGE_NO_ATTR = "page_no"  # ページ管理用
 
-    def __init__(self, parent: UI_STATE, allow_create:bool=False):
+    def __init__(self, parent: XUIState, allow_create:bool=False):
         super().__init__(parent, "_xmlui_page_root", allow_create)
 
     # ページ関係
@@ -573,7 +578,7 @@ class UI_PAGE_RO(_UI_UTIL_TREE):
 
     # ページタグリスト
     @property
-    def pages(self) -> list[UI_STATE]:
+    def pages(self) -> list[XUIState]:
         return self.findByTagAll(self.PAGE_TAG)
 
     # ページテキスト
@@ -611,8 +616,8 @@ class UI_PAGE_RO(_UI_UTIL_TREE):
         return unicodedata.normalize("NFKC", hankaku).translate(_hankaku_zenkaku_dict)
 
 # アニメーションテキストページ管理
-class UI_PAGE(UI_PAGE_RO):
-    def __init__(self, parent:UI_STATE, text:str, page_line_num:int, wrap:int=4096):
+class XUIPage(XUIPageRO):
+    def __init__(self, parent:XUIState, text:str, page_line_num:int, wrap:int=4096):
         super().__init__(parent, True)
         if self._need_init:
             # 改行を\nに統一して全角化
@@ -625,7 +630,7 @@ class UI_PAGE(UI_PAGE_RO):
             # ページごとにElementを追加
             for i in range(0, len(lines), page_line_num):
                 page_text = "\n".join(lines[i:i+page_line_num])  # 改行を\nにして全部文字列に
-                page = UI_STATE(self.xmlui, Element(self.PAGE_TAG))
+                page = XUIState(self.xmlui, Element(self.PAGE_TAG))
                 page.setText(page_text)
                 self.addChild(page)
 
@@ -669,8 +674,8 @@ class UI_PAGE(UI_PAGE_RO):
 # メニュー系
 # ---------------------------------------------------------
 # グリッド情報
-class _UI_SELECT_BASE(_UI_UTIL):
-    def __init__(self, state:UI_STATE, grid:list[list[UI_STATE]]):
+class _XUISelectBase(_XUIUtil):
+    def __init__(self, state:XUIState, grid:list[list[XUIState]]):
         super().__init__(state)
         self._grid = grid
 
@@ -682,12 +687,12 @@ class _UI_SELECT_BASE(_UI_UTIL):
 
     # GRID用
     @classmethod
-    def findGridByTag(cls, state:UI_STATE, tag_group:str, tag_item:str) -> list[list['UI_STATE']]:
+    def findGridByTag(cls, state:XUIState, tag_group:str, tag_item:str) -> list[list['XUIState']]:
         return [group.findByTagAll(tag_item) for group in state.findByTagAll(tag_group)]
 
     # 転置(Transpose)GRID
     @classmethod
-    def findGridByTagT(cls, state:UI_STATE, tag_group:str, tag_item:str) -> list[list['UI_STATE']]:
+    def findGridByTagT(cls, state:XUIState, tag_group:str, tag_item:str) -> list[list['XUIState']]:
         grid = cls.findGridByTag(state, tag_group, tag_item)
         grid = [[grid[y][x] for y in range(len(grid))] for x in range(len(grid[0]))]  # 転置
         return grid
@@ -710,7 +715,7 @@ class _UI_SELECT_BASE(_UI_UTIL):
         return self
 
     @property
-    def selected_item(self) -> UI_STATE:
+    def selected_item(self) -> XUIState:
         for group in self._grid:
             for item in group:
                 if item.selected:
@@ -743,8 +748,8 @@ class _UI_SELECT_BASE(_UI_UTIL):
 
 
 # グリッド選択
-class UI_SELECT_GRID(_UI_SELECT_BASE):
-    def __init__(self, state:UI_STATE, tag_group:str, tag_item:str):
+class XUISelectGrid(_XUISelectBase):
+    def __init__(self, state:XUIState, tag_group:str, tag_item:str):
         super().__init__(state, self.findGridByTag(state, tag_group, tag_item))
 
     # 入力に応じた挙動一括
@@ -760,9 +765,9 @@ class UI_SELECT_GRID(_UI_SELECT_BASE):
         return self
 
 # リスト選択
-class UI_SELECT_LIST(_UI_SELECT_BASE):
+class XUISelectList(_XUISelectBase):
     # 縦に入れる
-    def __init__(self, state:UI_STATE, tag_item:str):
+    def __init__(self, state:XUIState, tag_item:str):
         super().__init__(state, self.findGridByTagT(state, state.tag, tag_item))
 
     # 入力に応じた挙動一括。選択リストは通常上下ラップする
@@ -777,12 +782,12 @@ class UI_SELECT_LIST(_UI_SELECT_BASE):
 # ダイアル
 # ---------------------------------------------------------
 # 情報管理のみ
-class UI_DIAL_RO(_UI_UTIL_TREE):
+class XUIDialRO(_XUIUtilTree):
     DIGIT_TAG = "_xmlui_dial_digit"
 
     EDIT_POS_ATTR = "edit_pos"  # 操作位置
 
-    def __init__(self, parent:UI_STATE, allow_create:bool=False):
+    def __init__(self, parent:XUIState, allow_create:bool=False):
         super().__init__(parent, "_xmlui_dial_root", allow_create)
 
     @property
@@ -795,20 +800,20 @@ class UI_DIAL_RO(_UI_UTIL_TREE):
 
     @property
     def zenkakuDigits(self) -> list[str]:
-        return [UI_PAGE_RO.convertZenkaku(digit) for digit in self.digits]
+        return [XUIPageRO.convertZenkaku(digit) for digit in self.digits]
 
     @property
     def number(self) -> int:
         return int("".join(reversed(self.digits)))
 
 # ダイアル操作
-class UI_DIAL(UI_DIAL_RO):
-    def __init__(self, parent:UI_STATE, digit_length:int, digit_list:str="0123456789"):
+class XUIDial(XUIDialRO):
+    def __init__(self, parent:XUIState, digit_length:int, digit_list:str="0123456789"):
         super().__init__(parent, True)
         if self._need_init:
             # 初期値は最小埋め
             for i in range(digit_length):
-                digit = UI_STATE(self.xmlui, Element(self.DIGIT_TAG))
+                digit = XUIState(self.xmlui, Element(self.DIGIT_TAG))
                 digit.setText(digit_list[0])
                 self.addChild(digit)
 
@@ -850,7 +855,7 @@ class UI_DIAL(UI_DIAL_RO):
 
 # ウインドウサポート
 # ---------------------------------------------------------
-class _UI_WIN_BASE:
+class _XUIWinBase:
     # 0 1 2
     # 3 4 5
     # 6 7 8
@@ -860,7 +865,7 @@ class _UI_WIN_BASE:
         self._getPatIdxFunc = getPatternIndexFunc  # 枠外は-1を返す
 
         # クリッピングエリア
-        self.clip = UI_RECT(0, 0, screen_w, screen_h)
+        self.clip = XUIRect(0, 0, screen_w, screen_h)
 
     # 1,3,5,7,4のエリア(カド以外)は特に計算が必要ない
     def _get13574Index(self, x:int, y:int, w:int, h:int) -> int:
@@ -906,7 +911,7 @@ class _UI_WIN_BASE:
     def pattern_size(self) -> int:
         return len(self._patterns[0])
 
-class UI_WIN_ROUND(_UI_WIN_BASE):
+class XUIWinRound(_XUIWinBase):
     def __init__(self, pattern:list[int], screen_w:int, screen_h:int):
         super().__init__(pattern, screen_w, screen_h, self._getPatternIndex)
 
@@ -930,7 +935,7 @@ class UI_WIN_ROUND(_UI_WIN_BASE):
             return l if l < size else -1
         return self._get13574Index(x, y, w, h)
 
-class UI_WIN_RECT(_UI_WIN_BASE):
+class XUIWinRect(_XUIWinBase):
     def __init__(self, pattern:list[int], screen_w:int, screen_h:int):
         super().__init__(pattern, screen_w, screen_h, self._getPatternIndex)
 

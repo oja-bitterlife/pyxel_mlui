@@ -13,7 +13,7 @@ test_params = {"name":"world", "age":10}
 # 入力待ち
 # *****************************************************************************
 @ui_worker.update_func("my_ui")
-def my_ui_update(my_ui:UI_STATE, event:UI_EVENT):
+def my_ui_update(my_ui:XUIState, event:XUIEvent):
     # メインメニューを開く
     if "button_a" in event.trg:
         my_ui.open(ui_template, "menu_command")
@@ -24,11 +24,11 @@ def my_ui_update(my_ui:UI_STATE, event:UI_EVENT):
 # 更新
 # ---------------------------------------------------------
 @ui_worker.update_func("menu_win")
-def menu_win_update(menu_win:UI_STATE, event:UI_EVENT):
+def menu_win_update(menu_win:XUIState, event:XUIEvent):
     item_w, item_h = menu_win.attrInt("item_w"), menu_win.attrInt("item_h")
 
     # メニューアイテム
-    grid = UI_SELECT_GRID(menu_win, "menu_row", "menu_item").arrangeItems(item_w, item_h)
+    grid = XUISelectGrid(menu_win, "menu_row", "menu_item").arrangeItems(item_w, item_h)
     grid.selectByEvent(event.trg, "left", "right", "up", "down")
 
     # 選択アイテムの表示
@@ -48,7 +48,7 @@ def menu_win_update(menu_win:UI_STATE, event:UI_EVENT):
 # 描画
 # ---------------------------------------------------------
 @ui_worker.draw_func("menu_win")
-def menu_win_draw(menu_win:UI_STATE, event:UI_EVENT):
+def menu_win_draw(menu_win:XUIState, event:XUIEvent):
     bg_color = 12
     frame_color = 10 if event.active else 7
     title  = menu_win.attrStr("title")
@@ -64,7 +64,7 @@ def menu_win_draw(menu_win:UI_STATE, event:UI_EVENT):
         pyxel.text(text_x, menu_win.area.y-2, title, frame_color, font)
 
 @ui_worker.draw_func("menu_item")
-def menu_item_draw(menu_item:UI_STATE, event:UI_EVENT):
+def menu_item_draw(menu_item:XUIState, event:XUIEvent):
     color = menu_item.attrInt("color", 7)
     pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, color, font)
 
@@ -78,12 +78,12 @@ def menu_item_draw(menu_item:UI_STATE, event:UI_EVENT):
 # 更新
 # ---------------------------------------------------------
 @ui_worker.update_func("msg_win")
-def msg_win_update(msg_win:UI_STATE, event:UI_EVENT):
+def msg_win_update(msg_win:XUIState, event:XUIEvent):
     msg_cur = msg_win.findByTag("msg_cur")
     msg_text = msg_win.findByTag("msg_text")
 
     # 文字列更新
-    text = UI_PAGE(msg_text, msg_text.text.format(**test_params), 3, msg_text.attrInt("wrap")).next()
+    text = XUIPage(msg_text, msg_text.text.format(**test_params), 3, msg_text.attrInt("wrap")).next()
 
     # 次のページありカーソル表示
     msg_cur.setVisible(not text.is_end_page and text.is_finish)
@@ -99,7 +99,7 @@ def msg_win_update(msg_win:UI_STATE, event:UI_EVENT):
 # 描画
 # ---------------------------------------------------------
 @ui_worker.draw_func("msg_win")
-def msg_win_draw(msg_win:UI_STATE, event:UI_EVENT):
+def msg_win_draw(msg_win:XUIState, event:XUIEvent):
     frame_color = 10 if event.active else 7
     pyxel.rect(msg_win.area.x, msg_win.area.y, msg_win.area.w, msg_win.area.h, 12)
     pyxel.rectb(msg_win.area.x, msg_win.area.y, msg_win.area.w, msg_win.area.h, frame_color)
@@ -107,15 +107,15 @@ def msg_win_draw(msg_win:UI_STATE, event:UI_EVENT):
     pyxel.rectb(msg_win.area.x+3, msg_win.area.y+3, msg_win.area.w-6, msg_win.area.h-6, frame_color)
 
 @ui_worker.draw_func("msg_text")
-def msg_text_draw(msg_text:UI_STATE, event:UI_EVENT):
+def msg_text_draw(msg_text:XUIState, event:XUIEvent):
     # テキスト表示
-    page = UI_PAGE_RO(msg_text)
+    page = XUIPageRO(msg_text)
 
     for i,page in enumerate(page.page_text.split()):
         pyxel.text(msg_text.area.x, msg_text.area.y+i*FONT_SIZE, page, 7, font)
 
 @ui_worker.draw_func("msg_cur")
-def msg_cur_draw(msg_cur:UI_STATE, event:UI_EVENT):
+def msg_cur_draw(msg_cur:XUIState, event:XUIEvent):
     tri_size = msg_cur.attrInt("size", 6)
     color = msg_cur.attrInt("color", 7)
 
@@ -127,9 +127,9 @@ def msg_cur_draw(msg_cur:UI_STATE, event:UI_EVENT):
 # ダイアル
 # *****************************************************************************
 @ui_worker.update_func("win_dial")
-def win_dial_update(win_dial:UI_STATE, event:UI_EVENT):
+def win_dial_update(win_dial:XUIState, event:XUIEvent):
     # 数値変更
-    dial = UI_DIAL(win_dial, 5)
+    dial = XUIDial(win_dial, 5)
     dial.changeByEvent(event.trg, "left", "right", "up", "down")
 
     # 確定
@@ -142,21 +142,21 @@ def win_dial_update(win_dial:UI_STATE, event:UI_EVENT):
         win_dial.close()
 
 @ui_worker.draw_func("win_dial")
-def dial_win_draw(dial_win:UI_STATE, event:UI_EVENT):
+def dial_win_draw(dial_win:XUIState, event:XUIEvent):
     frame_color = 10 if event.active else 7
     pyxel.rect(dial_win.area.x, dial_win.area.y, dial_win.area.w, dial_win.area.h, 12)
     pyxel.rectb(dial_win.area.x, dial_win.area.y, dial_win.area.w, dial_win.area.h, frame_color)
 
     # 数値表示
-    dial = UI_DIAL_RO(dial_win)
+    dial = XUIDialRO(dial_win)
     for i,digit in enumerate(dial.zenkakuDigits):
         pyxel.text(dial_win.area.x+3+(4-i)*FONT_SIZE, dial_win.area.y+2, digit, 2 if dial.edit_pos == i else 7, font)
 
 @ui_worker.update_func("dial_yes_no")
-def dial_yes_no_update(dial_yes_no:UI_STATE, event:UI_EVENT):
+def dial_yes_no_update(dial_yes_no:XUIState, event:XUIEvent):
     item_h = dial_yes_no.attrInt("item_h")
 
-    grid = UI_SELECT_LIST(dial_yes_no, "yes_no_item").arrangeItems(0, item_h)
+    grid = XUISelectList(dial_yes_no, "yes_no_item").arrangeItems(0, item_h)
     grid.selectByEvent(event.trg, "up", "down")
 
     # 閉じる
@@ -167,7 +167,7 @@ def dial_yes_no_update(dial_yes_no:UI_STATE, event:UI_EVENT):
     if "button_a" in event.trg:
         # Yes時処理
         if grid.selected_item.value == "yes":
-            test_params["age"] = UI_DIAL_RO(dial_yes_no.findByTagR("win_dial")).number
+            test_params["age"] = XUIDialRO(dial_yes_no.findByTagR("win_dial")).number
             dial_yes_no.xmlui.close("menu_command")
 
         # No時処理
@@ -176,13 +176,13 @@ def dial_yes_no_update(dial_yes_no:UI_STATE, event:UI_EVENT):
 
 
 @ui_worker.draw_func("dial_yes_no")
-def dial_yes_no_draw(dial_yes_no:UI_STATE, event:UI_EVENT):
+def dial_yes_no_draw(dial_yes_no:XUIState, event:XUIEvent):
     frame_color = 10 if event.active else 7
     pyxel.rect(dial_yes_no.area.x+4, dial_yes_no.area.y+4, dial_yes_no.area.w, dial_yes_no.area.h, 12)
     pyxel.rectb(dial_yes_no.area.x+4, dial_yes_no.area.y+4, dial_yes_no.area.w, dial_yes_no.area.h, frame_color)
 
 @ui_worker.draw_func("yes_no_item")
-def dial_yes_no_item_draw(item:UI_STATE, event:UI_EVENT):
+def dial_yes_no_item_draw(item:XUIState, event:XUIEvent):
     pyxel.text(item.area.x+6, item.area.y, item.text, 7, font)  # Yes/No表示
     # カーソル表示
     if item.selected:
