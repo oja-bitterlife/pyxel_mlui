@@ -873,7 +873,7 @@ class UI_WIN_ROUND(UI_WIN_BASE):
         super().__init__(screen_w, screen_h, self._getPatternIndex)
 
     def _getVecLen(self, x:int, y:int, org_x:int, org_y:int) -> int:
-        return round(math.sqrt((x-org_x)**2 + (y-org_y)**2))
+        return math.ceil(math.sqrt((x-org_x)**2 + (y-org_y)**2))
 
     def _getPatternIndex(self, x:int, y:int, w:int, h:int, size:int) -> int:
         if x < size and y < size:  # 0
