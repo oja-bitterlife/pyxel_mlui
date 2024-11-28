@@ -55,7 +55,7 @@ class Menu(MenuRO):
         return self._grid.selected_item
 
 # デコレータを用意
-def menu_update_func(xmlui:XMLUI, tag_name:str, tag_group:str, tag_item:str):
+def menu_update_bind(xmlui:XMLUI, tag_name:str, tag_group:str, tag_item:str):
     def wrapper(update_func:Callable[[Menu,XUEvent], None]):
         # 登録用関数をジェネレート
         def update(state:XUState, event:XUEvent):
@@ -64,7 +64,7 @@ def menu_update_func(xmlui:XMLUI, tag_name:str, tag_group:str, tag_item:str):
         xmlui.set_updatefunc(tag_name, update)
     return wrapper
 
-def menu_draw_func(xmlui:XMLUI, tag_name:str, tag_group:str, tag_item:str):
+def menu_draw_bind(xmlui:XMLUI, tag_name:str, tag_group:str, tag_item:str):
     def wrapper(draw_func:Callable[[MenuRO,XUEvent], None]):
         # 登録用関数をジェネレート
         def draw(state:XUStateRO, event:XUEvent):
@@ -73,3 +73,34 @@ def menu_draw_func(xmlui:XMLUI, tag_name:str, tag_group:str, tag_item:str):
         xmlui.set_drawfunc(tag_name, draw)
     return wrapper
 
+
+# メッセージウインドウ
+# *****************************************************************************
+class MsgRO(_BaseRound):
+    def __init__(self, state:XUStateRO):
+        super().__init__(state)
+#        self._grid = XUSelectGrid(state, tag_group, tag_item)
+
+class Msg(MsgRO):
+    def __init__(self, state:XUState):
+        super().__init__(state)
+
+
+# デコレータを用意
+def msg_update_bind(xmlui:XMLUI, tag_name:str):
+    def wrapper(update_func:Callable[[Msg,XUEvent], None]):
+        # 登録用関数をジェネレート
+        def update(state:XUState, event:XUEvent):
+            update_func(Msg(state), event)
+        # 関数登録
+        xmlui.set_updatefunc(tag_name, update)
+    return wrapper
+
+def msg_draw_bind(xmlui:XMLUI, tag_name:str):
+    def wrapper(draw_func:Callable[[MsgRO,XUEvent], None]):
+        # 登録用関数をジェネレート
+        def draw(state:XUStateRO, event:XUEvent):
+            draw_func(MsgRO(state), event)
+        # 関数登録
+        xmlui.set_drawfunc(tag_name, draw)
+    return wrapper
