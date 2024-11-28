@@ -40,26 +40,21 @@ class Menu(MenuRO):
 
 
 
-
-
-# XMLUIへのタグ登録のための、登録関数ジェネレーター
-def gen_menu_update(func, tag_group:str, tag_item:str):
-    def update(state:XUState,event:XUEvent):
-        func(Menu(state, tag_group, tag_item), event)
-    return update
-
-def gen_menu_draw(func, tag_group:str, tag_item:str):
-    def draw(state:XUStateRO,event:XUEvent):
-        func(Menu(state.asRW(), tag_group, tag_item), event)
-    return draw
-
 # デコレータを用意
 def menu_update_func(xmlui:XMLUI, tag_name:str, tag_group:str, tag_item:str):
     def wrapper(update_func:Callable[[Menu,XUEvent], None]):
-        xmlui.set_updatefunc(tag_name, gen_menu_update(update_func, tag_group, tag_item))
+        # 登録用関数をジェネレート
+        def update(state:XUState,event:XUEvent):
+            update_func(Menu(state, tag_group, tag_item), event)
+        # 関数登録
+        xmlui.set_updatefunc(tag_name, update)
     return wrapper
 
 def menu_draw_func(xmlui:XMLUI, tag_name:str, tag_group:str, tag_item:str):
-    def wrapper(draw_func:Callable[[Menu,XUEvent], None]):
-        xmlui.set_drawfunc(tag_name, gen_menu_draw(draw_func, tag_group, tag_item))
+    def wrapper(draw_func:Callable[[MenuRO,XUEvent], None]):
+        # 登録用関数をジェネレート
+        def draw(state:XUStateRO,event:XUEvent):
+            draw_func(MenuRO(state, tag_group, tag_item), event)
+        # 関数登録
+        xmlui.set_drawfunc(tag_name, draw)
     return wrapper
