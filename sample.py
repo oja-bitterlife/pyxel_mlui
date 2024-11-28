@@ -4,8 +4,9 @@ ui_template = xui.core.XMLUI.fromfile("assets/ui/test.xml")
 ui_worker = xui.core.XMLUI.mkworker("my_ui")
 
 import pyxel
-font = pyxel.Font("assets/font/b12.bdf")
-FONT_SIZE = 12
+# font = pyxel.Font("assets/font/b12.bdf")
+font = xui.font
+FONT_SIZE = xui.FONT_SIZE
 
 # お試しパラメータ
 test_params = {"name":"world", "age":10}
@@ -75,38 +76,34 @@ def menu_item_draw(menu_item:xui.core.XUStateRO, event:xui.XUEvent):
 # *****************************************************************************
 # 更新
 # ---------------------------------------------------------
-@xui.win.msg_update_bind(ui_worker, "msg_win")
+@xui.win.msg_update_bind(ui_worker, "msg_win", "msg_text")
 def msg_win_update(msg_win:xui.win.Msg, event:xui.XUEvent):
     msg_cur = msg_win.find_by_tag("msg_cur")
-    msg_text = msg_win.find_by_tag("msg_text")
-
-    # 文字列更新
-    text = xui.core.XUPage(msg_text, msg_text.text.format(**test_params), 3, msg_text.attr_int("wrap")).nextcount()
 
     # 次のページありカーソル表示
-    msg_cur.set_visible(not text.is_end_page and text.is_finish)
+    msg_cur.set_visible(not msg_win.page.is_end_page and msg_win.page.is_finish)
 
     if "button_a" in event.trg or "button_b" in event.trg:
         # 表示しきっていたらメニューごと閉じる
-        if text.is_end_page:
+        if msg_win.page.is_end_page:
             msg_win.close("menu_command")
         # なにか残っていたら適切なアクション(ライブラリにお任せ)
         else:
-           text.action()
+           msg_win.page.action()
 
 # 描画
 # ---------------------------------------------------------
-@xui.win.msg_draw_bind(ui_worker, "msg_win")
+@xui.win.msg_draw_bind(ui_worker, "msg_win", "msg_text")
 def msg_win_draw(msg_win:xui.win.MsgRO, event:xui.XUEvent):
     msg_win.draw()
 
-@ui_worker.draw_bind("msg_text")
-def msg_text_draw(msg_text:xui.core.XUStateRO, event:xui.XUEvent):
-    # テキスト表示
-    page = xui.core.XUPageRO(msg_text)
+# @ui_worker.draw_bind("msg_text")
+# def msg_text_draw(msg_text:xui.core.XUStateRO, event:xui.XUEvent):
+#     # テキスト表示
+#     page = xui.core.XUPageRO(msg_text)
 
-    for i,page in enumerate(page.page_text.split()):
-        pyxel.text(msg_text.area.x, msg_text.area.y+i*FONT_SIZE, page, 7, font)
+#     for i,page in enumerate(page.page_text.split()):
+#         pyxel.text(msg_text.area.x, msg_text.area.y+i*FONT_SIZE, page, 7, font)
 
 @ui_worker.draw_bind("msg_cur")
 def msg_cur_draw(msg_cur:xui.core.XUStateRO, event:xui.XUEvent):

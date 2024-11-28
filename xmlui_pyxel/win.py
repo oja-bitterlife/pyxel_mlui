@@ -1,14 +1,16 @@
-from xmlui_core import *
-
 import pyxel
+
+from xmlui_core import *
+from . import xui
+
+# ウインドウ基底
+# *****************************************************************************
 _WINDOW_SPEED = 16
 
 # アクティブカラーにする
 def _active_color(state:XUStateRO, color:int):
         return 10 if  state.xmlui.debug and state.xmlui.active_state == state and color == 7 else color
 
-# ウインドウ基底
-# *****************************************************************************
 class _BaseRound(XUWinRound):
     DEFAULT_PAT = [7,7,12]
 
@@ -77,30 +79,41 @@ def menu_draw_bind(xmlui:XMLUI, tag_name:str, tag_group:str, tag_item:str):
 # メッセージウインドウ
 # *****************************************************************************
 class MsgRO(_BaseRound):
-    def __init__(self, state:XUStateRO):
+    LINE_NUM_ATTR = "lines"
+    WRAP_ATTR = "wrap"
+
+    def __init__(self, state:XUStateRO, tag_text:str):
         super().__init__(state)
-#        self._grid = XUSelectGrid(state, tag_group, tag_item)
+
+        msg = state.find_by_tag(tag_text)
+        self.page = XUPage(msg, msg.text, msg.attr_int(self.LINE_NUM_ATTR, 1), msg.attr_int("wrap"))
+
+    def draw(self):
+        super().draw()
+        for i,page in enumerate(self.page.page_text.split()):
+            area = self.page.state.area
+            pyxel.text(area.x, area.y+i*xui.FONT_SIZE, page, 7, xui.font)
 
 class Msg(MsgRO):
-    def __init__(self, state:XUState):
-        super().__init__(state)
-
+    def __init__(self, state:XUState, tag_text:str):
+        super().__init__(state, tag_text)
+        self.page.nextcount()
 
 # デコレータを用意
-def msg_update_bind(xmlui:XMLUI, tag_name:str):
+def msg_update_bind(xmlui:XMLUI, tag_name:str, tag_text:str):
     def wrapper(update_func:Callable[[Msg,XUEvent], None]):
         # 登録用関数をジェネレート
         def update(state:XUState, event:XUEvent):
-            update_func(Msg(state), event)
+            update_func(Msg(state, tag_text), event)
         # 関数登録
         xmlui.set_updatefunc(tag_name, update)
     return wrapper
 
-def msg_draw_bind(xmlui:XMLUI, tag_name:str):
+def msg_draw_bind(xmlui:XMLUI, tag_name:str, tag_text:str):
     def wrapper(draw_func:Callable[[MsgRO,XUEvent], None]):
         # 登録用関数をジェネレート
         def draw(state:XUStateRO, event:XUEvent):
-            draw_func(MsgRO(state), event)
+            draw_func(MsgRO(state, tag_text), event)
         # 関数登録
         xmlui.set_drawfunc(tag_name, draw)
     return wrapper
