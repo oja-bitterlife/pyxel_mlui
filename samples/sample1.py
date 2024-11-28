@@ -25,7 +25,7 @@ def my_ui_update(my_ui:xui.core.XUState, event:xui.core.XUEvent):
 # 更新
 # ---------------------------------------------------------
 @xui.win.menu_update_bind(ui_worker, "menu_win", "menu_row", "menu_item")
-def menu_win_update(menu_win:xui.win.Menu, event:xui.XUEvent):
+def menu_win_update(menu_win:xui.win.List, event:xui.XUEvent):
     item_w, item_h = menu_win.attr_int("item_w"), menu_win.attr_int("item_h")
     menu_win._grid_root.arrange_items(item_w, item_h)
 

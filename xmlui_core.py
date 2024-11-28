@@ -788,7 +788,7 @@ class XUSelectGrid(_XUSelectBase):
 # リスト選択
 class XUSelectList(_XUSelectBase):
     # 縦に入れる
-    def __init__(self, state:XUState, tag_item:str):
+    def __init__(self, state:XUStateRO, tag_item:str):
         super().__init__(state, self.find_gridT(state, state.tag, tag_item))
 
     # 入力に応じた挙動一括。選択リストは通常上下ラップする
