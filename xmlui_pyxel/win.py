@@ -98,10 +98,9 @@ class ListRO(_BaseRound):
 
     def draw(self):
         super().draw()
-        for group in self._grid_root._grid:
-            for item in group:
-                if self.clip.h >= item.area.y-self.area.y + xui.FONT_SIZE:  # ウインドウが表示されるまで表示しない
-                    pyxel.text(item.area.x+6, item.area.y, item.text, 7, xui.font)
+        for item in self._grid_root._grid[0]:
+            if self.clip.h >= item.area.y-self.area.y + xui.FONT_SIZE:  # ウインドウが表示されるまで表示しない
+                pyxel.text(item.area.x+6, item.area.y, item.text, 7, xui.font)
 
     @property
     def selected_item(self) -> XUStateRO:

@@ -162,9 +162,9 @@ def dial_yes_no_draw(list_win:xui.win.ListRO, event:xui.XUEvent):
     top  = item.area.y+2
     pyxel.tri(left, top, left, top+tri_size, left+tri_size//2, top+tri_size//2, 7)
 
-@ui_worker.draw_bind("yes_no_item")
-def dial_yes_no_item_draw(item:xui.core.XUStateRO, event:xui.XUEvent):
-    pyxel.text(item.area.x+6, item.area.y, item.text, 7, font)  # Yes/No表示
-    # カーソル表示
-    if item.selected:
-        pyxel.tri(item.area.x, item.area.y+2, item.area.x, item.area.y+2+6, item.area.x+6//2, item.area.y+2+6//2, 7)
+# @ui_worker.draw_bind("yes_no_item")
+# def dial_yes_no_item_draw(item:xui.core.XUStateRO, event:xui.XUEvent):
+#     pyxel.text(item.area.x+6, item.area.y, item.text, 7, font)  # Yes/No表示
+#     # カーソル表示
+#     if item.selected:
+#         pyxel.tri(item.area.x, item.area.y+2, item.area.x, item.area.y+2+6, item.area.x+6//2, item.area.y+2+6//2, 7)

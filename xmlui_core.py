@@ -730,8 +730,8 @@ class _XUSelectBase(XUStateRO):
     def select(self, x:int, y:int, x_wrap:bool=False, y_wrap:bool=False) -> Self:
         cur_x = (x + self.grid_w) % self.grid_w if x_wrap else max(min(x, self.grid_w-1), 0)
         cur_y = (y + self.grid_h) % self.grid_h if y_wrap else max(min(y, self.grid_h-1), 0)
-        for y, group in enumerate(self._grid):
-            for x, item in enumerate(group):
+        for y,group in enumerate(self._grid):
+            for x,item in enumerate(group):
                 item.set_attr("selected", x == cur_x and y == cur_y)
         return self
 
@@ -801,8 +801,9 @@ class XUSelectList(_XUSelectBase):
 
     # グリッド各アイテムの座標設定
     def arrange_items(self, w:int, h:int) -> Self:
-        for i,item in enumerate(self._grid[0]):
-            item.set_attr(["x", "y"], (i*w, i*h))
+        for y,group in enumerate(self._grid):
+            item = group[0]  # Listはxで並ばない
+            item.set_attr(["x", "y"], (y*w, y*h))  # 両方ともYを使って横に並べられるように
         return self
 
 
