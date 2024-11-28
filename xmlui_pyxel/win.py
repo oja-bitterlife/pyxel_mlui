@@ -45,7 +45,8 @@ class MenuRO(_BaseRound):
         super().draw()
         for group in self._grid_root._grid:
             for item in group:
-                pyxel.text(item.area.x+6, item.area.y, item.text, 7, xui.font)
+                if self.clip.h >= item.area.y-self.area.y + xui.FONT_SIZE:  # ウインドウが表示されるまで表示しない
+                    pyxel.text(item.area.x+6, item.area.y, item.text, 7, xui.font)
 
     @property
     def selected_item(self) -> XUStateRO:
