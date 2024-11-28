@@ -103,9 +103,15 @@ class XUStateRO:
         self.xmlui = xmlui  # ライブラリへのIF
         self._element = element  # 自身のElement
 
-    # UI_Stateは都度使い捨てなので、対象となるElementで比較する
     def __eq__(self, other) -> bool:
-        return other._element is self._element if isinstance(other, XUState) else False
+        # UI_Stateは都度使い捨てなので、対象となるElementで比較する
+        if isinstance(other, XUStateRO):
+            return other._element is self._element
+        # 文字列との比較はvalueとで行う(イベント用)
+        elif isinstance(other, str):
+            return self.value == other
+        else:
+            return False
 
     # attribアクセス用
     # *************************************************************************
@@ -185,7 +191,7 @@ class XUStateRO:
             return None
         parent = _rec_parent_search(self.xmlui.root._element, self._element)
         return XUState(self.xmlui, parent) if parent else None
-
+ 
     # デバッグ用
     # *************************************************************************
     def strtree(self, indent:str="  ", pre:str="") -> str:
@@ -697,12 +703,12 @@ class _XUSelectBase(XUStateRO):
 
     # GRID用
     @classmethod
-    def find_grid(cls, state:XUState, tag_group:str, tag_item:str) -> list[list[XUState]]:
+    def find_grid(cls, state:XUStateRO, tag_group:str, tag_item:str) -> list[list[XUState]]:
         return [group.find_by_tagall(tag_item) for group in state.find_by_tagall(tag_group)]
 
     # 転置(Transpose)GRID
     @classmethod
-    def find_gridT(cls, state:XUState, tag_group:str, tag_item:str) -> list[list[XUState]]:
+    def find_gridT(cls, state:XUStateRO, tag_group:str, tag_item:str) -> list[list[XUState]]:
         grid = cls.find_grid(state, tag_group, tag_item)
         grid = [[grid[y][x] for y in range(len(grid))] for x in range(len(grid[0]))]  # 転置
         return grid
@@ -759,7 +765,7 @@ class _XUSelectBase(XUStateRO):
 
 # グリッド選択
 class XUSelectGrid(_XUSelectBase):
-    def __init__(self, state:XUState, tag_group:str, tag_item:str):
+    def __init__(self, state:XUStateRO, tag_group:str, tag_item:str):
         super().__init__(state, self.find_grid(state, tag_group, tag_item))
 
     # 入力に応じた挙動一括

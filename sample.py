@@ -1,4 +1,4 @@
-from xui_pyxel import components as xui
+from xmlui_pyxel import xui
 
 from xmlui_core import *
 
@@ -25,46 +25,43 @@ def my_ui_update(my_ui:XUState, event:XUEvent):
 # *****************************************************************************
 # 更新
 # ---------------------------------------------------------
-@ui_worker.update_func("menu_win")
-def menu_win_update(menu_win:XUState, event:XUEvent):
-    item_w, item_h = menu_win.attr_int("item_w"), menu_win.attr_int("item_h")
+@xui.win.menu_update_func(ui_worker, "menu_win", "menu_row", "menu_item")
+def menu_win_update(menu:xui.win.Menu, event:XUEvent):
+    item_w, item_h = menu.attr_int("item_w"), menu.attr_int("item_h")
+    menu._grid.arrange_items(item_w, item_h)
 
-    # メニューアイテム
-    menu = xui.MenuWindow(menu_win, "menu_row", "menu_item", item_w, item_h)
+    # メニュー選択
     menu.select_by_event("left", "right", "up", "down")
 
     # 選択アイテムの表示
     if "button_a" in event.trg:
         # メッセージウインドウ表示
-        if menu == "speak":
-            menu.open(ui_template, "win_message")
+        if menu.selected_item == "speak":
+            menu.selected_item.open(ui_template, "win_message")
 
         # dialウインドウ表示
-        if menu == "dial":
-            menu.open(ui_template, "win_dial").set_pos(8, 2)
+        if menu.selected_item == "dial":
+            menu.selected_item.open(ui_template, "win_dial").set_pos(8, 2)
 
     # 閉じる
     if "button_b" in event.trg:
-        menu_win.close()
+        menu.close()
 
 # 描画
 # ---------------------------------------------------------
 @ui_worker.draw_func("menu_win")
-def menu_win_draw(menu_win:XUStateRO, event:XUEvent):
-    item_w, item_h = menu_win.attr_int("item_w"), menu_win.attr_int("item_h")
-
+def menu_win_draw(menu:XUStateRO, event:XUEvent):
     bg_color = 12
     frame_color = 10 if event.active else 7
-    title  = menu_win.attr_str("title")
+    title  = menu.attr_str("title")
 
-    menu = xui.MenuWindow(menu_win.asRW(), "menu_row", "menu_item", item_w, item_h)
-    menu.draw_win()
+#    menu.draw_win()
 
     if title:
         str_w = FONT_SIZE*len(title)
-        text_x = menu_win.area.x+(menu_win.area.w-str_w)/2
-        pyxel.rect(text_x,menu_win.area.y, str_w, FONT_SIZE, bg_color)
-        pyxel.text(text_x, menu_win.area.y-2, title, frame_color, font)
+        text_x = menu.area.x+(menu.area.w-str_w)/2
+        pyxel.rect(text_x,menu.area.y, str_w, FONT_SIZE, bg_color)
+        pyxel.text(text_x, menu.area.y-2, title, frame_color, font)
 
 @ui_worker.draw_func("menu_item")
 def menu_item_draw(menu_item:XUStateRO, event:XUEvent):
