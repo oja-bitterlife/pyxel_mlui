@@ -164,10 +164,14 @@ class MsgRO(_BaseRound):
     def draw(self):
         super().draw()  # ウインドウ描画
 
+        # テキスト未設定
+        if not self.page.pages:
+            return
+
         # テキスト描画
         for i,page in enumerate(self.page.page_text.split()):
-            if self.page.state.valid > 0:  # 子を強制描画するのでvaliedチェック
-                area = self.page.state.area
+            if self.page.page_root.valid > 0:  # 子を強制描画するのでvaliedチェック
+                area = self.page.page_root.area
                 pyxel.text(area.x, area.y+i*xui.FONT_SIZE, page, 7, xui.font)
 
 class Msg(MsgRO):
@@ -186,6 +190,9 @@ class Msg(MsgRO):
     def set_speed(self, speed:float):
         self._page_root.set_attr(self.SPEED_ATTR, speed)
 
+    def set_message(self, text:str):
+        old_text = self.page.remove()
+        self._page_root.set_text(text)
 
 # デコレータを用意
 def msg_update_bind(xmlui:XMLUI, tag_name:str, tag_text:str):

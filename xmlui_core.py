@@ -574,19 +574,19 @@ class XUPageRO(_XUUtil):
     PAGE_NO_ATTR = "page_no"  # ページ管理用
 
     def __init__(self, parent: XUStateRO):
-        self.state = self.find_state(parent, self.ROOT_TAG).asRW()
+        self.page_root = self.find_state(parent, self.ROOT_TAG).asRW()
 
     # ページ関係
     # -----------------------------------------------------
    # 現在ページ
     @property
     def page_no(self) -> int:
-        return min(max(self.state.attr_int(self.PAGE_NO_ATTR, 0), 0), self.page_max)
+        return min(max(self.page_root.attr_int(self.PAGE_NO_ATTR, 0), 0), self.page_max)
 
     # ページの最大数
     @property
     def page_max(self) -> int:
-        return len(self.state.find_by_tagall(self.PAGE_TAG))
+        return len(self.page_root.find_by_tagall(self.PAGE_TAG))
 
     # ページ全部表示済みかどうか
     @property
@@ -596,7 +596,7 @@ class XUPageRO(_XUUtil):
     # ページタグリスト
     @property
     def pages(self) -> list[XUState]:
-        return self.state.find_by_tagall(self.PAGE_TAG)
+        return self.page_root.find_by_tagall(self.PAGE_TAG)
 
     # ページテキスト
     @property
@@ -618,11 +618,14 @@ class XUPageRO(_XUUtil):
     # 表示カウンタ取得
     @property
     def draw_count(self) -> float:
-        return self.state.attr_float(self.DRAW_COUNT_ATTR)
+        return self.page_root.attr_float(self.DRAW_COUNT_ATTR)
 
     # 現在ページを表示しきったかどうか
     @property
     def is_finish(self) -> bool:
+        # データ未設定時はいつでもfinish
+        if not self.pages:
+            return True
         return math.ceil(self.draw_count) >= len(self.pages[self.page_no].text.replace("\n", ""))
 
     @property
@@ -639,7 +642,7 @@ class XUPageRO(_XUUtil):
 # アニメーションテキストページ管理
 class XUPage(XUPageRO):
     def __init__(self, parent:XUState, text:str, page_line_num:int, wrap:int=4096):
-        self.state, is_created = self.find_or_create_state(parent, self.ROOT_TAG)
+        self.page_root, is_created = self.find_or_create_state(parent, self.ROOT_TAG)
         if is_created:
             # 改行を\nに統一して全角化
             tmp_text = self.convert_zenkaku(re.sub(self.SEPARATE_REGEXP, "\n", text).strip())
@@ -651,33 +654,36 @@ class XUPage(XUPageRO):
             # ページごとにElementを追加
             for i in range(0, len(lines), page_line_num):
                 page_text = "\n".join(lines[i:i+page_line_num])  # 改行を\nにして全部文字列に
-                page = XUState(self.state.xmlui, Element(self.PAGE_TAG))
+                page = XUState(self.page_root.xmlui, Element(self.PAGE_TAG))
                 page.set_text(page_text)
-                self.state.add_child(page)
+                self.page_root.add_child(page)
+
+    def remove(self):
+        self.page_root.remove()
 
     # ページ関係
     # -----------------------------------------------------
     # page_noの操作
     def nextpage(self, add:int=1) -> Self:
         self.reset()  # ページが変わればまた最初から
-        self.state.set_attr(self.PAGE_NO_ATTR, self.page_no+1)
+        self.page_root.set_attr(self.PAGE_NO_ATTR, self.page_no+1)
         return self
 
     # アニメーション用
     # -----------------------------------------------------
     # 表示カウンタを進める
     def nextcount(self, add:float=1) -> Self:
-        self.state.set_attr(self.DRAW_COUNT_ATTR, self.draw_count+add)
+        self.page_root.set_attr(self.DRAW_COUNT_ATTR, self.draw_count+add)
         return self
 
     # 表示カウンタのリセット
     def reset(self) -> Self:
-        self.state.set_attr(self.DRAW_COUNT_ATTR, 0)
+        self.page_root.set_attr(self.DRAW_COUNT_ATTR, 0)
         return self
 
     # 一気に表示
     def finish(self) -> Self:
-        self.state.set_attr(self.DRAW_COUNT_ATTR, len(self.pages[self.page_no].text))
+        self.page_root.set_attr(self.DRAW_COUNT_ATTR, len(self.pages[self.page_no].text))
         return self
 
     # イベントアクション
