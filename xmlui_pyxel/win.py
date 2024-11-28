@@ -90,9 +90,10 @@ class MsgRO(_BaseRound):
 
     def draw(self):
         super().draw()
-        # for i,page in enumerate(self.page.page_text.split()):
-        #     area = self.page.state.area
-        #     pyxel.text(area.x, area.y+i*xui.FONT_SIZE, page, 7, xui.font)
+        for i,page in enumerate(self.page.page_text.split()):
+            if self.page.state.valid > 0:
+                area = self.page.state.area
+                pyxel.text(area.x, area.y+i*xui.FONT_SIZE, page, 7, xui.font)
 
 class Msg(MsgRO):
     def __init__(self, state:XUState, tag_text:str):

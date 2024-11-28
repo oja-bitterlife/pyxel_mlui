@@ -153,6 +153,10 @@ class XUStateRO:
     def asRO(self) -> 'XUStateRO':
         return XUStateRO(self.xmlui, self._element)
 
+    @property
+    def valid(self) -> bool:
+        return self.update_count > 0  # 初期化済み
+
     # ツリー操作用
     # *************************************************************************
     def find_by_ID(self, id:str) -> 'XUState':
@@ -442,7 +446,7 @@ class XMLUI:
     # 描画用
     # *************************************************************************
     def _get_drawtargets(self, state:XUState) -> Generator[XUState, None, None]:
-        if state.enable and state.visible and state.update_count>0:  # count==0はUpdateで追加されたばかりのもの(未Update)
+        if state.enable and state.visible and state.valid:  # not valied(update_count==0)はUpdateで追加されたばかりのもの(未Update)
             yield state
             # visibleの子だけ回収(invisibleの子は削除)
             for child in state._element:
