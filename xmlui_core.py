@@ -279,7 +279,7 @@ class XUState(XUStateRO):
 
     # textアクセス用
     # *************************************************************************
-    def set_text(self, text:str) -> 'XUState':
+    def set_text(self, text:str) -> Self:
         self._element.text = text
         return self
 
@@ -299,7 +299,7 @@ class XUState(XUStateRO):
 
     # ツリー操作用
     # *************************************************************************
-    def add_child(self, child:'XUState'):  # selfとchildどっちが返るかややこしいのでNone
+    def add_child(self, child:XUStateRO):  # selfとchildどっちが返るかややこしいのでNone
         self._element.append(child._element)
 
     def remove(self):  # removeの後なにかすることはないのでNone
@@ -309,7 +309,7 @@ class XUState(XUStateRO):
             self.parent._element.remove(self._element)
 
     # 子に別Element一式を追加する
-    def open(self, template:'XMLUI|XUState', id:str, alias:str|None=None) -> 'XUState':
+    def open(self, template:'XMLUI|XUStateRO', id:str, alias:str|None=None) -> 'XUState':
         src = template.root if isinstance(template, XMLUI) else template
 
         try:
@@ -388,7 +388,7 @@ class XMLUI:
 
     # XML操作
     # *************************************************************************
-    def add_child(self, child:'XUState'):
+    def add_child(self, child:'XUStateRO'):
         self.root.add_child(child)
 
     def find_by_ID(self, id:str) -> XUState:
