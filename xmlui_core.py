@@ -530,7 +530,7 @@ class XMLUI:
 # Treeが不要ならたぶんXUStateで事足りる
 class _XUUtil:
     # すでに存在するElementを回収
-    def init_state(self, parent:XUState, child_root_tag:str):
+    def init_state(self, parent:XUStateRO, child_root_tag:str):
         exists = parent.find_by_tag(child_root_tag)
         self.state = XUStateRO(parent.xmlui, exists._element)  # ROで保存
 
@@ -567,7 +567,7 @@ class XUPageRO(_XUUtil):
     DRAW_COUNT_ATTR = "draw_count"  # 文字アニメ用
     PAGE_NO_ATTR = "page_no"  # ページ管理用
 
-    def __init__(self, parent: XUState):
+    def __init__(self, parent: XUStateRO):
         self.init_state(parent, self.ROOT_TAG)
 
     # ページ関係
@@ -800,7 +800,7 @@ class XUDialRO(_XUUtil):
 
     EDIT_POS_ATTR = "edit_pos"  # 操作位置
 
-    def __init__(self, parent:XUState, allow_create:bool=False):
+    def __init__(self, parent:XUStateRO, allow_create:bool=False):
         self.init_state(parent, self.ROOT_TAG)
 
     @property
@@ -869,7 +869,8 @@ class XUDial(XUDialRO):
 
 # ウインドウサポート
 # ---------------------------------------------------------
-class _XUWinBase(XUStateRO):
+# 子ウインドウをopenするかもなのでROではいけない
+class _XUWinBase(XUState):
     # 0 1 2
     # 3 4 5
     # 6 7 8

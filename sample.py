@@ -50,14 +50,14 @@ def menu_win_update(menu_win:XUState, event:XUEvent):
 # 描画
 # ---------------------------------------------------------
 @ui_worker.draw_func("menu_win")
-def menu_win_draw(menu_win:XUState, event:XUEvent):
+def menu_win_draw(menu_win:XUStateRO, event:XUEvent):
     item_w, item_h = menu_win.attr_int("item_w"), menu_win.attr_int("item_h")
 
     bg_color = 12
     frame_color = 10 if event.active else 7
     title  = menu_win.attr_str("title")
 
-    menu = xui.MenuWindow(menu_win, "menu_row", "menu_item", item_w, item_h)
+    menu = xui.MenuWindow(menu_win.asRW(), "menu_row", "menu_item", item_w, item_h)
     menu.draw_win()
 
     if title:
@@ -67,7 +67,7 @@ def menu_win_draw(menu_win:XUState, event:XUEvent):
         pyxel.text(text_x, menu_win.area.y-2, title, frame_color, font)
 
 @ui_worker.draw_func("menu_item")
-def menu_item_draw(menu_item:XUState, event:XUEvent):
+def menu_item_draw(menu_item:XUStateRO, event:XUEvent):
     color = menu_item.attr_int("color", 7)
     pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, color, font)
 
@@ -102,7 +102,7 @@ def msg_win_update(msg_win:XUState, event:XUEvent):
 # 描画
 # ---------------------------------------------------------
 @ui_worker.draw_func("msg_win")
-def msg_win_draw(msg_win:XUState, event:XUEvent):
+def msg_win_draw(msg_win:XUStateRO, event:XUEvent):
     frame_color = 10 if event.active else 7
     pyxel.rect(msg_win.area.x, msg_win.area.y, msg_win.area.w, msg_win.area.h, 12)
     pyxel.rectb(msg_win.area.x, msg_win.area.y, msg_win.area.w, msg_win.area.h, frame_color)
@@ -110,7 +110,7 @@ def msg_win_draw(msg_win:XUState, event:XUEvent):
     pyxel.rectb(msg_win.area.x+3, msg_win.area.y+3, msg_win.area.w-6, msg_win.area.h-6, frame_color)
 
 @ui_worker.draw_func("msg_text")
-def msg_text_draw(msg_text:XUState, event:XUEvent):
+def msg_text_draw(msg_text:XUStateRO, event:XUEvent):
     # テキスト表示
     page = XUPageRO(msg_text)
 
@@ -118,7 +118,7 @@ def msg_text_draw(msg_text:XUState, event:XUEvent):
         pyxel.text(msg_text.area.x, msg_text.area.y+i*FONT_SIZE, page, 7, font)
 
 @ui_worker.draw_func("msg_cur")
-def msg_cur_draw(msg_cur:XUState, event:XUEvent):
+def msg_cur_draw(msg_cur:XUStateRO, event:XUEvent):
     tri_size = msg_cur.attr_int("size", 6)
     color = msg_cur.attr_int("color", 7)
 
@@ -145,7 +145,7 @@ def win_dial_update(win_dial:XUState, event:XUEvent):
         win_dial.close()
 
 @ui_worker.draw_func("win_dial")
-def dial_win_draw(dial_win:XUState, event:XUEvent):
+def dial_win_draw(dial_win:XUStateRO, event:XUEvent):
     frame_color = 10 if event.active else 7
     pyxel.rect(dial_win.area.x, dial_win.area.y, dial_win.area.w, dial_win.area.h, 12)
     pyxel.rectb(dial_win.area.x, dial_win.area.y, dial_win.area.w, dial_win.area.h, frame_color)
@@ -179,13 +179,13 @@ def dial_yes_no_update(dial_yes_no:XUState, event:XUEvent):
 
 
 @ui_worker.draw_func("dial_yes_no")
-def dial_yes_no_draw(dial_yes_no:XUState, event:XUEvent):
+def dial_yes_no_draw(dial_yes_no:XUStateRO, event:XUEvent):
     frame_color = 10 if event.active else 7
     pyxel.rect(dial_yes_no.area.x+4, dial_yes_no.area.y+4, dial_yes_no.area.w, dial_yes_no.area.h, 12)
     pyxel.rectb(dial_yes_no.area.x+4, dial_yes_no.area.y+4, dial_yes_no.area.w, dial_yes_no.area.h, frame_color)
 
 @ui_worker.draw_func("yes_no_item")
-def dial_yes_no_item_draw(item:XUState, event:XUEvent):
+def dial_yes_no_item_draw(item:XUStateRO, event:XUEvent):
     pyxel.text(item.area.x+6, item.area.y, item.text, 7, font)  # Yes/No表示
     # カーソル表示
     if item.selected:
