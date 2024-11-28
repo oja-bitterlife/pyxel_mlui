@@ -144,6 +144,9 @@ class XUStateRO:
     def asRW(self) -> 'XUState':
         return XUState(self.xmlui, self._element)
 
+    def asRO(self) -> 'XUStateRO':
+        return XUStateRO(self.xmlui, self._element)
+
     # ツリー操作用
     # *************************************************************************
     def find_by_ID(self, id:str) -> 'XUState':
@@ -523,32 +526,25 @@ class XMLUI:
 
 # ユーティリティークラス
 # #############################################################################
-# StateベースのUtility用基底クラス
-# ---------------------------------------------------------
-# ツリーでぶら下げる(rootの追加)
-class _XUUtilTree(XUState):
-    # 親になければ新規で作って追加する。あればそれを利用する
-    # 新規作成時Trueを返す
-    def __init__(self, parent:XUState, child_root_tag:str, allow_create:bool=True):
+# 基本は必要な情報をツリーでぶら下げる
+# Treeが不要ならたぶんXUStateで事足りる
+class _XUUtil:
+    # すでに存在するElementを回収
+    def init_state(self, parent:XUState, child_root_tag:str):
+        exists = parent.find_by_tag(child_root_tag)
+        self.state = XUStateRO(parent.xmlui, exists._element)  # ROで保存
+
+    # findできなければ新規で作って追加する
+    # 新規作成時Trueを返す(is_created)
+    def init_state_with_create(self, parent:XUState, child_root_tag:str):
         try:
-            # すでに存在するElementを回収
-            exists = parent.find_by_tag(child_root_tag)
-            super().__init__(parent.xmlui, exists._element)
-            self._need_init = False  # 初期化は不要
-        except Exception as e:
-            # 作成が許可されていないときは例外
-            if not allow_create:
-                raise e
-
+            self.init_state(parent, child_root_tag)
+            return False
+        except Exception:
             # 新規作成
-            super().__init__(parent.xmlui, Element(child_root_tag))
-            parent.add_child(self)
-            self._need_init = True  # 初期化が必要
-
-# Stateをそのまま利用する(attribute中心操作)
-class _XUIUtil(XUState):
-    def __init__(self, state:XUState):
-        super().__init__(state.xmlui, state._element)
+            self.state = XUStateRO(parent.xmlui, Element(child_root_tag))
+            parent.add_child(self.state)
+            return True
 
 # テキスト系
 # ---------------------------------------------------------
@@ -562,28 +558,29 @@ _hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
 # まずは読み込み用
 # *****************************************************************************
 # テキスト基底
-class XUPageRO(_XUUtilTree):
+class XUPageRO(_XUUtil):
     # クラス定数
+    ROOT_TAG= "_xmlui_page_root"
     PAGE_TAG ="_xmlui_page"
     SEPARATE_REGEXP = r"\\n"  # 改行に変換する正規表現
 
     DRAW_COUNT_ATTR = "draw_count"  # 文字アニメ用
     PAGE_NO_ATTR = "page_no"  # ページ管理用
 
-    def __init__(self, parent: XUState, allow_create:bool=False):
-        super().__init__(parent, "_xmlui_page_root", allow_create)
+    def __init__(self, parent: XUState):
+        self.init_state(parent, self.ROOT_TAG)
 
     # ページ関係
     # -----------------------------------------------------
    # 現在ページ
     @property
     def page_no(self) -> int:
-        return min(max(self.attr_int(self.PAGE_NO_ATTR, 0), 0), self.page_max)
+        return min(max(self.state.attr_int(self.PAGE_NO_ATTR, 0), 0), self.page_max)
 
     # ページの最大数
     @property
     def page_max(self) -> int:
-        return len(self.find_by_tagall(self.PAGE_TAG))
+        return len(self.state.find_by_tagall(self.PAGE_TAG))
 
     # ページ全部表示済みかどうか
     @property
@@ -593,7 +590,7 @@ class XUPageRO(_XUUtilTree):
     # ページタグリスト
     @property
     def pages(self) -> list[XUState]:
-        return self.find_by_tagall(self.PAGE_TAG)
+        return self.state.find_by_tagall(self.PAGE_TAG)
 
     # ページテキスト
     @property
@@ -615,7 +612,7 @@ class XUPageRO(_XUUtilTree):
     # 表示カウンタ取得
     @property
     def draw_count(self) -> float:
-        return self.attr_float(self.DRAW_COUNT_ATTR)
+        return self.state.attr_float(self.DRAW_COUNT_ATTR)
 
     # 現在ページを表示しきったかどうか
     @property
@@ -632,8 +629,9 @@ class XUPageRO(_XUUtilTree):
 # アニメーションテキストページ管理
 class XUPage(XUPageRO):
     def __init__(self, parent:XUState, text:str, page_line_num:int, wrap:int=4096):
-        super().__init__(parent, True)
-        if self._need_init:
+        if self.init_state_with_create(parent, self.ROOT_TAG):
+            self.state = self.state.asRW()
+
             # 改行を\nに統一して全角化
             tmp_text = self.convert_zenkaku(re.sub(self.SEPARATE_REGEXP, "\n", text).strip())
 
@@ -644,33 +642,33 @@ class XUPage(XUPageRO):
             # ページごとにElementを追加
             for i in range(0, len(lines), page_line_num):
                 page_text = "\n".join(lines[i:i+page_line_num])  # 改行を\nにして全部文字列に
-                page = XUState(self.xmlui, Element(self.PAGE_TAG))
+                page = XUState(self.state.xmlui, Element(self.PAGE_TAG))
                 page.set_text(page_text)
-                self.add_child(page)
+                self.state.add_child(page)
 
     # ページ関係
     # -----------------------------------------------------
     # page_noの操作
     def nextpage(self, add:int=1) -> Self:
         self.reset()  # ページが変わればまた最初から
-        self.set_attr(self.PAGE_NO_ATTR, self.page_no+1)
+        self.state.set_attr(self.PAGE_NO_ATTR, self.page_no+1)
         return self
 
     # アニメーション用
     # -----------------------------------------------------
     # 表示カウンタを進める
     def nextcount(self, add:float=1) -> Self:
-        self.set_attr(self.DRAW_COUNT_ATTR, self.draw_count+add)
+        self.state.set_attr(self.DRAW_COUNT_ATTR, self.draw_count+add)
         return self
 
     # 表示カウンタのリセット
     def reset(self) -> Self:
-        self.set_attr(self.DRAW_COUNT_ATTR, 0)
+        self.state.set_attr(self.DRAW_COUNT_ATTR, 0)
         return self
 
     # 一気に表示
     def finish(self) -> Self:
-        self.set_attr(self.DRAW_COUNT_ATTR, len(self.page_text))
+        self.state.set_attr(self.DRAW_COUNT_ATTR, len(self.page_text))
         return self
 
     # イベントアクション
@@ -688,25 +686,25 @@ class XUPage(XUPageRO):
 # メニュー系
 # ---------------------------------------------------------
 # グリッド情報
-class _XUSelectBase(_XUIUtil):
-    def __init__(self, state:XUState, grid:list[list[XUState]]):
-        super().__init__(state)
+class _XUSelectBase(XUStateRO):
+    def __init__(self, state:XUStateRO, grid:list[list[XUState]]):
+        super().__init__(state.xmlui, state._element)
         self._grid = grid
 
         # タグにselected=Trueがあればそれを使う。無ければgrid[0][0]を選択
         try:
-            self.selected_item
+            self.selected_item  # プロパティによる検索
         except:
             self.select(0, 0)  # 最初の選択
 
     # GRID用
     @classmethod
-    def find_grid(cls, state:XUState, tag_group:str, tag_item:str) -> list[list['XUState']]:
+    def find_grid(cls, state:XUState, tag_group:str, tag_item:str) -> list[list[XUState]]:
         return [group.find_by_tagall(tag_item) for group in state.find_by_tagall(tag_group)]
 
     # 転置(Transpose)GRID
     @classmethod
-    def find_gridT(cls, state:XUState, tag_group:str, tag_item:str) -> list[list['XUState']]:
+    def find_gridT(cls, state:XUState, tag_group:str, tag_item:str) -> list[list[XUState]]:
         grid = cls.find_grid(state, tag_group, tag_item)
         grid = [[grid[y][x] for y in range(len(grid))] for x in range(len(grid[0]))]  # 転置
         return grid
@@ -796,21 +794,22 @@ class XUSelectList(_XUSelectBase):
 # ダイアル
 # ---------------------------------------------------------
 # 情報管理のみ
-class XUDialRO(_XUUtilTree):
+class XUDialRO(_XUUtil):
+    ROOT_TAG = "_xmlui_dial_root"
     DIGIT_TAG = "_xmlui_dial_digit"
 
     EDIT_POS_ATTR = "edit_pos"  # 操作位置
 
     def __init__(self, parent:XUState, allow_create:bool=False):
-        super().__init__(parent, "_xmlui_dial_root", allow_create)
+        self.init_state(parent, self.ROOT_TAG)
 
     @property
     def edit_pos(self) -> int:
-        return self.attr_int(self.EDIT_POS_ATTR)
+        return self.state.attr_int(self.EDIT_POS_ATTR)
 
     @property
     def digits(self) -> list[str]:
-        return [state.text for state in self.find_by_tagall(self.DIGIT_TAG)]
+        return [state.text for state in self.state.find_by_tagall(self.DIGIT_TAG)]
 
     @property
     def zenkaku_digits(self) -> list[str]:
@@ -823,19 +822,20 @@ class XUDialRO(_XUUtilTree):
 # ダイアル操作
 class XUDial(XUDialRO):
     def __init__(self, parent:XUState, digit_length:int, digit_list:str="0123456789"):
-        super().__init__(parent, True)
-        if self._need_init:
+        if self.init_state_with_create(parent, self.ROOT_TAG):
+            self.state = self.state.asRW()
+
             # 初期値は最小埋め
             for i in range(digit_length):
-                digit = XUState(self.xmlui, Element(self.DIGIT_TAG))
+                digit = XUState(self.state.xmlui, Element(self.DIGIT_TAG))
                 digit.set_text(digit_list[0])
-                self.add_child(digit)
+                self.state.add_child(digit)
 
         self._digit_list = digit_list
 
     # 回り込み付き操作位置の設定
     def set_editpos(self, edit_pos:int) -> Self:
-        self.set_attr(self.EDIT_POS_ATTR, (edit_pos+len(self.digits))%len(self.digits))
+        self.state.set_attr(self.EDIT_POS_ATTR, (edit_pos+len(self.digits))%len(self.digits))
         return self
 
     # 操作位置の移動
@@ -844,7 +844,7 @@ class XUDial(XUDialRO):
 
     # 指定位置のdigitを変更する
     def set_digit(self, edit_pos:int, digit:str) -> Self:
-        state = self.find_by_tagall(self.DIGIT_TAG)[edit_pos]
+        state = self.state.find_by_tagall(self.DIGIT_TAG)[edit_pos]
         state.set_text(digit)
         return self
 
