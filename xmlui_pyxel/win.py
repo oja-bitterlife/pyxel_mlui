@@ -86,7 +86,7 @@ class MsgRO(_BaseRound):
         super().__init__(state)
 
         page_root = state.find_by_tag(tag_text)
-        self.page = XUPageRO(page_root)  # ROにして保存し直す
+        self.page = XUPageRO(page_root)
 
     def draw(self):
         super().draw()
