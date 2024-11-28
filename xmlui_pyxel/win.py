@@ -147,33 +147,38 @@ def list_draw_bind(xmlui:XMLUI, tag_name:str, tag_item:str):
 # メッセージウインドウ
 # *****************************************************************************
 class MsgRO(_BaseRound):
-    LINE_NUM_ATTR = "lines"
-    WRAP_ATTR = "wrap"
-    SPEED_ATTR = "speed"
+    LINE_NUM_ATTR = "lines"  # ページの行数
+    WRAP_ATTR = "wrap"  # ワードラップ文字数
+    SPEED_ATTR = "speed"  # メッセージ速度(1.0=30文字/s)
 
+    # tag_textタグのテキストを処理する
     def __init__(self, state:XUStateRO, tag_text:str):
         super().__init__(state)
 
+        # tag_textタグ下にpage管理タグとpage全部が入っている
         self._page_root = state.find_by_tag(tag_text)
         self.page = XUPageRO(self._page_root)
 
     def draw(self):
-        super().draw()
+        super().draw()  # ウインドウ描画
+
+        # テキスト描画
         for i,page in enumerate(self.page.page_text.split()):
-            # 子を強制描画するのでvaliedチェック
-            if self.page.state.valid > 0:
+            if self.page.state.valid > 0:  # 子を強制描画するのでvaliedチェック
                 area = self.page.state.area
                 pyxel.text(area.x, area.y+i*xui.FONT_SIZE, page, 7, xui.font)
 
 class Msg(MsgRO):
+    # tag_textタグのテキストを処理する
     def __init__(self, state:XUState, tag_text:str):
-        # PAGEがなければ新規作成。あればそれを使う
+        # tag_textタグ下にpage管理タグとpage全部が入っている
         self._page_root = state.find_by_tag(tag_text)
         page = XUPage(self._page_root, self._page_root.text, self._page_root.attr_int(self.LINE_NUM_ATTR, 1), self._page_root.attr_int(self.WRAP_ATTR))
 
+        # page管理タグがなければ新規作成。あればそれを使う
         super().__init__(state, tag_text)
 
-        # 親でself.pageが上書きされるので、あとからself.pageに突っ込む
+        # super().__init__でself.pageが上書きされるので、あとからself.pageに突っ込む
         self.page = page.nextcount(self._page_root.attr_float(self.SPEED_ATTR, 1))
 
     def set_speed(self, speed:float):
