@@ -367,7 +367,7 @@ class XMLUI:
 
         # 処理関数の登録
         self._update_funcs:dict[str,Callable[[XUState,XUEvent], None]] = {}
-        self._draw_funcs:dict[str,Callable[[XUState,XUEvent], None]] = {}
+        self._draw_funcs:dict[str,Callable[[XUStateRO,XUEvent], None]] = {}
 
         # root_tag指定が無ければ最上位エレメント
         if root_tag is None:
@@ -475,7 +475,7 @@ class XMLUI:
         if tag_name in self._update_funcs:
             self._update_funcs[tag_name](state, event)
 
-    def draw_element(self, tag_name:str, state:XUState, event:XUEvent):
+    def draw_element(self, tag_name:str, state:XUStateRO, event:XUEvent):
         # 登録済みの関数だけ実行
         if tag_name in self._draw_funcs:
             self._draw_funcs[tag_name](state, event)
@@ -486,7 +486,7 @@ class XMLUI:
     def set_updatefunc(self, tag_name:str, func:Callable[[XUState,XUEvent], None]):
         self._update_funcs[tag_name] = func
 
-    def set_drawfunc(self, tag_name:str, func:Callable[[XUState,XUEvent], None]):
+    def set_drawfunc(self, tag_name:str, func:Callable[[XUStateRO,XUEvent], None]):
         self._draw_funcs[tag_name] = func
 
     # デコレータを用意
@@ -496,7 +496,7 @@ class XMLUI:
         return wrapper
 
     def draw_func(self, tag_name:str):
-        def wrapper(draw_func:Callable[[XUState,XUEvent], None]):
+        def wrapper(draw_func:Callable[[XUStateRO,XUEvent], None]):
             self.set_drawfunc(tag_name, draw_func)
         return wrapper
 
