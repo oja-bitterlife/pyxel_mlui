@@ -16,7 +16,7 @@ class _BaseRound(XUWinRound):
         pat = [_active_color(state, c)  for c in self.DEFAULT_PAT]  # アクティブカラーに
         super().__init__(state, pat, pyxel.width, pyxel.height)
 
-    def draw_win(self):
+    def draw(self):
         self.clip.h = self.update_count*_WINDOW_SPEED
         self.draw_buf(pyxel.screen.data_ptr())
 
@@ -27,7 +27,7 @@ class _BaseRect(XUWinRect):
         pat = [_active_color(state, c)  for c in self.DEFAULT_PAT]  # アクティブカラーに
         super().__init__(state, pat, pyxel.width, pyxel.height)
 
-    def draw_win(self):
+    def draw(self):
         self.clip.h = self.update_count*_WINDOW_SPEED
         self.draw_buf(pyxel.screen.data_ptr())
 
