@@ -869,11 +869,13 @@ class XUDial(XUDialRO):
 
 # ウインドウサポート
 # ---------------------------------------------------------
-class _XUWinBase:
+class _XUWinBase(XUStateRO):
     # 0 1 2
     # 3 4 5
     # 6 7 8
-    def __init__(self, pattern:list[int], screen_w:int, screen_h:int, pattern_index_func:Callable[[int,int,int,int], int]):
+    def __init__(self, state:XUStateRO, pattern:list[int], screen_w:int, screen_h:int, pattern_index_func:Callable[[int,int,int,int], int]):
+        super().__init__(state.xmlui, state._element)
+
         self._patterns = [pattern.copy() for i in range(9)]
         self.screen_w, self.screen_h = screen_w, screen_h
         self._get_patidx_func = pattern_index_func  # 枠外は-1を返す
@@ -910,15 +912,16 @@ class _XUWinBase:
         return self
 
     # バッファに書き込む
-    def draw_buf(self, x:int, y:int, w:int, h:int, screen_buf):
-        for y_ in range(max(0, self.clip.y), min(self.clip.bottom, h)):
-            for x_ in range(max(0, self.clip.x), min(self.clip.right, w)):
-                index = self._get_patidx_func(x_, y_, w, h)
+    def draw_buf(self, screen_buf):
+        area = self.area
+        for y_ in range(max(0, self.clip.y), min(self.clip.bottom, area.h)):
+            for x_ in range(max(0, self.clip.x), min(self.clip.right, area.w)):
+                index = self._get_patidx_func(x_, y_, area.w, area.h)
                 if index >= 0:  # 枠外チェック
-                    color = self._patterns[self.get_area(x_, y_, w, h)][index]
+                    color = self._patterns[self.get_area(x_, y_, area.w, area.h)][index]
                     if color == -1:  # 透明チェック
                         continue
-                    screen_buf[(y+y_)*self.screen_w + (x+x_)] = color
+                    screen_buf[(area.y + y_)*self.screen_w + (area.x + x_)] = color
 
     # パターン長
     @property
@@ -926,8 +929,8 @@ class _XUWinBase:
         return len(self._patterns[0])
 
 class XUWinRound(_XUWinBase):
-    def __init__(self, pattern:list[int], screen_w:int, screen_h:int):
-        super().__init__(pattern, screen_w, screen_h, self._get_patternindex)
+    def __init__(self, state:XUStateRO, pattern:list[int], screen_w:int, screen_h:int):
+        super().__init__(state, pattern, screen_w, screen_h, self._get_patternindex)
 
     def _get_veclen(self, x:int, y:int, org_x:int, org_y:int) -> int:
         return math.ceil(math.sqrt((x-org_x)**2 + (y-org_y)**2))
@@ -950,8 +953,8 @@ class XUWinRound(_XUWinBase):
         return self._get13574index(x, y, w, h)
 
 class XUWinRect(_XUWinBase):
-    def __init__(self, pattern:list[int], screen_w:int, screen_h:int):
-        super().__init__(pattern, screen_w, screen_h, self._get_pattern_index)
+    def __init__(self, state:XUStateRO, pattern:list[int], screen_w:int, screen_h:int):
+        super().__init__(state, pattern, screen_w, screen_h, self._get_pattern_index)
 
     def _get_pattern_index(self, x:int, y:int, w:int, h:int) -> int:
         area = self.get_area(x, y, w, h)
