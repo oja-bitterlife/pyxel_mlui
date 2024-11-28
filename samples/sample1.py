@@ -130,7 +130,7 @@ def dial_win_draw(dial_win:xui.core.XUStateRO, event:xui.XUEvent):
 @xui.win.list_update_bind(ui_worker, "dial_yes_no", "yes_no_item")
 def dial_yes_no_update(list_win:xui.win.List, event:xui.XUEvent):
     item_h = list_win.attr_int("item_h")
-    list_win.arrange_items(item_h, 0)
+    list_win.arrange_items(0, item_h)
 
     # メニュー選択
     selected_item = list_win.select_by_event("up", "down")
