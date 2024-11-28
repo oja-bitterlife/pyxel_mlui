@@ -541,7 +541,7 @@ class _XUUtil:
  
     # findできなければ新規で作って追加する
     # 新規作成時Trueを返す(is_created)
-    def find_state_with_create(self, parent:XUState, child_root_tag:str) -> tuple[XUState, bool]:
+    def find_or_create_state(self, parent:XUState, child_root_tag:str) -> tuple[XUState, bool]:
         try:
             return parent.find_by_tag(child_root_tag), False
         except Exception:
@@ -633,7 +633,7 @@ class XUPageRO(_XUUtil):
 # アニメーションテキストページ管理
 class XUPage(XUPageRO):
     def __init__(self, parent:XUState, text:str, page_line_num:int, wrap:int=4096):
-        self.state, is_created = self.find_state_with_create(parent, self.ROOT_TAG)
+        self.state, is_created = self.find_or_create_state(parent, self.ROOT_TAG)
         if is_created:
             # 改行を\nに統一して全角化
             tmp_text = self.convert_zenkaku(re.sub(self.SEPARATE_REGEXP, "\n", text).strip())
@@ -825,7 +825,7 @@ class XUDialRO(_XUUtil):
 # ダイアル操作
 class XUDial(XUDialRO):
     def __init__(self, parent:XUState, digit_length:int, digit_list:str="0123456789"):
-        self.state, is_created = self.find_state_with_create(parent, self.ROOT_TAG)
+        self.state, is_created = self.find_or_create_state(parent, self.ROOT_TAG)
         if is_created:
             # 初期値は最小埋め
             for i in range(digit_length):

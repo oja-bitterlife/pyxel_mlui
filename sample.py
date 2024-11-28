@@ -95,7 +95,7 @@ def msg_win_update(msg_win:xui.win.Msg, event:xui.XUEvent):
 # ---------------------------------------------------------
 @xui.win.msg_draw_bind(ui_worker, "msg_win", "msg_text")
 def msg_win_draw(msg_win:xui.win.MsgRO, event:xui.XUEvent):
-    msg_win.draw()
+   msg_win.draw()
 
 @ui_worker.draw_bind("msg_cur")
 def msg_cur_draw(msg_cur:xui.core.XUStateRO, event:xui.XUEvent):
