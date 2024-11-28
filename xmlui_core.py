@@ -649,7 +649,6 @@ class XUPage(XUPageRO):
                 page.set_text(page_text)
                 self.state.add_child(page)
 
-
     # ページ関係
     # -----------------------------------------------------
     # page_noの操作

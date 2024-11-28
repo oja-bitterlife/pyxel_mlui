@@ -97,14 +97,6 @@ def msg_win_update(msg_win:xui.win.Msg, event:xui.XUEvent):
 def msg_win_draw(msg_win:xui.win.MsgRO, event:xui.XUEvent):
     msg_win.draw()
 
-# @ui_worker.draw_bind("msg_text")
-# def msg_text_draw(msg_text:xui.core.XUStateRO, event:xui.XUEvent):
-#     # テキスト表示
-#     page = xui.core.XUPageRO(msg_text)
-
-#     for i,page in enumerate(page.page_text.split()):
-#         pyxel.text(msg_text.area.x, msg_text.area.y+i*FONT_SIZE, page, 7, font)
-
 @ui_worker.draw_bind("msg_cur")
 def msg_cur_draw(msg_cur:xui.core.XUStateRO, event:xui.XUEvent):
     tri_size = msg_cur.attr_int("size", 6)

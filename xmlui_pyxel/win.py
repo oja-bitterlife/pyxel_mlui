@@ -85,8 +85,8 @@ class MsgRO(_BaseRound):
     def __init__(self, state:XUStateRO, tag_text:str):
         super().__init__(state)
 
-        msg = state.find_by_tag(tag_text)
-        self.page = XUPage(msg, msg.text, msg.attr_int(self.LINE_NUM_ATTR, 1), msg.attr_int("wrap"))
+        page_root = state.find_by_tag(tag_text)
+        self.page = XUPageRO(page_root)  # ROにして保存し直す
 
     def draw(self):
         super().draw()
@@ -96,8 +96,14 @@ class MsgRO(_BaseRound):
 
 class Msg(MsgRO):
     def __init__(self, state:XUState, tag_text:str):
+        # PAGEがなければ新規作成。あればそれを使う
+        page_root = state.find_by_tag(tag_text)
+        page = XUPage(page_root, page_root.text, page_root.attr_int(self.LINE_NUM_ATTR, 1), page_root.attr_int("wrap"))
+
         super().__init__(state, tag_text)
-        self.page.nextcount()
+
+        # 親でself.pageが上書きされるので、あとからself.pageに突っ込む
+        self.page = page.nextcount()
 
 # デコレータを用意
 def msg_update_bind(xmlui:XMLUI, tag_name:str, tag_text:str):
