@@ -49,13 +49,13 @@ def menu_win_update(menu:xui.win.Menu, event:XUEvent):
 
 # 描画
 # ---------------------------------------------------------
-@ui_worker.draw_func("menu_win")
-def menu_win_draw(menu:XUStateRO, event:XUEvent):
+@xui.win.menu_draw_func(ui_worker, "menu_win", "menu_row", "menu_item")
+def menu_win_draw(menu:xui.win.MenuRO, event:XUEvent):
     bg_color = 12
     frame_color = 10 if event.active else 7
     title  = menu.attr_str("title")
 
-#    menu.draw_win()
+    menu.draw_win()
 
     if title:
         str_w = FONT_SIZE*len(title)
