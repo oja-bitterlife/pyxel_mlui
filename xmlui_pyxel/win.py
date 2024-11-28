@@ -125,7 +125,7 @@ class List(ListRO):
 
 
 # デコレータを用意
-def list_update_bind(xmlui:XMLUI, tag_name:str, tag_item:str):
+def llist_update_bind(xmlui:XMLUI, tag_name:str, tag_item:str):
     def wrapper(update_func:Callable[[List,XUEvent], None]):
         # 登録用関数をジェネレート
         def update(state:XUState, event:XUEvent):
@@ -134,7 +134,7 @@ def list_update_bind(xmlui:XMLUI, tag_name:str, tag_item:str):
         xmlui.set_updatefunc(tag_name, update)
     return wrapper
 
-def ist_draw_bind(xmlui:XMLUI, tag_name:str, tag_item:str):
+def list_draw_bind(xmlui:XMLUI, tag_name:str, tag_item:str):
     def wrapper(draw_func:Callable[[ListRO,XUEvent], None]):
         # 登録用関数をジェネレート
         def draw(state:XUStateRO, event:XUEvent):
