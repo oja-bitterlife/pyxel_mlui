@@ -93,12 +93,13 @@ def menu_draw_bind(xmlui:XMLUI, tag_name:str, tag_group:str, tag_item:str):
 class MsgRO(_BaseRound):
     LINE_NUM_ATTR = "lines"
     WRAP_ATTR = "wrap"
+    SPEED_ATTR = "speed"
 
     def __init__(self, state:XUStateRO, tag_text:str):
         super().__init__(state)
 
-        page_root = state.find_by_tag(tag_text)
-        self.page = XUPageRO(page_root)
+        self._page_root = state.find_by_tag(tag_text)
+        self.page = XUPageRO(self._page_root)
 
     def draw(self):
         super().draw()
@@ -111,13 +112,17 @@ class MsgRO(_BaseRound):
 class Msg(MsgRO):
     def __init__(self, state:XUState, tag_text:str):
         # PAGEがなければ新規作成。あればそれを使う
-        page_root = state.find_by_tag(tag_text)
-        page = XUPage(page_root, page_root.text, page_root.attr_int(self.LINE_NUM_ATTR, 1), page_root.attr_int("wrap"))
+        self._page_root = state.find_by_tag(tag_text)
+        page = XUPage(self._page_root, self._page_root.text, self._page_root.attr_int(self.LINE_NUM_ATTR, 1), self._page_root.attr_int(self.WRAP_ATTR))
 
         super().__init__(state, tag_text)
 
         # 親でself.pageが上書きされるので、あとからself.pageに突っ込む
-        self.page = page.nextcount()
+        self.page = page.nextcount(self._page_root.attr_float(self.SPEED_ATTR, 1))
+
+    def set_speed(self, speed:float):
+        self._page_root.set_attr(self.SPEED_ATTR, speed)
+
 
 # デコレータを用意
 def msg_update_bind(xmlui:XMLUI, tag_name:str, tag_text:str):
