@@ -27,7 +27,7 @@ def my_ui_update(my_ui:xui.core.XUState, event:xui.core.XUEvent):
 @xui.win.menu_update_bind(ui_worker, "menu_win", "menu_row", "menu_item")
 def menu_win_update(menu_win:xui.win.Menu, event:xui.XUEvent):
     item_w, item_h = menu_win.attr_int("item_w"), menu_win.attr_int("item_h")
-    menu_win._grid_root.arrange_items(item_w, item_h)
+    menu_win.arrange_items(item_w, item_h)
 
     # メニュー選択
     selected_item = menu_win.select_by_event("left", "right", "up", "down")
@@ -127,10 +127,10 @@ def dial_win_draw(dial_win:xui.core.XUStateRO, event:xui.XUEvent):
     for i,digit in enumerate(dial.zenkaku_digits):
         pyxel.text(dial_win.area.x+3+(4-i)*FONT_SIZE, dial_win.area.y+2, digit, 2 if dial.edit_pos == i else 7, font)
 
-@xui.win.list_update_bind(ui_worker, "yes_no_win", "menu_item")
+@xui.win.list_update_bind(ui_worker, "dial_yes_no", "yes_no_item")
 def dial_yes_no_update(list_win:xui.win.List, event:xui.XUEvent):
     item_h = list_win.attr_int("item_h")
-    list_win._grid_root.arrange_items(0, item_h)
+    list_win.arrange_items(item_h, 0)
 
     # メニュー選択
     selected_item = list_win.select_by_event("up", "down")
@@ -151,7 +151,7 @@ def dial_yes_no_update(list_win:xui.win.List, event:xui.XUEvent):
             list_win.close()
 
 
-@xui.win.list_draw_bind(ui_worker, "yes_no_win", "menu_item")
+@xui.win.list_draw_bind(ui_worker, "dial_yes_no", "yes_no_item")
 def dial_yes_no_draw(list_win:xui.win.ListRO, event:xui.XUEvent):
     list_win.draw()
 

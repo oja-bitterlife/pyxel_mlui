@@ -799,6 +799,12 @@ class XUSelectList(_XUSelectBase):
             self.select(0, self.cur_y+1, False, y_wrap)
         return self
 
+    # グリッド各アイテムの座標設定
+    def arrange_items(self, w:int, h:int) -> Self:
+        for i,item in enumerate(self._grid[0]):
+            item.set_attr(["x", "y"], (i*w, i*h))
+        return self
+
 
 # ダイアル
 # ---------------------------------------------------------
