@@ -141,6 +141,9 @@ class XUStateRO:
     def area(self) -> XURect:
         return XURect(self.area_x, self.area_y, self.area_w, self.area_h)
 
+    def asRW(self) -> 'XUState':
+        return XUState(self.xmlui, self._element)
+
     # ツリー操作用
     # *************************************************************************
     def find_by_ID(self, id:str) -> 'XUState':
