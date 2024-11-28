@@ -46,21 +46,6 @@ ui_worker.set_inputlist("button_y", [
     pyxel.GAMEPAD1_BUTTON_Y,
 ])
 
-from xmlui_core import *
-
-screen_buf = pyxel.screen.data_ptr()
-win1 = XUWinRound([7,7,12,12,12], pyxel.width, pyxel.height).set_shadow(2, [1])
-win2 = XUWinRound([7,7,12,12,12], pyxel.width, pyxel.height).set_shadow(2, [1])
-win3 = XUWinRound([7,7,12,12,12], pyxel.width, pyxel.height).set_shadow(2, [1])
-win4 = XUWinRound([7,7,12,12,12], pyxel.width, pyxel.height).set_shadow(2, [1])
-
-win5 = XUWinRound([7,7,12,12,12,12,12,12,12,12,12,12], pyxel.width, pyxel.height).set_shadow(2, [1])
-win6 = XUWinRect([7,7,12], pyxel.width, pyxel.height).set_shadow(2, [1])
-win7 = XUWinRound([3,11,12,8,-1], pyxel.width, pyxel.height)
-win8 = XUWinRound([1,2,3,4,5,6,7,8,12], pyxel.width, pyxel.height).set_shadow(2, [1])
-
-wins = [win1, win2, win3, win4, win5, win6, win7, win8]
-
 # Main
 def update(): # フレームの更新処理
     ui_worker.check_input_on(pyxel.btn)
@@ -78,26 +63,6 @@ def draw(): # 描画処理
 
     # UI描画
     ui_worker.draw()
-
-    win_size = 64
-    count = ui_worker.root.update_count*2-100
-    for i,win in enumerate(wins):
-        win_w = win_size
-        win_h = win_size
-
-        if i == 0:
-            win.clip.h = count
-        elif i == 1:
-            win.clip.w = count
-        elif i == 2:
-            win_h = min(win_size, count)
-        elif i == 3:
-            win.clip.x = win_size//2 - count//2
-            win.clip.w = count
-            win.clip.y = win_size//2 - count//2
-            win.clip.h = count
-
-#        win.draw_buf((i%4)*win_size, (i//4)*win_size, win_w, win_h , screen_buf)
 
 # アプリケーションの実行
 pyxel.run(update, draw)
