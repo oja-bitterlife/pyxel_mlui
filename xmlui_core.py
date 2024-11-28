@@ -625,6 +625,10 @@ class XUPageRO(_XUUtil):
     def is_finish(self) -> bool:
         return math.ceil(self.draw_count) >= len(self.pages[self.page_no].text.replace("\n", ""))
 
+    @property
+    def is_next_wait(self) -> bool:
+        return self.is_finish and not self.is_end_page
+
     # ユーティリティ
     # -----------------------------------------------------
     # 文字列中の半角を全角に変換する
