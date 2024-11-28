@@ -623,7 +623,7 @@ class XUPageRO(_XUUtil):
     # 現在ページを表示しきったかどうか
     @property
     def is_finish(self) -> bool:
-        return math.ceil(self.draw_count) >= len(self.page_text.replace("\n", ""))
+        return math.ceil(self.draw_count) >= len(self.pages[self.page_no].text.replace("\n", ""))
 
     # ユーティリティ
     # -----------------------------------------------------

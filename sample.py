@@ -93,10 +93,11 @@ def msg_win_draw(msg_win:xui.win.MsgRO, event:xui.XUEvent):
     msg_win.draw()
 
     # カーソル表示
-    tri_size = 6
-    center_x = msg_win.area.center_x(tri_size)
-    bottom = msg_win.area.bottom(tri_size) - 2
-    pyxel.tri(center_x, bottom, center_x+tri_size, bottom, center_x+tri_size//2, bottom+tri_size//2, 7)
+    if msg_win.page.is_finish:
+        tri_size = 6
+        center_x = msg_win.area.center_x(tri_size)
+        bottom = msg_win.area.bottom(tri_size) - 2
+        pyxel.tri(center_x, bottom, center_x+tri_size, bottom, center_x+tri_size//2, bottom+tri_size//2, 7)
 
 
 # ダイアル
