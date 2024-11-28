@@ -642,24 +642,41 @@ class XUPageRO(_XUUtil):
 # アニメーションテキストページ管理
 class XUPage(XUPageRO):
     def __init__(self, parent:XUState, text:str, page_line_num:int, wrap:int=4096):
+        # パラメータの保存
+        self._page_line_num = page_line_num
+        self._wrap = max(wrap, 1)   # 0だと無限になってしまうので最低1を入れておく
+
+        # ページタグの作成
         self.page_root, is_created = self.find_or_create_state(parent, self.ROOT_TAG)
         if is_created:
+            self._setup_pages(text)
+
+    def _setup_pages(self, text:str):
             # 改行を\nに統一して全角化
             tmp_text = self.convert_zenkaku(re.sub(self.SEPARATE_REGEXP, "\n", text).strip())
 
             # 各行に分解し、その行をさらにwrapで分解する
-            wrap = max(1, wrap)  # 0だと無限になってしまうので最低1を入れておく
-            lines =  sum([[line[i:i+wrap] for i in  range(0, len(line), wrap)] for line in tmp_text.splitlines()], [])
+            lines =  sum([[line[i:i+self._wrap] for i in  range(0, len(line), self._wrap)] for line in tmp_text.splitlines()], [])
 
             # ページごとにElementを追加
-            for i in range(0, len(lines), page_line_num):
-                page_text = "\n".join(lines[i:i+page_line_num])  # 改行を\nにして全部文字列に
+            for i in range(0, len(lines), self._page_line_num):
+                page_text = "\n".join(lines[i:i+self._page_line_num])  # 改行を\nにして全部文字列に
                 page = XUState(self.page_root.xmlui, Element(self.PAGE_TAG))
                 page.set_text(page_text)
                 self.page_root.add_child(page)
 
-    def remove(self):
-        self.page_root.remove()
+    def change_text(self, text:str):
+        # 一旦ページを削除
+        self.page_root._element.clear()
+
+        # テキストの設定
+        if self.page_root.parent:
+            self.page_root.parent.set_text(text)
+        self._setup_pages(text)
+
+        # ページ初めから
+        self.reset()
+        self.page_root.set_attr(self.PAGE_NO_ATTR, 0)
 
     # ページ関係
     # -----------------------------------------------------

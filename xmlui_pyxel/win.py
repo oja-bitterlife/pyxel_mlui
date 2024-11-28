@@ -190,10 +190,6 @@ class Msg(MsgRO):
     def set_speed(self, speed:float):
         self._page_root.set_attr(self.SPEED_ATTR, speed)
 
-    def set_message(self, text:str):
-        old_text = self.page.remove()
-        self._page_root.set_text(text)
-
 # デコレータを用意
 def msg_update_bind(xmlui:XMLUI, tag_name:str, tag_text:str):
     def wrapper(update_func:Callable[[Msg,XUEvent], None]):
