@@ -3,12 +3,8 @@ import pyxel # Pyxelモジュールをインポート
 pyxel.init(256, 256) # 初期化(ウィンドウサイズを指定)
 
 # お試しサンプルUI
-import sample
+import samples.sample1 as sample
 ui_worker = sample.ui_worker
-
-# お試し
-ui_template = sample.ui_template
-# ui_worker.root.open(ui_template, "menu_command")
 
 ui_worker.set_inputlist("up", [
     pyxel.GAMEPAD1_BUTTON_DPAD_UP,
