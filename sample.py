@@ -30,17 +30,17 @@ def menu_win_update(menu_win:xui.win.Menu, event:xui.XUEvent):
     menu_win._grid_root.arrange_items(item_w, item_h)
 
     # メニュー選択
-    menu_win.select_by_event("left", "right", "up", "down")
+    selected_item = menu_win.select_by_event("left", "right", "up", "down")
 
     # 選択アイテムの表示
     if "button_a" in event.trg:
         # メッセージウインドウ表示
-        if menu_win.selected_item == "speak":
-            menu_win.selected_item.open(ui_template, "win_message")
+        if selected_item == "speak":
+            selected_item.open(ui_template, "win_message")
 
         # dialウインドウ表示
-        if menu_win.selected_item == "dial":
-            menu_win.selected_item.open(ui_template, "win_dial").set_pos(8, 2)
+        if selected_item == "dial":
+            selected_item.open(ui_template, "win_dial").set_pos(8, 2)
 
     # 閉じる
     if "button_b" in event.trg:

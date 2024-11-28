@@ -55,12 +55,13 @@ class Menu(MenuRO):
     def __init__(self, state:XUState, tag_group:str, tag_item:str):
         super().__init__(state, tag_group, tag_item)
 
-    def select_by_event(self, left:str, right:str, up:str, down:str):
-        if self.xmlui.active_state == self:
-            self._grid_root.select_by_event(self.xmlui._event.trg, left, right, up, down)
-
     def arrange_items(self, w:int, h:int):
         self._grid_root.arrange_items(w, h)
+
+    def select_by_event(self, left:str, right:str, up:str, down:str) -> XUState:
+        if self.xmlui.active_state == self:
+            self._grid_root.select_by_event(self.xmlui._event.trg, left, right, up, down)
+        return self.selected_item
 
     @property
     def selected_item(self) -> XUState:
