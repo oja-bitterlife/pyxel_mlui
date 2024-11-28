@@ -645,6 +645,9 @@ class XUPage(XUPageRO):
                 page = XUState(self.state.xmlui, Element(self.PAGE_TAG))
                 page.set_text(page_text)
                 self.state.add_child(page)
+        else:
+            self.state = self.state.asRW()
+
 
     # ページ関係
     # -----------------------------------------------------
@@ -830,6 +833,8 @@ class XUDial(XUDialRO):
                 digit = XUState(self.state.xmlui, Element(self.DIGIT_TAG))
                 digit.set_text(digit_list[0])
                 self.state.add_child(digit)
+        else:
+            self.state = self.state.asRW()
 
         self._digit_list = digit_list
 
