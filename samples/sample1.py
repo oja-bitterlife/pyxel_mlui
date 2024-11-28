@@ -11,6 +11,13 @@ FONT_SIZE = xui.FONT_SIZE
 # お試しパラメータ
 test_params = {"name":"world", "age":10}
 
+def draw_menu_cursor(state:xui.core.XUStateRO, x:int, y:int):
+    tri_size = 6
+    left =state.area.x
+    top  = state.area.y+2
+    pyxel.tri(left, top, left, top+tri_size, left+tri_size//2, top+tri_size//2, 7)
+
+
 # 入力待ち
 # *****************************************************************************
 @ui_worker.update_bind("my_ui")
@@ -55,13 +62,7 @@ def menu_win_draw(menu_win:xui.win.MenuRO, event:xui.XUEvent):
     title  = menu_win.attr_str("title")
 
     menu_win.draw()
-
-    # カーソル表示
-    item = menu_win.selected_item
-    tri_size = 6
-    left = item.area.x
-    top  = item.area.y+2
-    pyxel.tri(left, top, left, top+tri_size, left+tri_size//2, top+tri_size//2, 7)
+    draw_menu_cursor(menu_win.selected_item, 0, 0)
 
     # メニュータイトル
     if title:
@@ -154,17 +155,4 @@ def dial_yes_no_update(list_win:xui.win.List, event:xui.XUEvent):
 @xui.win.list_draw_bind(ui_worker, "dial_yes_no", "yes_no_item")
 def dial_yes_no_draw(list_win:xui.win.ListRO, event:xui.XUEvent):
     list_win.draw()
-
-    # カーソル表示
-    item = list_win.selected_item
-    tri_size = 6
-    left = item.area.x
-    top  = item.area.y+2
-    pyxel.tri(left, top, left, top+tri_size, left+tri_size//2, top+tri_size//2, 7)
-
-# @ui_worker.draw_bind("yes_no_item")
-# def dial_yes_no_item_draw(item:xui.core.XUStateRO, event:xui.XUEvent):
-#     pyxel.text(item.area.x+6, item.area.y, item.text, 7, font)  # Yes/No表示
-#     # カーソル表示
-#     if item.selected:
-#         pyxel.tri(item.area.x, item.area.y+2, item.area.x, item.area.y+2+6, item.area.x+6//2, item.area.y+2+6//2, 7)
+    draw_menu_cursor(list_win.selected_item, 0, 0)
