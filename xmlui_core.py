@@ -677,7 +677,7 @@ class XUPage(XUPageRO):
 
     # 一気に表示
     def finish(self) -> Self:
-        self.state.set_attr(self.DRAW_COUNT_ATTR, len(self.page_text))
+        self.state.set_attr(self.DRAW_COUNT_ATTR, len(self.pages[self.page_no].text))
         return self
 
     # イベントアクション
