@@ -39,7 +39,17 @@ class _BaseRect(XUWinRect):
 class MenuRO(_BaseRound):
     def __init__(self, state:XUStateRO, tag_group:str, tag_item:str):
         super().__init__(state)
-        self._grid = XUSelectGrid(state, tag_group, tag_item)
+        self._grid_root = XUSelectGrid(state, tag_group, tag_item)
+
+    def draw(self):
+        super().draw()
+        for group in self._grid_root._grid:
+            for item in group:
+                pyxel.text(item.area.x+6, item.area.y, item.text, 7, xui.font)
+
+    @property
+    def selected_item(self) -> XUStateRO:
+        return self._grid_root.selected_item
 
 class Menu(MenuRO):
     def __init__(self, state:XUState, tag_group:str, tag_item:str):
@@ -47,14 +57,15 @@ class Menu(MenuRO):
 
     def select_by_event(self, left:str, right:str, up:str, down:str):
         if self.xmlui.active_state == self:
-            self._grid.select_by_event(self.xmlui._event.trg, left, right, up, down)
+            self._grid_root.select_by_event(self.xmlui._event.trg, left, right, up, down)
 
     def arrange_items(self, w:int, h:int):
-        self._grid.arrange_items(w, h)
+        self._grid_root.arrange_items(w, h)
 
     @property
-    def selected_item(self):
-        return self._grid.selected_item
+    def selected_item(self) -> XUState:
+        return self._grid_root.selected_item
+
 
 # デコレータを用意
 def menu_update_bind(xmlui:XMLUI, tag_name:str, tag_group:str, tag_item:str):

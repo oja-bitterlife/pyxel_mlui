@@ -27,7 +27,7 @@ def my_ui_update(my_ui:xui.core.XUState, event:xui.core.XUEvent):
 @xui.win.menu_update_bind(ui_worker, "menu_win", "menu_row", "menu_item")
 def menu_win_update(menu_win:xui.win.Menu, event:xui.XUEvent):
     item_w, item_h = menu_win.attr_int("item_w"), menu_win.attr_int("item_h")
-    menu_win._grid.arrange_items(item_w, item_h)
+    menu_win._grid_root.arrange_items(item_w, item_h)
 
     # メニュー選択
     menu_win.select_by_event("left", "right", "up", "down")
@@ -56,20 +56,19 @@ def menu_win_draw(menu_win:xui.win.MenuRO, event:xui.XUEvent):
 
     menu_win.draw()
 
+    # カーソル表示
+    item = menu_win.selected_item
+    tri_size = 6
+    left = item.area.x
+    top  = item.area.y+2
+    pyxel.tri(left, top, left, top+tri_size, left+tri_size//2, top+tri_size//2, 7)
+
+    # メニュータイトル
     if title:
         str_w = FONT_SIZE*len(title)
         text_x = menu_win.area.x+(menu_win.area.w-str_w)/2
         pyxel.rect(text_x,menu_win.area.y, str_w, FONT_SIZE, bg_color)
         pyxel.text(text_x, menu_win.area.y-2, title, frame_color, font)
-
-@ui_worker.draw_bind("menu_item")
-def menu_item_draw(menu_item:xui.core.XUStateRO, event:xui.XUEvent):
-    color = menu_item.attr_int("color", 7)
-    pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, color, font)
-
-    # カーソル表示
-    if menu_item.selected:
-        pyxel.tri(menu_item.area.x, menu_item.area.y+2, menu_item.area.x, menu_item.area.y+2+6, menu_item.area.x+6//2, menu_item.area.y+2+6//2, color)
 
 
 # メッセージウインドウ
