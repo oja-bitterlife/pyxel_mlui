@@ -13,6 +13,7 @@ from typing import Generator,Callable,Any,Self  # 型を使うよ
 
 
 # 描画領域計算用
+# #############################################################################
 class XURect:
     def __init__(self, x:int, y:int, w:int, h:int):
         self.x = x
@@ -94,8 +95,10 @@ class XUEvent:
         return self._release  # 解除された入力を取得
 
 
-# UIパーツの状態管理ラッパー
-class XUState:
+# UIパーツの状態取得
+# #############################################################################
+# XMLの状態管理ReadOnly
+class XUStateRO:
     def __init__(self, xmlui:'XMLUI', element:Element):
         self.xmlui = xmlui  # ライブラリへのIF
         self._element = element  # 自身のElement
@@ -122,24 +125,11 @@ class XUState:
     def has_attr(self, key: str) -> bool:
         return key in self._element.attrib
 
-    def set_attr(self, key:str|list[str], value: Any) -> Self:
-        # attribはdict[str,str]なのでstrで保存する
-        if isinstance(key, list):
-            for i, k in enumerate(key):
-                self._element.attrib[k] = str(value[i])
-        else:
-            self._element.attrib[key] = str(value)
-        return self
-
     # textアクセス用
     # *************************************************************************
     @property
     def text(self) -> str:
         return self._element.text.strip() if self._element.text else ""
-
-    def set_text(self, text:str) -> 'XUState':
-        self._element.text = text
-        return self
 
     # その他
     # *************************************************************************
@@ -151,29 +141,8 @@ class XUState:
     def area(self) -> XURect:
         return XURect(self.area_x, self.area_y, self.area_w, self.area_h)
 
-    def set_pos(self, x:int, y:int) -> Self:
-        return self.set_attr(["x", "y"], [x, y])
-
-    def set_abspos(self, x:int, y:int) -> Self:
-        return self.set_attr(["abs_x", "abs_y"], [x, y])
-
-    def set_enable(self, enable:bool) -> Self:
-        return self.set_attr("enable", enable)
-
-    def set_visible(self, visible:bool) -> Self:
-        return self.set_attr("visible", visible)
-
     # ツリー操作用
     # *************************************************************************
-    def add_child(self, child:'XUState'):  # selfとchildどっちが返るかややこしいのでNone
-        self._element.append(child._element)
-
-    def remove(self):  # removeの後なにかすることはないのでNone
-        # 処理対象から外れるように
-        self.set_attr("enable", False)
-        if self.parent:  # 親から外す
-            self.parent._element.remove(self._element)
-
     def find_by_ID(self, id:str) -> 'XUState':
         for element in self._element.iter():
             if element.attrib.get("id") == id:
@@ -210,29 +179,6 @@ class XUState:
             return None
         parent = _rec_parent_search(self.xmlui.root._element, self._element)
         return XUState(self.xmlui, parent) if parent else None
-
-    # 子に別Element一式を追加する
-    def open(self, template:'XMLUI|XUState', id:str, alias:str|None=None) -> 'XUState':
-        src = template.root if isinstance(template, XMLUI) else template
-
-        try:
-            return self.find_by_ID(id if alias is None else alias)  # すでにいたらなにもしない
-        except:
-            # eventを有効にして追加する
-            opend  = self.xmlui.duplicate(src.find_by_ID(id))
-            # aliasでtagとidをリネーム
-            if alias is not None:
-                opend.set_attr("id", alias)
-                opend._element.tag = alias
-            self.add_child(opend.set_attr("use_event", True))
-            return opend
-
-    def close(self, id:str|None=None):  # closeの後なにもしないのでNone
-        if id is not None:
-            state = self.xmlui.root.find_by_ID(id)
-            state.remove()
-        else:
-            self.remove()
 
     # デバッグ用
     # *************************************************************************
@@ -314,6 +260,73 @@ class XUState:
     @property
     def marker(self) -> str:  # デバッグ用
         return self.attr_str("marker", "")
+
+# XMLの状態設定
+class XUState(XUStateRO):
+    # attribアクセス用
+    # *************************************************************************
+    def set_attr(self, key:str|list[str], value: Any) -> Self:
+        # attribはdict[str,str]なのでstrで保存する
+        if isinstance(key, list):
+            for i, k in enumerate(key):
+                self._element.attrib[k] = str(value[i])
+        else:
+            self._element.attrib[key] = str(value)
+        return self
+
+    # textアクセス用
+    # *************************************************************************
+    def set_text(self, text:str) -> 'XUState':
+        self._element.text = text
+        return self
+
+    # その他
+    # *************************************************************************
+    def set_pos(self, x:int, y:int) -> Self:
+        return self.set_attr(["x", "y"], [x, y])
+
+    def set_abspos(self, x:int, y:int) -> Self:
+        return self.set_attr(["abs_x", "abs_y"], [x, y])
+
+    def set_enable(self, enable:bool) -> Self:
+        return self.set_attr("enable", enable)
+
+    def set_visible(self, visible:bool) -> Self:
+        return self.set_attr("visible", visible)
+
+    # ツリー操作用
+    # *************************************************************************
+    def add_child(self, child:'XUState'):  # selfとchildどっちが返るかややこしいのでNone
+        self._element.append(child._element)
+
+    def remove(self):  # removeの後なにかすることはないのでNone
+        # 処理対象から外れるように
+        self.set_attr("enable", False)
+        if self.parent:  # 親から外す
+            self.parent._element.remove(self._element)
+
+    # 子に別Element一式を追加する
+    def open(self, template:'XMLUI|XUState', id:str, alias:str|None=None) -> 'XUState':
+        src = template.root if isinstance(template, XMLUI) else template
+
+        try:
+            return self.find_by_ID(id if alias is None else alias)  # すでにいたらなにもしない
+        except:
+            # eventを有効にして追加する
+            opend  = self.xmlui.duplicate(src.find_by_ID(id))
+            # aliasでtagとidをリネーム
+            if alias is not None:
+                opend.set_attr("id", alias)
+                opend._element.tag = alias
+            self.add_child(opend.set_attr("use_event", True))
+            return opend
+
+    def close(self, id:str|None=None):  # closeの後なにもしないのでNone
+        if id is not None:
+            state = self.xmlui.root.find_by_ID(id)
+            state.remove()
+        else:
+            self.remove()
 
 
 # XMLでUIライブラリ本体
