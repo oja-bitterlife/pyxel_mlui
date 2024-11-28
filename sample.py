@@ -78,11 +78,6 @@ def menu_item_draw(menu_item:xui.core.XUStateRO, event:xui.XUEvent):
 # ---------------------------------------------------------
 @xui.win.msg_update_bind(ui_worker, "msg_win", "msg_text")
 def msg_win_update(msg_win:xui.win.Msg, event:xui.XUEvent):
-    msg_cur = msg_win.find_by_tag("msg_cur")
-
-    # 次のページありカーソル表示
-    msg_cur.set_visible(not msg_win.page.is_end_page and msg_win.page.is_finish)
-
     if "button_a" in event.trg or "button_b" in event.trg:
         # 表示しきっていたらメニューごと閉じる
         if msg_win.page.is_end_page:
@@ -95,16 +90,13 @@ def msg_win_update(msg_win:xui.win.Msg, event:xui.XUEvent):
 # ---------------------------------------------------------
 @xui.win.msg_draw_bind(ui_worker, "msg_win", "msg_text")
 def msg_win_draw(msg_win:xui.win.MsgRO, event:xui.XUEvent):
-   msg_win.draw()
-
-@ui_worker.draw_bind("msg_cur")
-def msg_cur_draw(msg_cur:xui.core.XUStateRO, event:xui.XUEvent):
-    tri_size = msg_cur.attr_int("size", 6)
-    color = msg_cur.attr_int("color", 7)
+    msg_win.draw()
 
     # カーソル表示
-    x, y = msg_cur.area.x, msg_cur.area.y
-    pyxel.tri(x, y, x+tri_size, y, x+tri_size//2, y+tri_size//2, color)
+    tri_size = 6
+    center_x = msg_win.area.center_x(tri_size)
+    bottom = msg_win.area.bottom(tri_size) - 2
+    pyxel.tri(center_x, bottom, center_x+tri_size, bottom, center_x+tri_size//2, bottom+tri_size//2, 7)
 
 
 # ダイアル

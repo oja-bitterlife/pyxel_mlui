@@ -27,7 +27,6 @@
         <msg_text x="8" y="8" wrap="17" lines="3">
             パラメータ置換テスト\nname:{name}\nage:{age}\nワードラップ・ページ送りテスト１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０
         </msg_text>
-        <msg_cur x="109" y="51" size="6"/>
     </msg_win>
 
 </xmlui>

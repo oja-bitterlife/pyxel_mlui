@@ -31,11 +31,17 @@ class XURect:
     def contains(self, x, y) -> bool:
         return self.x <= x < self.x+self.w and self.y <= y < self.y+self.h
 
-    def center_x(self, width:int=0) -> int:
-        return self.x + (self.w-width)//2
+    def center_x(self, w:int=0) -> int:
+        return self.x + (self.w-w)//2
 
-    def center_y(self, height:int=0) -> int:
-        return self.y + (self.h-height)//2
+    def center_y(self, h:int=0) -> int:
+        return self.y + (self.h-h)//2
+
+    def right(self, w:int=0) -> int:
+        return self.x + self.w - w
+
+    def bottom(self, h:int=0) -> int:
+        return self.y + self.h - h
 
     @property
     def cx(self) -> int:
@@ -44,14 +50,6 @@ class XURect:
     @property
     def cy(self) -> int:
         return self.center_x()
-
-    @property
-    def right(self) -> int:
-        return self.x + self.w
-
-    @property
-    def bottom(self) -> int:
-        return self.y + self.h
 
     def __repr__(self) -> str:
         return f"RECT({self.x}, {self.y}, {self.w}, {self.h})"
@@ -921,8 +919,8 @@ class _XUWinBase(XUState):
     # バッファに書き込む
     def draw_buf(self, screen_buf):
         area = self.area
-        for y_ in range(max(0, self.clip.y), min(self.clip.bottom, area.h)):
-            for x_ in range(max(0, self.clip.x), min(self.clip.right, area.w)):
+        for y_ in range(max(0, self.clip.y), min(self.clip.bottom(), area.h)):
+            for x_ in range(max(0, self.clip.x), min(self.clip.right(), area.w)):
                 index = self._get_patidx_func(x_, y_, area.w, area.h)
                 if index >= 0:  # 枠外チェック
                     color = self._patterns[self.get_area(x_, y_, area.w, area.h)][index]

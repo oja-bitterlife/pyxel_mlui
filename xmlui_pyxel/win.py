@@ -91,6 +91,7 @@ class MsgRO(_BaseRound):
     def draw(self):
         super().draw()
         for i,page in enumerate(self.page.page_text.split()):
+            # 子を強制描画するのでvaliedチェック
             if self.page.state.valid > 0:
                 area = self.page.state.area
                 pyxel.text(area.x, area.y+i*xui.FONT_SIZE, page, 7, xui.font)
