@@ -42,7 +42,8 @@ class MenuRO(_BaseRound):
         self._grid_root = XUSelectGrid(state, tag_group, tag_item)
 
     def draw(self):
-        super().draw()
+        super().draw()  # ウインドウ描画
+
         for group in self._grid_root._grid:
             for item in group:
                 if self.clip.h >= item.area.y-self.area.y + xui.FONT_SIZE:  # ウインドウが表示されるまで表示しない
@@ -97,7 +98,8 @@ class ListRO(_BaseRound):
         self._grid_root = XUSelectList(state, tag_item)
 
     def draw(self):
-        super().draw()
+        super().draw()  # ウインドウ描画
+
         for group in self._grid_root._grid:
             item = group[0]
             if self.clip.h >= item.area.y-self.area.y + xui.FONT_SIZE:  # ウインドウが表示されるまで表示しない
