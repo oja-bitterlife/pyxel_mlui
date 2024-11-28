@@ -530,21 +530,19 @@ class XMLUI:
 # Treeが不要ならたぶんXUStateで事足りる
 class _XUUtil:
     # すでに存在するElementを回収
-    def init_state(self, parent:XUStateRO, child_root_tag:str):
-        exists = parent.find_by_tag(child_root_tag)
-        self.state = XUStateRO(parent.xmlui, exists._element)  # ROで保存
-
+    def find_state(self, parent:XUStateRO, child_root_tag:str) -> XUStateRO:
+        return parent.find_by_tag(child_root_tag).asRO()
+ 
     # findできなければ新規で作って追加する
     # 新規作成時Trueを返す(is_created)
-    def init_state_with_create(self, parent:XUState, child_root_tag:str):
+    def find_state_with_create(self, parent:XUState, child_root_tag:str) -> tuple[XUState, bool]:
         try:
-            self.init_state(parent, child_root_tag)
-            return False
+            return parent.find_by_tag(child_root_tag), False
         except Exception:
             # 新規作成
-            self.state = XUStateRO(parent.xmlui, Element(child_root_tag))
-            parent.add_child(self.state)
-            return True
+            state = XUState(parent.xmlui, Element(child_root_tag))
+            parent.add_child(state)
+            return state,True
 
 # テキスト系
 # ---------------------------------------------------------
@@ -568,7 +566,7 @@ class XUPageRO(_XUUtil):
     PAGE_NO_ATTR = "page_no"  # ページ管理用
 
     def __init__(self, parent: XUStateRO):
-        self.init_state(parent, self.ROOT_TAG)
+        self.state = self.find_state(parent, self.ROOT_TAG).asRW()
 
     # ページ関係
     # -----------------------------------------------------
@@ -629,9 +627,8 @@ class XUPageRO(_XUUtil):
 # アニメーションテキストページ管理
 class XUPage(XUPageRO):
     def __init__(self, parent:XUState, text:str, page_line_num:int, wrap:int=4096):
-        if self.init_state_with_create(parent, self.ROOT_TAG):
-            self.state = self.state.asRW()
-
+        self.state, is_created = self.find_state_with_create(parent, self.ROOT_TAG)
+        if is_created:
             # 改行を\nに統一して全角化
             tmp_text = self.convert_zenkaku(re.sub(self.SEPARATE_REGEXP, "\n", text).strip())
 
@@ -645,8 +642,6 @@ class XUPage(XUPageRO):
                 page = XUState(self.state.xmlui, Element(self.PAGE_TAG))
                 page.set_text(page_text)
                 self.state.add_child(page)
-        else:
-            self.state = self.state.asRW()
 
 
     # ページ関係
@@ -804,7 +799,7 @@ class XUDialRO(_XUUtil):
     EDIT_POS_ATTR = "edit_pos"  # 操作位置
 
     def __init__(self, parent:XUStateRO, allow_create:bool=False):
-        self.init_state(parent, self.ROOT_TAG)
+        self.state = self.find_state(parent, self.ROOT_TAG).asRW()
 
     @property
     def edit_pos(self) -> int:
@@ -825,16 +820,13 @@ class XUDialRO(_XUUtil):
 # ダイアル操作
 class XUDial(XUDialRO):
     def __init__(self, parent:XUState, digit_length:int, digit_list:str="0123456789"):
-        if self.init_state_with_create(parent, self.ROOT_TAG):
-            self.state = self.state.asRW()
-
+        self.state, is_created = self.find_state_with_create(parent, self.ROOT_TAG)
+        if is_created:
             # 初期値は最小埋め
             for i in range(digit_length):
                 digit = XUState(self.state.xmlui, Element(self.DIGIT_TAG))
                 digit.set_text(digit_list[0])
                 self.state.add_child(digit)
-        else:
-            self.state = self.state.asRW()
 
         self._digit_list = digit_list
 
