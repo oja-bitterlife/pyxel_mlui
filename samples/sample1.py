@@ -127,34 +127,40 @@ def dial_win_draw(dial_win:xui.core.XUStateRO, event:xui.XUEvent):
     for i,digit in enumerate(dial.zenkaku_digits):
         pyxel.text(dial_win.area.x+3+(4-i)*FONT_SIZE, dial_win.area.y+2, digit, 2 if dial.edit_pos == i else 7, font)
 
-@ui_worker.update_bind("dial_yes_no")
-def dial_yes_no_update(dial_yes_no:xui.core.XUState, event:xui.XUEvent):
-    item_h = dial_yes_no.attr_int("item_h")
+@xui.win.list_update_bind(ui_worker, "yes_no_win", "menu_item")
+def dial_yes_no_update(list_win:xui.win.List, event:xui.XUEvent):
+    item_h = list_win.attr_int("item_h")
+    list_win._grid_root.arrange_items(0, item_h)
 
-    grid = xui.core.XUSelectList(dial_yes_no, "yes_no_item").arrange_items(0, item_h)
-    grid.select_by_event(event.trg, "up", "down")
+    # メニュー選択
+    selected_item = list_win.select_by_event("up", "down")
 
     # 閉じる
     if "button_b" in event.trg:
-        dial_yes_no.close()
+        list_win.close()
 
     # 決定
     if "button_a" in event.trg:
         # Yes時処理
-        if grid.selected_item.value == "yes":
-            test_params["age"] = xui.core.XUDialRO(dial_yes_no.find_by_tagR("win_dial")).number
-            dial_yes_no.xmlui.close("menu_command")
+        if selected_item == "yes":
+            test_params["age"] = xui.core.XUDialRO(list_win.find_by_tagR("win_dial")).number
+            list_win.xmlui.close("menu_command")
 
         # No時処理
-        if grid.selected_item.value == "no":
-            dial_yes_no.close()
+        if selected_item == "no":
+            list_win.close()
 
 
-@ui_worker.draw_bind("dial_yes_no")
-def dial_yes_no_draw(dial_yes_no:xui.core.XUStateRO, event:xui.XUEvent):
-    frame_color = 10 if event.active else 7
-    pyxel.rect(dial_yes_no.area.x+4, dial_yes_no.area.y+4, dial_yes_no.area.w, dial_yes_no.area.h, 12)
-    pyxel.rectb(dial_yes_no.area.x+4, dial_yes_no.area.y+4, dial_yes_no.area.w, dial_yes_no.area.h, frame_color)
+@xui.win.list_draw_bind(ui_worker, "yes_no_win", "menu_item")
+def dial_yes_no_draw(list_win:xui.win.ListRO, event:xui.XUEvent):
+    list_win.draw()
+
+    # カーソル表示
+    item = list_win.selected_item
+    tri_size = 6
+    left = item.area.x
+    top  = item.area.y+2
+    pyxel.tri(left, top, left, top+tri_size, left+tri_size//2, top+tri_size//2, 7)
 
 @ui_worker.draw_bind("yes_no_item")
 def dial_yes_no_item_draw(item:xui.core.XUStateRO, event:xui.XUEvent):
