@@ -652,22 +652,17 @@ class XUPage(XUPageRO):
                 page.set_text(page_text)
                 self.page_root.add_child(page)
 
-    def change_text(self, text:str):
-        # 一旦ページを削除
-        self.page_root._element.clear()
-        self.page_root.set_attr(self.PAGE_NO_ATTR, 0)
-        self.reset()
-
-        # テキストの設定
-        if self.page_root.parent:
-            self.page_root.parent.set_text(text)
-
     # ページ関係
     # -----------------------------------------------------
     # page_noの操作
-    def nextpage(self, add:int=1) -> Self:
+    def next_page(self, add:int=1) -> Self:
         self.reset()  # ページが変わればまた最初から
         self.page_root.set_attr(self.PAGE_NO_ATTR, self.page_no+1)
+        return self
+
+    def reset_page(self) -> Self:
+        self.page_root.set_attr(self.PAGE_NO_ATTR, 0)
+        self.reset()  # ページが変わればまた最初から
         return self
 
     # アニメーション用
@@ -690,7 +685,7 @@ class XUPage(XUPageRO):
             self.finish()
         # ページが残っていたら次のページへ
         elif not self.is_end_page:
-            self.nextpage()
+            self.next_page()
 
 
 # メニュー系

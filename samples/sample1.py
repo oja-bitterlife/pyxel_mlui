@@ -78,8 +78,6 @@ def menu_win_draw(menu_win:xui.win.MenuRO, event:xui.XUEvent):
 # ---------------------------------------------------------
 @xui.win.msg_update_bind(xmlui, "msg_win", "msg_text")
 def msg_win_update(msg_win:xui.win.Msg, event:xui.XUEvent):
-    msg_win.page.change_text("abc")
-
     if "button_a" in event.trg or "button_b" in event.trg:
         # 表示しきっていたらメニューごと閉じる
         if msg_win.page.is_end_page:
