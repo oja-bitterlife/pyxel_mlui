@@ -6,6 +6,8 @@ pyxel.init(256, 256) # 初期化(ウィンドウサイズを指定)
 import samples.sample1 as sample
 xmlui = sample.xmlui
 
+#xmlui.open("ui_template", "menu_command")
+
 xmlui.set_inputlist("up", [
     pyxel.GAMEPAD1_BUTTON_DPAD_UP,
     pyxel.KEY_UP,
