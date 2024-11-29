@@ -260,6 +260,10 @@ class XUStateRO:
         return self.attr_int("update_count", 0)
 
     @property
+    def speed(self) -> float:  # スピード/秒。アニメーション等で使う
+        return self.attr_float("speed", 1.0)
+
+    @property
     def use_event(self) -> bool:  # eventを使うかどうか
         return self.attr_bool("use_event", False)
 
