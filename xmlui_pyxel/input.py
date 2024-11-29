@@ -3,7 +3,7 @@ import pyxel
 from xmlui_core import *
 
 # デフォルトインプット設定
-DEFAULT_INPUT_KEY_DICT = {
+DEFAULT_INPUTLIST_DICT = {
     "up": [
         pyxel.GAMEPAD1_BUTTON_DPAD_UP,
         pyxel.KEY_UP,

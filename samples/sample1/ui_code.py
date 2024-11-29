@@ -1,20 +1,19 @@
 import pyxel
 
-from xmlui_pyxel import core, win,font
+from xmlui_pyxel import core, win,font,input
 
 # xmlui_pyxelの初期化
 # *********************************************************
 from xmlui_pyxel import core
 import xmlui_pyxel
 
-# UIで使うフォント設定
-
 # ライブラリのインスタンス化
 xmlui = core.XMLUI()
 
-# 楽したいセット
+# 初期化セット
 xmlui_pyxel.initialize(xmlui,
-        font_path= "assets/font/b12.bdf"
+        inputlist_dict = input.DEFAULT_INPUTLIST_DICT,
+        font_path = "assets/font/b12.bdf"
     )
 
 # (ライブラリ開発用)
