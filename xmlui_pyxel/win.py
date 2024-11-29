@@ -159,8 +159,8 @@ class MsgRO(_BaseRound):
         super().__init__(state)
 
         # tag_textタグ下にpage管理タグとpage全部が入っている
-        self._page_root = state.find_by_tag(tag_text)
-        self.page = XUPageRO(self._page_root)
+        root = state.find_by_tag(tag_text)
+        self.page = XUPageRO(root)
 
     def draw(self):
         super().draw()  # ウインドウ描画
@@ -175,13 +175,14 @@ class Msg(MsgRO):
     # tag_textタグのテキストを処理する
     def __init__(self, state:XUState, tag_text:str):
         # tag_textタグ下にpage管理タグとpage全部が入っている
-        self._page_root = state.find_by_tag(tag_text)
-        page = XUPage(self._page_root, self._page_root.text, self._page_root.attr_int(self.LINE_NUM_ATTR, 1), self._page_root.attr_int(self.WRAP_ATTR))
+        # super()でそれらを読むので、super()の前に作っておく
+        root = state.find_by_tag(tag_text).asRW()
+        page = XUPage(root, root.text, root.attr_int(self.LINE_NUM_ATTR, 1), root.attr_int(self.WRAP_ATTR))
 
         # page管理タグがなければ新規作成。あればそれを使う
         super().__init__(state, tag_text)
 
-        # super().__init__でself.pageが上書きされるので、あとからself.pageに突っ込む
+        # super().__init__でself.pageが上書きされるので、あとからself.pageに突っ込み直す
         self.page = page
 
 # デコレータを用意

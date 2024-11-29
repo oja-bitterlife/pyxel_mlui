@@ -157,23 +157,23 @@ class XUStateRO:
 
     # ツリー操作用
     # *************************************************************************
-    def find_by_ID(self, id:str) -> 'XUState':
+    def find_by_ID(self, id:str) -> 'XUStateRO':
         for element in self._element.iter():
             if element.attrib.get("id") == id:
                 return XUState(self.xmlui, element)
         raise Exception(f"ID '{id}' not found in '{self.tag}' and children")
 
-    def find_by_tagall(self, tag:str) -> list['XUState']:
+    def find_by_tagall(self, tag:str) -> list['XUStateRO']:
         return [XUState(self.xmlui, element) for element in self._element.iter() if element.tag == tag]
 
-    def find_by_tag(self, tag:str) -> 'XUState':
-        elements:list[XUState] = self.find_by_tagall(tag)
+    def find_by_tag(self, tag:str) -> 'XUStateRO':
+        elements:list[XUStateRO] = self.find_by_tagall(tag)
         if elements:
             return elements[0]
         raise Exception(f"Tag '{tag}' not found in '{self.tag}' and children")
 
     # 下階層ではなく、上(root)に向かって探索する
-    def find_by_tagR(self, tag:str) -> 'XUState':
+    def find_by_tagR(self, tag:str) -> 'XUStateRO':
         parent = self.parent
         while(parent):
             if parent.tag == tag:
@@ -342,7 +342,7 @@ class XUState(XUStateRO):
 
     def close(self, id:str|None=None):  # closeの後なにもしないのでNone
         if id is not None:
-            state = self.xmlui.find_by_ID(id)
+            state = self.xmlui.find_by_ID(id).asRW()
             state.remove()
         else:
             self.remove()
@@ -541,7 +541,7 @@ class _XUUtil:
     # 新規作成時Trueを返す(is_created)
     def find_or_create_state(self, parent:XUState, child_root_tag:str) -> tuple[XUState, bool]:
         try:
-            return parent.find_by_tag(child_root_tag), False
+            return parent.find_by_tag(child_root_tag).asRW(), False
         except Exception:
             # 新規作成
             state = XUState(parent.xmlui, Element(child_root_tag))
@@ -590,7 +590,7 @@ class XUPageRO(_XUUtil):
 
     # ページタグリスト
     @property
-    def pages(self) -> list[XUState]:
+    def pages(self) -> list[XUStateRO]:
         return self.page_root.find_by_tagall(self.PAGE_TAG)
 
     # ページテキスト
@@ -727,7 +727,7 @@ class _XUSelectBase(XUStateRO):
     # GRID用
     @classmethod
     def find_grid(cls, state:XUStateRO, tag_group:str, tag_item:str) -> list[list[XUState]]:
-        return [group.find_by_tagall(tag_item) for group in state.find_by_tagall(tag_group)]
+        return [[ro.asRW() for ro in group.find_by_tagall(tag_item)] for group in state.find_by_tagall(tag_group)]
 
     # 転置(Transpose)GRID
     @classmethod
@@ -877,7 +877,7 @@ class XUDial(XUDialRO):
 
     # 指定位置のdigitを変更する
     def set_digit(self, edit_pos:int, digit:str) -> Self:
-        state = self.state.find_by_tagall(self.DIGIT_TAG)[edit_pos]
+        state = self.state.find_by_tagall(self.DIGIT_TAG)[edit_pos].asRW()
         state.set_text(digit)
         return self
 
