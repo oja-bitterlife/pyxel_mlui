@@ -11,7 +11,11 @@ import xmlui_pyxel
 
 # ライブラリのインスタンス化
 xmlui = core.XMLUI()
-xmlui_pyxel.initialize(xmlui, "assets/font/b12.bdf", 12)  # 楽したいセット
+
+# 楽したいセット
+xmlui_pyxel.initialize(xmlui,
+        font_path= "assets/font/b12.bdf"
+    )
 
 # (ライブラリ開発用)
 xmlui.debug.level = xmlui.debug.DEBUG_LEVEL_LIB
