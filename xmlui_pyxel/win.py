@@ -186,7 +186,7 @@ class Msg(MsgRO):
         super().__init__(state, tag_text)
 
         # super().__init__でself.pageが上書きされるので、あとからself.pageに突っ込む
-        self.page = page.nextcount(self.speed)
+        self.page = page
 
 # デコレータを用意
 def msg_update_bind(xmlui:XMLUI, tag_name:str, tag_text:str):

@@ -561,7 +561,6 @@ class XUPageRO(_XUUtil):
     PAGE_TAG ="_xmlui_page"
     SEPARATE_REGEXP = r"\\n"  # 改行に変換する正規表現
 
-    DRAW_COUNT_ATTR = "draw_count"  # 文字アニメ用
     PAGE_NO_ATTR = "page_no"  # ページ管理用
 
     def __init__(self, parent: XUStateRO):
@@ -609,7 +608,7 @@ class XUPageRO(_XUUtil):
     # 表示カウンタ取得
     @property
     def draw_count(self) -> float:
-        return self.page_root.attr_float(self.DRAW_COUNT_ATTR)
+        return self.page_root.update_count * self.page_root.speed
 
     # 現在ページを表示しきったかどうか
     @property
@@ -640,9 +639,6 @@ class XUPage(XUPageRO):
         # ページタグの作成
         self.page_root, is_created = self.find_or_create_state(parent, self.ROOT_TAG)
         if is_created:
-            self._setup_pages(text)
-
-    def _setup_pages(self, text:str):
             # 改行を\nに統一して全角化
             tmp_text = self.convert_zenkaku(re.sub(self.SEPARATE_REGEXP, "\n", text).strip())
 
@@ -659,15 +655,12 @@ class XUPage(XUPageRO):
     def change_text(self, text:str):
         # 一旦ページを削除
         self.page_root._element.clear()
+        self.page_root.set_attr(self.PAGE_NO_ATTR, 0)
+        self.reset()
 
         # テキストの設定
         if self.page_root.parent:
             self.page_root.parent.set_text(text)
-        self._setup_pages(text)
-
-        # ページ初めから
-        self.reset()
-        self.page_root.set_attr(self.PAGE_NO_ATTR, 0)
 
     # ページ関係
     # -----------------------------------------------------
@@ -679,19 +672,13 @@ class XUPage(XUPageRO):
 
     # アニメーション用
     # -----------------------------------------------------
-    # 表示カウンタを進める
-    def nextcount(self, add:float=1.0) -> Self:
-        self.page_root.set_attr(self.DRAW_COUNT_ATTR, self.draw_count+add)
-        return self
-
     # 表示カウンタのリセット
     def reset(self) -> Self:
-        self.page_root.set_attr(self.DRAW_COUNT_ATTR, 0)
+        self.page_root.set_attr("update_count", 0)
         return self
 
     # 一気に表示
     def finish(self) -> Self:
-        self.page_root.set_attr(self.DRAW_COUNT_ATTR, len(self.pages[self.page_no].text))
         return self
 
     # イベントアクション
