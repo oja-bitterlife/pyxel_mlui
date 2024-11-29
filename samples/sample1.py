@@ -79,12 +79,13 @@ def menu_win_draw(menu_win:xui.win.MenuRO, event:xui.XUEvent):
 @xui.win.msg_update_bind(xmlui, "msg_win", "msg_text")
 def msg_win_update(msg_win:xui.win.Msg, event:xui.XUEvent):
     if "button_a" in event.trg or "button_b" in event.trg:
-        # 表示しきっていたらメニューごと閉じる
-        if msg_win.page.is_end_page:
-            msg_win.close("menu_command")
-        # なにか残っていたら適切なアクション(ライブラリにお任せ)
-        else:
-           msg_win.page.action()
+        action = msg_win.page.check_action()
+        if action == "close":
+            msg_win.close("menu_command")  # メニューごと閉じる
+        elif action == "finish":
+            msg_win.page.finish()
+        elif action == "next_page":
+            msg_win.page.next_page()
 
 # 描画
 # ---------------------------------------------------------

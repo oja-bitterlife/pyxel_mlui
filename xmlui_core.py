@@ -569,7 +569,7 @@ class XUPageRO(_XUUtil):
     PAGE_NO_ATTR = "page_no"  # ページ管理用
 
     def __init__(self, parent: XUStateRO):
-        self.page_root = self.find_state(parent, self.ROOT_TAG).asRW()
+        self.page_root = self.find_state(parent, self.ROOT_TAG)
 
     # ページ関係
     # -----------------------------------------------------
@@ -644,18 +644,28 @@ class XUPage(XUPageRO):
         # ページタグの作成
         self.page_root, is_created = self.find_or_create_state(parent, self.ROOT_TAG)
         if is_created:
-            # 改行を\nに統一して全角化
-            tmp_text = self.convert_zenkaku(re.sub(self.SEPARATE_REGEXP, "\n", text).strip())
+            self.setup(text)
 
-            # 各行に分解し、その行をさらにwrapで分解する
-            lines =  sum([[line[i:i+self._wrap] for i in  range(0, len(line), self._wrap)] for line in tmp_text.splitlines()], [])
+    # PAGE_ROOT_TAG以下(ページテキスト)の設定
+    # Update中にテキストを再設定するのにも使える
+    def setup(self, text:str):
+        # 改行を\nに統一して全角化
+        tmp_text = self.convert_zenkaku(re.sub(self.SEPARATE_REGEXP, "\n", text).strip())
 
-            # ページごとにElementを追加
-            for i in range(0, len(lines), self._page_line_num):
-                page_text = "\n".join(lines[i:i+self._page_line_num])  # 改行を\nにして全部文字列に
-                page = XUState(self.page_root.xmlui, Element(self.PAGE_TAG))
-                page.set_text(page_text)
-                self.page_root.add_child(page)
+        # 各行に分解し、その行をさらにwrapで分解する
+        lines =  sum([[line[i:i+self._wrap] for i in  range(0, len(line), self._wrap)] for line in tmp_text.splitlines()], [])
+
+        # 再セットアップ用
+        self.page_root.clear_children()
+        self.reset_page()
+
+        # ページごとにElementを追加
+        for i in range(0, len(lines), self._page_line_num):
+            page_text = "\n".join(lines[i:i+self._page_line_num])  # 改行を\nにして全部文字列に
+            page = XUState(self.page_root.xmlui, Element(self.PAGE_TAG))
+            page.set_text(page_text)
+            self.page_root.add_child(page)
+
 
     # ページ関係
     # -----------------------------------------------------
@@ -683,17 +693,18 @@ class XUPage(XUPageRO):
 
     # イベントアクション
     # -----------------------------------------------------
-    # 状況に応じた決定ボタン操作を行う
-    def action(self) -> str:
+    # 状況に応じたactionを返す
+    def check_action(self) -> str:
+        # 表示しきっていたらメニューごと閉じる
+        if self.is_end_page:
+            return "close"
         # ページ中に残りがあるなら一気に表示
         if not self.is_finish:
-            self.finish()
             return "finish"
         # ページが残っていたら次のページへ
         elif not self.is_end_page:
-            self.next_page()
             return "next_page"
-        return "None"
+        return ""
 
 
 # メニュー系
