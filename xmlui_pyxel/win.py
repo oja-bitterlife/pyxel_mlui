@@ -153,7 +153,6 @@ def list_draw_bind(xmlui:XMLUI, tag_name:str, tag_item:str):
 class MsgRO(_BaseRound):
     LINE_NUM_ATTR = "lines"  # ページの行数
     WRAP_ATTR = "wrap"  # ワードラップ文字数
-    SPEED_ATTR = "speed"  # メッセージ速度(1.0=30文字/s)
 
     # tag_textタグのテキストを処理する
     def __init__(self, state:XUStateRO, tag_text:str):
@@ -187,10 +186,7 @@ class Msg(MsgRO):
         super().__init__(state, tag_text)
 
         # super().__init__でself.pageが上書きされるので、あとからself.pageに突っ込む
-        self.page = page.nextcount(self._page_root.attr_float(self.SPEED_ATTR, 1))
-
-    def set_speed(self, speed:float):
-        self._page_root.set_attr(self.SPEED_ATTR, speed)
+        self.page = page.nextcount(self.speed)
 
 # デコレータを用意
 def msg_update_bind(xmlui:XMLUI, tag_name:str, tag_text:str):

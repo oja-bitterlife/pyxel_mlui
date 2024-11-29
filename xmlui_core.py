@@ -680,7 +680,7 @@ class XUPage(XUPageRO):
     # アニメーション用
     # -----------------------------------------------------
     # 表示カウンタを進める
-    def nextcount(self, add:float=1) -> Self:
+    def nextcount(self, add:float=1.0) -> Self:
         self.page_root.set_attr(self.DRAW_COUNT_ATTR, self.draw_count+add)
         return self
 
