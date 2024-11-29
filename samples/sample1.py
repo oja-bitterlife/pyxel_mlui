@@ -1,6 +1,7 @@
 from xmlui_pyxel import xui
 
 xmlui = xui.core.XMLUI()
+xmlui.debug.level = xmlui.debug.DEBUG_LEVEL_LIB
 xmlui.template_fromfile("assets/ui/test.xml", "ui_template")
 
 import pyxel

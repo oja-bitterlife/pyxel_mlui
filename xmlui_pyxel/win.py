@@ -7,7 +7,7 @@ from . import xui
 # *****************************************************************************
 # アクティブカラーにする
 def _active_color(state:XUStateRO, color:int):
-        return 10 if  state.xmlui.debug and state.xmlui.active_state == state and color == 7 else color
+        return 10 if  state.xmlui.debug.is_lib_debug and state.xmlui.active_state == state and color == 7 else color
 
 class _BaseRound(XUWinRound):
     DEFAULT_PAT = [7,7,12]

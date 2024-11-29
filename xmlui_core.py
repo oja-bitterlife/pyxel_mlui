@@ -374,11 +374,20 @@ class XMLUI_Template(XUStateRO):
     def duplicate(self, id:str) -> XUState:
         return XUState(self.xmlui, copy.deepcopy(self.find_by_ID(id)._element))
 
-class XMLUI(XUState):
+# デバッグ用
+class XMLUI_Debug(XUState):
     # デバッグ用フラグ
-    DEBUG_LEVEL_LIB = 100
-    debug = True
+    DEBUG_LEVEL_LIB:int = 100  # ライブラリ作成用
+    DEBUG_LEVEL_DEFAULT:int = 0
 
+    def __init__(self):
+        self.level = self.DEBUG_LEVEL_DEFAULT
+
+    @property
+    def is_lib_debug(self) -> bool:
+        return self.level >= self.DEBUG_LEVEL_LIB
+
+class XMLUI(XUState):
     # 初期化
     # *************************************************************************
     # 初期化。<xmlui>を持つXMLを突っ込む
@@ -388,6 +397,9 @@ class XMLUI(XUState):
         root.attrib["id"] = "root"
         root.attrib["use_event"] = "True"
         super().__init__(self, root)
+
+        # デバッグ用
+        self.debug = XMLUI_Debug()
 
         # 入力
         self._event = XUEvent(True)  # 唯一のactiveとする
