@@ -684,13 +684,16 @@ class XUPage(XUPageRO):
     # イベントアクション
     # -----------------------------------------------------
     # 状況に応じた決定ボタン操作を行う
-    def action(self):
+    def action(self) -> str:
         # ページ中に残りがあるなら一気に表示
         if not self.is_finish:
             self.finish()
+            return "finish"
         # ページが残っていたら次のページへ
         elif not self.is_end_page:
             self.next_page()
+            return "next_page"
+        return "None"
 
 
 # メニュー系
