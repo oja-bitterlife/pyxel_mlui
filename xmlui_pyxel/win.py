@@ -165,10 +165,6 @@ class MsgRO(_BaseRound):
     def draw(self):
         super().draw()  # ウインドウ描画
 
-        # テキスト未設定
-        if not self.page.pages:
-            return
-
         # テキスト描画
         for i,page in enumerate(self.page.page_text.split()):
             if self.page.page_root.valid > 0:  # 子を強制描画するのでvaliedチェック

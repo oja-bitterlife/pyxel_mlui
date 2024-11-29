@@ -596,6 +596,9 @@ class XUPageRO(_XUUtil):
     # ページテキスト
     @property
     def page_text(self) -> str:
+        # ページオーバーチェック
+        if self.is_end_page:
+            return ""
         return self._limitstr(self.pages[self.page_no].text, self.draw_count)
 
     # アニメーション用
