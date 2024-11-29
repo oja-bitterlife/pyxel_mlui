@@ -10,4 +10,4 @@ from . import font
 # これを呼ぶだけでだいたいいい感じになるように頑張る
 def initialize(xmlui:core.XMLUI, font_path:str, font_size:int):
     input.set_Inputlist_fromdict(xmlui, input.DEFAULT_INPUT_KEY_DICT)
-    font.set_font(font_path, 12)
+    font.set_font(font_path)

@@ -75,10 +75,10 @@ def menu_win_draw(menu_win:win.MenuRO, event:core.XUEvent):
 
     # メニュータイトル
     if title:
-        str_w = font.font_size*len(title)
+        str_w = font.size*len(title)
         text_x = menu_win.area.x+(menu_win.area.w-str_w)/2
-        pyxel.rect(text_x,menu_win.area.y, str_w, font.font_size, bg_color)
-        pyxel.text(text_x, menu_win.area.y-2, title, frame_color, font.font)
+        pyxel.rect(text_x,menu_win.area.y, str_w, font.size, bg_color)
+        pyxel.text(text_x, menu_win.area.y-2, title, frame_color, font.data)
 
 
 # メッセージウインドウ
@@ -136,7 +136,7 @@ def dial_win_draw(dial_win:core.XUStateRO, event:core.XUEvent):
     # 数値表示
     dial = core.XUDialRO(dial_win)
     for i,digit in enumerate(dial.zenkaku_digits):
-        pyxel.text(dial_win.area.x+3+(4-i)*font.font_size, dial_win.area.y+2, digit, 2 if dial.edit_pos == i else 7, font.font)
+        pyxel.text(dial_win.area.x+3+(4-i)*font.size, dial_win.area.y+2, digit, 2 if dial.edit_pos == i else 7, font.data)
 
 @win.list_update_bind(xmlui, "yes_no", "yes_no_item")
 def dial_yes_no_update(list_win:win.List, event:core.XUEvent):

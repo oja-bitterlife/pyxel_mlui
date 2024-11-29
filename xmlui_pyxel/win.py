@@ -48,8 +48,8 @@ class MenuRO(_BaseRound):
 
         for group in self._grid_root._grid:
             for item in group:
-                if self.clip.h >= item.area.y-self.area.y + font.font_size:  # ウインドウが表示されるまで表示しない
-                    pyxel.text(item.area.x+6, item.area.y, item.text, 7, font.font)
+                if self.clip.h >= item.area.y-self.area.y + font.size:  # ウインドウが表示されるまで表示しない
+                    pyxel.text(item.area.x+6, item.area.y, item.text, 7, font.data)
 
     @property
     def selected_item(self) -> XUStateRO:
@@ -104,8 +104,8 @@ class ListRO(_BaseRound):
 
         for group in self._grid_root._grid:
             item = group[0]
-            if self.clip.h >= item.area.y-self.area.y + font.font_size:  # ウインドウが表示されるまで表示しない
-                pyxel.text(item.area.x+6, item.area.y, item.text, 7, font.font)
+            if self.clip.h >= item.area.y-self.area.y + font.size:  # ウインドウが表示されるまで表示しない
+                pyxel.text(item.area.x+6, item.area.y, item.text, 7, font.data)
 
     @property
     def selected_item(self) -> XUStateRO:
@@ -169,7 +169,7 @@ class MsgRO(_BaseRound):
         for i,page in enumerate(self.page.page_text.split()):
             if self.page.page_root.valid > 0:  # 子を強制描画するのでvaliedチェック
                 area = self.page.page_root.area
-                pyxel.text(area.x, area.y+i*font.font_size, page, 7, font.font)
+                pyxel.text(area.x, area.y+i*font.size, page, 7, font.data)
 
 class Msg(MsgRO):
     # tag_textタグのテキストを処理する

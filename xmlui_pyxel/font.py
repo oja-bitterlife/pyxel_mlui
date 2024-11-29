@@ -1,10 +1,18 @@
 import pyxel
 
-font = None
-font_size = 0
+data = None
+size = 0
 
-def set_font(font_path:str, font_size_:int):
-    global font
-    global font_size
-    font = pyxel.Font(font_path)
-    font_size = font_size_
+def set_font(font_path:str):
+    global data,size
+
+    # フォントデータ読み込み
+    data = pyxel.Font(font_path)
+
+    # フォントサイズ算出
+    with open(font_path, "r") as f:
+        for i, line in enumerate(f.readline()):
+            if i > 100:  # 100行も見りゃええじゃろ...
+                raise Exception("font error")
+            if line.startswith("PIXEL_SIZE"):
+                size = int(line.split()[-1])
