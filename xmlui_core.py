@@ -317,6 +317,10 @@ class XUState(XUStateRO):
     def add_child(self, child:XUStateRO):  # selfとchildどっちが返るかややこしいのでNone
         self._element.append(child._element)
 
+    def clear_children(self) -> Self:
+        self._element.clear()
+        return self
+
     def remove(self):  # removeの後なにかすることはないのでNone
         # 処理対象から外れるように
         self.set_attr("enable", False)
@@ -324,14 +328,15 @@ class XUState(XUStateRO):
             self.parent._element.remove(self._element)
 
     # 子に別Element一式を追加する
-    def open(self, template_name:str, id:str, alias:str|None=None) -> 'XUState':
-        alias = id if alias is None else alias
+    def open(self, template_name:str, id:str, id_alias:str|None=None) -> 'XUState':
+        # idがかぶらないよう別名を付けられる
+        id_alias = id if id_alias is None else id_alias
         try:
-            self.find_by_ID(alias)  # IDがかぶってはいけない
-            raise Exception(f"ID '{alias}' already exists")
+            self.xmlui.find_by_ID(id_alias)  # IDがかぶってはいけない
+            raise Exception(f"ID '{id_alias}' already exists")
         except:
-            # eventを有効にして追加する
-            opend = self.xmlui._templates[template_name].duplicate(id).set_attr("id", alias).set_attr("use_event", True)
+            opend = self.xmlui._templates[template_name].duplicate(id).set_attr("id", id_alias)
+            opend.set_attr("use_event", True)  # openで追加するときはeventを有効に
             self.add_child(opend)
             return opend
 
