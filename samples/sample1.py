@@ -1,7 +1,7 @@
 from xmlui_pyxel import xui
 
 xmlui = xui.core.XMLUI()
-xmlui.load_fromfile("assets/ui/test.xml", "ui_template")
+xmlui.template_fromfile("assets/ui/test.xml", "ui_template")
 
 import pyxel
 # font = pyxel.Font("assets/font/b12.bdf")

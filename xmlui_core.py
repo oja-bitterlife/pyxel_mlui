@@ -331,7 +331,7 @@ class XUState(XUStateRO):
             raise Exception(f"ID '{alias}' already exists")
         except:
             # eventを有効にして追加する
-            opend = self.xmlui.templates[template_name].duplicate(id).set_attr("id", alias).set_attr("use_event", True)
+            opend = self.xmlui._templates[template_name].duplicate(id).set_attr("id", alias).set_attr("use_event", True)
             self.add_child(opend)
             return opend
 
@@ -393,18 +393,18 @@ class XMLUI(XUState):
         self._draw_funcs:dict[str,Callable[[XUStateRO,XUEvent], None]] = {}
 
         # XMLテンプレート置き場
-        self.templates:dict[str,XMLUI_Template] = {}
+        self._templates:dict[str,XMLUI_Template] = {}
 
     # template操作
     # *************************************************************************
-    def load(self, template:XMLUI_Template, template_name:str):
-        self.templates[template_name] = template
+    def set_template(self, template:XMLUI_Template, template_name:str):
+        self._templates[template_name] = template
 
-    def load_fromfile(self, template_filename:str, template_name:str):
-        self.templates[template_name] = XMLUI_Template._fromfile(self, template_filename)
+    def template_fromfile(self, template_filename:str, template_name:str):
+        self.set_template(XMLUI_Template._fromfile(self, template_filename), template_name)
 
-    def load_fromstring(self, template_str:str, template_name:str):
-        self.templates[template_name] = XMLUI_Template._fromstring(self, template_str)
+    def template_fromstring(self, template_str:str, template_name:str):
+        self.set_template(XMLUI_Template._fromstring(self, template_str), template_name)
 
     # 更新用
     # *************************************************************************
