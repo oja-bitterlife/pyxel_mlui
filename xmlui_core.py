@@ -191,7 +191,7 @@ class XUStateRO:
                 if result:
                     return result
             return None
-        parent = _rec_parent_search(self.xmlui.root._element, self._element)
+        parent = _rec_parent_search(self.xmlui._element, self._element)
         return XUState(self.xmlui, parent) if parent else None
  
     # デバッグ用
@@ -324,24 +324,20 @@ class XUState(XUStateRO):
             self.parent._element.remove(self._element)
 
     # 子に別Element一式を追加する
-    def open(self, template:'XMLUI|XUStateRO', id:str, alias:str|None=None) -> 'XUState':
-        src = template.root if isinstance(template, XMLUI) else template
-
+    def open(self, template_name:str, id:str, alias:str|None=None) -> 'XUState':
+        alias = id if alias is None else alias
         try:
-            return self.find_by_ID(id if alias is None else alias)  # すでにいたらなにもしない
+            self.find_by_ID(alias)  # IDがかぶってはいけない
+            raise Exception(f"ID '{alias}' already exists")
         except:
             # eventを有効にして追加する
-            opend  = self.xmlui.duplicate(src.find_by_ID(id))
-            # aliasでtagとidをリネーム
-            if alias is not None:
-                opend.set_attr("id", alias)
-                opend._element.tag = alias
-            self.add_child(opend.set_attr("use_event", True))
+            opend = self.xmlui.templates[template_name].pick(id).set_attr("id", alias).set_attr("use_event", True)
+            self.add_child(opend)
             return opend
 
     def close(self, id:str|None=None):  # closeの後なにもしないのでNone
         if id is not None:
-            state = self.xmlui.root.find_by_ID(id)
+            state = self.xmlui.find_by_ID(id)
             state.remove()
         else:
             self.remove()
@@ -349,30 +345,45 @@ class XUState(XUStateRO):
 
 # XMLでUIライブラリ本体
 # #############################################################################
-class XMLUI:
-    # デバッグ用フラグ
-    debug = True
-
+# テンプレート用
+class XMLUI_Template(XUStateRO):
     # 初期化
     # *************************************************************************
     # ファイルから読み込み
     @classmethod
-    def fromfile(cls, fileName:str, root_tag:str|None=None) -> 'XMLUI':
+    def _fromfile(cls, xmlui:'XMLUI', fileName:str, root_tag:str|None=None) -> 'XMLUI_Template':
         with open(fileName, "r", encoding="utf8") as f:
-            return cls.fromstring(f.read())
+            return cls._fromstring(xmlui, f.read())
 
     # リソースから読み込み
     @classmethod
-    def fromstring(cls, xml_data:str, root_tag:str|None=None) -> 'XMLUI':
-        return XMLUI(xml.etree.ElementTree.fromstring(xml_data))
+    def _fromstring(cls, xmlui:'XMLUI', xml_data:str) -> 'XMLUI_Template':
+        return XMLUI_Template(XUState(xmlui, xml.etree.ElementTree.fromstring(xml_data)))
 
-    # ワーカーの作成
-    @classmethod
-    def mkworker(cls, root_tag:str) -> 'XMLUI':
-        return XMLUI(Element(root_tag))
+    def __init__(self, root:XUStateRO):
+        super().__init__(root.xmlui, root._element)
 
+    # XML操作
+    # *************************************************************************
+    # Elmentを複製して取り出す
+    def pick(self, id:str) -> XUState:
+        return XUState(self.xmlui, copy.deepcopy(self.find_by_ID(id)._element))
+
+class XMLUI(XUState):
+    # デバッグ用フラグ
+    DEBUG_LEVEL_LIB = 100
+    debug = True
+
+    # 初期化
+    # *************************************************************************
     # 初期化。<xmlui>を持つXMLを突っ込む
-    def __init__(self, dom:xml.etree.ElementTree.Element, root_tag:str|None=None):
+    def __init__(self):
+        # rootを作って自分自身に設定
+        root = Element("root")
+        root.attrib["id"] = "root"
+        root.attrib["use_event"] = "True"
+        super().__init__(self, root)
+
         # 入力
         self._event = XUEvent(True)  # 唯一のactiveとする
         self._input_lists:dict[str, list[int]] = {}
@@ -381,43 +392,19 @@ class XMLUI:
         self._update_funcs:dict[str,Callable[[XUState,XUEvent], None]] = {}
         self._draw_funcs:dict[str,Callable[[XUStateRO,XUEvent], None]] = {}
 
-        # root_tag指定が無ければ最上位エレメント
-        if root_tag is None:
-            xmlui_root = dom
-        else:
-            # Noneでないときは子から探す
-            xmlui_root = dom.find(root_tag)
-            # 見つからなかったら未対応のXML
-            if xmlui_root is None:
-                raise Exception(f"<{root_tag}> not found")
+        # XMLテンプレート置き場
+        self.templates:dict[str,XMLUI_Template] = {}
 
-        # rootを取り出しておく
-        self.root = XUState(self, xmlui_root)
-        self.root.set_attr("use_event", True)  # rootはデフォルトではイベントをとるように
-        self.active_state = self.root
-
-    # Elmentを複製する
-    def duplicate(self, src:Element|XUState) -> XUState:
-        return XUState(self, copy.deepcopy(src._element if isinstance(src, XUState) else src))
-
-
-    # XML操作
+    # template操作
     # *************************************************************************
-    def add_child(self, child:'XUStateRO'):
-        self.root.add_child(child)
+    def load(self, template:XMLUI_Template, template_name:str):
+        self.templates[template_name] = template
 
-    def find_by_ID(self, id:str) -> XUState:
-        return self.root.find_by_ID(id)
+    def load_fromfile(self, template_filename:str, template_name:str):
+        self.templates[template_name] = XMLUI_Template._fromfile(self, template_filename)
 
-    def find_by_tagall(self, tag:str) -> list[XUState]:
-        return self.root.find_by_tagall(tag)
-
-    def find_by_tag(self, tag:str) -> XUState:
-        return self.root.find_by_tag(tag)
-
-    def close(self, id:str):
-        self.root.find_by_ID(id).close()
-
+    def load_fromstring(self, template_str:str, template_name:str):
+        self.templates[template_name] = XMLUI_Template._fromstring(self, template_str)
 
     # 更新用
     # *************************************************************************
@@ -433,11 +420,11 @@ class XMLUI:
         self._event.update()
 
         # 更新対象を取得
-        update_targets = list(self._get_updatetargets(self.root))
+        update_targets = list(self._get_updatetargets(self))
 
         # イベント発生対象は表示物のみ
         event_targets = [state for state in update_targets if state.visible and state.use_event]
-        self.active_state = event_targets[-1] if event_targets else self.root  # Active=最後
+        self.active_state = event_targets[-1] if event_targets else self  # Active=最後
 
         # 更新処理
         for state in update_targets:
@@ -456,7 +443,7 @@ class XMLUI:
 
     def draw(self):
         # 描画対象を取得
-        draw_targets = list(self._get_drawtargets(self.root))
+        draw_targets = list(self._get_drawtargets(self))
 
         # イベント発生対象は表示物のみ
         event_targets = [state for state in draw_targets if state.use_event]
