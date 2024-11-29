@@ -1,20 +1,26 @@
-import sys
-sys.path.append("../../")
-from xmlui_pyxel import xui
+import pyxel
 
-xmlui = xui.core.XMLUI()
+from xmlui_pyxel import core, win,font
+
+# xmlui_pyxelの初期化
+# *********************************************************
+from xmlui_pyxel import core
+import xmlui_pyxel
+
+# UIで使うフォント設定
+
+# ライブラリのインスタンス化
+xmlui = core.XMLUI()
+xmlui_pyxel.initialize(xmlui, "assets/font/b12.bdf", 12)  # 楽したいセット
+
+# (ライブラリ開発用)
 xmlui.debug.level = xmlui.debug.DEBUG_LEVEL_LIB
+
+# UIテンプレートXMLの読み込み
 xmlui.template_fromfile("assets/ui/test.xml", "ui_template")
 
-import pyxel
-# font = pyxel.Font("assets/font/b12.bdf")
-font = xui.font
-FONT_SIZE = xui.FONT_SIZE
 
-# お試しパラメータ
-test_params = {"name":"world", "age":10}
-
-def draw_menu_cursor(state:xui.core.XUStateRO, x:int, y:int):
+def draw_menu_cursor(state:core.XUStateRO, x:int, y:int):
     tri_size = 6
     left =state.area.x
     top  = state.area.y+2
@@ -24,7 +30,7 @@ def draw_menu_cursor(state:xui.core.XUStateRO, x:int, y:int):
 # 入力待ち
 # *****************************************************************************
 @xmlui.update_bind("root")
-def my_ui_update(my_ui:xui.core.XUState, event:xui.core.XUEvent):
+def my_ui_update(my_ui:core.XUState, event:core.XUEvent):
     # メインメニューを開く
     if "button_a" in event.trg:
         my_ui.open("ui_template", "menu_command")
@@ -34,8 +40,8 @@ def my_ui_update(my_ui:xui.core.XUState, event:xui.core.XUEvent):
 # *****************************************************************************
 # 更新
 # ---------------------------------------------------------
-@xui.win.menu_update_bind(xmlui, "menu_win", "menu_row", "menu_item")
-def menu_win_update(menu_win:xui.win.Menu, event:xui.XUEvent):
+@win.menu_update_bind(xmlui, "menu_win", "menu_row", "menu_item")
+def menu_win_update(menu_win:win.Menu, event:core.XUEvent):
     item_w, item_h = menu_win.attr_int("item_w"), menu_win.attr_int("item_h")
     menu_win.arrange_items(item_w, item_h)
 
@@ -58,8 +64,8 @@ def menu_win_update(menu_win:xui.win.Menu, event:xui.XUEvent):
 
 # 描画
 # ---------------------------------------------------------
-@xui.win.menu_draw_bind(xmlui, "menu_win", "menu_row", "menu_item")
-def menu_win_draw(menu_win:xui.win.MenuRO, event:xui.XUEvent):
+@win.menu_draw_bind(xmlui, "menu_win", "menu_row", "menu_item")
+def menu_win_draw(menu_win:win.MenuRO, event:core.XUEvent):
     bg_color = 12
     frame_color = 10 if event.active else 7
     title  = menu_win.attr_str("title")
@@ -69,18 +75,18 @@ def menu_win_draw(menu_win:xui.win.MenuRO, event:xui.XUEvent):
 
     # メニュータイトル
     if title:
-        str_w = FONT_SIZE*len(title)
+        str_w = font.font_size*len(title)
         text_x = menu_win.area.x+(menu_win.area.w-str_w)/2
-        pyxel.rect(text_x,menu_win.area.y, str_w, FONT_SIZE, bg_color)
-        pyxel.text(text_x, menu_win.area.y-2, title, frame_color, font)
+        pyxel.rect(text_x,menu_win.area.y, str_w, font.font_size, bg_color)
+        pyxel.text(text_x, menu_win.area.y-2, title, frame_color, font.font)
 
 
 # メッセージウインドウ
 # *****************************************************************************
 # 更新
 # ---------------------------------------------------------
-@xui.win.msg_update_bind(xmlui, "msg_win", "msg_text")
-def msg_win_update(msg_win:xui.win.Msg, event:xui.XUEvent):
+@win.msg_update_bind(xmlui, "msg_win", "msg_text")
+def msg_win_update(msg_win:win.Msg, event:core.XUEvent):
     if "button_a" in event.trg or "button_b" in event.trg:
         action = msg_win.page.check_action()
         if action == "close":
@@ -92,8 +98,8 @@ def msg_win_update(msg_win:xui.win.Msg, event:xui.XUEvent):
 
 # 描画
 # ---------------------------------------------------------
-@xui.win.msg_draw_bind(xmlui, "msg_win", "msg_text")
-def msg_win_draw(msg_win:xui.win.MsgRO, event:xui.XUEvent):
+@win.msg_draw_bind(xmlui, "msg_win", "msg_text")
+def msg_win_draw(msg_win:win.MsgRO, event:core.XUEvent):
     msg_win.draw()
 
     # カーソル表示
@@ -107,9 +113,9 @@ def msg_win_draw(msg_win:xui.win.MsgRO, event:xui.XUEvent):
 # ダイアル
 # *****************************************************************************
 @xmlui.update_bind("win_dial")
-def win_dial_update(win_dial:xui.core.XUState, event:xui.XUEvent):
+def win_dial_update(win_dial:core.XUState, event:core.XUEvent):
     # 数値変更
-    dial = xui.core.XUDial(win_dial, 5)
+    dial = core.XUDial(win_dial, 5)
     dial.change_by_event(event.trg, "left", "right", "up", "down")
 
     # 確定
@@ -122,18 +128,18 @@ def win_dial_update(win_dial:xui.core.XUState, event:xui.XUEvent):
         win_dial.close()
 
 @xmlui.draw_bind("win_dial")
-def dial_win_draw(dial_win:xui.core.XUStateRO, event:xui.XUEvent):
+def dial_win_draw(dial_win:core.XUStateRO, event:core.XUEvent):
     frame_color = 10 if event.active else 7
     pyxel.rect(dial_win.area.x, dial_win.area.y, dial_win.area.w, dial_win.area.h, 12)
     pyxel.rectb(dial_win.area.x, dial_win.area.y, dial_win.area.w, dial_win.area.h, frame_color)
 
     # 数値表示
-    dial = xui.core.XUDialRO(dial_win)
+    dial = core.XUDialRO(dial_win)
     for i,digit in enumerate(dial.zenkaku_digits):
-        pyxel.text(dial_win.area.x+3+(4-i)*FONT_SIZE, dial_win.area.y+2, digit, 2 if dial.edit_pos == i else 7, font)
+        pyxel.text(dial_win.area.x+3+(4-i)*font.font_size, dial_win.area.y+2, digit, 2 if dial.edit_pos == i else 7, font.font)
 
-@xui.win.list_update_bind(xmlui, "yes_no", "yes_no_item")
-def dial_yes_no_update(list_win:xui.win.List, event:xui.XUEvent):
+@win.list_update_bind(xmlui, "yes_no", "yes_no_item")
+def dial_yes_no_update(list_win:win.List, event:core.XUEvent):
     item_h = list_win.attr_int("item_h")
     list_win.arrange_items(0, item_h)
 
@@ -148,7 +154,7 @@ def dial_yes_no_update(list_win:xui.win.List, event:xui.XUEvent):
     if "button_a" in event.trg:
         # Yes時処理
         if selected_item == "yes":
-            test_params["age"] = xui.core.XUDialRO(list_win.find_by_tagR("win_dial")).number
+#            test_params["age"] = core.XUDialRO(list_win.find_by_tagR("win_dial")).number
             list_win.xmlui.close("menu_command")
 
         # No時処理
@@ -156,7 +162,7 @@ def dial_yes_no_update(list_win:xui.win.List, event:xui.XUEvent):
             list_win.close()
 
 
-@xui.win.list_draw_bind(xmlui, "yes_no", "yes_no_item")
-def dial_yes_no_draw(list_win:xui.win.ListRO, event:xui.XUEvent):
+@win.list_draw_bind(xmlui, "yes_no", "yes_no_item")
+def dial_yes_no_draw(list_win:win.ListRO, event:core.XUEvent):
     list_win.draw()
     draw_menu_cursor(list_win.selected_item, 0, 0)

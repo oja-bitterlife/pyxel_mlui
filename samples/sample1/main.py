@@ -1,62 +1,28 @@
-import pyxel # Pyxelモジュールをインポート
+# 今回はpyxel向けのライブラリを作るのです
+import pyxel
 
-pyxel.init(256, 256) # 初期化(ウィンドウサイズを指定)
+# ui_code内で作ったUIライブラリのインスタンスを持ってくる
+from .ui_code import xmlui
 
-# お試しサンプルUI
-import samples.sample1.ui_code as sample
-xmlui = sample.xmlui
-
-#xmlui.open("ui_template", "menu_command")
-
-xmlui.set_inputlist("up", [
-    pyxel.GAMEPAD1_BUTTON_DPAD_UP,
-    pyxel.KEY_UP,
-    pyxel.KEY_W,
-])
-xmlui.set_inputlist("down", [
-    pyxel.GAMEPAD1_BUTTON_DPAD_DOWN,
-    pyxel.KEY_DOWN,
-    pyxel.KEY_S,
-])
-xmlui.set_inputlist("left", [
-    pyxel.GAMEPAD1_BUTTON_DPAD_LEFT,
-    pyxel.KEY_LEFT,
-    pyxel.KEY_A,
-])
-xmlui.set_inputlist("right", [
-    pyxel.GAMEPAD1_BUTTON_DPAD_RIGHT,
-    pyxel.KEY_RIGHT,
-    pyxel.KEY_D,
-])
-xmlui.set_inputlist("button_a", [
-    pyxel.GAMEPAD1_BUTTON_A,
-    pyxel.KEY_RETURN,
-    pyxel.KEY_SPACE,
-])
-xmlui.set_inputlist("button_b", [
-    pyxel.GAMEPAD1_BUTTON_B,
-    pyxel.KEY_BACKSPACE,
-])
-xmlui.set_inputlist("button_X", [
-    pyxel.GAMEPAD1_BUTTON_X,
-])
-xmlui.set_inputlist("button_y", [
-    pyxel.GAMEPAD1_BUTTON_Y,
-])
+# ここからゲーム本体開始
+# *********************************************************
+pyxel.init(256, 256)
 
 # Main
 def update(): # フレームの更新処理
-    xmlui.check_input_on(pyxel.btn)
+    # ゲームの更新コード
 
     # UI更新
+    xmlui.check_input_on(pyxel.btn)
     xmlui.update()
 
     # デバッグ
-    if xmlui.debug:
+    if xmlui.debug.is_lib_debug:
         if pyxel.btnp(pyxel.KEY_T):
             print(xmlui.strtree())
 
 def draw(): # 描画処理
+    # ゲームの描画コード
     pyxel.cls(0)
 
     # UI描画
