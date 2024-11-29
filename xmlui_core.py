@@ -331,7 +331,7 @@ class XUState(XUStateRO):
             raise Exception(f"ID '{alias}' already exists")
         except:
             # eventを有効にして追加する
-            opend = self.xmlui.templates[template_name].pick(id).set_attr("id", alias).set_attr("use_event", True)
+            opend = self.xmlui.templates[template_name].duplicate(id).set_attr("id", alias).set_attr("use_event", True)
             self.add_child(opend)
             return opend
 
@@ -366,7 +366,7 @@ class XMLUI_Template(XUStateRO):
     # XML操作
     # *************************************************************************
     # Elmentを複製して取り出す
-    def pick(self, id:str) -> XUState:
+    def duplicate(self, id:str) -> XUState:
         return XUState(self.xmlui, copy.deepcopy(self.find_by_ID(id)._element))
 
 class XMLUI(XUState):
