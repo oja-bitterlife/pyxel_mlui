@@ -1,3 +1,5 @@
+import sys
+sys.path.append("../../")
 from xmlui_pyxel import xui
 
 xmlui = xui.core.XMLUI()
