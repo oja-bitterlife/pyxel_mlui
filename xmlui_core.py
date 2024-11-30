@@ -366,7 +366,7 @@ class XUState(XUStateRO):
             self.xmlui.find_by_ID(id).asRW().remove()
         else:
             self.remove()
-       
+
 
 # XMLでUIライブラリ本体
 # #############################################################################
