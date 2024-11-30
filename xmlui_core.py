@@ -925,7 +925,7 @@ class XUDial(XUDialRO):
 # ウインドウサポート
 # ---------------------------------------------------------
 # 子ウインドウをopenするかもなのでROではいけない
-class _XUWinBase(XUState):
+class _XUWinFrameBase(XUState):
     # 0 1 2
     # 3 4 5
     # 6 7 8
@@ -969,35 +969,39 @@ class _XUWinBase(XUState):
     def draw_frame(self, screen_buf):
         # areaはアトリビュートなのでばらすとかなり高速化
         area_x, area_y = self.area.x, self.area.y
-        offset_r, offset_b = self.area.w, self.area.h  # オフセットなので0,0～w,h
+        off_r, off_b = self.area.w, self.area.h  # オフセットなので0,0～w,h
 
         # 高速化のため描画もばらす
         # ピクセル描画
-        def _draw_pix(self, x_:int, y_:int):
-            index = self._get_patidx_func(x_, y_, offset_r, offset_b)
+        def _draw_pix(self, off_x:int, off_y:int):
+            index = self._get_patidx_func(off_x, off_y, off_r, off_b)
             if index >= 0:  # 枠外チェック
                 color = self._pattern[index]
                 if color != -1:  # 透明チェック
-                    screen_buf[(area_y + y_)*self.screen_w + (area_x + x_)] = color
+                    screen_buf[(area_y + off_y)*self.screen_w + (area_x + off_x)] = color
+
+        # 読みやすさのための展開(速度はほぼ変わらなかった)
+        size = self.pattern_size
+        clip_r,clip_b = self.clip.right(), self.clip.bottom()
 
         # まずは上のライン
-        for y_ in range(max(0, self.clip.y), min(self.clip.bottom(), min(offset_b, self.pattern_size))):
-            for x_ in range(max(0, self.clip.x), min(self.clip.right(), offset_r)):
+        for y_ in range(max(0, self.clip.y), min(clip_b, min(off_b, size))):
+            for x_ in range(max(0, self.clip.x), min(clip_r, off_r)):
                 _draw_pix(self, x_, y_)
         # 下のライン
-        for y_ in range(max(offset_b-self.pattern_size, self.clip.y), min(self.clip.bottom(), offset_b)):
-            for x_ in range(max(0, self.clip.x), min(self.clip.right(), offset_r)):
+        for y_ in range(max(off_b-size, self.clip.y), min(clip_b, off_b)):
+            for x_ in range(max(0, self.clip.x), min(clip_r, off_r)):
                 _draw_pix(self, x_, y_)
-        for y_ in range(max(self.pattern_size, self.clip.y), min(self.clip.bottom(), offset_b-self.pattern_size)):
+        for y_ in range(max(size, self.clip.y), min(clip_b, off_b-size)):
             # 左のライン
-            for x_ in range(max(0, self.clip.x), min(self.clip.right(), self.pattern_size)):
+            for x_ in range(max(0, self.clip.x), min(clip_r, size)):
                 _draw_pix(self, x_, y_)
             # 右のライン
-            for x_ in range(max(offset_r-self.pattern_size, self.clip.x), min(self.clip.right(), offset_r)):
+            for x_ in range(max(off_r-size, self.clip.x), min(clip_r, off_r)):
                 _draw_pix(self, x_, y_)
 
 
-class XUWinRound(_XUWinBase):
+class XUWinRoundFrame(_XUWinFrameBase):
     def __init__(self, state:XUStateRO, pattern:list[int], screen_w:int, screen_h:int):
         super().__init__(state, pattern, screen_w, screen_h, self._get_patternindex)
 
@@ -1006,34 +1010,34 @@ class XUWinRound(_XUWinBase):
 
     def _get_patternindex(self, x:int, y:int, w:int, h:int) -> int:
         size = self.pattern_size
-        area = self.get_area(x, y, w, h)
-        if area == 0:
-            l = size-1-self._get_veclen(x, y, size-1, size-1)
-            return l if l < size else -1
-        elif area == 2:
-            l = size-1-self._get_veclen(x, y, w-size, size-1)
-            return l if l < size else -1
-        elif area == 6:
-            l = size-1-self._get_veclen(x, y, size-1, h-size)
-            return l if l < size else -1
-        elif area == 8:
-            l = size-1-self._get_veclen(x, y, w-size, h-size)
-            return l if l < size else -1
+        match self.get_area(x, y, w, h):
+            case 0:
+                l = size-1-self._get_veclen(x, y, size-1, size-1)
+                return l if l < size else -1
+            case 2:
+                l = size-1-self._get_veclen(x, y, w-size, size-1)
+                return l if l < size else -1
+            case 6:
+                l = size-1-self._get_veclen(x, y, size-1, h-size)
+                return l if l < size else -1
+            case 8:
+                l = size-1-self._get_veclen(x, y, w-size, h-size)
+                return l if l < size else -1
         return self._get13574index(x, y, w, h)
 
-class XUWinRect(_XUWinBase):
+class XUWinRectFrame(_XUWinFrameBase):
     def __init__(self, state:XUStateRO, pattern:list[int], screen_w:int, screen_h:int):
         super().__init__(state, pattern, screen_w, screen_h, self._get_pattern_index)
 
     def _get_pattern_index(self, x:int, y:int, w:int, h:int) -> int:
-        area = self.get_area(x, y, w, h)
-        if area == 0:
-            return y if x > y else x
-        elif area == 2:
-            return y if w-1-x > y else w-1-x
-        elif area == 6:
-            return h-1-y if x > h-1-y else x
-        elif area == 8:
-            return h-1-y if w-1-x > h-1-y else w-1-x
+        match self.get_area(x, y, w, h):
+            case 0:
+                return y if x > y else x
+            case 2:
+                return y if w-1-x > y else w-1-x
+            case 6:
+                return h-1-y if x > h-1-y else x
+            case 8:
+                return h-1-y if w-1-x > h-1-y else w-1-x
         return self._get13574index(x, y, w, h)
 

@@ -9,7 +9,7 @@ from . import font
 def _active_color(state:XUStateRO, color:int):
         return 10 if  state.xmlui.debug.is_lib_debug and state.xmlui.active_state == state and color == 7 else color
 
-class _BaseRound(XUWinRound):
+class _BaseRound(XUWinRoundFrame):
     DEFAULT_PAT = [7,7,12]
 
     def __init__(self, state:XUStateRO, speed:float=16):
@@ -22,7 +22,7 @@ class _BaseRound(XUWinRound):
         self.clip.h = int(self.update_count*self.speed)
         self.draw_frame(pyxel.screen.data_ptr())
 
-class _BaseRect(XUWinRect):
+class _BaseRect(XUWinRectFrame):
     DEFAULT_PAT = [7,7,12]
 
     def __init__(self, state:XUStateRO, speed:float=16):
