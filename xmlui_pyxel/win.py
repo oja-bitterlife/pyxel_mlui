@@ -39,12 +39,32 @@ class _BaseRect(XUWinRectFrame):
 # ラベル
 # *****************************************************************************
 class LabelRO(_BaseRound):
-    def __init__(self, state:XUStateRO):
+    def __init__(self, state:XUStateRO, align:str="center"):
         super().__init__(state)
+        self._align = align
+        self.offset = 0
+
+    def set_offset(self, x:int):
+        self.offset  = x
 
     def draw(self):
         super().draw()  # ウインドウ描画
-        pyxel.text(self.area.x+6, self.area.y, self.text, 7, font.data)
+
+        text_w = font.data.text_width(self.text)
+        match self.align:
+            case "left":
+                x =  self.area.x + self.offset
+            case "center":
+                x = self.area.center_x(text_w)
+            case "right":
+                x = self.area.right() - text_w - self.offset
+            case _:
+                raise ValueError(f"align:{self.align} is not supported.")        
+        pyxel.text(x, self.area.center_y(font.size), self.text, 7, font.data)
+
+    @property
+    def align(self) -> str:
+        return self._align
 
 class Label(_BaseRound):
     def __init__(self, state:XUState):

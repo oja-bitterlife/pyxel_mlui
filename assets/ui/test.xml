@@ -16,7 +16,7 @@
 
     <win_dial w="64" h="16" id="win_dial" layer="1"/>
 
-    <label abs_x="100" abs_y="100" w="64" h="16" id="label">らべる</label>
+    <label abs_x="100" abs_y="100" w="64" h="18" id="label">らべる</label>
 
     <yes_no w="48" h="40" item_h="14" title="ok?" id="yes_no">
         <yes_no_grid x="8" y="14">
