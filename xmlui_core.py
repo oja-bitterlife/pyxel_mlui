@@ -1025,8 +1025,8 @@ class _XUWinFrameBase(XUState):
         # 角の描画
         # ---------------------------------------------------------------------
         def _draw_shoulder(self, off_x:int, off_y:int, pattern:bytes|bytearray):
-            # クリップチェック
-            if self.clip.x < off_x < clip_r and self.clip.y < off_y < clip_b:
+           # クリップチェック
+            if self.clip.x <= off_x < clip_r and self.clip.y <= off_y < clip_b:
                 index = self._get_patidx_func(off_x, off_y, off_r, off_b)
                 if index >= 0:  # 枠外チェック
                     if pattern[index] >= 0:  # 透明チェック
