@@ -993,7 +993,7 @@ class _XUWinFrameBase(XUState):
                 screen_buf[offset:offset+w] = c_pat
 
     # フレームだけバッファに書き込む(高速化や半透明用)
-    # いわゆる上級者用。中央部分塗りつぶしは呼び出し側で行う
+    # 中央部分塗りつぶしは呼び出し側で行う
     def _draw_frame(self, screen_buf:bytearray):
         # areaはアトリビュートなのでばらすとかなり高速化
         area_x, area_y = self.area.x, self.area.y
