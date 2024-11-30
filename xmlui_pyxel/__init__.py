@@ -1,4 +1,4 @@
-import xmlui_core as core
+import xmlui_core as xuc
 
 # パッケージ一覧
 from . import input
@@ -9,7 +9,7 @@ from . import win
 # XMLUIのおすすめ設定による初期化をよしなにやってくれるやつ
 # これを呼ぶだけでだいたいいい感じになるように頑張る
 def initialize(
-        xmlui:core.XMLUI,
+        xmlui:xuc.XMLUI,
         inputlist_dict: dict[str,list[int]],
         font_path:str
     ):
