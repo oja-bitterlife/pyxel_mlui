@@ -15,7 +15,6 @@ def update(): # フレームの更新処理
     if input.BTN_A in xmlui.event.trg:
         if not xmlui.is_open("menu_command"):
             xmlui.open(UI_TEMPLATE, "menu_command")
-            return
 
     # UI更新
     xmlui.check_input_on(pyxel.btn)

@@ -66,6 +66,9 @@ class XURect:
 class XUEvent:
     def __init__(self, init_active=False):
         self.active = init_active  # アクティブなイベントかどうか
+        self.clear()
+
+    def clear(self):
         self._receive:set[str] = set([])  # 次の状態受付
         self._input:set[str] = set([])
         self._trg:set[str] = set([])
@@ -354,16 +357,16 @@ class XUState(XUStateRO):
             opend.set_attr("use_event", True)  # openで追加するときはeventを有効に
             self.add_child(opend)
             return opend
+
         # IDがかぶってはいけない
         raise Exception(f"ID '{id_alias}' already exists")
-
+ 
     def close(self, id:str|None=None):  # closeの後なにもしないのでNone
         if id is not None:
-            state = self.xmlui.find_by_ID(id).asRW()
-            state.remove()
+            self.xmlui.find_by_ID(id).asRW().remove()
         else:
             self.remove()
-
+       
 
 # XMLでUIライブラリ本体
 # #############################################################################
