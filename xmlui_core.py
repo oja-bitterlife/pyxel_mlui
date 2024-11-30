@@ -932,12 +932,14 @@ class _XUWinBase(XUState):
     def __init__(self, state:XUStateRO, pattern:list[int], screen_w:int, screen_h:int, pattern_index_func:Callable[[int,int,int,int], int]):
         super().__init__(state.xmlui, state._element)
 
-        self._patterns = [pattern.copy() for i in range(9)]
+        self._pattern = pattern.copy()
+        self.pattern_size = len(pattern)  # 高速化のためここで変数に
         self.screen_w, self.screen_h = screen_w, screen_h
         self._get_patidx_func = pattern_index_func  # 枠外は-1を返す
 
         # クリッピングエリア
         self.clip = XURect(0, 0, screen_w, screen_h)
+        self.is_shadow = False
 
     # 1,3,5,7,4のエリア(カド以外)は特に計算が必要ない
     def _get13574index(self, x:int, y:int, w:int, h:int) -> int:
@@ -960,29 +962,40 @@ class _XUWinBase(XUState):
 
     # シャドウ対応(0,1,3のパターン上書き)
     def set_shadow(self, index:int, shadow:list[int]) -> Self:
-        for i,color in enumerate(shadow):
-            self._patterns[0][index+i] = color
-            self._patterns[1][index+i] = color
-            self._patterns[2][index+i] = color
-            self._patterns[3][index+i] = color
+        self.is_shadow = True
         return self
 
-    # バッファに書き込む
-    def draw_buf(self, screen_buf):
-        area = self.area
-        for y_ in range(max(0, self.clip.y), min(self.clip.bottom(), area.h)):
-            for x_ in range(max(0, self.clip.x), min(self.clip.right(), area.w)):
-                index = self._get_patidx_func(x_, y_, area.w, area.h)
-                if index >= 0:  # 枠外チェック
-                    color = self._patterns[self.get_area(x_, y_, area.w, area.h)][index]
-                    if color == -1:  # 透明チェック
-                        continue
-                    screen_buf[(area.y + y_)*self.screen_w + (area.x + x_)] = color
+    # フレームだけバッファに書き込む
+    def draw_frame(self, screen_buf):
+        # areaはアトリビュートなのでばらすとかなり高速化
+        area_x, area_y = self.area.x, self.area.y
+        offset_r, offset_b = self.area.w, self.area.h  # オフセットなので0,0～w,h
 
-    # パターン長
-    @property
-    def pattern_size(self) -> int:
-        return len(self._patterns[0])
+        # 高速化のため描画もばらす
+        # ピクセル描画
+        def _draw_pix(self, x_:int, y_:int):
+            index = self._get_patidx_func(x_, y_, offset_r, offset_b)
+            if index >= 0:  # 枠外チェック
+                color = self._pattern[index]
+                if color != -1:  # 透明チェック
+                    screen_buf[(area_y + y_)*self.screen_w + (area_x + x_)] = color
+
+        # まずは上のライン
+        for y_ in range(max(0, self.clip.y), min(self.clip.bottom(), min(offset_b, self.pattern_size))):
+            for x_ in range(max(0, self.clip.x), min(self.clip.right(), offset_r)):
+                _draw_pix(self, x_, y_)
+        # 下のライン
+        for y_ in range(max(offset_b-self.pattern_size, self.clip.y), min(self.clip.bottom(), offset_b)):
+            for x_ in range(max(0, self.clip.x), min(self.clip.right(), offset_r)):
+                _draw_pix(self, x_, y_)
+        for y_ in range(max(self.pattern_size, self.clip.y), min(self.clip.bottom(), offset_b-self.pattern_size)):
+            # 左のライン
+            for x_ in range(max(0, self.clip.x), min(self.clip.right(), self.pattern_size)):
+                _draw_pix(self, x_, y_)
+            # 右のライン
+            for x_ in range(max(offset_r-self.pattern_size, self.clip.x), min(self.clip.right(), offset_r)):
+                _draw_pix(self, x_, y_)
+
 
 class XUWinRound(_XUWinBase):
     def __init__(self, state:XUStateRO, pattern:list[int], screen_w:int, screen_h:int):
