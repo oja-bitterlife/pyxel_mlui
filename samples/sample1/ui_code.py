@@ -20,6 +20,7 @@ xmlui_pyxel.initialize(xmlui,
 xmlui.debug.level = xmlui.debug.DEBUG_LEVEL_LIB
 
 # UIテンプレートXMLの読み込み
+UI_TEMPLATE = "ui_template"
 xmlui.template_fromfile("assets/ui/test.xml", "ui_template")
 
 
@@ -28,15 +29,6 @@ def draw_menu_cursor(state:xuc.XUStateRO, x:int, y:int):
     left =state.area.x
     top  = state.area.y+2
     pyxel.tri(left, top, left, top+tri_size, left+tri_size//2, top+tri_size//2, 7)
-
-
-# 入力待ち
-# *****************************************************************************
-@xmlui.update_bind("root")
-def my_ui_update(my_ui:xuc.XUState, event:xuc.XUEvent):
-    # メインメニューを開く
-    if "button_a" in event.trg:
-        my_ui.open("ui_template", "menu_command")
 
 
 # コマンドメニュー
@@ -49,20 +41,20 @@ def menu_win_update(menu_win:win.Menu, event:xuc.XUEvent):
     menu_win.arrange_items(item_w, item_h)
 
     # メニュー選択
-    selected_item = menu_win.select_by_event("left", "right", "up", "down")
+    selected_item = menu_win.select_by_event(*input.CURSOR_LRUD)
 
     # 選択アイテムの表示
-    if "button_a" in event.trg:
+    if input.BTN_A in event.trg:
         # メッセージウインドウ表示
         if selected_item == "speak":
-            selected_item.open("ui_template", "win_message")
+            selected_item.open(UI_TEMPLATE, "win_message")
 
         # dialウインドウ表示
         if selected_item == "dial":
-            selected_item.open("ui_template", "win_dial").set_pos(8, 2)
+            selected_item.open(UI_TEMPLATE, "win_dial").set_pos(8, 2)
 
     # 閉じる
-    if "button_b" in event.trg:
+    if input.BTN_B in event.trg:
         menu_win.close()
 
 # 描画
@@ -90,7 +82,7 @@ def menu_win_draw(menu_win:win.MenuRO, event:xuc.XUEvent):
 # ---------------------------------------------------------
 @win.msg_update_bind(xmlui, "msg_win", "msg_text")
 def msg_win_update(msg_win:win.Msg, event:xuc.XUEvent):
-    if "button_a" in event.trg or "button_b" in event.trg:
+    if input.BTN_A in event.trg or input.BTN_B in event.trg:
         action = msg_win.page.check_action()
         if action == "close":
             msg_win.close("menu_command")  # メニューごと閉じる
@@ -119,15 +111,15 @@ def msg_win_draw(msg_win:win.MsgRO, event:xuc.XUEvent):
 def win_dial_update(win_dial:xuc.XUState, event:xuc.XUEvent):
     # 数値変更
     dial = xuc.XUDial(win_dial, 5)
-    dial.change_by_event(event.trg, "left", "right", "up", "down")
+    dial.change_by_event(event.trg, *input.CURSOR_LRUD)
 
     # 確定
-    if "button_a" in event.trg:
-        win_dial.open("ui_template", "yes_no", "dial_yes_no")
+    if input.BTN_A in event.trg:
+        win_dial.open(UI_TEMPLATE, "yes_no", "dial_yes_no")
         # dial_win.close() # 確定でも閉じる
 
     # 閉じる
-    if "button_b" in event.trg:
+    if input.BTN_B in event.trg:
         win_dial.close()
 
 @xmlui.draw_bind("win_dial")
@@ -147,14 +139,14 @@ def dial_yes_no_update(list_win:win.List, event:xuc.XUEvent):
     list_win.arrange_items(0, item_h)
 
     # メニュー選択
-    selected_item = list_win.select_by_event("up", "down")
+    selected_item = list_win.select_by_event(*input.CURSOR_UD)
 
     # 閉じる
-    if "button_b" in event.trg:
+    if input.BTN_B in event.trg:
         list_win.close()
 
     # 決定
-    if "button_a" in event.trg:
+    if input.BTN_A in event.trg:
         # Yes時処理
         if selected_item == "yes":
 #            test_params["age"] = core.XUDialRO(list_win.find_by_tagR("win_dial")).number

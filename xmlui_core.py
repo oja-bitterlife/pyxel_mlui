@@ -402,7 +402,7 @@ class XMLUI(XUState):
         self.debug = XMLUI_Debug()
 
         # 入力
-        self._event = XUEvent(True)  # 唯一のactiveとする
+        self.event = XUEvent(True)  # 唯一のactiveとする
         self._input_lists:dict[str, list[int]] = {}
 
         # 処理関数の登録
@@ -434,7 +434,7 @@ class XMLUI(XUState):
 
     def update(self):
         # (入力)イベントの更新
-        self._event.update()
+        self.event.update()
 
         # 更新対象を取得
         update_targets = list(self._get_updatetargets(self))
@@ -447,7 +447,7 @@ class XMLUI(XUState):
         for state in update_targets:
             if state.enable:  # update中にdisable(remove)になる場合があるので毎回チェック
                 state.set_attr("update_count", state.update_count+1)  # 1スタート(0は初期化時)
-                self.update_element(state.tag, state, self._event if state == self.active_state else XUEvent())
+                self.update_element(state.tag, state, self.event if state == self.active_state else XUEvent())
 
     # 描画用
     # *************************************************************************
@@ -483,7 +483,7 @@ class XMLUI(XUState):
 
         # 描画処理
         for state in sorted(draw_targets, key=lambda state: state.layer):
-            self.draw_element(state.tag, state, self._event if state == active_state else XUEvent())
+            self.draw_element(state.tag, state, self.event if state == active_state else XUEvent())
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
     def update_element(self, tag_name:str, state:XUState, event:XUEvent):
@@ -521,7 +521,7 @@ class XMLUI(XUState):
     # *************************************************************************
     # イベント入力
     def on(self, input:str):
-        self._event.on(input)
+        self.event.on(input)
 
     # キー入力
     def set_inputlist(self, input_type:str, list:list[int]):
@@ -537,7 +537,7 @@ class XMLUI(XUState):
     def check_input_on(self, check_func:Callable[[int], bool]):
         for key in self._input_lists:
             if self.check_input(key, check_func):
-                self._event.on(key)
+                self.event.on(key)
 
 
 # ユーティリティークラス

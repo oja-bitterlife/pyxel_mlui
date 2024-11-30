@@ -1,8 +1,8 @@
 # 今回はpyxel向けのライブラリを作るのです
 import pyxel
 
-# ui_code内で作ったUIライブラリのインスタンスを持ってくる
-from .ui_code import xmlui
+# ui_code内のUIライブラリへのアクセス
+from .ui_code import xmlui,UI_TEMPLATE
 
 # ここからゲーム本体開始
 # *********************************************************
@@ -11,6 +11,9 @@ pyxel.init(256, 256)
 # Main
 def update(): # フレームの更新処理
     # ゲームの更新コード
+    # ゲームの中でメインメニューを開く
+    if "button_a" in xmlui.event.trg:
+        xmlui.open(UI_TEMPLATE, "menu_command")
 
     # UI更新
     xmlui.check_input_on(pyxel.btn)

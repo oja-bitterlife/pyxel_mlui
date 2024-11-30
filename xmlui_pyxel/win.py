@@ -64,7 +64,7 @@ class Menu(MenuRO):
 
     def select_by_event(self, left:str, right:str, up:str, down:str) -> XUState:
         if self.xmlui.active_state == self:
-            self._grid_root.select_by_event(self.xmlui._event.trg, left, right, up, down)
+            self._grid_root.select_by_event(self.xmlui.event.trg, left, right, up, down)
         return self.selected_item
 
     @property
@@ -120,7 +120,7 @@ class List(ListRO):
 
     def select_by_event(self, up:str, down:str) -> XUState:
         if self.xmlui.active_state == self:
-            self._grid_root.select_by_event(self.xmlui._event.trg, up, down)
+            self._grid_root.select_by_event(self.xmlui.event.trg, up, down)
         return self.selected_item
 
     @property
