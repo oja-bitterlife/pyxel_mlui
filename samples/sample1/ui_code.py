@@ -51,7 +51,7 @@ def menu_win_update(menu_win:win.Menu, event:xuc.XUEvent):
         # メッセージウインドウ表示
         if selected_item == "speak":
             # selected_item.open(UI_TEMPLATE, "win_message")
-            selected_item.open(UI_TEMPLATE, "label")
+            selected_item.append(UI_TEMPLATE, "label")
 
         # dialウインドウ表示
         if selected_item == "dial":

@@ -357,6 +357,10 @@ class XUState(XUStateRO):
         # IDがかぶってはいけない
         raise Exception(f"ID '{id_alias}' already exists")
 
+    # 子に別Element一式を追加する。イベントは無効
+    def append(self, template_name:str, id:str, id_alias:str|None=None) -> 'XUState':
+        return self.open(template_name, id, id_alias).set_attr("use_event", False)
+
     def close(self, id:str|None=None):  # closeの後なにもしないのでNone
         if id is not None:
             state = self.xmlui.find_by_ID(id).asRW()
