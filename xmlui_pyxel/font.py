@@ -11,8 +11,9 @@ def set_font(font_path:str):
 
     # フォントサイズ算出
     with open(font_path, "r") as f:
-        for i, line in enumerate(f.readline()):
+        for i, line in enumerate(f.readlines()):
             if i > 100:  # 100行も見りゃええじゃろ...
                 raise Exception("font error")
             if line.startswith("PIXEL_SIZE"):
                 size = int(line.split()[-1])
+                break
