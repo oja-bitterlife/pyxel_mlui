@@ -181,6 +181,13 @@ class XUStateRO:
             parent = parent.parent
         raise Exception(f"Tag '{tag}' not found in parents")
 
+    def is_open(self, id:str) -> bool:
+        try:
+            self.find_by_ID(id)
+            return True
+        except:
+            return False
+
     @property
     def parent(self) -> 'XUState|None':
         def _rec_parent_search(element:Element, me:Element) -> Element|None:
@@ -332,13 +339,16 @@ class XUState(XUStateRO):
         # idがかぶらないよう別名を付けられる
         id_alias = id if id_alias is None else id_alias
         try:
-            self.xmlui.find_by_ID(id_alias)  # IDがかぶってはいけない
-            raise Exception(f"ID '{id_alias}' already exists")
+            # すでに存在するかチェック
+            self.xmlui.find_by_ID(id_alias)
         except:
+            # 見つからず例外がでればOK
             opend = self.xmlui._templates[template_name].duplicate(id).set_attr("id", id_alias)
             opend.set_attr("use_event", True)  # openで追加するときはeventを有効に
             self.add_child(opend)
             return opend
+        # IDがかぶってはいけない
+        raise Exception(f"ID '{id_alias}' already exists")
 
     def close(self, id:str|None=None):  # closeの後なにもしないのでNone
         if id is not None:
