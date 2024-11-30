@@ -993,8 +993,8 @@ class _XUWinFrameBase(XUState):
                 screen_buf[offset:offset+w] = c_pat
 
     # フレームだけバッファに書き込む(高速化や半透明用)
-    # 中央部分塗りつぶしは呼び出し側に任せる
-    def draw_frame(self, screen_buf:bytearray):
+    # いわゆる上級者用。中央部分塗りつぶしは呼び出し側で行う
+    def _draw_frame(self, screen_buf:bytearray):
         # areaはアトリビュートなのでばらすとかなり高速化
         area_x, area_y = self.area.x, self.area.y
         off_r, off_b = self.area.w, self.area.h  # オフセットなので0,0～w,h
@@ -1049,7 +1049,7 @@ class _XUWinFrameBase(XUState):
     # ウインドウ全体をバッファに書き込む
     def draw_buf(self, screen_buf:bytearray):
         self._draw_center(screen_buf)
-        self.draw_frame(screen_buf)
+        self._draw_frame(screen_buf)
 
 class XUWinRoundFrame(_XUWinFrameBase):
     def __init__(self, state:XUStateRO, pattern:list[int], screen_w:int, screen_h:int):
