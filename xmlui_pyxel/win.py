@@ -39,13 +39,11 @@ class _BaseRect(XUWinRectFrame):
 # ラベル
 # *****************************************************************************
 class LabelRO(_BaseRound):
+    LABEL_OFFSET_ATTR:str = "label_offset"
+
     def __init__(self, state:XUStateRO, align:str="center"):
         super().__init__(state)
         self._align = align
-        self.offset = 0
-
-    def set_offset(self, x:int):
-        self.offset  = x
 
     def draw(self):
         super().draw()  # ウインドウ描画
@@ -59,16 +57,25 @@ class LabelRO(_BaseRound):
             case "right":
                 x = self.area.right() - text_w - self.offset
             case _:
-                raise ValueError(f"align:{self.align} is not supported.")        
+                raise ValueError(f"align:{self.align} is not supported.")
+
+        # ラベルテキスト描画
         pyxel.text(x, self.area.center_y(font.size), self.text, 7, font.data)
 
     @property
     def align(self) -> str:
         return self._align
 
-class Label(_BaseRound):
-    def __init__(self, state:XUState):
-        super().__init__(state)
+    @property
+    def offset(self) -> int:
+        return self.attr_int(self.LABEL_OFFSET_ATTR, 0)
+
+class Label(LabelRO):
+    def __init__(self, state:XUState, align:str="center"):
+        super().__init__(state, align)
+
+    def set_offset(self, x:int):
+        self.set_attr(self.LABEL_OFFSET_ATTR, x)
 
 # デコレータを用意
 def label_update_bind(xmlui:XMLUI, tag_name:str):
@@ -80,11 +87,11 @@ def label_update_bind(xmlui:XMLUI, tag_name:str):
         xmlui.set_updatefunc(tag_name, update)
     return wrapper
 
-def label_draw_bind(xmlui:XMLUI, tag_name:str):
+def label_draw_bind(xmlui:XMLUI, tag_name:str, align:str="center"):
     def wrapper(draw_func:Callable[[LabelRO,XUEvent], None]):
         # 登録用関数をジェネレート
         def draw(state:XUStateRO, event:XUEvent):
-            draw_func(LabelRO(state), event)
+            draw_func(LabelRO(state, align), event)
         # 関数登録
         xmlui.set_drawfunc(tag_name, draw)
     return wrapper
