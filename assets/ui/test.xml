@@ -18,7 +18,8 @@
     <win_dial w="64" h="16" id="win_dial" layer="1"/>
 
 
-    <yes_no w="48" h="40" item_h="14" title="ok?" id="yes_no">
+    <yes_no w="56" h="50" item_h="16" title="ok?" id="yes_no">
+        <title x="19" y="-2" w="18" h="12" id="label">OK?</title>
         <yes_no_grid x="8" y="14">
             <yes_no_item value="yes">はい</yes_no_item>
             <yes_no_item value="no">いいえ</yes_no_item>
