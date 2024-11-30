@@ -10,9 +10,12 @@ import xmlui_pyxel
 # ライブラリのインスタンス化
 xmlui = xuc.XMLUI()
 
+# キー定義。設定しない場合はデフォルトが使われる
+# input.INPUT_LIST[input.BTN_A] = [pyxel.KEY_A]
+
 # 初期化セット
 xmlui_pyxel.initialize(xmlui,
-        inputlist_dict = input.DEFAULT_INPUTLIST_DICT,
+        inputlist_dict = input.INPUT_LIST,
         font_path = "assets/font/b12.bdf"
     )
 

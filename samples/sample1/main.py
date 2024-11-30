@@ -2,7 +2,7 @@
 import pyxel
 
 # ui_code内のUIライブラリへのアクセス
-from .ui_code import xmlui,UI_TEMPLATE
+from .ui_code import xmlui,UI_TEMPLATE,input
 
 # ここからゲーム本体開始
 # *********************************************************
@@ -12,7 +12,7 @@ pyxel.init(256, 256)
 def update(): # フレームの更新処理
     # ゲームの更新コード
     # ゲームの中でメインメニューを開く
-    if "button_a" in xmlui.event.trg:
+    if input.BTN_A in xmlui.event.trg:
         xmlui.open(UI_TEMPLATE, "menu_command")
 
     # UI更新

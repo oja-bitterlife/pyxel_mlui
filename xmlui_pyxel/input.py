@@ -20,7 +20,7 @@ LEFT_RIGHT = [LEFT, RIGHT]
 ANY = CURSOR + [BTN_A, BTN_B, BTN_X, BTN_Y]
 
 # デフォルトインプット設定
-DEFAULT_INPUTLIST_DICT = {
+INPUT_LIST = {
     UP: [
         pyxel.GAMEPAD1_BUTTON_DPAD_UP,
         pyxel.KEY_UP,
