@@ -20,7 +20,7 @@ class _BaseRound(XUWinRoundFrame):
 
     def draw(self):
         self.clip.h = int(self.update_count*self.speed)
-        self.draw_frame(pyxel.screen.data_ptr())
+        self.draw_buf(pyxel.screen.data_ptr())
 
 class _BaseRect(XUWinRectFrame):
     DEFAULT_PAT = [7,7,12]
@@ -33,7 +33,7 @@ class _BaseRect(XUWinRectFrame):
 
     def draw(self):
         self.clip.h = int(self.update_count*self.speed)
-        self.draw_frame(pyxel.screen.data_ptr())
+        self.draw_buf(pyxel.screen.data_ptr())
 
 
 # グリッドメニュー付きウインドウ

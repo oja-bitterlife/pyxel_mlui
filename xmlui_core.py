@@ -967,23 +967,30 @@ class _XUWinFrameBase(XUState):
         return self
 
     # フレームだけバッファに書き込む
-    def draw_frame(self, screen_buf:bytearray):
+    def draw_buf(self, screen_buf:bytearray):
         # areaはアトリビュートなのでばらすとかなり高速化
         area_x, area_y = self.area.x, self.area.y
         off_r, off_b = self.area.w, self.area.h  # オフセットなので0,0～w,h
 
-        # 高速化のため描画もばらす
-        # ピクセル描画
-        def _draw_shoulder(self, off_x:int, off_y:int, pattern:bytes|bytearray):
-            index = self._get_patidx_func(off_x, off_y, off_r, off_b)
-            if index >= 0:  # 枠外チェック
-                color = pattern[index]
-                if color != -1:  # 透明チェック
-                    screen_buf[(area_y + off_y)*self.screen_w + (area_x + off_x)] = color
-
         # 読みやすさのための展開(速度はほぼ変わらなかった)
         size = self.pattern_size
         clip_r,clip_b = self.clip.right(), self.clip.bottom()
+
+        # 角の描画
+        def _draw_shoulder(self, off_x:int, off_y:int, pattern:bytes|bytearray):
+            # クリップチェック
+            if self.clip.x < off_x < clip_r and self.clip.y < off_y < clip_b:
+                index = self._get_patidx_func(off_x, off_y, off_r, off_b)
+                if index >= 0:  # 枠外チェック
+                    if pattern[index] >= 0:  # 透明チェック
+                        screen_buf[(area_y + off_y)*self.screen_w + (area_x + off_x)] = pattern[index]
+
+        for y_ in range(size):
+            for x_ in range(size):
+                _draw_shoulder(self, x_, y_, self._shadow_pattern)  # 左上
+                _draw_shoulder(self, off_r-1-x_, y_, self._shadow_pattern)  # 右上
+                _draw_shoulder(self, x_, off_b-1-y_, self._shadow_pattern)  # 左下
+                _draw_shoulder(self, off_r-1-x_, off_b-1-y_, self._pattern)  # 右下
 
         # 上下のライン
         w = min(clip_r, off_r) - max(0, self.clip.x) - size*2
@@ -996,13 +1003,26 @@ class _XUWinFrameBase(XUState):
                 screen_buf[offset+max(0, self.clip.x)+size: offset+min(clip_r, off_r)-size] = self._pattern[y_:y_+1] * w
 
         # 左右のライン
+        r_pat = bytes(reversed(self._pattern))
         for y_ in range(max(size, self.clip.y), min(clip_b, off_b-size)):
-            # 左のライン
-            for x_ in range(max(0, self.clip.x), min(clip_r, size)):
-                _draw_shoulder(self, x_, y_, self._shadow_pattern)
-            # 右のライン
-            for x_ in range(max(off_r-size, self.clip.x), min(clip_r, off_r)):
-                _draw_shoulder(self, x_, y_, self._pattern)
+            # 左
+            offset = (area_y + y_)*self.screen_w + area_x
+            w = size-max(0, self.clip.x)
+            if w > 0:
+                screen_buf[offset:offset+w] = self._shadow_pattern[:w]
+            # 右
+            offset = (area_y + y_)*self.screen_w + area_x + off_r - size
+            w = min(clip_r-off_r, size)
+            if w > 0:
+                screen_buf[offset:offset+w] = r_pat[:w]
+
+        # 塗りつぶし
+        w = min(clip_r, off_r) - size*2
+        c_pat = self._pattern[-1:] * w
+        for y_ in range(max(size, self.clip.y), min(clip_b, off_b-size)):
+            offset = (area_y + y_)*self.screen_w + area_x + size
+            if w > 0:
+                screen_buf[offset:offset+w] = c_pat
 
 
 class XUWinRoundFrame(_XUWinFrameBase):
