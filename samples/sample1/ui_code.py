@@ -41,7 +41,7 @@ def menu_win_update(menu_win:win.Menu, event:xuc.XUEvent):
     menu_win.arrange_items(item_w, item_h)
 
     # メニュー選択
-    selected_item = menu_win.select_by_event(*input.CURSOR_LRUD)
+    selected_item = menu_win.select_by_event(*input.CURSOR)
 
     # 選択アイテムの表示
     if input.BTN_A in event.trg:
@@ -111,7 +111,7 @@ def msg_win_draw(msg_win:win.MsgRO, event:xuc.XUEvent):
 def win_dial_update(win_dial:xuc.XUState, event:xuc.XUEvent):
     # 数値変更
     dial = xuc.XUDial(win_dial, 5)
-    dial.change_by_event(event.trg, *input.CURSOR_LRUD)
+    dial.change_by_event(event.trg, *input.CURSOR)
 
     # 確定
     if input.BTN_A in event.trg:
@@ -139,7 +139,7 @@ def dial_yes_no_update(list_win:win.List, event:xuc.XUEvent):
     list_win.arrange_items(0, item_h)
 
     # メニュー選択
-    selected_item = list_win.select_by_event(*input.CURSOR_UD)
+    selected_item = list_win.select_by_event(*input.UP_DOWN)
 
     # 閉じる
     if input.BTN_B in event.trg:

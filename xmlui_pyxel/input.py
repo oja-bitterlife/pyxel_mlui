@@ -2,6 +2,7 @@ import pyxel
 
 from xmlui_core import *
 
+# キー定義
 LEFT = "left"
 RIGHT = "right"
 UP = "up"
@@ -11,9 +12,12 @@ BTN_B = "btn_b"
 BTN_X = "btn_x"
 BTN_Y = "btn_y"
 
-CURSOR_LRUD = [LEFT, RIGHT, UP, DOWN]
-CURSOR_UD = [UP, DOWN]
-CURSOR_LR = [LEFT, RIGHT]
+# キー定義おまとめ版。*????で展開できる
+# 例) select_by_event(LEFT,RIGHT,UP,DOWN) -> select_by_event(*CURSOR_LRUD)
+CURSOR = [LEFT, RIGHT, UP, DOWN]
+UP_DOWN = [UP, DOWN]
+LEFT_RIGHT = [LEFT, RIGHT]
+ANY = CURSOR + [BTN_A, BTN_B, BTN_X, BTN_Y]
 
 # デフォルトインプット設定
 DEFAULT_INPUTLIST_DICT = {
@@ -54,6 +58,7 @@ DEFAULT_INPUTLIST_DICT = {
     ]
 }
 
+# ボタン配列の辞書を突っ込むとイベント通知するようになる
 def set_Inputlist_fromdict(xmlui:XMLUI, dict_:dict[str,list[int]]):
     for key,value in dict_.items():
         xmlui.set_inputlist(key, value)
