@@ -977,6 +977,7 @@ class _XUWinFrameBase(XUState):
         clip_r,clip_b = self.clip.right(), self.clip.bottom()
 
         # 角の描画
+        # ---------------------------------------------------------------------
         def _draw_shoulder(self, off_x:int, off_y:int, pattern:bytes|bytearray):
             # クリップチェック
             if self.clip.x < off_x < clip_r and self.clip.y < off_y < clip_b:
@@ -992,6 +993,8 @@ class _XUWinFrameBase(XUState):
                 _draw_shoulder(self, x_, off_b-1-y_, self._shadow_pattern)  # 左下
                 _draw_shoulder(self, off_r-1-x_, off_b-1-y_, self._pattern)  # 右下
 
+        # bytearrayによる角以外の高速描画(patternキャッシュを作ればもっと速くなるかも)
+        # ---------------------------------------------------------------------
         # 上下のライン
         w = min(clip_r, off_r) - max(0, self.clip.x) - size*2
         for y_ in range(size):
@@ -1016,7 +1019,7 @@ class _XUWinFrameBase(XUState):
             if w > 0:
                 screen_buf[offset:offset+w] = r_pat[:w]
 
-        # 塗りつぶし
+        # 中央塗りつぶし
         w = min(clip_r, off_r) - size*2
         c_pat = self._pattern[-1:] * w
         for y_ in range(max(size, self.clip.y), min(clip_b, off_b-size)):
