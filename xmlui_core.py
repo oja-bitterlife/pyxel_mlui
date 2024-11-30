@@ -558,7 +558,7 @@ class XMLUI(XUState):
     def set_inputlist(self, input_type:str, list:list[int]):
         self._input_lists[input_type] = list
 
-    def check_input(self, check:str, check_func:Callable[[int], bool]) -> bool:
+    def _check_input(self, check:str, check_func:Callable[[int], bool]) -> bool:
         for button in self._input_lists[check]:
             if check_func(button):
                 return True
@@ -567,7 +567,7 @@ class XMLUI(XUState):
     # 登録キー入力を全部調べて片っ端からイベントに登録
     def check_input_on(self, check_func:Callable[[int], bool]):
         for key in self._input_lists:
-            if self.check_input(key, check_func):
+            if self._check_input(key, check_func):
                 self.event.on(key)
 
 
