@@ -50,8 +50,7 @@ def menu_win_update(menu_win:win.Menu, event:xuc.XUEvent):
     if input.BTN_A in event.trg:
         # メッセージウインドウ表示
         if selected_item == "speak":
-            # selected_item.open(UI_TEMPLATE, "win_message")
-            selected_item.open(UI_TEMPLATE, "label")
+            selected_item.open(UI_TEMPLATE, "win_message")
 
         # dialウインドウ表示
         if selected_item == "dial":
@@ -65,19 +64,8 @@ def menu_win_update(menu_win:win.Menu, event:xuc.XUEvent):
 # ---------------------------------------------------------
 @win.menu_draw_bind(xmlui, "menu_win", "menu_row", "menu_item")
 def menu_win_draw(menu_win:win.MenuRO, event:xuc.XUEvent):
-    bg_color = 12
-    frame_color = 10 if event.active else 7
-    title  = menu_win.attr_str("title")
-
     menu_win.draw()
     draw_menu_cursor(menu_win.selected_item, 0, 0)
-
-    # メニュータイトル
-    if title:
-        str_w = font.size*len(title)
-        text_x = menu_win.area.x+(menu_win.area.w-str_w)/2
-        pyxel.rect(text_x,menu_win.area.y, str_w, font.size, bg_color)
-        pyxel.text(text_x, menu_win.area.y-2, title, frame_color, font.data)
 
 
 # メッセージウインドウ

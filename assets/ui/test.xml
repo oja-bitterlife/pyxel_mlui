@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <xmlui>
-    <menu_win x="32" y="16" w="128" h="52" item_w="58" item_h="18" title="コマンド" id="menu_command">
+    <menu_win x="32" y="16" w="128" h="52" item_w="58" item_h="18" id="menu_command">
         <menu_grid x="6" y="14">
             <menu_row>
                 <menu_item value="speak">はなす</menu_item>
@@ -12,11 +12,11 @@
                 <menu_item value="check">しらべる</menu_item>
             </menu_row>
         </menu_grid>
+        <label x="32" y="-4" w="64" h="18" id="label">コマンド</label>
     </menu_win>
 
     <win_dial w="64" h="16" id="win_dial" layer="1"/>
 
-    <label abs_x="100" abs_y="100" w="64" h="18" id="label">らべる</label>
 
     <yes_no w="48" h="40" item_h="14" title="ok?" id="yes_no">
         <yes_no_grid x="8" y="14">
