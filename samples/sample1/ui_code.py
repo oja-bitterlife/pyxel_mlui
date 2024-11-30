@@ -50,7 +50,8 @@ def menu_win_update(menu_win:win.Menu, event:xuc.XUEvent):
     if input.BTN_A in event.trg:
         # メッセージウインドウ表示
         if selected_item == "speak":
-            selected_item.open(UI_TEMPLATE, "win_message")
+            # selected_item.open(UI_TEMPLATE, "win_message")
+            selected_item.open(UI_TEMPLATE, "label")
 
         # dialウインドウ表示
         if selected_item == "dial":
@@ -164,3 +165,10 @@ def dial_yes_no_update(list_win:win.List, event:xuc.XUEvent):
 def dial_yes_no_draw(list_win:win.ListRO, event:xuc.XUEvent):
     list_win.draw()
     draw_menu_cursor(list_win.selected_item, 0, 0)
+
+
+
+
+@win.label_draw_bind(xmlui, "label")
+def label_draw(label:win.LabelRO, event:xuc.XUEvent):
+    label.draw()

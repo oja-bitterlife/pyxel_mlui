@@ -36,6 +36,40 @@ class _BaseRect(XUWinRectFrame):
         self.draw_buf(pyxel.screen.data_ptr())
 
 
+# ラベル
+# *****************************************************************************
+class LabelRO(_BaseRound):
+    def __init__(self, state:XUStateRO):
+        super().__init__(state)
+
+    def draw(self):
+        super().draw()  # ウインドウ描画
+        pyxel.text(self.area.x+6, self.area.y, self.text, 7, font.data)
+
+class Label(_BaseRound):
+    def __init__(self, state:XUState):
+        super().__init__(state)
+
+# デコレータを用意
+def label_update_bind(xmlui:XMLUI, tag_name:str):
+    def wrapper(update_func:Callable[[Label,XUEvent], None]):
+        # 登録用関数をジェネレート
+        def update(state:XUState, event:XUEvent):
+            update_func(Label(state), event)
+        # 関数登録
+        xmlui.set_updatefunc(tag_name, update)
+    return wrapper
+
+def label_draw_bind(xmlui:XMLUI, tag_name:str):
+    def wrapper(draw_func:Callable[[LabelRO,XUEvent], None]):
+        # 登録用関数をジェネレート
+        def draw(state:XUStateRO, event:XUEvent):
+            draw_func(LabelRO(state), event)
+        # 関数登録
+        xmlui.set_drawfunc(tag_name, draw)
+    return wrapper
+
+
 # グリッドメニュー付きウインドウ
 # *****************************************************************************
 class MenuRO(_BaseRound):
@@ -203,3 +237,5 @@ def msg_draw_bind(xmlui:XMLUI, tag_name:str, tag_text:str):
         # 関数登録
         xmlui.set_drawfunc(tag_name, draw)
     return wrapper
+
+
