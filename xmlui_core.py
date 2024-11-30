@@ -933,13 +933,13 @@ class _XUWinFrameBase(XUState):
         super().__init__(state.xmlui, state._element)
 
         self._pattern = pattern.copy()
+        self._shadow_pattern = pattern.copy()
         self.pattern_size = len(pattern)  # 高速化のためここで変数に
         self.screen_w, self.screen_h = screen_w, screen_h
         self._get_patidx_func = pattern_index_func  # 枠外は-1を返す
 
         # クリッピングエリア
         self.clip = XURect(0, 0, screen_w, screen_h)
-        self.is_shadow = False
 
     # 1,3,5,7,4のエリア(カド以外)は特に計算が必要ない
     def _get13574index(self, x:int, y:int, w:int, h:int) -> int:
@@ -961,8 +961,9 @@ class _XUWinFrameBase(XUState):
             return 5 if y < h-self.pattern_size else 8
 
     # シャドウ対応(0,1,3のパターン上書き)
-    def set_shadow(self, index:int, shadow:list[int]) -> Self:
-        self.is_shadow = True
+    def set_shadow(self, index:int, color:int) -> Self:
+        if self._shadow_pattern:
+            self._shadow_pattern[index] = color
         return self
 
     # フレームだけバッファに書き込む
@@ -973,10 +974,10 @@ class _XUWinFrameBase(XUState):
 
         # 高速化のため描画もばらす
         # ピクセル描画
-        def _draw_pix(self, off_x:int, off_y:int):
+        def _draw_pix(self, off_x:int, off_y:int, pattern:list[int]):
             index = self._get_patidx_func(off_x, off_y, off_r, off_b)
             if index >= 0:  # 枠外チェック
-                color = self._pattern[index]
+                color = pattern[index]
                 if color != -1:  # 透明チェック
                     screen_buf[(area_y + off_y)*self.screen_w + (area_x + off_x)] = color
 
@@ -984,21 +985,21 @@ class _XUWinFrameBase(XUState):
         size = self.pattern_size
         clip_r,clip_b = self.clip.right(), self.clip.bottom()
 
-        # まずは上のライン
+        # 上のライン
         for y_ in range(max(0, self.clip.y), min(clip_b, min(off_b, size))):
             for x_ in range(max(0, self.clip.x), min(clip_r, off_r)):
-                _draw_pix(self, x_, y_)
+                _draw_pix(self, x_, y_, self._shadow_pattern)
         # 下のライン
         for y_ in range(max(off_b-size, self.clip.y), min(clip_b, off_b)):
             for x_ in range(max(0, self.clip.x), min(clip_r, off_r)):
-                _draw_pix(self, x_, y_)
+                _draw_pix(self, x_, y_, self._pattern)
         for y_ in range(max(size, self.clip.y), min(clip_b, off_b-size)):
             # 左のライン
             for x_ in range(max(0, self.clip.x), min(clip_r, size)):
-                _draw_pix(self, x_, y_)
+                _draw_pix(self, x_, y_, self._shadow_pattern)
             # 右のライン
             for x_ in range(max(off_r-size, self.clip.x), min(clip_r, off_r)):
-                _draw_pix(self, x_, y_)
+                _draw_pix(self, x_, y_, self._pattern)
 
 
 class XUWinRoundFrame(_XUWinFrameBase):
