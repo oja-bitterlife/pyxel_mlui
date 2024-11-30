@@ -1,6 +1,6 @@
 import pyxel
 
-from xmlui_pyxel import xuc,win,font,input
+from xmlui_pyxel import xuc,win,font,input,label
 
 # xmlui_pyxelの初期化
 # *********************************************************
@@ -155,8 +155,6 @@ def dial_yes_no_draw(list_win:win.ListRO, event:xuc.XUEvent):
     draw_menu_cursor(list_win.selected_item, 0, 0)
 
 
-
-
-@win.label_draw_bind(xmlui, "label")
-def label_draw(label:win.LabelRO, event:xuc.XUEvent):
+@label.nflabel_draw_bind(xmlui, "label")
+def label_draw(label:label.NFLabelRO, event:xuc.XUEvent):
     label.draw()

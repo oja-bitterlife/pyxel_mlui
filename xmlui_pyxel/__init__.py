@@ -4,6 +4,7 @@ import xmlui_core as xuc
 from . import input
 from . import font
 from . import win
+from . import label
 
 
 # XMLUIのおすすめ設定による初期化をよしなにやってくれるやつ
