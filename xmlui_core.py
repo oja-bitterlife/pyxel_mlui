@@ -1029,8 +1029,7 @@ class _XUWinFrameBase(XUState):
             if self.clip.x <= off_x < clip_r and self.clip.y <= off_y < clip_b:
                 index = self._get_patidx_func(off_x, off_y, off_r, off_b)
                 if index >= 0:  # 枠外チェック
-                    if pattern[index] >= 0:  # 透明チェック
-                        screen_buf[(area_y + off_y)*self.screen_w + (area_x + off_x)] = pattern[index]
+                    screen_buf[(area_y + off_y)*self.screen_w + (area_x + off_x)] = pattern[index]
 
         for y_ in range(size):
             for x_ in range(size):

@@ -3,6 +3,7 @@ import pyxel
 from xmlui_core import *
 from . import win,font
 
+
 # ラベル
 # *****************************************************************************
 class LabelRO(win._BaseRound):
@@ -64,9 +65,11 @@ def label_draw_bind(xmlui:XMLUI, tag_name:str, align:str="center"):
     return wrapper
 
 
+# フレーム無し(NoFrame)ラベル。ウインドウタイトル用
 # *****************************************************************************
 class NFLabelRO(win.XUWinRectFrame):
-    LABEL_OFFSET_ATTR:str = "label_offset"
+    LABEL_OFFSET_X_ATTR:str = "label_offset_x"
+    LABEL_OFFSET_Y_ATTR:str = "label_offset_y"
 
     def __init__(self, state:XUStateRO, align:str="center"):
         super().__init__(state, [12], pyxel.width, pyxel.height)
@@ -78,31 +81,36 @@ class NFLabelRO(win.XUWinRectFrame):
         text_w = font.data.text_width(self.text)
         match self.align:
             case "left":
-                x =  self.area.x + self.offset
+                x =  self.area.x + self.offset_x
             case "center":
-                x = self.area.center_x(text_w)
+                x = self.area.center_x(text_w) + self.offset_x
             case "right":
-                x = self.area.right() - text_w - self.offset
+                x = self.area.right() - text_w - self.offset_x
             case _:
                 raise ValueError(f"align:{self.align} is not supported.")
 
         # ラベルテキスト描画
-        pyxel.text(x, self.area.center_y(font.size), self.text, 7, font.data)
+        pyxel.text(x, self.area.center_y(font.size) + self.offset_y, self.text, 7, font.data)
 
     @property
     def align(self) -> str:
         return self._align
 
     @property
-    def offset(self) -> int:
-        return self.attr_int(self.LABEL_OFFSET_ATTR, 0)
+    def offset_x(self) -> int:
+        return self.attr_int(self.LABEL_OFFSET_X_ATTR, 0)
+
+    @property
+    def offset_y(self) -> int:
+        return self.attr_int(self.LABEL_OFFSET_Y_ATTR, 0)
 
 class NFLabel(NFLabelRO):
     def __init__(self, state:XUState, align:str="center"):
         super().__init__(state, align)
 
-    def set_offset(self, x:int):
-        self.set_attr(self.LABEL_OFFSET_ATTR, x)
+    def set_offset(self, x:int, y:int):
+        self.set_attr(self.LABEL_OFFSET_X_ATTR, x)
+        self.set_attr(self.LABEL_OFFSET_Y_ATTR, y)
 
 # デコレータを用意
 def nflabel_update_bind(xmlui:XMLUI, tag_name:str):

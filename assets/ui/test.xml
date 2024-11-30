@@ -12,7 +12,7 @@
                 <menu_item value="check">しらべる</menu_item>
             </menu_row>
         </menu_grid>
-        <label x="32" y="-4" w="64" h="18" id="label">コマンド</label>
+        <label x="40" y="0" w="52" h="12" id="label">コマンド</label>
     </menu_win>
 
     <win_dial w="64" h="16" id="win_dial" layer="1"/>
