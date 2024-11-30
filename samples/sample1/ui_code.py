@@ -155,6 +155,8 @@ def dial_yes_no_draw(list_win:win.ListRO, event:xuc.XUEvent):
     draw_menu_cursor(list_win.selected_item, 0, 0)
 
 
-@label.nflabel_draw_bind(xmlui, "label")
-def label_draw(label:label.NFLabelRO, event:xuc.XUEvent):
+# ラベル全般
+# *****************************************************************************
+@label.nflabel_draw_bind(xmlui, "title")
+def title_draw(label:label.NFLabelRO, event:xuc.XUEvent):
     label.draw()
