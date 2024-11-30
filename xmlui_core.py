@@ -369,6 +369,12 @@ class XUState(XUStateRO):
         # IDがかぶってはいけない
         raise Exception(f"ID '{id_alias}' already exists")
  
+    # イベントでopen
+    def open_by_event(self, trg_event:str, template_name:str, id:str, id_alias:str|None=None):
+        if trg_event in self.xmlui.event.trg:
+            self.open(template_name, id, id_alias)
+
+    # 閉じる
     def close(self, id:str|None=None):  # closeの後なにもしないのでNone
         # Trg入力を落とす(open/closeが連続しないよう)
         self.xmlui.event.clearTrg()
