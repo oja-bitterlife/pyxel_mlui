@@ -67,10 +67,15 @@ class XUEvent:
     def __init__(self, init_active=False):
         self.active = init_active  # アクティブなイベントかどうか
         self.clear()
+        self._wait_update = 0
 
     def clear(self):
         self._receive:set[str] = set([])  # 次の状態受付
         self._input:set[str] = set([])
+        self._trg:set[str] = set([])
+        self._release:set[str] = set([])
+
+    def clearTrg(self):
         self._trg:set[str] = set([])
         self._release:set[str] = set([])
 
@@ -346,6 +351,9 @@ class XUState(XUStateRO):
 
     # 子に別Element一式を追加する
     def open(self, template_name:str, id:str, id_alias:str|None=None) -> 'XUState':
+        # Trg入力を落とす(open/closeが連続しないよう)
+        self.xmlui.event.clearTrg()
+
         # idがかぶらないよう別名を付けられる
         id_alias = id if id_alias is None else id_alias
         try:
@@ -362,6 +370,9 @@ class XUState(XUStateRO):
         raise Exception(f"ID '{id_alias}' already exists")
  
     def close(self, id:str|None=None):  # closeの後なにもしないのでNone
+        # Trg入力を落とす(open/closeが連続しないよう)
+        self.xmlui.event.clearTrg()
+
         if id is not None:
             self.xmlui.find_by_ID(id).asRW().remove()
         else:
