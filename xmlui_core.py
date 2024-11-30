@@ -18,16 +18,19 @@ class XURect:
     def __init__(self, x:int, y:int, w:int, h:int):
         self.x = x
         self.y = y
-        self.w = w
-        self.h = h
+        self.w = max(0, w)
+        self.h = max(0, h)
 
-    def intersect(self, other):
+    def intersect(self, other) -> "XURect":
         right = min(self.x+self.w, other.x+other.w)
         left = max(self.x, other.x)
         bottom = min(self.y+self.h, other.y+other.h)
         top = max(self.y, other.y)
         return XURect(left, top, right-left, bottom-top)
-    
+
+    def inflate(self, size) -> "XURect":
+        return XURect(self.x-size, self.y-size, self.w+size*2, self.h+size*2)
+
     def contains(self, x, y) -> bool:
         return self.x <= x < self.x+self.w and self.y <= y < self.y+self.h
 
@@ -49,7 +52,11 @@ class XURect:
 
     @property
     def cy(self) -> int:
-        return self.center_x()
+        return self.center_y()
+
+    @property
+    def is_empty(self) -> int:
+        return self.w <= 0 or self.h <= 0
 
     def __repr__(self) -> str:
         return f"RECT({self.x}, {self.y}, {self.w}, {self.h})"
@@ -966,8 +973,28 @@ class _XUWinFrameBase(XUState):
             self._shadow_pattern[index] = color
         return self
 
-    # フレームだけバッファに書き込む
-    def draw_buf(self, screen_buf:bytearray):
+    # 中央部分をバッファに書き込む。
+    # 環境依存の塗りつぶしが使えるならそちらを使った方が高速
+    def _draw_center(self, screen_buf:bytearray):
+        # areaはアトリビュートなのでばらすとかなり高速化
+        area_x, area_y = self.area.x, self.area.y
+        off_r, off_b = self.area.w, self.area.h  # オフセットなので0,0～w,h
+
+        # 読みやすさのための展開(速度はほぼ変わらなかった)
+        size = self.pattern_size
+        clip_r,clip_b = self.clip.right(), self.clip.bottom()
+
+        # 中央塗りつぶし
+        w = min(clip_r, off_r) - size*2
+        c_pat = self._pattern[-1:] * w
+        for y_ in range(max(size, self.clip.y), min(clip_b, off_b-size)):
+            offset = (area_y + y_)*self.screen_w + area_x + size
+            if w > 0:
+                screen_buf[offset:offset+w] = c_pat
+
+    # フレームだけバッファに書き込む(高速化や半透明用)
+    # 中央部分塗りつぶしは呼び出し側に任せる
+    def draw_frame(self, screen_buf:bytearray):
         # areaはアトリビュートなのでばらすとかなり高速化
         area_x, area_y = self.area.x, self.area.y
         off_r, off_b = self.area.w, self.area.h  # オフセットなので0,0～w,h
@@ -1019,14 +1046,10 @@ class _XUWinFrameBase(XUState):
             if w > 0:
                 screen_buf[offset:offset+w] = r_pat[:w]
 
-        # 中央塗りつぶし
-        w = min(clip_r, off_r) - size*2
-        c_pat = self._pattern[-1:] * w
-        for y_ in range(max(size, self.clip.y), min(clip_b, off_b-size)):
-            offset = (area_y + y_)*self.screen_w + area_x + size
-            if w > 0:
-                screen_buf[offset:offset+w] = c_pat
-
+    # ウインドウ全体をバッファに書き込む
+    def draw_buf(self, screen_buf:bytearray):
+        self._draw_center(screen_buf)
+        self.draw_frame(screen_buf)
 
 class XUWinRoundFrame(_XUWinFrameBase):
     def __init__(self, state:XUStateRO, pattern:list[int], screen_w:int, screen_h:int):
