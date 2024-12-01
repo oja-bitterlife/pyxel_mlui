@@ -46,10 +46,12 @@ class MenuRO(_BaseRound):
     def draw(self):
         super().draw()  # ウインドウ描画
 
+        area = self.area  # areaを扱うときは必ず一旦ローカル化する
         for group in self._grid_root._grid:
             for item in group:
-                if self.clip.h >= item.area.y-self.area.y + text.default.size:  # ウインドウが表示されるまで表示しない
-                    pyxel.text(item.area.x+6, item.area.y, item.text, 7, text.default.data)
+                item_area = item.area  # areaを扱うときは必ず一旦ローカル化する
+                if self.clip.h >= item_area.y-area.y + text.default.size:  # ウインドウが表示されるまで表示しない
+                    pyxel.text(item_area.x+6, item_area.y, item.text, 7, text.default.data)
 
     @property
     def selected_item(self) -> XUStateRO:
@@ -101,10 +103,12 @@ class ListRO(_BaseRound):
     def draw(self):
         super().draw()  # ウインドウ描画
 
+        area = self.area  # areaを扱うときは必ず一旦ローカル化する
         for group in self._grid_root._grid:
             item = group[0]
-            if self.clip.h >= item.area.y-self.area.y + text.default.size:  # ウインドウが表示されるまで表示しない
-                pyxel.text(item.area.x+6, item.area.y, item.text, 7, text.default.data)
+            item_area = item.area  # areaを扱うときは必ず一旦ローカル化する
+            if self.clip.h >= item_area.y-area.y + text.default.size:  # ウインドウが表示されるまで表示しない
+                pyxel.text(item_area.x+6, item_area.y, item.text, 7, text.default.data)
 
     @property
     def selected_item(self) -> XUStateRO:
@@ -165,7 +169,7 @@ class MsgRO(_BaseRound):
 
         # テキスト描画
         for i,page in enumerate(self.page.page_text.split()):
-            if self.page.page_root.valid > 0:  # 子を強制描画するのでvaliedチェック
+            if self.page.page_root.update_count > 0:  # 子を強制描画するので更新済みチェック
                 area = self.page.page_root.area
                 pyxel.text(area.x, area.y+i*text.default.size, page, 7, text.default.data)
 
