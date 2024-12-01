@@ -550,8 +550,8 @@ class XMLUI(XUState):
 
     # イベントでopen
     def open_by_event(self, trg_event:str, template_name:str, id:str, id_alias:str|None=None):
-        if not self.is_open("menu_command"):
-            if trg_event in self.xmlui.event.trg:
+        if trg_event in self.xmlui.event.trg:
+            if not self.is_open("menu_command"):  # 一応入れておく
                 self.open(template_name, id, id_alias)
 
 # ユーティリティークラス
