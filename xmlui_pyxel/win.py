@@ -171,7 +171,7 @@ class MsgRO(_BaseRound):
         for i,page in enumerate(self.page.page_text.split()):
             if self.page.page_root.update_count > 0:  # 子を強制描画するので更新済みチェック
                 area = self.page.page_root.area
-                pyxel.text(area.x, area.y+i*text.default.size, page, 7, text.default.data)
+                text.default.draw(area.x, area.y+i*text.default.size, page, 7)
 
 class Msg(MsgRO):
     # tag_textタグのテキストを処理する

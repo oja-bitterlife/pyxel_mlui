@@ -10,6 +10,7 @@ import re
 import math
 import copy
 from typing import Generator,Callable,Any,Self  # 型を使うよ
+import weakref
 
 
 # 描画領域計算用
@@ -115,7 +116,6 @@ class XUStateRO:
     def __init__(self, xmlui:'XMLUI', element:Element):
         self.xmlui = xmlui  # ライブラリへのIF
         self._element = element  # 自身のElement
-        self._parent:XUStateRO|None = None  # 親
 
     def __eq__(self, other) -> bool:
         # UI_Stateは都度使い捨てなので、対象となるElementで比較する
@@ -155,7 +155,8 @@ class XUStateRO:
      # *************************************************************************
     @property
     def area(self) -> XURect:  # 親からの相対座標
-        parent_area = self._parent.area if self._parent else XURect(0, 0, 4096, 4096)
+        parent = self.parent
+        parent_area = parent.area if parent else XURect(0, 0, 4096, 4096)
 
         # absがあれば絶対座標、なければ親からのオフセット
         offset_x = self.x
@@ -196,12 +197,17 @@ class XUStateRO:
 
     # 下階層ではなく、上(root)に向かって探索する
     def find_by_tagR(self, tag:str) -> 'XUStateRO':
-        parent = self._parent
+        parent = self.parent
         while(parent):
             if parent.tag == tag:
                 return parent
-            parent = parent._parent
+            parent = parent.parent
         raise Exception(f"Tag '{tag}' not found in parents")
+
+    # 親を探す
+    @property
+    def parent(self) -> 'XUStateRO|None':
+        self.xmlui._parent_cache.get(self._element, None)
 
     def is_open(self, id:str) -> bool:
         try:
@@ -276,10 +282,11 @@ class XUStateRO:
 
     @property
     def layer(self) -> int:  # 描画レイヤ
-        if self.has_attr("layer") or self._parent is None:
-            return self.attr_int("layer", 0)
+        if self.has_attr("layer"):
+            return self.attr_int("layer")
         else:  # 無ければ親のlayerを持ってくる
-            return self._parent.layer
+            parent = self.parent
+            return parent.layer if parent else 0
 
     @property
     def marker(self) -> str:  # デバッグ用
@@ -330,9 +337,9 @@ class XUState(XUStateRO):
     def remove(self):  # removeの後なにかすることはないのでNone
         # 処理対象から外れるように
         self.set_attr("enable", False)
-        if self._parent:  # 親から外す
-            self._parent._element.remove(self._element)
-            self._parent = None
+        parent = self.parent
+        if parent:  # 親から外す
+            parent._element.remove(self._element)
 
     # 子に別Element一式を追加する
     def open(self, template_name:str, id:str, id_alias:str|None=None) -> 'XUState':
@@ -415,6 +422,9 @@ class XMLUI(XUState):
         root.attrib["use_event"] = "True"
         super().__init__(self, root)
 
+        # キャッシュ
+        self._parent_cache:dict[Element, XUStateRO] = {}
+
         # デバッグ用
         self.debug = XMLUI_Debug()
 
@@ -442,13 +452,12 @@ class XMLUI(XUState):
 
     # 更新用
     # *************************************************************************
-    def _get_updatetargets(self, state:XUState, parent:XUState|None=None) -> Generator[XUState, None, None]:
+    def _get_updatetargets(self, state:XUState) -> Generator[XUState, None, None]:
         # enableのElementとその子だけ回収(disableの子は回収しない)
         if state.enable:
-            state._parent = parent
             yield state
             for child in state._element:
-                yield from self._get_updatetargets(XUState(self, child), state)
+                yield from self._get_updatetargets(XUState(self, child))
 
     def update(self):
         # (入力)イベントの更新
@@ -456,6 +465,9 @@ class XMLUI(XUState):
 
         # 更新対象を取得(ついでに親を設定)
         update_targets = list(self._get_updatetargets(self))
+
+        # 親の更新
+        self._parent_cache = {c:XUStateRO(self, p) for p in self._element.iter() for c in p}
 
         # イベント発生対象は表示物のみ
         event_targets = [state for state in update_targets if state.visible and state.use_event]
