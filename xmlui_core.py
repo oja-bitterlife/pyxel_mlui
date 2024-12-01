@@ -733,16 +733,33 @@ class XUPageBase(_XUUtilBase):
 # メニュー系
 # ---------------------------------------------------------
 # グリッド情報
-class _XUSelectBase(XUStateRO):
-    def __init__(self, state:XUStateRO, grid:list[list[XUState]]):
-        super().__init__(state.xmlui, state._element)
-        self._grid = grid
+class _XUSelectBase(_XUUtilBase):
+    # クラス定数
+    ROOT_TAG = "_xmlui_select_root"
+    GROUP_TAG = "_xmlui_select_group"
 
-        # タグにselected=Trueがあればそれを使う。無ければgrid[0][0]を選択
-        try:
-            self.selected_item  # プロパティによる検索
-        except:
-            self.select(0, 0)  # 最初の選択
+    def __init__(self, state:XUStateRO):
+        super().__init__(state)
+
+        # ページルートの設定
+        select_root, is_created = self.find_or_create_child_root(state, self.ROOT_TAG)
+        self.select_root = select_root.asRW()
+        if is_created:
+            # 選択の初期値
+            sel_x,sel_y = 0,0
+
+            # 選択用ルート下に接続しなおす
+            for y,items in enumerate(grid):
+                group = XUState(state.xmlui, Element(self.GROUP_TAG))
+                self.select_root.add_child(group)
+                for x,item in enumerate(items):
+                    group.add_child(item)
+
+                    # 選択中を見つけたので記録
+                    if item.selected:
+                        sel_x,sel_y = x,y
+
+                self.select(sel_x, sel_y)
 
     # GRID用
     @classmethod
