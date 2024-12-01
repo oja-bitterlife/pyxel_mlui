@@ -350,8 +350,7 @@ class XUState(XUStateRO):
         self.add_child(opend)
         return opend
 
- 
-    # 閉じる
+     # 閉じる
     def _rec_close(self, id:str|None=None) -> bool:  # closeの後なにもしないのでNone
         # idが一致している。id指定がない場合はidを持っていれば値は問わない
         if self.id == id or id is None and self.id:
@@ -361,9 +360,8 @@ class XUState(XUStateRO):
         # 親があるなら遡って閉じに行く
         if self.parent:
             return self.parent.asRW()._rec_close(id)
-
-        # なにもcloseできなかった
-        return False
+        else:
+            return False  # なにもcloseできなかった
 
     def close(self, id:str|None=None):  # closeの後なにもしないのでNone
         # open/closeが連続しないようTrg入力を落とす
