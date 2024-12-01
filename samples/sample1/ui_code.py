@@ -35,10 +35,6 @@ def draw_menu_cursor(state:xuc.XUStateRO, x:int, y:int):
 
 # コマンドメニュー
 # *****************************************************************************
-# @win.round_update_bind(xmlui, "round_win")
-# def round_update_draw(win:win.Round, event:xuc.XUEvent):
-#     print(win)
-
 @win.round_draw_bind(xmlui, "round_win")
 def round_win_draw(win:win.RoundRO, event:xuc.XUEvent):
     win.draw()
@@ -64,8 +60,8 @@ def menu_win_update(menu_win:menu.Grid, event:xuc.XUEvent):
             selected_item.open(UI_TEMPLATE, "win_dial").set_pos(8, 2)
 
     # # 閉じる
-    # if input.BTN_B in event.trg:
-    #     menu_win.close()
+    if input.BTN_B in event.trg:
+        menu_win.close("command_menu_win")
 
 # 描画
 # ---------------------------------------------------------

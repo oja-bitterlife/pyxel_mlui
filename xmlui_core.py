@@ -929,7 +929,7 @@ class XUDial(XUDialRO):
 # ウインドウサポート
 # ---------------------------------------------------------
 # 子ウインドウをopenするかもなのでROではいけない
-class _XUWinFrameBase(XUState):
+class _XUWinFrameBase(XUStateRO):
     # 0 1 2
     # 3 4 5
     # 6 7 8

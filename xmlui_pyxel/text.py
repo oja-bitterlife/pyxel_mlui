@@ -69,7 +69,7 @@ class LabelRO(XUStateRO):
     def offset_y(self) -> int:
         return self.attr_int(self.TEXT_OFFSET_Y_ATTR, 0)
 
-class Label(LabelRO):
+class Label(LabelRO, XUState):
     def __init__(self, state:XUState, align:str="center"):
         super().__init__(state, align)
 
@@ -119,7 +119,7 @@ class MsgRO(XUPageRO):
                 area = self.page.page_root.area
                 text.default.draw(area.x, area.y+i*text.default.size, page, 7)
 
-class Msg(MsgRO):
+class Msg(MsgRO, XUState):
     # tag_textタグのテキストを処理する
     def __init__(self, state:XUState, tag_text:str):
         # tag_textタグ下にpage管理タグとpage全部が入っている

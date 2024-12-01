@@ -23,7 +23,7 @@ class GridRO(XUStateRO):
     def selected_item(self) -> XUStateRO:
         return self._grid_root.selected_item
 
-class Grid(GridRO):
+class Grid(GridRO, XUState):
     def __init__(self, state:XUState, tag_group:str, tag_item:str):
         super().__init__(state, tag_group, tag_item)
 
@@ -78,7 +78,7 @@ class ListRO(XUStateRO):
     def selected_item(self) -> XUStateRO:
         return self._grid_root.selected_item
 
-class List(ListRO):
+class List(ListRO, XUState):
     def __init__(self, state:XUState, tag_item:str):
         super().__init__(state, tag_item)
 

@@ -12,19 +12,20 @@ def _active_color(state:XUStateRO, color:int):
 class RoundRO(XUWinRoundFrame):
     DEFAULT_PAT = [7,7,12]
 
-    def __init__(self, state:XUStateRO, speed:float=16):
+    def __init__(self, state:XUStateRO):
         pat = [_active_color(state, c)  for c in self.DEFAULT_PAT]  # アクティブカラーに
         super().__init__(state, pat, pyxel.width, pyxel.height)
 
-        self.set_attr("speed", speed)
 
     def draw(self):
         self.clip.h = int(self.update_count*self.speed)
         self.clip = self.clip.intersect(XURect(0, 0, pyxel.width, pyxel.height))
         self.draw_buf(pyxel.screen.data_ptr())
 
-class Round(RoundRO):
-    pass
+class Round(RoundRO, XUState):
+    def __init__(self, state:XUStateRO, speed:float=16):
+        super().__init__(state)
+        self.set_attr("speed", speed)
 
 # デコレータを用意
 def round_update_bind(xmlui:XMLUI, tag_name:str):
@@ -51,19 +52,19 @@ def round_draw_bind(xmlui:XMLUI, tag_name:str):
 class RectRO(XUWinRectFrame):
     DEFAULT_PAT = [7,7,12]
 
-    def __init__(self, state:XUStateRO, speed:float=16):
+    def __init__(self, state:XUStateRO):
         pat = [_active_color(state, c)  for c in self.DEFAULT_PAT]  # アクティブカラーに
         super().__init__(state, pat, pyxel.width, pyxel.height)
-
-        self.set_attr("speed", speed)
 
     def draw(self):
         self.clip.h = int(self.update_count*self.speed)
         self.clip = self.clip.intersect(XURect(0, 0, pyxel.width, pyxel.height))
         self.draw_buf(pyxel.screen.data_ptr())
 
-class Rect(RectRO):
-    pass
+class Rect(RectRO, XUState):
+    def __init__(self, state:XUStateRO, speed:float=16):
+        super().__init__(state)
+        self.set_attr("speed", speed)
 
 # デコレータを用意
 def rect_update_bind(xmlui:XMLUI, tag_name:str):
