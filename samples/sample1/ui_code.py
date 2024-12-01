@@ -13,10 +13,12 @@ xmlui = xuc.XMLUI()
 # キー定義。設定しない場合はデフォルトが使われる
 # input.INPUT_LIST[input.BTN_A] = [pyxel.KEY_A]
 
+ASSET_PATH = "samples/assets/"
+
 # 初期化セット
 xmlui_pyxel.initialize(xmlui,
         inputlist_dict = input.INPUT_LIST,
-        font_path = "assets/font/b12.bdf"
+        font_path = ASSET_PATH + "font/b12.bdf"
     )
 
 # (ライブラリ開発用)
@@ -24,7 +26,7 @@ xmlui.debug.level = xmlui.debug.DEBUG_LEVEL_LIB
 
 # UIテンプレートXMLの読み込み
 UI_TEMPLATE = "ui_template"
-xmlui.template_fromfile("assets/ui/test.xml", "ui_template")
+xmlui.template_fromfile(ASSET_PATH + "ui/test.xml", "ui_template")
 
 
 def draw_menu_cursor(state:xuc.XUStateRO, x:int, y:int):
