@@ -212,6 +212,7 @@ class XUStateRO:
     def parent(self) -> 'XUStateRO|None':
         return self.xmlui._parent_cache.get(self._element, None)
 
+    # すでにidツリーに存在するか
     def is_open(self, id:str) -> bool:
         try:
             self.find_by_ID(id)
@@ -329,13 +330,12 @@ class XUState(XUStateRO):
 
     # ツリー操作用
     # *************************************************************************
-    def add_child(self, child:XUStateRO):  # selfとchildどっちが返るかややこしいのでNone
+    def add_child(self, child:XUStateRO):
         self._element.append(child._element)
         self.xmlui._update_cache()
 
-    def clear_children(self) -> Self:
+    def clear_children(self):
         self._element.clear()
-        return self
 
     def remove(self):  # removeの後なにかすることはないのでNone
         # 処理対象から外れるように
