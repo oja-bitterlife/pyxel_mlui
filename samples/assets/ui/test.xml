@@ -16,9 +16,11 @@
     </round_win>
 
 
-    <win_dial w="64" h="16" id="win_dial" layer="1"/>
+    <rect_win x="32" y="16" w="128" h="52" id="dial_test">
+        <win_dial w="64" h="16" id="win_dial" layer="1"/>
+    </rect_win>
 
-    <yes_no w="56" h="50" item_h="16" title="ok?" id="yes_no">
+    <yes_no w="56" h="50" item_h="16" id="yes_no">
         <title x="19" y="-2" w="18" h="12" id="label">OK?</title>
         <yes_no_grid x="8" y="14">
             <yes_no_item value="yes">はい</yes_no_item>

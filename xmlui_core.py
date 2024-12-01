@@ -356,7 +356,6 @@ class XUState(XUStateRO):
             raise Exception(f"ID '{id_alias}' already exists")
 
         opend = self.xmlui._templates[template_name].duplicate(id).set_attr("id", id_alias)
-        opend.set_attr("use_event", True)  # openで追加するときはeventを有効に
         self.add_child(opend)
         return opend
 
