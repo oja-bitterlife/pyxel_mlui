@@ -155,12 +155,15 @@ class XUStateRO:
      # *************************************************************************
     @property
     def area(self) -> XURect:  # 親からの相対座標
-        parent = self.parent  # areaは良く呼ばれるので、一回でもdictアクセスを軽減する
+        # areaは良く呼ばれるので、一回でもparent探しのdictアクセスを軽減する
+        parent = self.parent
         parent_area = parent.area if parent else XURect(0, 0, 4096, 4096)
 
-        # absがあれば絶対座標、なければ親からのオフセット
+        # x,yはアトリビュートなのでローカルにしておく
         offset_x = self.x
         offset_y = self.y
+
+        # absがあれば絶対座標、なければ親からのオフセット
         return XURect(
             self.abs_x if self.has_attr("abs_x") else offset_x + parent_area.x,
             self.abs_y if self.has_attr("abs_y") else offset_y + parent_area.y,
