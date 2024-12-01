@@ -352,23 +352,26 @@ class XUState(XUStateRO):
 
  
     # 閉じる
-    def _rec_close(self, id:str|None=None):  # closeの後なにもしないのでNone
-        # idが一致していたら閉じる
-        if self.id == id:
-            return self.remove()
-
-        # id指定がなければ、idを持っていたら閉じる
-        if id is None and self.id:
-            return self.remove()
+    def _rec_close(self, id:str|None=None) -> bool:  # closeの後なにもしないのでNone
+        # idが一致している。id指定がない場合はidを持っていれば値は問わない
+        if self.id == id or id is None and self.id:
+            self.remove()
+            return True
 
         # 親があるなら遡って閉じに行く
         if self.parent:
-            self.parent.asRW()._rec_close(id)
+            return self.parent.asRW()._rec_close(id)
+
+        # なにもcloseできなかった
+        return False
 
     def close(self, id:str|None=None):  # closeの後なにもしないのでNone
         # open/closeが連続しないようTrg入力を落とす
         self.xmlui.event.clearTrg()
-        self._rec_close(id)
+
+        # idをもつものを遡って閉じる
+        if self._rec_close(id):
+            self.remove()  # 何もcloseできなかったら自分をclose
 
 
 # XMLでUIライブラリ本体
