@@ -178,9 +178,6 @@ class XUStateRO:
     def asRW(self) -> 'XUState':
         return XUState(self.xmlui, self._element)
 
-    def asRO(self) -> 'XUStateRO':
-        return XUStateRO(self.xmlui, self._element)
-
     # ツリー操作用
     # *************************************************************************
     def find_by_ID(self, id:str) -> 'XUStateRO':
