@@ -27,6 +27,10 @@ class Grid(GridRO, XUState):
     def __init__(self, state:XUState, tag_group:str, tag_item:str):
         super().__init__(state, tag_group, tag_item)
 
+        # イベントを使用する
+        if not self.has_attr("use_event"):
+            self.set_attr("use_event", True)
+
     def arrange_items(self, w:int, h:int):
         self._grid_root.arrange_items(w, h)
 
@@ -81,6 +85,10 @@ class ListRO(XUStateRO):
 class List(ListRO, XUState):
     def __init__(self, state:XUState, tag_item:str):
         super().__init__(state, tag_item)
+
+        # イベントを使用する
+        if not self.has_attr("use_event"):
+            self.set_attr("use_event", True)
 
     def arrange_items(self, w:int, h:int):
         self._grid_root.arrange_items(w, h)

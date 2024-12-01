@@ -3,7 +3,7 @@
 <xmlui>
     <round_win x="32" y="16" w="128" h="52" id="command_menu_win">
         <title x="40" y="0" w="52" h="12">コマンド</title>
-        <menu_grid x="6" y="14" item_w="58" item_h="18" use_event="True">
+        <menu_grid x="6" y="14" item_w="58" item_h="18">
             <menu_row>
                 <menu_item value="speak">はなす</menu_item>
                 <menu_item value="dial">ダイアル</menu_item>
