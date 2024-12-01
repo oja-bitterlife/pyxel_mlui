@@ -115,6 +115,7 @@ class XUStateRO:
     def __init__(self, xmlui:'XMLUI', element:Element):
         self.xmlui = xmlui  # ライブラリへのIF
         self._element = element  # 自身のElement
+        self._area = XURect(0, 0, 0, 0)  # 描画領域
 
     def __eq__(self, other) -> bool:
         # UI_Stateは都度使い捨てなので、対象となるElementで比較する
@@ -151,14 +152,14 @@ class XUStateRO:
         return self._element.text.strip() if self._element.text else ""
 
     # その他
-    # *************************************************************************
+     # *************************************************************************
+    @property
+    def area(self) -> XURect:
+        return self._area
+
     @property
     def tag(self) -> str:
         return self._element.tag
-
-    @property
-    def area(self) -> XURect:
-        return XURect(self.area_x, self.area_y, self.area_w, self.area_h)
 
     def asRW(self) -> 'XUState':
         return XUState(self.xmlui, self._element)
@@ -167,8 +168,8 @@ class XUStateRO:
         return XUStateRO(self.xmlui, self._element)
 
     @property
-    def valid(self) -> bool:
-        return self.update_count > 0  # 初期化済み
+    def valid(self) -> bool:  # 描画有効フラグ。Update済みかどうかを返す
+        return self.update_count > 0 and not self._area.is_empty
 
     # ツリー操作用
     # *************************************************************************
@@ -263,19 +264,6 @@ class XUStateRO:
     @property
     def h(self) -> int:  # elementの高さ
         return self.attr_int("h", 4096)
-
-    @property
-    def area_x(self) -> int:  # 表示最終座標x
-        return self.attr_int("area_x", 0)
-    @property
-    def area_y(self) -> int:  # 表示最終座標y
-        return self.attr_int("area_y", 0)
-    @property
-    def area_w(self) -> int:  #  表示最終幅
-        return self.attr_int("area_w", 4096)
-    @property
-    def area_h(self) -> int:  #  表示最終高さ
-        return self.attr_int("area_h", 4096)
 
     @property
     def update_count(self) -> int:  # updateが行われた回数
@@ -430,6 +418,9 @@ class XMLUI(XUState):
         root.attrib["use_event"] = "True"
         super().__init__(self, root)
 
+        # 描画エリアは分からないので大きめでとっておく
+        self._area = XURect(0, 0, 4096, 4096)
+
         # デバッグ用
         self.debug = XMLUI_Debug()
 
@@ -471,6 +462,24 @@ class XMLUI(XUState):
         # 更新対象を取得
         update_targets = list(self._get_updatetargets(self))
 
+        # 更新処理
+        for state in update_targets:
+            # 親を持たないElementは更新不要
+            parent = state.parent
+            if parent is None:
+                continue
+
+            # エリア更新。absがあれば絶対座標、なければ親からのオフセット
+            state._area = XURect(
+                state.abs_x if state.has_attr("abs_x") else state.x + parent._area.x,
+                state.abs_y if state.has_attr("abs_y") else state.y + parent._area.y,
+                state.attr_int("w", parent._area.w),
+                state.attr_int("h", parent._area.h)
+            )
+  
+            if not state.has_attr("layer") and state.parent:
+                state.set_attr("layer", state.parent.layer)  # 自身がlayerを持っていなければ親から引き継ぐ
+
         # イベント発生対象は表示物のみ
         event_targets = [state for state in update_targets if state.visible and state.use_event]
         self.active_state = event_targets[-1] if event_targets else self  # Active=最後
@@ -497,21 +506,6 @@ class XMLUI(XUState):
         # イベント発生対象は表示物のみ
         event_targets = [state for state in draw_targets if state.use_event]
         active_state = event_targets[-1] if event_targets else None  # Active=最後
-
-        # 更新処理
-        for state in draw_targets:
-            # 親を持たないElementは更新不要
-            if state.parent is None:
-                continue
-
-            # エリア更新。absがあれば絶対座標、なければ親からのオフセット
-            state.set_attr("area_x", state.abs_x if state.has_attr("abs_x") else state.x + state.parent.area_x)
-            state.set_attr("area_y", state.abs_y if state.has_attr("abs_y") else state.y + state.parent.area_y)
-            state.set_attr("area_w", state.attr_int("w", state.parent.area_w))
-            state.set_attr("area_h", state.attr_int("h", state.parent.area_h))
-
-            if not state.has_attr("layer") and state.parent:
-                state.set_attr("layer", state.parent.layer)  # 自身がlayerを持っていなければ親から引き継ぐ
 
         # 描画処理
         for state in sorted(draw_targets, key=lambda state: state.layer):
@@ -996,8 +990,8 @@ class _XUWinFrameBase(XUState):
     # 環境依存の塗りつぶしが使えるならそちらを使った方が高速
     def _draw_center(self, screen_buf:bytearray):
         # areaはアトリビュートなのでばらすとかなり高速化
-        area_x, area_y = self.area.x, self.area.y
-        off_r, off_b = self.area.w, self.area.h  # オフセットなので0,0～w,h
+        area_x, area_y = self._area.x, self._area.y
+        off_r, off_b = self._area.w, self._area.h  # オフセットなので0,0～w,h
 
         # 読みやすさのための展開(速度はほぼ変わらなかった)
         size = self.pattern_size
@@ -1015,8 +1009,8 @@ class _XUWinFrameBase(XUState):
     # 中央部分塗りつぶしは呼び出し側で行う
     def _draw_frame(self, screen_buf:bytearray):
         # areaはアトリビュートなのでばらすとかなり高速化
-        area_x, area_y = self.area.x, self.area.y
-        off_r, off_b = self.area.w, self.area.h  # オフセットなので0,0～w,h
+        area_x, area_y = self._area.x, self._area.y
+        off_r, off_b = self._area.w, self._area.h  # オフセットなので0,0～w,h
 
         # 読みやすさのための展開(速度はほぼ変わらなかった)
         size = self.pattern_size
