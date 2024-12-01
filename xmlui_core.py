@@ -116,7 +116,6 @@ class XUStateRO:
         self.xmlui = xmlui  # ライブラリへのIF
         self._element = element  # 自身のElement
         self._parent:XUStateRO|None = None  # 親
-        self._area = XURect(0, 0, 0, 0)  # 描画領域
 
     def __eq__(self, other) -> bool:
         # UI_Stateは都度使い捨てなので、対象となるElementで比較する
@@ -155,8 +154,18 @@ class XUStateRO:
     # その他
      # *************************************************************************
     @property
-    def area(self) -> XURect:  # 操作されないようコピーを返す
-        return XURect(self._area.x, self._area.y, self._area.w, self._area.h)
+    def area(self) -> XURect:  # 親からの相対座標
+        parent_area = self._parent.area if self._parent else XURect(0, 0, 4096, 4096)
+
+        # absがあれば絶対座標、なければ親からのオフセット
+        offset_x = self.x
+        offset_y = self.y
+        return XURect(
+            self.abs_x if self.has_attr("abs_x") else offset_x + parent_area.x,
+            self.abs_y if self.has_attr("abs_y") else offset_y + parent_area.y,
+            self.attr_int("w", parent_area.w-offset_x),
+            self.attr_int("h", parent_area.h-offset_y)
+        )
 
     @property
     def tag(self) -> str:
@@ -169,8 +178,8 @@ class XUStateRO:
         return XUStateRO(self.xmlui, self._element)
 
     @property
-    def valid(self) -> bool:  # 描画有効フラグ。Update済みかどうかを返す
-        return self.update_count > 0 and not self._area.is_empty
+    def valid(self) -> bool:  # 有効フラグ。更新があるまで無効
+        return self.update_count > 0
 
     # ツリー操作用
     # *************************************************************************
@@ -271,7 +280,10 @@ class XUStateRO:
 
     @property
     def layer(self) -> int:  # 描画レイヤ
-        return self.attr_int("layer", 0)
+        if self.has_attr("layer") or self._parent is None:
+            return self.attr_int("layer", 0)
+        else:  # 無ければ親のlayerを持ってくる
+            return self._parent.layer
 
     @property
     def marker(self) -> str:  # デバッグ用
@@ -324,6 +336,7 @@ class XUState(XUStateRO):
         self.set_attr("enable", False)
         if self._parent:  # 親から外す
             self._parent._element.remove(self._element)
+            self._parent = None
 
     # 子に別Element一式を追加する
     def open(self, template_name:str, id:str, id_alias:str|None=None) -> 'XUState':
@@ -406,9 +419,6 @@ class XMLUI(XUState):
         root.attrib["use_event"] = "True"
         super().__init__(self, root)
 
-        # 描画エリア
-        self._area = XURect(0, 0, self.w, self.h)
-
         # デバッグ用
         self.debug = XMLUI_Debug()
 
@@ -437,10 +447,10 @@ class XMLUI(XUState):
     # 更新用
     # *************************************************************************
     def _get_updatetargets(self, state:XUState, parent:XUState|None=None) -> Generator[XUState, None, None]:
+        # enableのElementとその子だけ回収(disableの子は回収しない)
         if state.enable:
             state._parent = parent
             yield state
-            # enableの子だけ回収(disableの子は回収しない)
             for child in state._element:
                 yield from self._get_updatetargets(XUState(self, child), state)
 
@@ -450,25 +460,6 @@ class XMLUI(XUState):
 
         # 更新対象を取得(ついでに親を設定)
         update_targets = list(self._get_updatetargets(self))
-
-        # 更新処理
-        # -------------------------------------------------
-        for state in update_targets:
-            # 親を持たないElementは更新不要
-            parent = state._parent
-            if parent is None:  # root
-                continue
-
-            # エリア更新。absがあれば絶対座標、なければ親からのオフセット
-            state._area = XURect(
-                state.abs_x if state.has_attr("abs_x") else state.x + parent._area.x,
-                state.abs_y if state.has_attr("abs_y") else state.y + parent._area.y,
-                state.attr_int("w", parent._area.w),
-                state.attr_int("h", parent._area.h)
-            )
-  
-            if not state.has_attr("layer"):
-                state.set_attr("layer", parent.layer)  # 自身がlayerを持っていなければ親から引き継ぐ
 
         # イベント発生対象は表示物のみ
         event_targets = [state for state in update_targets if state.visible and state.use_event]
@@ -483,9 +474,10 @@ class XMLUI(XUState):
     # 描画用
     # *************************************************************************
     def _get_drawtargets(self, state:XUState) -> Generator[XUState, None, None]:
-        if state.enable and state.visible and state.valid:  # not valied(update_count==0)はUpdateで追加されたばかりのもの(未Update)
+        # enable/visible/valiedのElementとその子だけ回収(invisibleの子は削除)
+        # not valied(update_count==0)はUpdateで追加されたばかりのもの(未Update)
+        if state.enable and state.visible and state.valid:
             yield state
-            # visibleの子だけ回収(invisibleの子は削除)
             for child in state._element:
                 yield from self._get_drawtargets(XUState(self, child))
 
@@ -979,9 +971,9 @@ class _XUWinFrameBase(XUState):
     # 中央部分をバッファに書き込む。
     # 環境依存の塗りつぶしが使えるならそちらを使った方が高速
     def _draw_center(self, screen_buf:bytearray):
-        # areaはアトリビュートなのでばらすとかなり高速化
-        area_x, area_y = self._area.x, self._area.y
-        off_r, off_b = self._area.w, self._area.h  # オフセットなので0,0～w,h
+        # self.areaは低速なので何度もアクセスするならローカル化
+        area = self.area
+        off_r, off_b = area.w, area.h  # オフセットなので0,0～w,h
 
         # 読みやすさのための展開(速度はほぼ変わらなかった)
         size = self.pattern_size
@@ -991,16 +983,16 @@ class _XUWinFrameBase(XUState):
         w = min(clip_r, off_r) - size*2
         c_pat = self._pattern[-1:] * w
         for y_ in range(max(size, self.clip.y), min(clip_b, off_b-size)):
-            offset = (area_y + y_)*self.screen_w + area_x + size
+            offset = (area.y + y_)*self.screen_w + area.x + size
             if w > 0:
                 screen_buf[offset:offset+w] = c_pat
 
     # フレームだけバッファに書き込む(高速化や半透明用)
     # 中央部分塗りつぶしは呼び出し側で行う
     def _draw_frame(self, screen_buf:bytearray):
-        # areaはアトリビュートなのでばらすとかなり高速化
-        area_x, area_y = self._area.x, self._area.y
-        off_r, off_b = self._area.w, self._area.h  # オフセットなので0,0～w,h
+        # self.areaは低速なので何度もアクセスするならローカル化
+        area = self.area
+        off_r, off_b = area.w, area.h  # オフセットなので0,0～w,h
 
         # 読みやすさのための展開(速度はほぼ変わらなかった)
         size = self.pattern_size
@@ -1013,7 +1005,7 @@ class _XUWinFrameBase(XUState):
             if self.clip.x <= off_x < clip_r and self.clip.y <= off_y < clip_b:
                 index = self._get_patidx_func(off_x, off_y, off_r, off_b)
                 if index >= 0:  # 枠外チェック
-                    screen_buf[(area_y + off_y)*self.screen_w + (area_x + off_x)] = pattern[index]
+                    screen_buf[(area.y + off_y)*self.screen_w + (area.x + off_x)] = pattern[index]
 
         for y_ in range(size):
             for x_ in range(size):
@@ -1026,24 +1018,26 @@ class _XUWinFrameBase(XUState):
         # ---------------------------------------------------------------------
         # 上下のライン
         w = min(clip_r, off_r) - max(0, self.clip.x) - size*2
+        if w <= 0:
+            return
         for y_ in range(size):
             if y_ >= self.clip.y:  # 上
-                offset = (area_y + y_)*self.screen_w + area_x
+                offset = (area.y + y_)*self.screen_w + area.x
                 screen_buf[offset+max(0, self.clip.x)+size: offset+min(clip_r, off_r)-size] = self._shadow_pattern[y_:y_+1] * w
             if off_b-1-y_ < clip_b:  # 下
-                offset = (area_y + off_b-1-y_)*self.screen_w + area_x
+                offset = (area.y + off_b-1-y_)*self.screen_w + area.x
                 screen_buf[offset+max(0, self.clip.x)+size: offset+min(clip_r, off_r)-size] = self._pattern[y_:y_+1] * w
 
         # 左右のライン
         r_pat = bytes(reversed(self._pattern))
         for y_ in range(max(size, self.clip.y), min(clip_b, off_b-size)):
             # 左
-            offset = (area_y + y_)*self.screen_w + area_x
+            offset = (area.y + y_)*self.screen_w + area.x
             w = size-max(0, self.clip.x)
             if w > 0:
                 screen_buf[offset:offset+w] = self._shadow_pattern[:w]
             # 右
-            offset = (area_y + y_)*self.screen_w + area_x + off_r - size
+            offset = (area.y + y_)*self.screen_w + area.x + off_r - size
             w = min(clip_r-off_r, size)
             if w > 0:
                 screen_buf[offset:offset+w] = r_pat[:w]

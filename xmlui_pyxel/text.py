@@ -41,21 +41,22 @@ class LabelRO(XUStateRO):
         self._align = align
 
     def draw(self):
-        pyxel.rect(self._area.x, self._area.y, self._area.w, self._area.h, 12)
+        area = self.area  # 低速なので使うときは必ず一旦ローカルに
+        pyxel.rect(area.x, area.y, area.w, area.h, 12)
 
         text_w = default.text_width(self.text)
         match self.align:
             case "left":
-                x =  self._area.x + self.offset_x
+                x =  area.x + self.offset_x
             case "center":
-                x = self._area.center_x(text_w) + self.offset_x
+                x = area.center_x(text_w) + self.offset_x
             case "right":
-                x = self._area.right() - text_w - self.offset_x
+                x = area.right() - text_w - self.offset_x
             case _:
                 raise ValueError(f"align:{self.align} is not supported.")
 
         # ラベルテキスト描画
-        default.draw(x, self._area.center_y(default.size) + self.offset_y, self.text, 7)
+        default.draw(x, area.center_y(default.size) + self.offset_y, self.text, 7)
 
     @property
     def align(self) -> str:
