@@ -345,13 +345,14 @@ class XUState(XUStateRO):
 
     # 子に別Element一式を追加する
     def open(self, template_name:str, id:str, id_alias:str|None=None) -> 'XUState':
-        # Trg入力を落とす(open/closeが連続しないよう)
+        # open/closeが連続しないようTrg入力を落とす
         self.xmlui.event.clearTrg()
 
         # idがかぶらないよう別名を付けられる
         id_alias = id if id_alias is None else id_alias
+
+        # IDがかぶってはいけない
         if self.xmlui.is_open(id_alias):
-            # IDがかぶってはいけない
             raise Exception(f"ID '{id_alias}' already exists")
 
         opend = self.xmlui._templates[template_name].duplicate(id).set_attr("id", id_alias)
@@ -362,7 +363,7 @@ class XUState(XUStateRO):
  
     # 閉じる
     def close(self, id:str|None=None):  # closeの後なにもしないのでNone
-        # Trg入力を落とす(open/closeが連続しないよう)
+        # open/closeが連続しないようTrg入力を落とす
         self.xmlui.event.clearTrg()
 
         if id is not None:
