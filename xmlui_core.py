@@ -455,8 +455,8 @@ class XMLUI(XUState):
         # (入力)イベントの更新
         self.event.update()
 
-        # 更新対象を取得(ついでに親を設定)
-        update_targets = [XUState(self, element) for element in self._element.iter() if element.attrib.get("enable", True)]
+        # 更新対象を取得
+        update_targets = list(filter(lambda state: state.enable, [XUState(self, element) for element in self._element.iter()]))
 
         # 親の更新
         self._parent_cache = {c:XUStateRO(self, p) for p in self._element.iter() for c in p}
@@ -474,10 +474,8 @@ class XMLUI(XUState):
     # 描画用
     # *************************************************************************
     def draw(self):
-        # 描画対象を取得
-        draw_targets = [XUState(self, element) for element in self._element.iter()]
-        # enable/visibleのものだけ。update_countが0の時は未Updateなのでこれもはじく
-        draw_targets = list(filter(lambda state: state.enable and state.visible and state.update_count>0, draw_targets))
+        # 描画対象を取得。update_countが0の時は未Updateなのではじく
+        draw_targets = list(filter(lambda state: state.enable and state.visible and state.update_count>0, [XUState(self, element) for element in self._element.iter()]))
 
         # イベント発生対象は表示物のみ
         event_targets = [state for state in draw_targets if state.use_event]
