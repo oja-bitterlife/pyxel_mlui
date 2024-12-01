@@ -45,7 +45,7 @@ def round_win_draw(win:win.RoundRO, event:xuc.XUEvent):
 
 # 更新
 # ---------------------------------------------------------
-@menu.grid_update_bind(xmlui, "menu_win", "menu_row", "menu_item")
+@menu.grid_update_bind(xmlui, "menu_grid", "menu_row", "menu_item")
 def menu_win_update(menu_win:menu.Grid, event:xuc.XUEvent):
     item_w, item_h = menu_win.attr_int("item_w"), menu_win.attr_int("item_h")
     menu_win.arrange_items(item_w, item_h)
@@ -69,7 +69,7 @@ def menu_win_update(menu_win:menu.Grid, event:xuc.XUEvent):
 
 # 描画
 # ---------------------------------------------------------
-@menu.grid_draw_bind(xmlui, "menu_win", "menu_row", "menu_item")
+@menu.grid_draw_bind(xmlui, "menu_grid", "menu_row", "menu_item")
 def menu_win_draw(menu_win:menu.GridRO, event:xuc.XUEvent):
     menu_win.draw()
     draw_menu_cursor(menu_win.selected_item, 0, 0)

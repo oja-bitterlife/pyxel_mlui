@@ -13,7 +13,7 @@ def update(): # フレームの更新処理
     # ゲームの更新コード
 
     # ゲームの中でメインメニューを開く
-    xmlui.open_by_event(input.BTN_A, UI_TEMPLATE, "round_win", "menu_command")
+    xmlui.open_by_event(input.BTN_A, UI_TEMPLATE, "command_menu_win")
 
     # UI更新
     xmlui.check_input_on(pyxel.btn)
