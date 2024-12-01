@@ -6,7 +6,7 @@
 
     <menu_win>
         <title x="40" y="0" w="52" h="12" id="label">コマンド</title>
-    <menu_win>
+    </menu_win>
 
     <menu_1 x="6" y="14" item_w="58" item_h="18">
         <menu_row>
