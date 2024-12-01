@@ -560,6 +560,27 @@ class XMLUI(XUState):
 
 # ユーティリティークラス
 # #############################################################################
+# 基本は必要な情報をツリーでぶら下げる
+# Treeが不要ならたぶんXUStateで事足りる
+class _XUUtilBase(XUStateRO):
+    def __init__(self, state):
+        super().__init__(state.xmlui, state._element)
+
+    # すでに存在するElementを回収
+    def find_child_root(self, state:XUStateRO, child_root_tag:str) -> XUStateRO:
+        return state.find_by_tag(child_root_tag)
+ 
+    # findできなければ新規で作って追加する
+    # 新規作成時Trueを返す(is_created)
+    def find_or_create_child_root(self, state:XUStateRO, child_root_tag:str) -> tuple[XUStateRO, bool]:
+        try:
+            return state.find_by_tag(child_root_tag), False
+        except Exception:
+            # 新規作成
+            state = XUState(state.xmlui, Element(child_root_tag))
+            state.add_child(state)
+            return state, True
+
 # テキスト系
 # ---------------------------------------------------------
 # 半角を全角に変換
@@ -572,7 +593,7 @@ _hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
 # まずは読み込み用
 # *****************************************************************************
 # テキスト基底
-class XUPageBase(XUStateRO):
+class XUPageBase(_XUUtilBase):
     # クラス定数
     ROOT_TAG= "_xmlui_page_root"
     PAGE_TAG ="_xmlui_page"
