@@ -563,24 +563,6 @@ class XMLUI(XUState):
 
 # ユーティリティークラス
 # #############################################################################
-# 基本は必要な情報をツリーでぶら下げる
-# Treeが不要ならたぶんXUStateで事足りる
-class _XUUtil:
-    # すでに存在するElementを回収
-    def find_state(self, parent:XUStateRO, child_root_tag:str) -> XUStateRO:
-        return parent.find_by_tag(child_root_tag).asRO()
- 
-    # findできなければ新規で作って追加する
-    # 新規作成時Trueを返す(is_created)
-    def find_or_create_state(self, parent:XUState, child_root_tag:str) -> tuple[XUState, bool]:
-        try:
-            return parent.find_by_tag(child_root_tag).asRW(), False
-        except Exception:
-            # 新規作成
-            state = XUState(parent.xmlui, Element(child_root_tag))
-            parent.add_child(state)
-            return state,True
-
 # テキスト系
 # ---------------------------------------------------------
 # 半角を全角に変換
@@ -593,7 +575,7 @@ _hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
 # まずは読み込み用
 # *****************************************************************************
 # テキスト基底
-class XUPageRO(_XUUtil):
+class XUPageBase(XUStateRO):
     # クラス定数
     ROOT_TAG= "_xmlui_page_root"
     PAGE_TAG ="_xmlui_page"
@@ -601,12 +583,49 @@ class XUPageRO(_XUUtil):
 
     PAGE_NO_ATTR = "page_no"  # ページ管理用
 
-    def __init__(self, parent: XUStateRO):
-        self.page_root = self.find_state(parent, self.ROOT_TAG)
+    # 文字列中の半角を全角に変換する
+    @classmethod
+    def convert_zenkaku(cls, hankaku:str) -> str:
+        return unicodedata.normalize("NFKC", hankaku).translate(_hankaku_zenkaku_dict)
+
+    # -----------------------------------------------------
+    def __init__(self, state:XUStateRO, text:str, page_lins:int, wrap:int=4096):
+        super().__init__(state.xmlui, state._element)
+
+        # パラメータの保存
+        self._page_lines = page_lins
+        self._wrap = max(wrap, 1)   # 0だと無限になってしまうので最低1を入れておく
+
+        # PAGE_ROOT_TAG以下(ページテキスト)の設定
+        try:
+            self.page_root = state.find_by_tag(self.ROOT_TAG).asRW()
+        except:
+            # 新規作成
+            self.page_root = XUState(state.xmlui, Element(self.ROOT_TAG))
+            self._setup(text)  # 新規作成なのでテキストを処理しておく
+
+
+    def _setup(self, text:str):
+        # 改行を\nに統一して全角化
+        tmp_text = self.convert_zenkaku(re.sub(self.SEPARATE_REGEXP, "\n", text).strip())
+
+        # 各行に分解し、その行をさらにwrapで分解する
+        lines =  sum([[line[i:i+self._wrap] for i in  range(0, len(line), self._wrap)] for line in tmp_text.splitlines()], [])
+
+        # 再セットアップ用
+        self.page_root.clear_children()
+        self.reset_page()
+
+        # ページごとにElementを追加
+        for i in range(0, len(lines), self._page_lines):
+            page_text = "\n".join(lines[i:i+self._page_lines])  # 改行を\nにして全部文字列に
+            page = XUState(self.page_root.xmlui, Element(self.PAGE_TAG))
+            page.set_text(page_text)
+            self.page_root.add_child(page)
 
     # ページ関係
     # -----------------------------------------------------
-   # 現在ページ
+    # 現在ページ
     @property
     def page_no(self) -> int:
         return min(max(self.page_root.attr_int(self.PAGE_NO_ATTR, 0), 0), self.page_max)
@@ -634,6 +653,16 @@ class XUPageRO(_XUUtil):
             return ""
         return self._limitstr(self.pages[self.page_no].text, self.draw_count)
 
+    # page_noの操作
+    def next_page(self, add:int=1) -> Self:
+        self.reset()  # ページが変わればまた最初から
+        self.page_root.set_attr(self.PAGE_NO_ATTR, max(0, self.page_no+add))
+        return self
+
+    # ページを0に戻す
+    def reset_page(self) -> Self:
+        return self.next_page(-self.page_no)
+
     # アニメーション用
     # -----------------------------------------------------
     # draw_countまでの文字列を改行分割
@@ -659,65 +688,11 @@ class XUPageRO(_XUUtil):
             return True
         return math.ceil(self.draw_count) >= len(self.pages[self.page_no].text.replace("\n", ""))
 
+    # ページ送り待ち状態(ページ送りカーソルの表示が必要)
     @property
     def is_next_wait(self) -> bool:
         return self.is_finish and not self.is_end_page
 
-    # ユーティリティ
-    # -----------------------------------------------------
-    # 文字列中の半角を全角に変換する
-    @classmethod
-    def convert_zenkaku(cls, hankaku:str) -> str:
-        return unicodedata.normalize("NFKC", hankaku).translate(_hankaku_zenkaku_dict)
-
-# アニメーションテキストページ管理
-class XUPage(XUPageRO):
-    def __init__(self, parent:XUState, text:str, page_line_num:int, wrap:int=4096):
-        # パラメータの保存
-        self._page_line_num = page_line_num
-        self._wrap = max(wrap, 1)   # 0だと無限になってしまうので最低1を入れておく
-
-        # ページタグの作成
-        self.page_root, is_created = self.find_or_create_state(parent, self.ROOT_TAG)
-        if is_created:
-            self.setup(text)
-
-    # PAGE_ROOT_TAG以下(ページテキスト)の設定
-    # Update中にテキストを再設定するのにも使える
-    def setup(self, text:str):
-        # 改行を\nに統一して全角化
-        tmp_text = self.convert_zenkaku(re.sub(self.SEPARATE_REGEXP, "\n", text).strip())
-
-        # 各行に分解し、その行をさらにwrapで分解する
-        lines =  sum([[line[i:i+self._wrap] for i in  range(0, len(line), self._wrap)] for line in tmp_text.splitlines()], [])
-
-        # 再セットアップ用
-        self.page_root.clear_children()
-        self.reset_page()
-
-        # ページごとにElementを追加
-        for i in range(0, len(lines), self._page_line_num):
-            page_text = "\n".join(lines[i:i+self._page_line_num])  # 改行を\nにして全部文字列に
-            page = XUState(self.page_root.xmlui, Element(self.PAGE_TAG))
-            page.set_text(page_text)
-            self.page_root.add_child(page)
-
-
-    # ページ関係
-    # -----------------------------------------------------
-    # page_noの操作
-    def next_page(self, add:int=1) -> Self:
-        self.reset()  # ページが変わればまた最初から
-        self.page_root.set_attr(self.PAGE_NO_ATTR, self.page_no+1)
-        return self
-
-    def reset_page(self) -> Self:
-        self.page_root.set_attr(self.PAGE_NO_ATTR, 0)
-        self.reset()  # ページが変わればまた最初から
-        return self
-
-    # アニメーション用
-    # -----------------------------------------------------
     # 表示カウンタのリセット
     def reset(self) -> Self:
         self.page_root.set_attr("update_count", 0)
@@ -861,47 +836,41 @@ class XUSelectList(_XUSelectBase):
 # ダイアル
 # ---------------------------------------------------------
 # 情報管理のみ
-class XUDialRO(_XUUtil):
+class XUDialBase(XUState):
     ROOT_TAG = "_xmlui_dial_root"
     DIGIT_TAG = "_xmlui_dial_digit"
 
     EDIT_POS_ATTR = "edit_pos"  # 操作位置
 
-    def __init__(self, parent:XUStateRO, allow_create:bool=False):
-        self.state = self.find_state(parent, self.ROOT_TAG).asRW()
+    def __init__(self, state:XUState, digit_length:int, digit_list:str="0123456789"):
+        super().__init__(state.xmlui, state._element)
+
+        self._digit_list = digit_list
+        for i in range(digit_length):
+            digit = XUState(self.xmlui, Element(self.DIGIT_TAG))
+            digit.set_text(digit_list[0])
+            self.add_child(digit)
+
 
     @property
     def edit_pos(self) -> int:
-        return self.state.attr_int(self.EDIT_POS_ATTR)
+        return self.attr_int(self.EDIT_POS_ATTR)
 
     @property
     def digits(self) -> list[str]:
-        return [state.text for state in self.state.find_by_tagall(self.DIGIT_TAG)]
+        return [state.text for state in self.find_by_tagall(self.DIGIT_TAG)]
 
     @property
     def zenkaku_digits(self) -> list[str]:
-        return [XUPageRO.convert_zenkaku(digit) for digit in self.digits]
+        return [XUPageBase.convert_zenkaku(digit) for digit in self.digits]
 
     @property
     def number(self) -> int:
         return int("".join(reversed(self.digits)))
 
-# ダイアル操作
-class XUDial(XUDialRO):
-    def __init__(self, parent:XUState, digit_length:int, digit_list:str="0123456789"):
-        self.state, is_created = self.find_or_create_state(parent, self.ROOT_TAG)
-        if is_created:
-            # 初期値は最小埋め
-            for i in range(digit_length):
-                digit = XUState(self.state.xmlui, Element(self.DIGIT_TAG))
-                digit.set_text(digit_list[0])
-                self.state.add_child(digit)
-
-        self._digit_list = digit_list
-
     # 回り込み付き操作位置の設定
     def set_editpos(self, edit_pos:int) -> Self:
-        self.state.set_attr(self.EDIT_POS_ATTR, (edit_pos+len(self.digits))%len(self.digits))
+        self.asRW().set_attr(self.EDIT_POS_ATTR, (edit_pos+len(self.digits))%len(self.digits))
         return self
 
     # 操作位置の移動
@@ -910,7 +879,7 @@ class XUDial(XUDialRO):
 
     # 指定位置のdigitを変更する
     def set_digit(self, edit_pos:int, digit:str) -> Self:
-        state = self.state.find_by_tagall(self.DIGIT_TAG)[edit_pos].asRW()
+        state = self.find_by_tagall(self.DIGIT_TAG)[edit_pos].asRW()
         state.set_text(digit)
         return self
 

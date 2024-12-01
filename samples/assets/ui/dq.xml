@@ -28,9 +28,9 @@
         </yes_no_grid>
     </yes_no>
 
-    <msg_win abs_x="16" abs_y="180" w="224" h="60" id="win_message">
-        <msg_text x="8" y="8" wrap="17" lines="3" use_event="True"/>
-    </msg_win>
+    <round_win abs_x="16" abs_y="180" w="224" h="60" id="win_message">
+        <msg_text x="8" y="8" wrap="17" page_lines="3" use_event="True"/>
+    </round_win>
 
 </xmlui>
 
