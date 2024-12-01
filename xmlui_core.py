@@ -549,11 +549,9 @@ class XMLUI(XUState):
                 self.event.on(key)
 
     # イベントでopen
-    def open_by_event(self, trg_event:str, template_name:str, ids:list[str], id_alias:str|None=None):
+    def open_by_event(self, trg_event:str, template_name:str, id:str, id_alias:str|None=None):
         if trg_event in self.xmlui.event.trg:
-            parent = self
-            for id in ids:
-                parent = parent.open(template_name, id, id_alias if parent==self else None)
+            self.open(template_name, id, id_alias)
 
 # ユーティリティークラス
 # #############################################################################
