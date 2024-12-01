@@ -115,6 +115,7 @@ class XUStateRO:
     def __init__(self, xmlui:'XMLUI', element:Element):
         self.xmlui = xmlui  # ライブラリへのIF
         self._element = element  # 自身のElement
+        self._parent:XUStateRO|None = None  # 親
         self._area = XURect(0, 0, 0, 0)  # 描画領域
 
     def __eq__(self, other) -> bool:
@@ -154,8 +155,8 @@ class XUStateRO:
     # その他
      # *************************************************************************
     @property
-    def area(self) -> XURect:
-        return self._area
+    def area(self) -> XURect:  # 操作されないようコピーを返す
+        return XURect(self._area.x, self._area.y, self._area.w, self._area.h)
 
     @property
     def tag(self) -> str:
@@ -190,11 +191,11 @@ class XUStateRO:
 
     # 下階層ではなく、上(root)に向かって探索する
     def find_by_tagR(self, tag:str) -> 'XUStateRO':
-        parent = self.parent
+        parent = self._parent
         while(parent):
             if parent.tag == tag:
                 return parent
-            parent = parent.parent
+            parent = parent._parent
         raise Exception(f"Tag '{tag}' not found in parents")
 
     def is_open(self, id:str) -> bool:
@@ -203,19 +204,6 @@ class XUStateRO:
             return True
         except:
             return False
-
-    @property
-    def parent(self) -> 'XUState|None':
-        def _rec_parent_search(element:Element, me:Element) -> Element|None:
-            if me in element:
-                return element
-            for child in element:
-                result = _rec_parent_search(child, me)
-                if result:
-                    return result
-            return None
-        parent = _rec_parent_search(self.xmlui._element, self._element)
-        return XUState(self.xmlui, parent) if parent else None
  
     # デバッグ用
     # *************************************************************************
@@ -334,8 +322,8 @@ class XUState(XUStateRO):
     def remove(self):  # removeの後なにかすることはないのでNone
         # 処理対象から外れるように
         self.set_attr("enable", False)
-        if self.parent:  # 親から外す
-            self.parent._element.remove(self._element)
+        if self._parent:  # 親から外す
+            self._parent._element.remove(self._element)
 
     # 子に別Element一式を追加する
     def open(self, template_name:str, id:str, id_alias:str|None=None) -> 'XUState':
@@ -418,8 +406,8 @@ class XMLUI(XUState):
         root.attrib["use_event"] = "True"
         super().__init__(self, root)
 
-        # 描画エリアは分からないので大きめでとっておく
-        self._area = XURect(0, 0, 4096, 4096)
+        # 描画エリア
+        self._area = XURect(0, 0, self.w, self.h)
 
         # デバッグ用
         self.debug = XMLUI_Debug()
@@ -448,25 +436,27 @@ class XMLUI(XUState):
 
     # 更新用
     # *************************************************************************
-    def _get_updatetargets(self, state:XUState) -> Generator[XUState, None, None]:
+    def _get_updatetargets(self, state:XUState, parent:XUState|None=None) -> Generator[XUState, None, None]:
         if state.enable:
+            state._parent = parent
             yield state
-            # enableの子だけ回収(disableの子は削除)
+            # enableの子だけ回収(disableの子は回収しない)
             for child in state._element:
-                yield from self._get_updatetargets(XUState(self, child))
+                yield from self._get_updatetargets(XUState(self, child), state)
 
     def update(self):
         # (入力)イベントの更新
         self.event.update()
 
-        # 更新対象を取得
+        # 更新対象を取得(ついでに親を設定)
         update_targets = list(self._get_updatetargets(self))
 
         # 更新処理
+        # -------------------------------------------------
         for state in update_targets:
             # 親を持たないElementは更新不要
-            parent = state.parent
-            if parent is None:
+            parent = state._parent
+            if parent is None:  # root
                 continue
 
             # エリア更新。absがあれば絶対座標、なければ親からのオフセット
@@ -477,8 +467,8 @@ class XMLUI(XUState):
                 state.attr_int("h", parent._area.h)
             )
   
-            if not state.has_attr("layer") and state.parent:
-                state.set_attr("layer", state.parent.layer)  # 自身がlayerを持っていなければ親から引き継ぐ
+            if not state.has_attr("layer"):
+                state.set_attr("layer", parent.layer)  # 自身がlayerを持っていなければ親から引き継ぐ
 
         # イベント発生対象は表示物のみ
         event_targets = [state for state in update_targets if state.visible and state.use_event]
