@@ -350,18 +350,15 @@ class XUState(XUStateRO):
 
         # idがかぶらないよう別名を付けられる
         id_alias = id if id_alias is None else id_alias
-        try:
-            # すでに存在するかチェック
-            self.xmlui.find_by_ID(id_alias)
-        except:
-            # 見つからず例外がでればOK
-            opend = self.xmlui._templates[template_name].duplicate(id).set_attr("id", id_alias)
-            opend.set_attr("use_event", True)  # openで追加するときはeventを有効に
-            self.add_child(opend)
-            return opend
+        if self.xmlui.is_open(id_alias):
+            # IDがかぶってはいけない
+            raise Exception(f"ID '{id_alias}' already exists")
 
-        # IDがかぶってはいけない
-        raise Exception(f"ID '{id_alias}' already exists")
+        opend = self.xmlui._templates[template_name].duplicate(id).set_attr("id", id_alias)
+        opend.set_attr("use_event", True)  # openで追加するときはeventを有効に
+        self.add_child(opend)
+        return opend
+
  
     # 閉じる
     def close(self, id:str|None=None):  # closeの後なにもしないのでNone
