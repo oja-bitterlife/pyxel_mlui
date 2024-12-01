@@ -49,6 +49,8 @@ class MenuRO(_BaseRound):
         area = self.area  # areaを扱うときは必ず一旦ローカル化する
         for group in self._grid_root._grid:
             for item in group:
+                print(item.area)
+
                 item_area = item.area  # areaを扱うときは必ず一旦ローカル化する
                 if self.clip.h >= item_area.y-area.y + text.default.size:  # ウインドウが表示されるまで表示しない
                     pyxel.text(item_area.x+6, item_area.y, item.text, 7, text.default.data)

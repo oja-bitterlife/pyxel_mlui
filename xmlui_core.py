@@ -210,7 +210,7 @@ class XUStateRO:
     # 親を探す
     @property
     def parent(self) -> 'XUStateRO|None':
-        self.xmlui._parent_cache.get(self._element, None)
+        return self.xmlui._parent_cache.get(self._element, None)
 
     def is_open(self, id:str) -> bool:
         try:
@@ -331,6 +331,7 @@ class XUState(XUStateRO):
     # *************************************************************************
     def add_child(self, child:XUStateRO):  # selfとchildどっちが返るかややこしいのでNone
         self._element.append(child._element)
+        self.xmlui._update_cache()
 
     def clear_children(self) -> Self:
         self._element.clear()
@@ -461,7 +462,7 @@ class XMLUI(XUState):
         update_targets = list(filter(lambda state: state.enable, [XUState(self, element) for element in self._element.iter()]))
 
         # キャッシュの更新
-        self._parent_cache = {c:XUStateRO(self, p) for p in self._element.iter() for c in p}
+        self._update_cache()
 
         # イベント発生対象は表示物のみ
         event_targets = [state for state in update_targets if state.visible and state.use_event]
@@ -472,6 +473,13 @@ class XMLUI(XUState):
             if state.enable:  # update中にdisable(remove)になる場合があるので毎回チェック
                 state.set_attr("update_count", state.update_count+1)  # 1スタート(0は初期化時)
                 self.update_element(state.tag, state, self.event if state == self.active_state else XUEvent())
+
+        # 更新処理で変更された可能性があるキャッシュの再更新
+        self._update_cache()
+
+    # キャッシュの更新
+    def _update_cache(self):
+        self._parent_cache = {c:XUStateRO(self, p) for p in self._element.iter() for c in p}
 
     # 描画用
     # *************************************************************************
