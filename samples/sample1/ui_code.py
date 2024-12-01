@@ -35,6 +35,10 @@ def draw_menu_cursor(state:xuc.XUStateRO, x:int, y:int):
 
 # コマンドメニュー
 # *****************************************************************************
+# @win.round_update_bind(xmlui, "round_win", 16)
+# def round_update_draw(win:win.Round, event:xuc.XUEvent):
+#     pass
+
 @win.round_draw_bind(xmlui, "round_win")
 def round_win_draw(win:win.RoundRO, event:xuc.XUEvent):
     win.draw()

@@ -23,16 +23,16 @@ class RoundRO(XUWinRoundFrame):
         self.draw_buf(pyxel.screen.data_ptr())
 
 class Round(RoundRO, XUState):
-    def __init__(self, state:XUStateRO, speed:float=16):
+    def __init__(self, state:XUStateRO, speed:float):
         super().__init__(state)
         self.set_attr("speed", speed)
 
 # デコレータを用意
-def round_update_bind(xmlui:XMLUI, tag_name:str):
+def round_update_bind(xmlui:XMLUI, tag_name:str, speed:float=16):
     def wrapper(update_func:Callable[[Round,XUEvent], None]):
         # 登録用関数をジェネレート
         def update(state:XUState, event:XUEvent):
-            update_func(Round(state), event)
+            update_func(Round(state, speed), event)
         # 関数登録
         xmlui.set_updatefunc(tag_name, update)
     return wrapper
@@ -62,16 +62,16 @@ class RectRO(XUWinRectFrame):
         self.draw_buf(pyxel.screen.data_ptr())
 
 class Rect(RectRO, XUState):
-    def __init__(self, state:XUStateRO, speed:float=16):
+    def __init__(self, state:XUStateRO, speed:float):
         super().__init__(state)
         self.set_attr("speed", speed)
 
 # デコレータを用意
-def rect_update_bind(xmlui:XMLUI, tag_name:str):
+def rect_update_bind(xmlui:XMLUI, tag_name:str, speed:float=16):
     def wrapper(update_func:Callable[[Rect,XUEvent], None]):
         # 登録用関数をジェネレート
         def update(state:XUState, event:XUEvent):
-            update_func(Rect(state), event)
+            update_func(Rect(state, speed), event)
         # 関数登録
         xmlui.set_updatefunc(tag_name, update)
     return wrapper
