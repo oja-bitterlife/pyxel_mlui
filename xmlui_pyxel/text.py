@@ -1,7 +1,7 @@
 import pyxel
 
 from xmlui_core import *
-from . import win
+from . import text
 
 # フォントを扱う
 # #############################################################################
@@ -69,7 +69,7 @@ class LabelRO(XUStateRO):
     def offset_y(self) -> int:
         return self.attr_int(self.TEXT_OFFSET_Y_ATTR, 0)
 
-class NFLabel(LabelRO):
+class Label(LabelRO):
     def __init__(self, state:XUState, align:str="center"):
         super().__init__(state, align)
 
@@ -80,10 +80,10 @@ class NFLabel(LabelRO):
 
 # デコレータを用意
 def label_update_bind(xmlui:XMLUI, tag_name:str):
-    def wrapper(update_func:Callable[[NFLabel,XUEvent], None]):
+    def wrapper(update_func:Callable[[Label,XUEvent], None]):
         # 登録用関数をジェネレート
         def update(state:XUState, event:XUEvent):
-            update_func(NFLabel(state), event)
+            update_func(Label(state), event)
         # 関数登録
         xmlui.set_updatefunc(tag_name, update)
     return wrapper
@@ -100,7 +100,7 @@ def label_draw_bind(xmlui:XMLUI, tag_name:str, align:str="center"):
 
 # メッセージ
 # *****************************************************************************
-class MsgRO(_BaseRound):
+class MsgRO(XUPageRO):
     LINE_NUM_ATTR = "lines"  # ページの行数
     WRAP_ATTR = "wrap"  # ワードラップ文字数
 
@@ -113,8 +113,6 @@ class MsgRO(_BaseRound):
         self.page = XUPageRO(root)
 
     def draw(self):
-        super().draw()  # ウインドウ描画
-
         # テキスト描画
         for i,page in enumerate(self.page.page_text.split()):
             if self.page.page_root.update_count > 0:  # 子を強制描画するので更新済みチェック

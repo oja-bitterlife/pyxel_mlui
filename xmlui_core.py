@@ -490,7 +490,8 @@ class XMLUI(XUState):
         active_state = event_targets[-1] if event_targets else None  # Active=最後
 
         # 描画処理
-        for state in sorted(draw_targets, key=lambda state: state.layer):
+        layer_cache = {state._element:state.layer for state in draw_targets}
+        for state in sorted(draw_targets, key=lambda state: layer_cache[state._element]):
             self.draw_element(state.tag, state, self.event if state == active_state else XUEvent())
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
