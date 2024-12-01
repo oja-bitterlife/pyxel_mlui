@@ -1,6 +1,6 @@
 import pyxel
 
-from xmlui_pyxel import text, xuc,win,input
+from xmlui_pyxel import xuc,text,win,input,menu
 
 # xmlui_pyxelの初期化
 # *********************************************************
@@ -38,8 +38,8 @@ def draw_menu_cursor(state:xuc.XUStateRO, x:int, y:int):
 # *****************************************************************************
 # 更新
 # ---------------------------------------------------------
-@win.menu_update_bind(xmlui, "menu_win", "menu_row", "menu_item")
-def menu_win_update(menu_win:win.Menu, event:xuc.XUEvent):
+@menu.grid_update_bind(xmlui, "menu_win", "menu_row", "menu_item")
+def menu_win_update(menu_win:menu.Grid, event:xuc.XUEvent):
     item_w, item_h = menu_win.attr_int("item_w"), menu_win.attr_int("item_h")
     menu_win.arrange_items(item_w, item_h)
 
@@ -56,14 +56,14 @@ def menu_win_update(menu_win:win.Menu, event:xuc.XUEvent):
         if selected_item == "dial":
             selected_item.open(UI_TEMPLATE, "win_dial").set_pos(8, 2)
 
-    # 閉じる
-    if input.BTN_B in event.trg:
-        menu_win.close()
+    # # 閉じる
+    # if input.BTN_B in event.trg:
+    #     menu_win.close()
 
 # 描画
 # ---------------------------------------------------------
-@win.menu_draw_bind(xmlui, "menu_win", "menu_row", "menu_item")
-def menu_win_draw(menu_win:win.MenuRO, event:xuc.XUEvent):
+@menu.grid_draw_bind(xmlui, "menu_win", "menu_row", "menu_item")
+def menu_win_draw(menu_win:menu.GridRO, event:xuc.XUEvent):
     menu_win.draw()
     draw_menu_cursor(menu_win.selected_item, 0, 0)
 
@@ -72,12 +72,13 @@ def menu_win_draw(menu_win:win.MenuRO, event:xuc.XUEvent):
 # *****************************************************************************
 # 更新
 # ---------------------------------------------------------
-@win.msg_update_bind(xmlui, "msg_win", "msg_text")
-def msg_win_update(msg_win:win.Msg, event:xuc.XUEvent):
+@text.msg_update_bind(xmlui, "msg_win", "msg_text")
+def msg_win_update(msg_win:text.Msg, event:xuc.XUEvent):
     if input.BTN_A in event.trg or input.BTN_B in event.trg:
         action = msg_win.page.check_action()
         if action == "close":
-            msg_win.close("menu_command")  # メニューごと閉じる
+            pass
+            # msg_win.close("menu_command")  # メニューごと閉じる
         elif action == "finish":
             msg_win.page.finish()
         elif action == "next_page":
@@ -85,16 +86,16 @@ def msg_win_update(msg_win:win.Msg, event:xuc.XUEvent):
 
 # 描画
 # ---------------------------------------------------------
-@win.msg_draw_bind(xmlui, "msg_win", "msg_text")
-def msg_win_draw(msg_win:win.MsgRO, event:xuc.XUEvent):
+@text.msg_draw_bind(xmlui, "msg_win", "msg_text")
+def msg_win_draw(msg_win:text.MsgRO, event:xuc.XUEvent):
     msg_win.draw()
 
-    # カーソル表示
-    if msg_win.page.is_next_wait:
-        tri_size = 6
-        center_x = msg_win.area.center_x(tri_size)
-        bottom = msg_win.area.bottom(tri_size) - 2
-        pyxel.tri(center_x, bottom, center_x+tri_size, bottom, center_x+tri_size//2, bottom+tri_size//2, 7)
+    # # カーソル表示
+    # if msg_win.page.is_next_wait:
+    #     tri_size = 6
+    #     center_x = msg_win.area.center_x(tri_size)
+    #     bottom = msg_win.area.bottom(tri_size) - 2
+    #     pyxel.tri(center_x, bottom, center_x+tri_size, bottom, center_x+tri_size//2, bottom+tri_size//2, 7)
 
 
 # ダイアル
@@ -125,8 +126,8 @@ def dial_win_draw(dial_win:xuc.XUStateRO, event:xuc.XUEvent):
     for i,digit in enumerate(dial.zenkaku_digits):
         pyxel.text(dial_win.area.x+3+(4-i)*text.default.size, dial_win.area.y+2, digit, 2 if dial.edit_pos == i else 7, text.default.data)
 
-@win.list_update_bind(xmlui, "yes_no", "yes_no_item")
-def dial_yes_no_update(list_win:win.List, event:xuc.XUEvent):
+@menu.list_update_bind(xmlui, "yes_no", "yes_no_item")
+def dial_yes_no_update(list_win:menu.List, event:xuc.XUEvent):
     item_h = list_win.attr_int("item_h")
     list_win.arrange_items(0, item_h)
 
@@ -134,8 +135,8 @@ def dial_yes_no_update(list_win:win.List, event:xuc.XUEvent):
     selected_item = list_win.select_by_event(*input.UP_DOWN)
 
     # 閉じる
-    if input.BTN_B in event.trg:
-        list_win.close()
+    # if input.BTN_B in event.trg:
+    #     list_win.close()
 
     # 決定
     if input.BTN_A in event.trg:
@@ -145,12 +146,12 @@ def dial_yes_no_update(list_win:win.List, event:xuc.XUEvent):
             list_win.xmlui.close("menu_command")
 
         # No時処理
-        if selected_item == "no":
-            list_win.close()
+        # if selected_item == "no":
+        #     list_win.close()
 
 
-@win.list_draw_bind(xmlui, "yes_no", "yes_no_item")
-def dial_yes_no_draw(list_win:win.ListRO, event:xuc.XUEvent):
+@menu.list_draw_bind(xmlui, "yes_no", "yes_no_item")
+def dial_yes_no_draw(list_win:menu.ListRO, event:xuc.XUEvent):
     list_win.draw()
     draw_menu_cursor(list_win.selected_item, 0, 0)
 

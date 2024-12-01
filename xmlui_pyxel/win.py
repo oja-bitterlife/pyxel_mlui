@@ -3,13 +3,13 @@ import pyxel
 from xmlui_core import *
 from . import text
 
-# ウインドウ基底
-# *****************************************************************************
 # アクティブカラーにする
 def _active_color(state:XUStateRO, color:int):
         return 10 if  state.xmlui.debug.is_lib_debug and state.xmlui.active_state == state and color == 7 else color
 
-class _BaseRound(XUWinRoundFrame):
+# 角丸ウインドウ
+# *****************************************************************************
+class RoundRO(XUWinRoundFrame):
     DEFAULT_PAT = [7,7,12]
 
     def __init__(self, state:XUStateRO, speed:float=16):
@@ -22,7 +22,32 @@ class _BaseRound(XUWinRoundFrame):
         self.clip.h = int(self.update_count*self.speed)
         self.draw_buf(pyxel.screen.data_ptr())
 
-class _BaseRect(XUWinRectFrame):
+class Round(RoundRO):
+    pass
+
+# デコレータを用意
+def round_update_bind(xmlui:XMLUI, tag_name:str):
+    def wrapper(update_func:Callable[[Round,XUEvent], None]):
+        # 登録用関数をジェネレート
+        def update(state:XUState, event:XUEvent):
+            update_func(Round(state), event)
+        # 関数登録
+        xmlui.set_updatefunc(tag_name, update)
+    return wrapper
+
+def round_draw_bind(xmlui:XMLUI, tag_name:str):
+    def wrapper(draw_func:Callable[[RoundRO,XUEvent], None]):
+        # 登録用関数をジェネレート
+        def draw(state:XUStateRO, event:XUEvent):
+            draw_func(RoundRO(state), event)
+        # 関数登録
+        xmlui.set_drawfunc(tag_name, draw)
+    return wrapper
+
+
+# 四角ウインドウ
+# *****************************************************************************
+class RectRO(XUWinRectFrame):
     DEFAULT_PAT = [7,7,12]
 
     def __init__(self, state:XUStateRO, speed:float=16):
@@ -34,3 +59,25 @@ class _BaseRect(XUWinRectFrame):
     def draw(self):
         self.clip.h = int(self.update_count*self.speed)
         self.draw_buf(pyxel.screen.data_ptr())
+
+class Rect(RectRO):
+    pass
+
+# デコレータを用意
+def rect_update_bind(xmlui:XMLUI, tag_name:str):
+    def wrapper(update_func:Callable[[Rect,XUEvent], None]):
+        # 登録用関数をジェネレート
+        def update(state:XUState, event:XUEvent):
+            update_func(Rect(state), event)
+        # 関数登録
+        xmlui.set_updatefunc(tag_name, update)
+    return wrapper
+
+def rect_draw_bind(xmlui:XMLUI, tag_name:str):
+    def wrapper(draw_func:Callable[[RectRO,XUEvent], None]):
+        # 登録用関数をジェネレート
+        def draw(state:XUStateRO, event:XUEvent):
+            draw_func(RectRO(state), event)
+        # 関数登録
+        xmlui.set_drawfunc(tag_name, draw)
+    return wrapper

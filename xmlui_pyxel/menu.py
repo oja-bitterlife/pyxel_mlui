@@ -6,28 +6,24 @@ from . import text
 
 # グリッドメニュー付きウインドウ
 # *****************************************************************************
-class MenuRO(_BaseRound):
+class GridRO(XUStateRO):
     def __init__(self, state:XUStateRO, tag_group:str, tag_item:str):
-        super().__init__(state)
+        super().__init__(state.xmlui, state._element)
         self._grid_root = XUSelectGrid(state, tag_group, tag_item)
 
     def draw(self):
-        super().draw()  # ウインドウ描画
-
         area = self.area  # areaを扱うときは必ず一旦ローカル化する
         for group in self._grid_root._grid:
             for item in group:
-                print(item.area)
-
                 item_area = item.area  # areaを扱うときは必ず一旦ローカル化する
-                if self.clip.h >= item_area.y-area.y + text.default.size:  # ウインドウが表示されるまで表示しない
-                    pyxel.text(item_area.x+6, item_area.y, item.text, 7, text.default.data)
+                # if self.clip.h >= item_area.y-area.y + text.default.size:  # ウインドウが表示されるまで表示しない
+                pyxel.text(item_area.x+6, item_area.y, item.text, 7, text.default.data)
 
     @property
     def selected_item(self) -> XUStateRO:
         return self._grid_root.selected_item
 
-class Menu(MenuRO):
+class Grid(GridRO):
     def __init__(self, state:XUState, tag_group:str, tag_item:str):
         super().__init__(state, tag_group, tag_item)
 
@@ -44,20 +40,20 @@ class Menu(MenuRO):
         return self._grid_root.selected_item
 
 # デコレータを用意
-def menu_update_bind(xmlui:XMLUI, tag_name:str, tag_group:str, tag_item:str):
-    def wrapper(update_func:Callable[[Menu,XUEvent], None]):
+def grid_update_bind(xmlui:XMLUI, tag_name:str, tag_group:str, tag_item:str):
+    def wrapper(update_func:Callable[[Grid,XUEvent], None]):
         # 登録用関数をジェネレート
         def update(state:XUState, event:XUEvent):
-            update_func(Menu(state, tag_group, tag_item), event)
+            update_func(Grid(state, tag_group, tag_item), event)
         # 関数登録
         xmlui.set_updatefunc(tag_name, update)
     return wrapper
 
-def menu_draw_bind(xmlui:XMLUI, tag_name:str, tag_group:str, tag_item:str):
-    def wrapper(draw_func:Callable[[MenuRO,XUEvent], None]):
+def grid_draw_bind(xmlui:XMLUI, tag_name:str, tag_group:str, tag_item:str):
+    def wrapper(draw_func:Callable[[GridRO,XUEvent], None]):
         # 登録用関数をジェネレート
         def draw(state:XUStateRO, event:XUEvent):
-            draw_func(MenuRO(state, tag_group, tag_item), event)
+            draw_func(GridRO(state, tag_group, tag_item), event)
         # 関数登録
         xmlui.set_drawfunc(tag_name, draw)
     return wrapper
@@ -65,20 +61,18 @@ def menu_draw_bind(xmlui:XMLUI, tag_name:str, tag_group:str, tag_item:str):
 
 # リストウインドウ
 # *****************************************************************************
-class ListRO(_BaseRound):
+class ListRO(XUStateRO):
     def __init__(self, state:XUStateRO, tag_item:str):
-        super().__init__(state)
+        super().__init__(state.xmlui, state._element)
         self._grid_root = XUSelectList(state, tag_item)
 
     def draw(self):
-        super().draw()  # ウインドウ描画
-
         area = self.area  # areaを扱うときは必ず一旦ローカル化する
         for group in self._grid_root._grid:
             item = group[0]
             item_area = item.area  # areaを扱うときは必ず一旦ローカル化する
-            if self.clip.h >= item_area.y-area.y + text.default.size:  # ウインドウが表示されるまで表示しない
-                pyxel.text(item_area.x+6, item_area.y, item.text, 7, text.default.data)
+            # if self.clip.h >= item_area.y-area.y + text.default.size:  # ウインドウが表示されるまで表示しない
+            pyxel.text(item_area.x+6, item_area.y, item.text, 7, text.default.data)
 
     @property
     def selected_item(self) -> XUStateRO:
