@@ -337,9 +337,8 @@ class XUState(XUStateRO):
     def remove(self):  # removeの後なにかすることはないのでNone
         # 処理対象から外れるように
         self.set_attr("enable", False)
-        parent = self.parent
-        if parent:  # 親から外す
-            parent._element.remove(self._element)
+        if self.parent:  # 親から外す
+            self.parent._element.remove(self._element)
 
     # 子に別Element一式を追加する
     def open(self, template_name:str, id:str, id_alias:str|None=None) -> 'XUState':
@@ -452,19 +451,12 @@ class XMLUI(XUState):
 
     # 更新用
     # *************************************************************************
-    def _get_updatetargets(self, state:XUState) -> Generator[XUState, None, None]:
-        # enableのElementとその子だけ回収(disableの子は回収しない)
-        if state.enable:
-            yield state
-            for child in state._element:
-                yield from self._get_updatetargets(XUState(self, child))
-
     def update(self):
         # (入力)イベントの更新
         self.event.update()
 
         # 更新対象を取得(ついでに親を設定)
-        update_targets = list(self._get_updatetargets(self))
+        update_targets = [XUState(self, element) for element in self._element.iter() if element.attrib.get("enable", True)]
 
         # 親の更新
         self._parent_cache = {c:XUStateRO(self, p) for p in self._element.iter() for c in p}
@@ -481,16 +473,11 @@ class XMLUI(XUState):
 
     # 描画用
     # *************************************************************************
-    def _get_drawtargets(self, state:XUState) -> Generator[XUState, None, None]:
-        # enable/visibleのElementとその子だけ回収(invisibleの子は削除)
-        if state.enable and state.visible and self.update_count > 0:  # Updateで追加されたばかりのもの(未Update)もはじく
-            yield state
-            for child in state._element:
-                yield from self._get_drawtargets(XUState(self, child))
-
     def draw(self):
         # 描画対象を取得
-        draw_targets = list(self._get_drawtargets(self))
+        draw_targets = [XUState(self, element) for element in self._element.iter()]
+        # enable/visibleのものだけ。update_countが0の時は未Updateなのでこれもはじく
+        draw_targets = list(filter(lambda state: state.enable and state.visible and state.update_count>0, draw_targets))
 
         # イベント発生対象は表示物のみ
         event_targets = [state for state in draw_targets if state.use_event]
