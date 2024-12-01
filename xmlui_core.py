@@ -608,38 +608,32 @@ class XUPageBase(_XUUtilBase):
 
     # -----------------------------------------------------
     def __init__(self, state:XUStateRO, text:str, page_lins:int, wrap:int=4096):
-        super().__init__(state.xmlui, state._element)
+        super().__init__(state)
 
         # パラメータの保存
         self._page_lines = page_lins
         self._wrap = max(wrap, 1)   # 0だと無限になってしまうので最低1を入れておく
 
-        # PAGE_ROOT_TAG以下(ページテキスト)の設定
-        try:
-            self.page_root = state.find_by_tag(self.ROOT_TAG).asRW()
-        except:
-            # 新規作成
-            self.page_root = XUState(state.xmlui, Element(self.ROOT_TAG))
-            self._setup(text)  # 新規作成なのでテキストを処理しておく
+        # ページルートの設定
+        page_root, is_created = self.find_or_create_child_root(state, self.ROOT_TAG)
+        self.page_root = page_root.asRW()
+        if is_created:
+            # 改行を\nに統一して全角化
+            tmp_text = self.convert_zenkaku(re.sub(self.SEPARATE_REGEXP, "\n", text).strip())
 
+            # 各行に分解し、その行をさらにwrapで分解する
+            lines =  sum([[line[i:i+self._wrap] for i in  range(0, len(line), self._wrap)] for line in tmp_text.splitlines()], [])
 
-    def _setup(self, text:str):
-        # 改行を\nに統一して全角化
-        tmp_text = self.convert_zenkaku(re.sub(self.SEPARATE_REGEXP, "\n", text).strip())
+            # 再セットアップ用
+            self.page_root.clear_children()
+            self.reset_page()
 
-        # 各行に分解し、その行をさらにwrapで分解する
-        lines =  sum([[line[i:i+self._wrap] for i in  range(0, len(line), self._wrap)] for line in tmp_text.splitlines()], [])
-
-        # 再セットアップ用
-        self.page_root.clear_children()
-        self.reset_page()
-
-        # ページごとにElementを追加
-        for i in range(0, len(lines), self._page_lines):
-            page_text = "\n".join(lines[i:i+self._page_lines])  # 改行を\nにして全部文字列に
-            page = XUState(self.page_root.xmlui, Element(self.PAGE_TAG))
-            page.set_text(page_text)
-            self.page_root.add_child(page)
+            # ページごとにElementを追加
+            for i in range(0, len(lines), self._page_lines):
+                page_text = "\n".join(lines[i:i+self._page_lines])  # 改行を\nにして全部文字列に
+                page = XUState(self.page_root.xmlui, Element(self.PAGE_TAG))
+                page.set_text(page_text)
+                self.page_root.add_child(page)
 
     # ページ関係
     # -----------------------------------------------------
