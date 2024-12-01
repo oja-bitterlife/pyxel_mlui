@@ -55,7 +55,11 @@ INPUT_LIST = {
     ],
     BTN_Y: [
         pyxel.GAMEPAD1_BUTTON_Y,
-    ]
+    ],
+    # デバッグ用
+    "DEBUG_PRINT_TREE": [
+        pyxel.KEY_TAB,
+    ],
 }
 
 # ボタン配列の辞書を突っ込むとイベント通知するようになる

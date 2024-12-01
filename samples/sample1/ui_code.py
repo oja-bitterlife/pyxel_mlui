@@ -47,10 +47,8 @@ def round_win_draw(win:win.RoundRO, event:xuc.XUEvent):
 # ---------------------------------------------------------
 @menu.grid_update_bind(xmlui, "menu_grid", "menu_row", "menu_item")
 def menu_win_update(menu_win:menu.Grid, event:xuc.XUEvent):
-    item_w, item_h = menu_win.attr_int("item_w"), menu_win.attr_int("item_h")
-    menu_win.arrange_items(item_w, item_h)
-
     # メニュー選択
+    menu_win.arrange_items(menu_win.attr_int("item_w"), menu_win.attr_int("item_h"))
     selected_item = menu_win.select_by_event(*input.CURSOR)
 
     # 選択アイテムの表示
@@ -65,7 +63,7 @@ def menu_win_update(menu_win:menu.Grid, event:xuc.XUEvent):
 
     # # 閉じる
     if input.BTN_B in event.trg:
-        menu_win.close("command_menu_win")
+        menu_win.close()
 
 # 描画
 # ---------------------------------------------------------

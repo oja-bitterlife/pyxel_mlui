@@ -399,13 +399,18 @@ class XMLUI_Template(XUStateRO):
         return XUState(self.xmlui, copy.deepcopy(self.find_by_ID(id)._element))
 
 # デバッグ用
-class XMLUI_Debug(XUState):
+class XMLUI_Debug:
     # デバッグ用フラグ
     DEBUG_LEVEL_LIB:int = 100  # ライブラリ作成用
     DEBUG_LEVEL_DEFAULT:int = 0
 
-    def __init__(self):
+    def __init__(self, xmlui:"XMLUI"):
+        self.xmlui = xmlui
         self.level = self.DEBUG_LEVEL_DEFAULT
+
+    def update(self):
+        if "DEBUG_PRINT_TREE" in self.xmlui.event.trg:
+            print(self.xmlui.strtree())
 
     @property
     def is_lib_debug(self) -> bool:
@@ -426,7 +431,7 @@ class XMLUI(XUState):
         self._parent_cache:dict[Element, XUStateRO] = {}
 
         # デバッグ用
-        self.debug = XMLUI_Debug()
+        self.debug = XMLUI_Debug(self)
 
         # 入力
         self.event = XUEvent(True)  # 唯一のactiveとする
@@ -459,21 +464,23 @@ class XMLUI(XUState):
         # 更新対象を取得
         update_targets = list(filter(lambda state: state.enable, [XUState(self, element) for element in self._element.iter()]))
 
-        # キャッシュの更新
-        self._update_cache()
-
         # イベント発生対象は表示物のみ
         event_targets = [state for state in update_targets if state.visible and state.use_event]
         self.active_state = event_targets[-1] if event_targets else self  # Active=最後
 
         # 更新処理
+        self._update_cache()  # Update実行前にキャッシュの更新
+
         for state in update_targets:
             if state.enable:  # update中にdisable(remove)になる場合があるので毎回チェック
                 state.set_attr("update_count", state.update_count+1)  # 1スタート(0は初期化時)
                 self.update_element(state.tag, state, self.event if state == self.active_state else XUEvent())
 
-        # 更新処理で変更された可能性があるキャッシュの再更新
-        self._update_cache()
+        self._update_cache()  # 更新処理で変更された可能性があるキャッシュの再更新
+
+        # デバッグ
+        if self.debug.is_lib_debug:
+            self.debug.update()
 
     # キャッシュの更新
     def _update_cache(self):
