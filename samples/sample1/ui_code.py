@@ -1,6 +1,6 @@
 import pyxel
 
-from xmlui_pyxel import xuc,win,font,input,label
+from xmlui_pyxel import text, xuc,win,input
 
 # xmlui_pyxelの初期化
 # *********************************************************
@@ -13,12 +13,10 @@ xmlui = xuc.XMLUI()
 # キー定義。設定しない場合はデフォルトが使われる
 # input.INPUT_LIST[input.BTN_A] = [pyxel.KEY_A]
 
-ASSET_PATH = "samples/assets/"
-
 # 初期化セット
 xmlui_pyxel.initialize(xmlui,
         inputlist_dict = input.INPUT_LIST,
-        font_path = ASSET_PATH + "font/b12.bdf"
+        font_path = "samples/assets/font/b12.bdf"
     )
 
 # (ライブラリ開発用)
@@ -26,7 +24,7 @@ xmlui.debug.level = xmlui.debug.DEBUG_LEVEL_LIB
 
 # UIテンプレートXMLの読み込み
 UI_TEMPLATE = "ui_template"
-xmlui.template_fromfile(ASSET_PATH + "ui/test.xml", "ui_template")
+xmlui.template_fromfile("samples/assets/ui/test.xml", "ui_template")
 
 
 def draw_menu_cursor(state:xuc.XUStateRO, x:int, y:int):
@@ -125,7 +123,7 @@ def dial_win_draw(dial_win:xuc.XUStateRO, event:xuc.XUEvent):
     # 数値表示
     dial = xuc.XUDialRO(dial_win)
     for i,digit in enumerate(dial.zenkaku_digits):
-        pyxel.text(dial_win.area.x+3+(4-i)*font.size, dial_win.area.y+2, digit, 2 if dial.edit_pos == i else 7, font.data)
+        pyxel.text(dial_win.area.x+3+(4-i)*text.default.size, dial_win.area.y+2, digit, 2 if dial.edit_pos == i else 7, text.default.data)
 
 @win.list_update_bind(xmlui, "yes_no", "yes_no_item")
 def dial_yes_no_update(list_win:win.List, event:xuc.XUEvent):
@@ -159,6 +157,6 @@ def dial_yes_no_draw(list_win:win.ListRO, event:xuc.XUEvent):
 
 # ラベル全般
 # *****************************************************************************
-@label.nflabel_draw_bind(xmlui, "title")
-def title_draw(label:label.NFLabelRO, event:xuc.XUEvent):
+@text.label_draw_bind(xmlui, "title")
+def title_draw(label:text.LabelRO, event:xuc.XUEvent):
     label.draw()

@@ -2,9 +2,8 @@ import xmlui_core as xuc
 
 # パッケージ一覧
 from . import input
-from . import font
+from . import text
 from . import win
-from . import label
 
 
 # XMLUIのおすすめ設定による初期化をよしなにやってくれるやつ
@@ -15,4 +14,6 @@ def initialize(
         font_path:str
     ):
     input.set_Inputlist_fromdict(xmlui, inputlist_dict)
-    font.set_font(font_path)
+
+    text.default = text.FONT(font_path)
+
