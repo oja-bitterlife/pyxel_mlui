@@ -198,15 +198,6 @@ class XUStateRO:
             return elements[0]
         raise Exception(f"Tag '{tag}' not found in '{self.tag}' and children")
 
-    # 下階層ではなく、上(root)に向かって探索する
-    def find_by_tagR(self, tag:str) -> 'XUStateRO':
-        parent = self.parent
-        while(parent):
-            if parent.tag == tag:
-                return parent
-            parent = parent.parent
-        raise Exception(f"Tag '{tag}' not found in parents")
-
     # 親を探す
     @property
     def parent(self) -> 'XUStateRO|None':
@@ -361,14 +352,23 @@ class XUState(XUStateRO):
 
  
     # 閉じる
+    def _rec_close(self, id:str|None=None):  # closeの後なにもしないのでNone
+        # idが一致していたら閉じる
+        if self.id == id:
+            return self.remove()
+
+        # id指定がなければ、idを持っていたら閉じる
+        if id is None and self.id:
+            return self.remove()
+
+        # 親があるなら遡って閉じに行く
+        if self.parent:
+            self.parent.asRW()._rec_close(id)
+
     def close(self, id:str|None=None):  # closeの後なにもしないのでNone
         # open/closeが連続しないようTrg入力を落とす
         self.xmlui.event.clearTrg()
-
-        if id is not None:
-            self.xmlui.find_by_ID(id).asRW().remove()
-        else:
-            self.remove()
+        self._rec_close(id)
 
 
 # XMLでUIライブラリ本体
