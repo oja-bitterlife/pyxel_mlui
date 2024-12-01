@@ -1,10 +1,9 @@
 import pyxel
 
-from xmlui_pyxel import xuc,text,win,input,menu
 
 # xmlui_pyxelの初期化
 # *********************************************************
-from xmlui_pyxel import xuc
+from xmlui_pyxel import xuc,text,win,input,menu
 import xmlui_pyxel
 
 # ライブラリのインスタンス化
@@ -36,6 +35,14 @@ def draw_menu_cursor(state:xuc.XUStateRO, x:int, y:int):
 
 # コマンドメニュー
 # *****************************************************************************
+# @win.round_update_bind(xmlui, "round_win")
+# def round_update_draw(win:win.Round, event:xuc.XUEvent):
+#     print(win)
+
+@win.round_draw_bind(xmlui, "round_win")
+def round_win_draw(win:win.RoundRO, event:xuc.XUEvent):
+    win.draw()
+
 # 更新
 # ---------------------------------------------------------
 @menu.grid_update_bind(xmlui, "menu_win", "menu_row", "menu_item")

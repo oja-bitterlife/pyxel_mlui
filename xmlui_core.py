@@ -22,7 +22,7 @@ class XURect:
         self.w = max(0, w)
         self.h = max(0, h)
 
-    def intersect(self, other) -> "XURect":
+    def intersect(self, other:"XURect") -> "XURect":
         right = min(self.x+self.w, other.x+other.w)
         left = max(self.x, other.x)
         bottom = min(self.y+self.h, other.y+other.h)
@@ -550,8 +550,9 @@ class XMLUI(XUState):
 
     # イベントでopen
     def open_by_event(self, trg_event:str, template_name:str, id:str, id_alias:str|None=None):
-        if trg_event in self.xmlui.event.trg:
-            self.open(template_name, id, id_alias)
+        if not self.is_open("menu_command"):
+            if trg_event in self.xmlui.event.trg:
+                self.open(template_name, id, id_alias)
 
 # ユーティリティークラス
 # #############################################################################

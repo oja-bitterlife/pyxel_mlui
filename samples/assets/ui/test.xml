@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <xmlui>
-    <round_win id="win_round">
+    <round_win id="round_win">
     </round_win>
 
     <menu_win>

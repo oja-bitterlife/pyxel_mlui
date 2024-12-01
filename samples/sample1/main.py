@@ -11,9 +11,9 @@ pyxel.init(256, 256)
 # Main
 def update(): # フレームの更新処理
     # ゲームの更新コード
+
     # ゲームの中でメインメニューを開く
-    if not xmlui.is_open("menu_command"):
-        xmlui.open_by_event(input.BTN_A, UI_TEMPLATE, "round_win", "win_command")
+    xmlui.open_by_event(input.BTN_A, UI_TEMPLATE, "round_win", "menu_command")
 
     # UI更新
     xmlui.check_input_on(pyxel.btn)
