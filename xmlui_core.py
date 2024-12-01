@@ -344,20 +344,20 @@ class XUState(XUStateRO):
             self.parent._element.remove(self._element)
 
     # 子に別Element一式を追加する
-    def open(self, template_name:str, id:str, id_alias:str|None=None) -> 'XUState':
+    def open(self, template_name:str, id:str, id_alias:str|None=None) -> "XUState":
+        # IDがかぶってはいけない
+        if self.xmlui.is_open(id):
+            raise Exception(f"ID '{id_alias}' already exists")
+
         # open/closeが連続しないようTrg入力を落とす
         self.xmlui.event.clearTrg()
 
-        # idがかぶらないよう別名を付けられる
-        id_alias = id if id_alias is None else id_alias
-
-        # IDがかぶってはいけない
-        if self.xmlui.is_open(id_alias):
-            raise Exception(f"ID '{id_alias}' already exists")
-
-        opend = self.xmlui._templates[template_name].duplicate(id).set_attr("id", id_alias)
+        # 新規オープン
+        opend = self.xmlui._templates[template_name].duplicate(id)
+        opend.set_attr("id", id if id_alias is None else id_alias)  # idがかぶらないよう別名を付けられる
         opend.set_attr("use_event", True)  # openで追加するときはeventを有効に
         self.add_child(opend)
+
         return opend
 
  
@@ -380,13 +380,13 @@ class XMLUI_Template(XUStateRO):
     # *************************************************************************
     # ファイルから読み込み
     @classmethod
-    def _fromfile(cls, xmlui:'XMLUI', fileName:str, root_tag:str|None=None) -> 'XMLUI_Template':
+    def _fromfile(cls, xmlui:'XMLUI', fileName:str, root_tag:str|None=None) -> "XMLUI_Template":
         with open(fileName, "r", encoding="utf8") as f:
             return cls._fromstring(xmlui, f.read())
 
     # リソースから読み込み
     @classmethod
-    def _fromstring(cls, xmlui:'XMLUI', xml_data:str) -> 'XMLUI_Template':
+    def _fromstring(cls, xmlui:'XMLUI', xml_data:str) -> "XMLUI_Template":
         return XMLUI_Template(XUState(xmlui, xml.etree.ElementTree.fromstring(xml_data)))
 
     def __init__(self, root:XUStateRO):
@@ -549,9 +549,11 @@ class XMLUI(XUState):
                 self.event.on(key)
 
     # イベントでopen
-    def open_by_event(self, trg_event:str, template_name:str, id:str, id_alias:str|None=None):
+    def open_by_event(self, trg_event:str, template_name:str, ids:list[str], id_alias:str|None=None):
         if trg_event in self.xmlui.event.trg:
-            self.open(template_name, id, id_alias)
+            parent = self
+            for id in ids:
+                parent = parent.open(template_name, id)
 
 # ユーティリティークラス
 # #############################################################################
