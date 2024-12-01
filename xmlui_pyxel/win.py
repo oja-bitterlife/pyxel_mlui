@@ -59,6 +59,7 @@ class RectRO(XUWinRectFrame):
 
     def draw(self):
         self.clip.h = int(self.update_count*self.speed)
+        self.clip = self.clip.intersect(XURect(0, 0, pyxel.width, pyxel.height))
         self.draw_buf(pyxel.screen.data_ptr())
 
 class Rect(RectRO):
