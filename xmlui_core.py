@@ -345,19 +345,19 @@ class XUState(XUStateRO):
 
     # 子に別Element一式を追加する
     def open(self, template_name:str, id:str, id_alias:str|None=None) -> "XUState":
-        # IDがかぶってはいけない
-        if self.xmlui.is_open(id):
-            raise Exception(f"ID '{id_alias}' already exists")
-
         # open/closeが連続しないようTrg入力を落とす
         self.xmlui.event.clearTrg()
 
-        # 新規オープン
-        opend = self.xmlui._templates[template_name].duplicate(id)
-        opend.set_attr("id", id if id_alias is None else id_alias)  # idがかぶらないよう別名を付けられる
+        # idがかぶらないよう別名を付けられる
+        id_alias = id if id_alias is None else id_alias
+
+        # IDがかぶってはいけない
+        if self.xmlui.is_open(id_alias):
+            raise Exception(f"ID '{id_alias}' already exists")
+
+        opend = self.xmlui._templates[template_name].duplicate(id).set_attr("id", id_alias)
         opend.set_attr("use_event", True)  # openで追加するときはeventを有効に
         self.add_child(opend)
-
         return opend
 
  
@@ -548,12 +548,12 @@ class XMLUI(XUState):
             if self._check_input(key, check_func):
                 self.event.on(key)
 
-    # イベントでopen
-    def open_by_event(self, trg_event:str, template_name:str, ids:list[str], id_alias:str|None=None):
-        if trg_event in self.xmlui.event.trg:
-            parent = self
-            for id in ids:
-                parent = parent.open(template_name, id)
+    # # イベントでopen
+    # def open_by_event(self, trg_event:str, template_name:str, ids:list[str], id_alias:str|None=None):
+    #     if trg_event in self.xmlui.event.trg:
+    #         parent = self
+    #         for id in ids:
+    #             parent = parent.open(template_name, id)
 
 # ユーティリティークラス
 # #############################################################################
