@@ -155,7 +155,7 @@ class XUStateRO:
      # *************************************************************************
     @property
     def area(self) -> XURect:  # 親からの相対座標
-        parent = self.parent
+        parent = self.parent  # areaは良く呼ばれるので、一回でもdictアクセスを軽減する
         parent_area = parent.area if parent else XURect(0, 0, 4096, 4096)
 
         # absがあれば絶対座標、なければ親からのオフセット
@@ -282,11 +282,10 @@ class XUStateRO:
 
     @property
     def layer(self) -> int:  # 描画レイヤ
-        if self.has_attr("layer"):
-            return self.attr_int("layer")
+        if self.has_attr("layer") or self.parent is None:
+            return self.attr_int("layer", 0)
         else:  # 無ければ親のlayerを持ってくる
-            parent = self.parent
-            return parent.layer if parent else 0
+            return self.parent.layer
 
     @property
     def marker(self) -> str:  # デバッグ用
@@ -458,7 +457,7 @@ class XMLUI(XUState):
         # 更新対象を取得
         update_targets = list(filter(lambda state: state.enable, [XUState(self, element) for element in self._element.iter()]))
 
-        # 親の更新
+        # キャッシュの更新
         self._parent_cache = {c:XUStateRO(self, p) for p in self._element.iter() for c in p}
 
         # イベント発生対象は表示物のみ
