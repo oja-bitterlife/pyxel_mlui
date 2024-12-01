@@ -351,24 +351,24 @@ class XUState(XUStateRO):
         return opend
 
      # 閉じる
-    def _rec_close(self, id:str|None=None) -> bool:  # closeの後なにもしないのでNone
-        # idが一致している。id指定がない場合はidを持っていれば値は問わない
-        if self.id == id or id is None and self.id:
-            self.remove()
-            return True
-
-        # 親があるなら遡って閉じに行く
-        if self.parent:
-            return self.parent.asRW()._rec_close(id)
-        else:
-            return False  # なにもcloseできなかった
-
     def close(self, id:str|None=None):  # closeの後なにもしないのでNone
         # open/closeが連続しないようTrg入力を落とす
         self.xmlui.event.clearTrg()
 
         # idをもつものを遡って閉じる
-        if self._rec_close(id):
+        def _rec_close(state:XUState, id:str|None=None) -> bool:  # closeの後なにもしないのでNone
+            # idが一致している。id指定がない場合はidを持っていれば値は問わない
+            if state.id == id or id is None and state.id:
+                state.remove()
+                return True
+
+            # 親があるなら遡って閉じに行く
+            if state.parent:
+                return _rec_close(state.parent.asRW(), id)
+            else:
+                return False  # なにもcloseできなかった
+
+        if _rec_close(self, id):
             self.remove()  # 何もcloseできなかったら自分をclose
 
 
