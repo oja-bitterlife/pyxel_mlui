@@ -3,18 +3,13 @@ import pyxel
 from xmlui_core import *
 from . import text
 
-# アクティブカラーにする
-def _active_color(state:XUStateRO, color:int):
-        return 10 if  state.xmlui.debug.is_lib_debug and state.xmlui.active_state == state and color == 7 else color
-
 # 角丸ウインドウ
 # *****************************************************************************
 class RoundRO(XUWinRoundFrame):
     DEFAULT_PAT = [7,7,12]
 
     def __init__(self, state:XUStateRO):
-        pat = [_active_color(state, c)  for c in self.DEFAULT_PAT]  # アクティブカラーに
-        super().__init__(state, pat, pyxel.width, pyxel.height)
+        super().__init__(state, self.DEFAULT_PAT, pyxel.width, pyxel.height)
 
 
     def draw(self):
@@ -53,8 +48,7 @@ class RectRO(XUWinRectFrame):
     DEFAULT_PAT = [7,7,12]
 
     def __init__(self, state:XUStateRO):
-        pat = [_active_color(state, c)  for c in self.DEFAULT_PAT]  # アクティブカラーに
-        super().__init__(state, pat, pyxel.width, pyxel.height)
+        super().__init__(state, self.DEFAULT_PAT, pyxel.width, pyxel.height)
 
     def draw(self):
         self.clip.h = int(self.update_count*self.speed)
