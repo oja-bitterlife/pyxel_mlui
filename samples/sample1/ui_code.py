@@ -51,6 +51,9 @@ def round_win_draw(win:win.RoundRO):
 # ---------------------------------------------------------
 @menu.grid_update_bind(xmlui, "menu_grid", "menu_item", "rows", "item_w", "item_h")
 def menu_win_update(menu_win:menu.Grid, event:xuc.XUEvent):
+    if event.on_init:
+        print("init")
+
     # メニュー選択
     selected_item = menu_win.select_by_event(event.trg, *input.CURSOR)
 

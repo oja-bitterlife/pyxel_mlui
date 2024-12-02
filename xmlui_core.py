@@ -466,8 +466,8 @@ class XMLUI(XUState):
         # 更新対象を取得
         update_targets = list(filter(lambda state: state.enable, [XUState(self, element) for element in self._element.iter()]))
 
-        # イベント発生対象は表示物のみ
-        event_targets = [state for state in update_targets if state.visible and state.use_event]
+        # ActiveStateの取得
+        event_targets = [state for state in update_targets if state.use_event]
         self.active_state = event_targets[-1] if event_targets else self  # Active=最後
 
         # 更新処理
