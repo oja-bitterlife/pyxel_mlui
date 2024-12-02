@@ -195,7 +195,15 @@ class XUStateRO:
             return elements[0]
         raise Exception(f"Tag '{tag}' not found in '{self.tag}' and children")
 
-    # 親を探す
+    # ツリーを遡って親を探す
+    def find_parent(self, id:str) -> 'XUStateRO':
+        parent = self.parent
+        while parent:
+            if parent.id == id:
+                return parent
+            parent = parent.parent
+        raise Exception(f"Parent '{id}' not found in '{self.tag}' and parents")
+
     @property
     def parent(self) -> 'XUStateRO|None':
         return self.xmlui._parent_cache.get(self._element, None)

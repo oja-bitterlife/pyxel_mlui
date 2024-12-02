@@ -14,7 +14,6 @@ class GridRO(XUSelectBase):
         area = self.area  # areaを扱うときは必ず一旦ローカル化する
         for item in self._items:
             item_area = item.area  # areaを扱うときは必ず一旦ローカル化する
-            # if self.clip.h >= item_area.y-area.y + text.default.size:  # ウインドウが表示されるまで表示しない
             pyxel.text(item_area.x+6, item_area.y, item.text, 7, text.default.data)
 
 class Grid(XUSelectGrid):
