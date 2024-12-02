@@ -67,8 +67,8 @@ class XURect:
 class XUEvent:
     def __init__(self, init_active=False):
         self.active = init_active  # アクティブなイベントかどうか
+        self.on_init = False
         self.clear()
-        self._wait_update = 0
 
     def clear(self):
         self._receive:set[str] = set([])  # 次の状態受付
@@ -475,8 +475,15 @@ class XMLUI(XUState):
 
         for state in update_targets:
             if state.enable:  # update中にdisable(remove)になる場合があるので毎回チェック
+                # active/inactiveどちらのeventを使うか決定
+                event = copy.copy(self.event) if state == self.active_state else XUEvent()
+
+                # やっぱりinitialize情報がどこかに欲しい
+                event.on_init = state.update_count == 0
+
+                # 更新処理
                 state.set_attr("update_count", state.update_count+1)  # 1スタート(0は初期化時)
-                self.update_element(state.tag, state, self.event if state == self.active_state else XUEvent())
+                self.update_element(state.tag, state, event)
 
         self._update_cache()  # 更新処理で変更された可能性があるキャッシュの再更新
 

@@ -26,6 +26,9 @@ UI_TEMPLATE = "ui_template"
 xmlui.template_fromfile("samples/assets/ui/dq.xml", "ui_template")
 
 
+# ユーティリティ
+# *****************************************************************************
+# カーソル描画
 def draw_menu_cursor(state:xuc.XUStateRO, x:int, y:int):
     tri_size = 6
     left =state.area.x
