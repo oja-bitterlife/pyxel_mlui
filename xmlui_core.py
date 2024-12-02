@@ -464,7 +464,7 @@ class XMLUI(XUState):
         self.event.update()
 
         # 更新対象を取得
-        update_targets = list(filter(lambda state: state.enable, [XUState(self, element) for element in self._element.iter()]))
+        update_targets = [XUState(self, element) for element in self._element.iter() if bool(element.attrib.get("enable", "True"))]
 
         # ActiveStateの取得
         event_targets = [state for state in update_targets if state.use_event]
