@@ -83,13 +83,13 @@ def menu_win_draw(menu_win:menu.GridRO, event:xuc.XUEvent):
 def msg_win_update(msg_win:text.Msg, event:xuc.XUEvent):
     if input.BTN_A in event.trg or input.BTN_B in event.trg:
         action = msg_win.check_action()
-        if action == "close":
-            pass
-            # msg_win.close("menu_command")  # メニューごと閉じる
-        elif action == "finish":
-            msg_win.finish()
-        elif action == "next_page":
-            msg_win.next_page()
+        match action:
+            case "close":
+                msg_win.close("command_menu_win")  # メニューごと閉じる
+            case "finish":
+                msg_win.finish()
+            case "next_page":
+                msg_win.next_page()
 
 # 描画
 # ---------------------------------------------------------
