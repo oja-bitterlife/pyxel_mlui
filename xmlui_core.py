@@ -731,14 +731,17 @@ class XUPageBase(_XUUtilBase):
 class XUSelectBase(_XUUtilBase):
     # クラス定数
     ROOT_TAG = "_xmlui_select_root"
-    GROUP_TAG = "_xmlui_select_group"
 
     SELECTED_NO_ATTR = "_xmlui_selected"
 
-    def __init__(self, state:XUStateRO, item_tag:str, rows:int):
+    def __init__(self, state:XUStateRO, item_tag:str, rows_attr:str|None):
         super().__init__(state)
-        self._items = self.find_by_tagall(item_tag)
-        self._rows = rows
+        try:
+            select_root = state.find_by_tag(self.ROOT_TAG)
+            self._items = select_root.find_by_tagall(item_tag)
+        except:
+            self._items: list[XUStateRO] = []
+        self._rows = self.attr_int(rows_attr, 1) if rows_attr else 1
 
     @property
     def selected_no(self) -> int:
@@ -773,21 +776,24 @@ class XUSelectBase(_XUUtilBase):
 # グリッド選択
 class XUSelectGrid(XUSelectBase):
     def __init__(self, state:XUStateRO, item_tag:str, rows_attr:str, item_w_attr:str, item_h_attr:str):
-        super().__init__(state, item_tag, self.attr_int(rows_attr, 1))
-        item_w = self.attr_int(item_w_attr, 0)
-        item_h = self.attr_int(item_h_attr, 0)
+        super().__init__(state, item_tag, rows_attr)
 
         # グリッドルートの設定
-        self.select_root, is_created = self.find_or_create_child_root(state, self.ROOT_TAG)
+        self._select_root, is_created = self.find_or_create_child_root(state, self.ROOT_TAG)
         if is_created:
+            self._items = state.find_by_tagall(item_tag)
+            item_w = state.attr_int(item_w_attr, 0)
+            item_h = state.attr_int(item_h_attr, 0)
+
             # 選択用ルート下に接続しなおす
             for i,item in enumerate(self._items):
                 # 座標設定
                 item = item.asRW()
                 item.set_attr("x", i % self._rows * item_w)
                 item.set_attr("y", i // self._rows * item_h)
+
                 # 登録しなおし
-                self.select_root.add_child(item)
+                self._select_root.add_child(item)
 
     # 入力に応じた挙動一括
     def _select_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str, x_wrap:bool=False, y_wrap:bool=False) -> XUState:
@@ -814,17 +820,20 @@ class XUSelectGrid(XUSelectBase):
 # リスト選択
 class XUSelectList(XUSelectBase):
     def __init__(self, state:XUStateRO, item_tag:str, item_h_attr:str):
-        super().__init__(state, item_tag, 1)
-        item_h = self.attr_int(item_h_attr, 0)
+        super().__init__(state, item_tag, None)
 
         # リストルートの設定
         self.select_root, is_created = self.find_or_create_child_root(state, self.ROOT_TAG)
         if is_created:
+            self._items = state.find_by_tagall(item_tag)
+            item_h = state.attr_int(item_h_attr, 0)
+
             # 選択用ルート下に接続しなおす
             for i,item in enumerate(self._items):
                 # 座標設定
                 item = item.asRW()
                 item.set_attr("y", i * item_h)
+
                 # 登録しなおし
                 self.select_root.add_child(item)
   

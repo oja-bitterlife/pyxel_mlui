@@ -8,7 +8,7 @@ from . import text
 # *****************************************************************************
 class GridRO(XUSelectBase):
     def __init__(self, state:XUStateRO, item_tag:str, rows_attr:str):
-        super().__init__(state, item_tag, self.attr_int(rows_attr, 1))
+        super().__init__(state, item_tag, rows_attr)
 
     def draw(self):
         area = self.area  # areaを扱うときは必ず一旦ローカル化する
@@ -45,7 +45,7 @@ def grid_draw_bind(xmlui:XMLUI, tag_name:str, item_tag:str, rows_attr:str):
 # *****************************************************************************
 class ListRO(XUSelectBase):
     def __init__(self, state:XUStateRO, item_tag:str, rows_attr:str):
-        super().__init__(state, item_tag, self.attr_int(rows_attr, 1))
+        super().__init__(state, item_tag, rows_attr)
 
     def draw(self):
         area = self.area  # areaを扱うときは必ず一旦ローカル化する
