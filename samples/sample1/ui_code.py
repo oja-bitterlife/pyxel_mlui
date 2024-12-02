@@ -33,16 +33,17 @@ def draw_menu_cursor(state:xuc.XUStateRO, x:int, y:int):
     pyxel.tri(left, top, left, top+tri_size, left+tri_size//2, top+tri_size//2, 7)
 
 
-# コマンドメニュー
+# ウインドウ
 # *****************************************************************************
-# @win.round_update_bind(xmlui, "round_win", 16)
-# def round_update_draw(win:win.Round, event:xuc.XUEvent):
-#     pass
-
+# 角丸ウインドウ
+# ---------------------------------------------------------
 @win.round_draw_bind(xmlui, "round_win")
 def round_win_draw(win:win.RoundRO, event:xuc.XUEvent):
     win.draw()
 
+
+# コマンドメニュー
+# *****************************************************************************
 # 更新
 # ---------------------------------------------------------
 @menu.grid_update_bind(xmlui, "menu_grid", "menu_item", "rows", "item_w", "item_h")
@@ -60,7 +61,7 @@ def menu_win_update(menu_win:menu.Grid, event:xuc.XUEvent):
         if selected_item == "dial":
             selected_item.open(UI_TEMPLATE, "win_dial").set_pos(8, 2)
 
-    # # 閉じる
+    # 閉じる
     if input.BTN_B in event.trg:
         menu_win.close()
 
@@ -69,6 +70,8 @@ def menu_win_update(menu_win:menu.Grid, event:xuc.XUEvent):
 @menu.grid_draw_bind(xmlui, "menu_grid", "menu_item", "rows")
 def menu_win_draw(menu_win:menu.GridRO, event:xuc.XUEvent):
     menu_win.draw()
+
+    # カーソル追加
     draw_menu_cursor(menu_win.selected_item, 0, 0)
 
 
@@ -100,6 +103,8 @@ def msg_win_draw(msg_win:text.MsgRO, event:xuc.XUEvent):
     #     center_x = msg_win.area.center_x(tri_size)
     #     bottom = msg_win.area.bottom(tri_size) - 2
     #     pyxel.tri(center_x, bottom, center_x+tri_size, bottom, center_x+tri_size//2, bottom+tri_size//2, 7)
+
+
 
 
 # ダイアル
