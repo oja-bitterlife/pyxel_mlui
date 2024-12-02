@@ -31,9 +31,15 @@ xmlui.template_fromfile("samples/assets/ui/dq.xml", "ui_template")
 # カーソル描画
 def draw_menu_cursor(state:xuc.XUStateRO, x:int, y:int):
     tri_size = 6
-    left =state.area.x
-    top  = state.area.y+2
+    left = state.area.x + x
+    top = state.area.y+2 + y
     pyxel.tri(left, top, left, top+tri_size, left+tri_size//2, top+tri_size//2, 7)
+
+def draw_msg_cursor(state:xuc.XUStateRO):
+    tri_size = 6
+    center_x = state.area.center_x(tri_size)
+    bottom = state.area.bottom(tri_size) - 2
+    pyxel.tri(center_x, bottom, center_x+tri_size, bottom, center_x+tri_size//2, bottom+tri_size//2, 7)
 
 
 # ウインドウ
@@ -100,13 +106,9 @@ def msg_win_update(msg_win:text.Msg, event:xuc.XUEvent):
 def msg_win_draw(msg_win:text.MsgRO):
     msg_win.draw()
 
-    # # カーソル表示
-    # if msg_win.page.is_next_wait:
-    #     tri_size = 6
-    #     center_x = msg_win.area.center_x(tri_size)
-    #     bottom = msg_win.area.bottom(tri_size) - 2
-    #     pyxel.tri(center_x, bottom, center_x+tri_size, bottom, center_x+tri_size//2, bottom+tri_size//2, 7)
-
+    # カーソル表示
+    if msg_win.is_next_wait:
+        draw_msg_cursor(msg_win)
 
 
 
