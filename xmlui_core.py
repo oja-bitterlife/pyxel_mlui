@@ -814,6 +814,7 @@ class XUSelectGrid(XUSelectBase):
                 item.set_attr("y", i // self._rows * item_h)
 
                 # 登録しなおし
+                item.remove()
                 self._select_root.add_child(item)
 
     # 入力に応じた挙動一括

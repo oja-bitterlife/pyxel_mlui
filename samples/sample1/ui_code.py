@@ -84,12 +84,6 @@ def menu_win_draw(menu_win:menu.GridRO):
 # ---------------------------------------------------------
 @text.msg_update_bind(xmlui, "msg_text")
 def msg_win_update(msg_win:text.Msg, event:xuc.XUEvent):
-    if event.on_init:
-        msg_win.set_text("あいう")
-    if input.LEFT in event.trg:
-        msg_win.set_text("えお")
-
-
     if input.BTN_A in event.trg or input.BTN_B in event.trg:
         action = msg_win.check_action()
         match action:
