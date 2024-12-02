@@ -558,7 +558,7 @@ class XMLUI(XUState):
 # #############################################################################
 # 基本は必要な情報をツリーでぶら下げる
 # Treeが不要ならたぶんXUStateで事足りる
-class _XUUtilBase(XUStateRO):
+class _XUUtilBase(XUState):
     def __init__(self, state):
         super().__init__(state.xmlui, state._element)
 
@@ -728,14 +728,14 @@ class XUPageBase(_XUUtilBase):
 # メニュー系
 # ---------------------------------------------------------
 # グリッド情報
-class _XUSelectBase(_XUUtilBase):
+class XUSelectBase(_XUUtilBase):
     # クラス定数
     ROOT_TAG = "_xmlui_select_root"
     GROUP_TAG = "_xmlui_select_group"
 
-    SELECTED_NO_ATTR = "_xmlui_seleced"
+    SELECTED_NO_ATTR = "_xmlui_selected"
 
-    def __init__(self, state:XUStateRO, item_tag:str, rows:int=1):
+    def __init__(self, state:XUStateRO, item_tag:str, rows:int):
         super().__init__(state)
         self._items = self.find_by_tagall(item_tag)
         self._rows = rows
@@ -755,7 +755,7 @@ class _XUSelectBase(_XUUtilBase):
     # 値設定用
     # -----------------------------------------------------
     def select(self, no:int):
-        self.asRW().set_attr(self.SELECTED_NO_ATTR, min(max(0, no), self.length))
+        self.set_attr(self.SELECTED_NO_ATTR, min(max(0, no), self.length))
 
     def next(self, add:int=1, x_wrap=False, y_wrap=False):
         no = self.selected_no + add
@@ -771,7 +771,7 @@ class _XUSelectBase(_XUUtilBase):
 
 
 # グリッド選択
-class XUSelectGrid(_XUSelectBase):
+class XUSelectGrid(XUSelectBase):
     def __init__(self, state:XUStateRO, item_tag:str, rows_attr:str, item_w_attr:str, item_h_attr:str):
         super().__init__(state, item_tag, self.attr_int(rows_attr, 1))
         item_w = self.attr_int(item_w_attr, 0)
@@ -790,7 +790,7 @@ class XUSelectGrid(_XUSelectBase):
                 self.select_root.add_child(item)
 
     # 入力に応じた挙動一括
-    def select_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str, x_wrap:bool=False, y_wrap:bool=False) -> Self:
+    def _select_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str, x_wrap:bool=False, y_wrap:bool=False) -> XUState:
         if left_event in input:
             self.next(1, x_wrap, y_wrap)
         elif right_event in input:
@@ -799,12 +799,22 @@ class XUSelectGrid(_XUSelectBase):
             self.next(-self._rows, x_wrap, y_wrap)
         elif down_event in input:
             self.next(self._rows, x_wrap, y_wrap)
-        return self
+        return self.selected_item.asRW()
+
+    def select_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> XUState:
+        return self._select_by_event(input, left_event, right_event, up_event, down_event, False, False)
+
+    def select_wrap_x(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> XUState:
+        return self._select_by_event(input, left_event, right_event, up_event, down_event, True, False)
+
+    def select_wrap_y(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> XUState:
+        return self._select_by_event(input, left_event, right_event, up_event, down_event, False, True)
+
 
 # リスト選択
-class XUSelectList(_XUSelectBase):
+class XUSelectList(XUSelectBase):
     def __init__(self, state:XUStateRO, item_tag:str, item_h_attr:str):
-        super().__init__(state, item_tag)
+        super().__init__(state, item_tag, 1)
         item_h = self.attr_int(item_h_attr, 0)
 
         # リストルートの設定
@@ -819,12 +829,18 @@ class XUSelectList(_XUSelectBase):
                 self.select_root.add_child(item)
   
     # 入力に応じた挙動一括。選択リストは通常上下ラップする
-    def select_by_event(self, input:set[str], up_event:str, down_event:str, y_wrap:bool=True) -> Self:
+    def _select_by_event(self, input:set[str], up_event:str, down_event:str, y_wrap:bool=True) -> XUState:
         if up_event in input:
             self.next(-1, False, y_wrap)
         elif down_event in input:
             self.next(1, False, y_wrap)
-        return self
+        return self.selected_item.asRW()
+
+    def select_by_event(self, input:set[str], up_event:str, down_event:str) -> XUState:
+        return self._select_by_event(input, up_event, down_event, False)
+
+    def select_wrap(self, input:set[str], up_event:str, down_event:str) -> XUState:
+        return self._select_by_event(input, up_event, down_event, True)
 
 
 # ダイアル
@@ -864,7 +880,7 @@ class XUDialBase(XUState):
 
     # 回り込み付き操作位置の設定
     def set_editpos(self, edit_pos:int) -> Self:
-        self.asRW().set_attr(self.EDIT_POS_ATTR, (edit_pos+len(self.digits))%len(self.digits))
+        self.set_attr(self.EDIT_POS_ATTR, (edit_pos+len(self.digits))%len(self.digits))
         return self
 
     # 操作位置の移動
