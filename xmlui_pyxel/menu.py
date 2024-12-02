@@ -31,10 +31,10 @@ def grid_update_bind(xmlui:XMLUI, tag_name:str, item_tag:str, rows_attr:str, ite
     return wrapper
 
 def grid_draw_bind(xmlui:XMLUI, tag_name:str, item_tag:str, rows_attr:str):
-    def wrapper(draw_func:Callable[[GridRO,XUEvent], None]):
+    def wrapper(draw_func:Callable[[GridRO], None]):
         # 登録用関数をジェネレート
-        def draw(state:XUStateRO, event:XUEvent):
-            draw_func(GridRO(state, item_tag, rows_attr), event)
+        def draw(state:XUStateRO):
+            draw_func(GridRO(state, item_tag, rows_attr))
         # 関数登録
         xmlui.set_drawfunc(tag_name, draw)
     return wrapper
@@ -68,10 +68,10 @@ def list_update_bind(xmlui:XMLUI, tag_name:str, tag_item:str, item_h_attr:str):
     return wrapper
 
 def list_draw_bind(xmlui:XMLUI, tag_name:str, tag_item:str, item_h_attr:str):
-    def wrapper(draw_func:Callable[[ListRO,XUEvent], None]):
+    def wrapper(draw_func:Callable[[ListRO], None]):
         # 登録用関数をジェネレート
-        def draw(state:XUStateRO, event:XUEvent):
-            draw_func(ListRO(state, tag_item, item_h_attr), event)
+        def draw(state:XUStateRO):
+            draw_func(ListRO(state, tag_item, item_h_attr))
         # 関数登録
         xmlui.set_drawfunc(tag_name, draw)
     return wrapper

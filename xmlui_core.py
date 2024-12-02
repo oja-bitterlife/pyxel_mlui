@@ -441,7 +441,7 @@ class XMLUI(XUState):
 
         # 処理関数の登録
         self._update_funcs:dict[str,Callable[[XUState,XUEvent], None]] = {}
-        self._draw_funcs:dict[str,Callable[[XUStateRO,XUEvent], None]] = {}
+        self._draw_funcs:dict[str,Callable[[XUStateRO], None]] = {}
 
         # XMLテンプレート置き場
         self._templates:dict[str,XMLUI_Template] = {}
@@ -501,14 +501,10 @@ class XMLUI(XUState):
         # 描画対象を取得。update_countが0の時は未Updateなのではじく
         draw_targets = list(filter(lambda state: state.enable and state.visible and state.update_count>0, [XUState(self, element) for element in self._element.iter()]))
 
-        # イベント発生対象は表示物のみ
-        event_targets = [state for state in draw_targets if state.use_event]
-        active_state = event_targets[-1] if event_targets else None  # Active=最後
-
         # 描画処理
         layer_cache = {state._element:state.layer for state in draw_targets}
         for state in sorted(draw_targets, key=lambda state: layer_cache[state._element]):
-            self.draw_element(state.tag, state, self.event if state == active_state else XUEvent())
+            self.draw_element(state.tag, state)
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
     def update_element(self, tag_name:str, state:XUState, event:XUEvent):
@@ -516,10 +512,10 @@ class XMLUI(XUState):
         if tag_name in self._update_funcs:
             self._update_funcs[tag_name](state, event)
 
-    def draw_element(self, tag_name:str, state:XUStateRO, event:XUEvent):
+    def draw_element(self, tag_name:str, state:XUStateRO):
         # 登録済みの関数だけ実行
         if tag_name in self._draw_funcs:
-            self._draw_funcs[tag_name](state, event)
+            self._draw_funcs[tag_name](state)
 
 
     # 処理登録
@@ -527,7 +523,7 @@ class XMLUI(XUState):
     def set_updatefunc(self, tag_name:str, func:Callable[[XUState,XUEvent], None]):
         self._update_funcs[tag_name] = func
 
-    def set_drawfunc(self, tag_name:str, func:Callable[[XUStateRO,XUEvent], None]):
+    def set_drawfunc(self, tag_name:str, func:Callable[[XUStateRO], None]):
         self._draw_funcs[tag_name] = func
 
     # デコレータを用意
@@ -537,7 +533,7 @@ class XMLUI(XUState):
         return wrapper
 
     def draw_bind(self, tag_name:str):
-        def wrapper(draw_func:Callable[[XUStateRO,XUEvent], None]):
+        def wrapper(draw_func:Callable[[XUStateRO], None]):
             self.set_drawfunc(tag_name, draw_func)
         return wrapper
 

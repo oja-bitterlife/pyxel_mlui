@@ -89,10 +89,10 @@ def label_update_bind(xmlui:XMLUI, tag_name:str):
     return wrapper
 
 def label_draw_bind(xmlui:XMLUI, tag_name:str, align:str="center"):
-    def wrapper(draw_func:Callable[[LabelRO,XUEvent], None]):
+    def wrapper(draw_func:Callable[[LabelRO], None]):
         # 登録用関数をジェネレート
-        def draw(state:XUStateRO, event:XUEvent):
-            draw_func(LabelRO(state, align), event)
+        def draw(state:XUStateRO):
+            draw_func(LabelRO(state, align))
         # 関数登録
         xmlui.set_drawfunc(tag_name, draw)
     return wrapper
@@ -144,10 +144,10 @@ def msg_update_bind(xmlui:XMLUI, tag_name:str):
     return wrapper
 
 def msg_draw_bind(xmlui:XMLUI, tag_name:str):
-    def wrapper(draw_func:Callable[[MsgRO,XUEvent], None]):
+    def wrapper(draw_func:Callable[[MsgRO], None]):
         # 登録用関数をジェネレート
-        def draw(state:XUStateRO, event:XUEvent):
-            draw_func(MsgRO(state), event)
+        def draw(state:XUStateRO):
+            draw_func(MsgRO(state))
         # 関数登録
         xmlui.set_drawfunc(tag_name, draw)
     return wrapper

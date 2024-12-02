@@ -41,7 +41,7 @@ def draw_menu_cursor(state:xuc.XUStateRO, x:int, y:int):
 # 角丸ウインドウ
 # ---------------------------------------------------------
 @win.round_draw_bind(xmlui, "round_win")
-def round_win_draw(win:win.RoundRO, event:xuc.XUEvent):
+def round_win_draw(win:win.RoundRO):
     win.draw()
 
 
@@ -71,7 +71,7 @@ def menu_win_update(menu_win:menu.Grid, event:xuc.XUEvent):
 # 描画
 # ---------------------------------------------------------
 @menu.grid_draw_bind(xmlui, "menu_grid", "menu_item", "rows")
-def menu_win_draw(menu_win:menu.GridRO, event:xuc.XUEvent):
+def menu_win_draw(menu_win:menu.GridRO):
     menu_win.draw()
 
     # カーソル追加
@@ -97,7 +97,7 @@ def msg_win_update(msg_win:text.Msg, event:xuc.XUEvent):
 # 描画
 # ---------------------------------------------------------
 @text.msg_draw_bind(xmlui, "msg_text")
-def msg_win_draw(msg_win:text.MsgRO, event:xuc.XUEvent):
+def msg_win_draw(msg_win:text.MsgRO):
     msg_win.draw()
 
     # # カーソル表示
@@ -160,7 +160,7 @@ def dial_yes_no_update(list_win:menu.List, event:xuc.XUEvent):
 
 
 @menu.list_draw_bind(xmlui, "yes_no", "yes_no_item", "item_h")
-def dial_yes_no_draw(list_win:menu.ListRO, event:xuc.XUEvent):
+def dial_yes_no_draw(list_win:menu.ListRO):
     list_win.draw()
     draw_menu_cursor(list_win.selected_item, 0, 0)
 
@@ -168,5 +168,5 @@ def dial_yes_no_draw(list_win:menu.ListRO, event:xuc.XUEvent):
 # ラベル全般
 # *****************************************************************************
 @text.label_draw_bind(xmlui, "title")
-def title_draw(label:text.LabelRO, event:xuc.XUEvent):
+def title_draw(label:text.LabelRO):
     label.draw()

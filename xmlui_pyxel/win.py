@@ -38,10 +38,10 @@ def round_update_bind(xmlui:XMLUI, tag_name:str, speed:float=16):
     return wrapper
 
 def round_draw_bind(xmlui:XMLUI, tag_name:str):
-    def wrapper(draw_func:Callable[[RoundRO,XUEvent], None]):
+    def wrapper(draw_func:Callable[[RoundRO], None]):
         # 登録用関数をジェネレート
-        def draw(state:XUStateRO, event:XUEvent):
-            draw_func(RoundRO(state), event)
+        def draw(state:XUStateRO):
+            draw_func(RoundRO(state))
         # 関数登録
         xmlui.set_drawfunc(tag_name, draw)
     return wrapper
@@ -77,10 +77,10 @@ def rect_update_bind(xmlui:XMLUI, tag_name:str, speed:float=16):
     return wrapper
 
 def rect_draw_bind(xmlui:XMLUI, tag_name:str):
-    def wrapper(draw_func:Callable[[RectRO,XUEvent], None]):
+    def wrapper(draw_func:Callable[[RectRO], None]):
         # 登録用関数をジェネレート
-        def draw(state:XUStateRO, event:XUEvent):
-            draw_func(RectRO(state), event)
+        def draw(state:XUStateRO):
+            draw_func(RectRO(state))
         # 関数登録
         xmlui.set_drawfunc(tag_name, draw)
     return wrapper
