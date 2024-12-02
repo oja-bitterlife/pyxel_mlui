@@ -18,7 +18,7 @@ class GridRO(XUSelectBase):
             pyxel.text(item_area.x+6, item_area.y, item.text, 7, text.default.data)
 
 class Grid(XUSelectGrid):
-    def __init__(self, state:XUStateRO, item_tag:str, rows_attr:str, item_w_attr:str, item_h_attr:str):
+    def __init__(self, state:XUState, item_tag:str, rows_attr:str, item_w_attr:str, item_h_attr:str):
         super().__init__(state, item_tag, rows_attr, item_w_attr, item_h_attr)
 
 # デコレータを用意
@@ -55,7 +55,7 @@ class ListRO(XUSelectBase):
             pyxel.text(item_area.x+6, item_area.y, item.text, 7, text.default.data)
 
 class List(XUSelectList):
-    def __init__(self, state:XUStateRO, item_tag:str, item_h_attr:str):
+    def __init__(self, state:XUState, item_tag:str, item_h_attr:str):
         super().__init__(state, item_tag, item_h_attr)
 
 # デコレータを用意

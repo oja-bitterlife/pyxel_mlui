@@ -567,15 +567,15 @@ class _XUUtilBase(XUState):
         return state.find_by_tag(child_root_tag).asRW()
  
     # findできなければ新規で作って追加する。新規作成時Trueを返す(is_created)
-    def find_or_create_child_root(self, state:XUStateRO, child_root_tag:str) -> tuple[XUState, bool]:
+    def find_or_create_child_root(self, state:XUState, child_root_tag:str) -> tuple[XUState, bool]:
         try:
             # すでに存在するElementを回収
             return state.find_by_tag(child_root_tag).asRW(), False
         except Exception:
             # 新規作成
-            state = XUState(state.xmlui, Element(child_root_tag))
-            state.add_child(state)
-            return state, True
+            created = XUState(state.xmlui, Element(child_root_tag))
+            state.add_child(created)
+            return created, True
 
 # テキスト系
 # ---------------------------------------------------------
@@ -611,7 +611,7 @@ class XUPageBase(_XUUtilBase):
         self._wrap = max(wrap, 1)   # 0だと無限になってしまうので最低1を入れておく
 
         # ページルートの設定
-        self.page_root, is_created = self.find_or_create_child_root(state, self.ROOT_TAG)
+        self.page_root, is_created = self.find_or_create_child_root(state.asRW(), self.ROOT_TAG)
         if is_created:
             # 改行を\nに統一して全角化
             tmp_text = self.convert_zenkaku(re.sub(self.SEPARATE_REGEXP, "\n", text).strip())
@@ -737,8 +737,8 @@ class XUSelectBase(_XUUtilBase):
     def __init__(self, state:XUStateRO, item_tag:str, rows_attr:str|None):
         super().__init__(state)
         try:
-            select_root = state.find_by_tag(self.ROOT_TAG)
-            self._items = select_root.find_by_tagall(item_tag)
+            self._select_root = state.find_by_tag(self.ROOT_TAG)
+            self._items = self._select_root.find_by_tagall(item_tag)
         except:
             self._items: list[XUStateRO] = []
         self._rows = self.attr_int(rows_attr, 1) if rows_attr else 1
@@ -775,7 +775,7 @@ class XUSelectBase(_XUUtilBase):
 
 # グリッド選択
 class XUSelectGrid(XUSelectBase):
-    def __init__(self, state:XUStateRO, item_tag:str, rows_attr:str, item_w_attr:str, item_h_attr:str):
+    def __init__(self, state:XUState, item_tag:str, rows_attr:str, item_w_attr:str, item_h_attr:str):
         super().__init__(state, item_tag, rows_attr)
 
         # グリッドルートの設定
@@ -819,7 +819,7 @@ class XUSelectGrid(XUSelectBase):
 
 # リスト選択
 class XUSelectList(XUSelectBase):
-    def __init__(self, state:XUStateRO, item_tag:str, item_h_attr:str):
+    def __init__(self, state:XUState, item_tag:str, item_h_attr:str):
         super().__init__(state, item_tag, None)
 
         # リストルートの設定

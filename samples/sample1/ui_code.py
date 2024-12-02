@@ -66,7 +66,7 @@ def menu_win_update(menu_win:menu.Grid, event:xuc.XUEvent):
 
 # 描画
 # ---------------------------------------------------------
-@menu.grid_draw_bind(xmlui, "menu_grid", "menu_row", "menu_item")
+@menu.grid_draw_bind(xmlui, "menu_grid", "menu_item", "rows")
 def menu_win_draw(menu_win:menu.GridRO, event:xuc.XUEvent):
     menu_win.draw()
     draw_menu_cursor(menu_win.selected_item, 0, 0)
