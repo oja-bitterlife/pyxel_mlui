@@ -624,23 +624,30 @@ class XUPageBase(_XUUtilBase):
 
         # ページルートの設定
         self.page_root, is_created = self.find_or_create_child_root(state.asRW(), self.ROOT_TAG)
-        if is_created:
-            # 改行を\nに統一して全角化
-            tmp_text = self.convert_zenkaku(re.sub(self.SEPARATE_REGEXP, "\n", text).strip())
+        if is_created and text:
+            self._setup(text)
 
-            # 各行に分解し、その行をさらにwrapで分解する
-            lines =  sum([[line[i:i+self._wrap] for i in  range(0, len(line), self._wrap)] for line in tmp_text.splitlines()], [])
+    def _setup(self, text:str):
+        # 改行を\nに統一して全角化
+        tmp_text = self.convert_zenkaku(re.sub(self.SEPARATE_REGEXP, "\n", text).strip())
 
-            # 再セットアップ用
-            self.page_root.clear_children()
-            self.reset_page()
+        # 各行に分解し、その行をさらにwrapで分解する
+        lines =  sum([[line[i:i+self._wrap] for i in  range(0, len(line), self._wrap)] for line in tmp_text.splitlines()], [])
 
-            # ページごとにElementを追加
-            for i in range(0, len(lines), self._page_lines):
-                page_text = "\n".join(lines[i:i+self._page_lines])  # 改行を\nにして全部文字列に
-                page = XUState(self.page_root.xmlui, Element(self.PAGE_TAG))
-                page.set_text(page_text)
-                self.page_root.add_child(page)
+        # 再セットアップ用
+        self.page_root.clear_children()
+        self.reset_page()
+
+        # ページごとにElementを追加
+        for i in range(0, len(lines), self._page_lines):
+            page_text = "\n".join(lines[i:i+self._page_lines])  # 改行を\nにして全部文字列に
+            page = XUState(self.page_root.xmlui, Element(self.PAGE_TAG))
+            page.set_text(page_text)
+            self.page_root.add_child(page)
+
+    def set_text(self, text:str) -> Self:
+        self._setup(text)
+        return self
 
     # ページ関係
     # -----------------------------------------------------
@@ -667,9 +674,6 @@ class XUPageBase(_XUUtilBase):
     # ページテキスト
     @property
     def page_text(self) -> str:
-        # ページオーバーチェック
-        if self.is_end_page:
-            return ""
         return self._limitstr(self.pages[self.page_no].text, self.draw_count)
 
     # page_noの操作
