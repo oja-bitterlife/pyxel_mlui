@@ -761,14 +761,19 @@ class XUSelectBase(_XUUtilBase):
         self.set_attr(self.SELECTED_NO_ATTR, min(max(0, no), self.length))
 
     def next(self, add:int=1, x_wrap=False, y_wrap=False):
-        no = self.selected_no + add
-        x = no%self._rows + add
-        y = no//self._rows + add//self._rows
+        # キャッシュ
+        no = self.selected_no
+        cols = self.length//self._rows
+
+        x = no % self._rows
+        y = no // self._rows
+        sign = 1 if add >= 0 else -1
+        add_x = abs(add) % self._rows * sign
+        add_y = abs(add) // self._rows * sign
 
         # wrapモードとmin/maxモードそれぞれで設定
-        x = (x + self._rows) % self._rows if x_wrap else min(max(x, 0), self._rows-1)
-        cols = self.length//self._rows
-        y = (y + cols) % cols if y_wrap else min(max(y, 0), cols-1)
+        x = (x + self._rows + add_x) % self._rows if x_wrap else min(max(x + add_x, 0), self._rows-1)
+        y = (y + cols + add_y) % cols if y_wrap else min(max(y + add_y, 0), cols-1)
 
         self.select(y*self._rows + x)
 
@@ -798,9 +803,9 @@ class XUSelectGrid(XUSelectBase):
     # 入力に応じた挙動一括
     def _select_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str, x_wrap:bool=False, y_wrap:bool=False) -> XUState:
         if left_event in input:
-            self.next(1, x_wrap, y_wrap)
-        elif right_event in input:
             self.next(-1, x_wrap, y_wrap)
+        elif right_event in input:
+            self.next(1, x_wrap, y_wrap)
         elif up_event in input:
             self.next(-self._rows, x_wrap, y_wrap)
         elif down_event in input:
