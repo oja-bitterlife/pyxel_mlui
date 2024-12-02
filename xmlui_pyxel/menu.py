@@ -13,7 +13,7 @@ class GridRO(XUStateRO):
 
     def draw(self):
         area = self.area  # areaを扱うときは必ず一旦ローカル化する
-        for group in self._grid_root._grid:
+        for group in self._grid_root._items:
             for item in group:
                 item_area = item.area  # areaを扱うときは必ず一旦ローカル化する
                 # if self.clip.h >= item_area.y-area.y + text.default.size:  # ウインドウが表示されるまで表示しない
@@ -68,7 +68,7 @@ class ListRO(XUStateRO):
 
     def draw(self):
         area = self.area  # areaを扱うときは必ず一旦ローカル化する
-        for group in self._grid_root._grid:
+        for group in self._grid_root._items:
             item = group[0]
             item_area = item.area  # areaを扱うときは必ず一旦ローカル化する
             # if self.clip.h >= item_area.y-area.y + text.default.size:  # ウインドウが表示されるまで表示しない

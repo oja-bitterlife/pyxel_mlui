@@ -269,10 +269,6 @@ class XUStateRO:
         return self.attr_bool("use_event", False)
 
     @property
-    def selected(self) -> int:  # 選択されている
-        return self.attr_bool("selected", False)
-
-    @property
     def layer(self) -> int:  # 描画レイヤ
         if self.has_attr("layer") or self.parent is None:
             return self.attr_int("layer", 0)
@@ -567,14 +563,14 @@ class _XUUtilBase(XUStateRO):
         super().__init__(state.xmlui, state._element)
 
     # すでに存在するElementを回収
-    def find_child_root(self, state:XUStateRO, child_root_tag:str) -> XUStateRO:
-        return state.find_by_tag(child_root_tag)
+    def find_child_root(self, state:XUStateRO, child_root_tag:str) -> XUState:
+        return state.find_by_tag(child_root_tag).asRW()
  
-    # findできなければ新規で作って追加する
-    # 新規作成時Trueを返す(is_created)
-    def find_or_create_child_root(self, state:XUStateRO, child_root_tag:str) -> tuple[XUStateRO, bool]:
+    # findできなければ新規で作って追加する。新規作成時Trueを返す(is_created)
+    def find_or_create_child_root(self, state:XUStateRO, child_root_tag:str) -> tuple[XUState, bool]:
         try:
-            return state.find_by_tag(child_root_tag), False
+            # すでに存在するElementを回収
+            return state.find_by_tag(child_root_tag).asRW(), False
         except Exception:
             # 新規作成
             state = XUState(state.xmlui, Element(child_root_tag))
@@ -615,8 +611,7 @@ class XUPageBase(_XUUtilBase):
         self._wrap = max(wrap, 1)   # 0だと無限になってしまうので最低1を入れておく
 
         # ページルートの設定
-        page_root, is_created = self.find_or_create_child_root(state, self.ROOT_TAG)
-        self.page_root = page_root.asRW()
+        self.page_root, is_created = self.find_or_create_child_root(state, self.ROOT_TAG)
         if is_created:
             # 改行を\nに統一して全角化
             tmp_text = self.convert_zenkaku(re.sub(self.SEPARATE_REGEXP, "\n", text).strip())
@@ -738,127 +733,97 @@ class _XUSelectBase(_XUUtilBase):
     ROOT_TAG = "_xmlui_select_root"
     GROUP_TAG = "_xmlui_select_group"
 
-    def __init__(self, state:XUStateRO):
+    SELECTED_NO_ATTR = "_xmlui_seleced"
+
+    def __init__(self, state:XUStateRO, item_tag:str, rows:int=1):
         super().__init__(state)
-
-        # ページルートの設定
-        select_root, is_created = self.find_or_create_child_root(state, self.ROOT_TAG)
-        self.select_root = select_root.asRW()
-        if is_created:
-            # 選択の初期値
-            sel_x,sel_y = 0,0
-
-            # 選択用ルート下に接続しなおす
-            for y,items in enumerate(grid):
-                group = XUState(state.xmlui, Element(self.GROUP_TAG))
-                self.select_root.add_child(group)
-                for x,item in enumerate(items):
-                    group.add_child(item)
-
-                    # 選択中を見つけたので記録
-                    if item.selected:
-                        sel_x,sel_y = x,y
-
-                self.select(sel_x, sel_y)
-
-    # GRID用
-    @classmethod
-    def find_grid(cls, state:XUStateRO, tag_group:str, tag_item:str) -> list[list[XUState]]:
-        return [[ro.asRW() for ro in group.find_by_tagall(tag_item)] for group in state.find_by_tagall(tag_group)]
-
-    # 転置(Transpose)GRID
-    @classmethod
-    def find_gridT(cls, state:XUStateRO, tag_group:str, tag_item:str) -> list[list[XUState]]:
-        grid = cls.find_grid(state, tag_group, tag_item)
-        grid = [[grid[y][x] for y in range(len(grid))] for x in range(len(grid[0]))]  # 転置
-        return grid
-
-    # グリッド各アイテムの座標設定
-    def arrange_items(self, w:int, h:int) -> Self:
-        for y,group in enumerate(self._grid):
-            for x,item in enumerate(group):
-                item.set_attr(["x", "y"], (x*w, y*h))
-        return self
-
-
-    # 範囲限定付き座標設定
-    def select(self, x:int, y:int, x_wrap:bool=False, y_wrap:bool=False) -> Self:
-        cur_x = (x + self.grid_w) % self.grid_w if x_wrap else max(min(x, self.grid_w-1), 0)
-        cur_y = (y + self.grid_h) % self.grid_h if y_wrap else max(min(y, self.grid_h-1), 0)
-        for y,group in enumerate(self._grid):
-            for x,item in enumerate(group):
-                item.set_attr("selected", x == cur_x and y == cur_y)
-        return self
+        self._items = self.find_by_tagall(item_tag)
+        self._rows = rows
 
     @property
-    def selected_item(self) -> XUState:
-        for group in self._grid:
-            for item in group:
-                if item.selected:
-                    return item
-        raise Exception("selected item not found")
+    def selected_no(self) -> int:
+        return self.attr_int(self.SELECTED_NO_ATTR, 0)
 
     @property
-    def cur_x(self) -> int:
-        for group in self._grid:
-            for x,item in enumerate(group):
-                if item.selected:
-                    return x
-        return 0
+    def selected_item(self) -> XUStateRO:
+        return self._items[self.selected_no]
 
     @property
-    def cur_y(self) -> int:
-        for y,group in enumerate(self._grid):
-            for item in group:
-                if item.selected:
-                    return y
-        return 0
+    def length(self) -> int:
+        return len(self._items)
 
-    @property
-    def grid_w(self) -> int:
-        return len(self._grid[0])
+    # 値設定用
+    # -----------------------------------------------------
+    def select(self, no:int):
+        self.asRW().set_attr(self.SELECTED_NO_ATTR, min(max(0, no), self.length))
 
-    @property
-    def grid_h(self) -> int:
-        return len(self._grid)
+    def next(self, add:int=1, x_wrap=False, y_wrap=False):
+        no = self.selected_no + add
+        x = no%self._rows + add
+        y = no//self._rows + add//self._rows
+
+        # wrapモードとmin/maxモードそれぞれで設定
+        x = (x + self._rows) % self._rows if x_wrap else min(max(x, 0), self._rows-1)
+        cols = self.length//self._rows
+        y = (y + cols) % cols if y_wrap else min(max(y, 0), cols-1)
+
+        self.select(y*self._rows + x)
 
 
 # グリッド選択
 class XUSelectGrid(_XUSelectBase):
-    def __init__(self, state:XUStateRO, tag_group:str, tag_item:str):
-        super().__init__(state, self.find_grid(state, tag_group, tag_item))
+    def __init__(self, state:XUStateRO, item_tag:str, rows_attr:str, item_w_attr:str, item_h_attr:str):
+        super().__init__(state, item_tag, self.attr_int(rows_attr, 1))
+        item_w = self.attr_int(item_w_attr, 0)
+        item_h = self.attr_int(item_h_attr, 0)
+
+        # グリッドルートの設定
+        self.select_root, is_created = self.find_or_create_child_root(state, self.ROOT_TAG)
+        if is_created:
+            # 選択用ルート下に接続しなおす
+            for i,item in enumerate(self._items):
+                # 座標設定
+                item = item.asRW()
+                item.set_attr("x", i % self._rows * item_w)
+                item.set_attr("y", i // self._rows * item_h)
+                # 登録しなおし
+                self.select_root.add_child(item)
 
     # 入力に応じた挙動一括
     def select_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str, x_wrap:bool=False, y_wrap:bool=False) -> Self:
         if left_event in input:
-            self.select(self.cur_x-1, self.cur_y, x_wrap)
+            self.next(1, x_wrap, y_wrap)
         elif right_event in input:
-            self.select(self.cur_x+1, self.cur_y, x_wrap)
+            self.next(-1, x_wrap, y_wrap)
         elif up_event in input:
-            self.select(self.cur_x, self.cur_y-1, False, y_wrap)
+            self.next(-self._rows, x_wrap, y_wrap)
         elif down_event in input:
-            self.select(self.cur_x, self.cur_y+1, False, y_wrap)
+            self.next(self._rows, x_wrap, y_wrap)
         return self
 
 # リスト選択
 class XUSelectList(_XUSelectBase):
-    # 縦に入れる
-    def __init__(self, state:XUStateRO, tag_item:str):
-        super().__init__(state, self.find_gridT(state, state.tag, tag_item))
+    def __init__(self, state:XUStateRO, item_tag:str, item_h_attr:str):
+        super().__init__(state, item_tag)
+        item_h = self.attr_int(item_h_attr, 0)
 
+        # リストルートの設定
+        self.select_root, is_created = self.find_or_create_child_root(state, self.ROOT_TAG)
+        if is_created:
+            # 選択用ルート下に接続しなおす
+            for i,item in enumerate(self._items):
+                # 座標設定
+                item = item.asRW()
+                item.set_attr("y", i * item_h)
+                # 登録しなおし
+                self.select_root.add_child(item)
+  
     # 入力に応じた挙動一括。選択リストは通常上下ラップする
     def select_by_event(self, input:set[str], up_event:str, down_event:str, y_wrap:bool=True) -> Self:
         if up_event in input:
-            self.select(0, self.cur_y-1, False, y_wrap)
+            self.next(-1, False, y_wrap)
         elif down_event in input:
-            self.select(0, self.cur_y+1, False, y_wrap)
-        return self
-
-    # グリッド各アイテムの座標設定
-    def arrange_items(self, w:int, h:int) -> Self:
-        for y,group in enumerate(self._grid):
-            item = group[0]  # Listはxで並ばない
-            item.set_attr(["x", "y"], (y*w, y*h))  # 両方ともYを使って横に並べられるように
+            self.next(1, False, y_wrap)
         return self
 
 
