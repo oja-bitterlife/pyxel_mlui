@@ -137,8 +137,8 @@ def dial(dial:input.Dial, event:xuc.XUEvent):
         dial.close()
 
 
-@select.list(xmlui, "yes_no", "yes_no_item", "item_h")
-def dial_yes_no_update(list_win:select.List, event:xuc.XUEvent):
+@select.list(xmlui, "yes_no_list", "menu_item", "item_h")
+def yes_no_list(list_win:select.List, event:xuc.XUEvent):
     # メニュー選択
     selected_item = list_win.select_by_event(event.trg, *input.UP_DOWN)
 
