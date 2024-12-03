@@ -523,8 +523,8 @@ class _XUUtilBase(XUState):
         except:
             self._util_root = XUState(state.xmlui, Element(root_tag))
 
-    def copy_name(self, name):
-        return self.COPY_PREFIX + name
+    def state_copy(self, src:XUState) -> XUState:
+        return XUState(self.xmlui, Element(self.COPY_PREFIX + src._element.tag, src._element.attrib))
 
 
 # テキスト系
@@ -681,7 +681,7 @@ class XUSelectBase(_XUUtilBase):
         self._rows = rows
 
         # コピーを登録
-        self._items = [XUState(state.xmlui, Element(self.copy_name(item.tag), item._element.attrib)) for item in items]
+        self._items = [self.state_copy(item) for item in items]
 
     @property
     def selected_no(self) -> int:
@@ -779,29 +779,28 @@ class XUSelectList(XUSelectBase):
 # ダイアル
 # ---------------------------------------------------------
 # 情報管理のみ
-class XUDialBase(XUState):
+class XUDialBase(_XUUtilBase):
     ROOT_TAG = "_xmlui_dial_root"
     DIGIT_TAG = "_xmlui_dial_digit"
 
     EDIT_POS_ATTR = "edit_pos"  # 操作位置
 
     def __init__(self, state:XUState, digit_length:int, digit_list:str="0123456789"):
-        super().__init__(state.xmlui, state._element)
+        super().__init__(state.xmlui, self.ROOT_TAG)
 
         self._digit_list = digit_list
-        for i in range(digit_length):
+        for _ in range(digit_length):
             digit = XUState(self.xmlui, Element(self.DIGIT_TAG))
             digit.set_text(digit_list[0])
-            self.add_child(digit)
-
+            self._util_root.add_child(digit)
 
     @property
     def edit_pos(self) -> int:
-        return self.attr_int(self.EDIT_POS_ATTR)
+        return self._util_root.attr_int(self.EDIT_POS_ATTR)
 
     @property
     def digits(self) -> list[str]:
-        return [state.text for state in self.find_by_tagall(self.DIGIT_TAG)]
+        return [state.text for state in self._util_root.find_by_tagall(self.DIGIT_TAG)]
 
     @property
     def zenkaku_digits(self) -> list[str]:
@@ -813,7 +812,7 @@ class XUDialBase(XUState):
 
     # 回り込み付き操作位置の設定
     def set_editpos(self, edit_pos:int) -> Self:
-        self.set_attr(self.EDIT_POS_ATTR, (edit_pos+len(self.digits))%len(self.digits))
+        self._util_root.set_attr(self.EDIT_POS_ATTR, (edit_pos+len(self.digits))%len(self.digits))
         return self
 
     # 操作位置の移動
@@ -822,7 +821,7 @@ class XUDialBase(XUState):
 
     # 指定位置のdigitを変更する
     def set_digit(self, edit_pos:int, digit:str) -> Self:
-        state = self.find_by_tagall(self.DIGIT_TAG)[edit_pos]
+        state = self._util_root.find_by_tagall(self.DIGIT_TAG)[edit_pos]
         state.set_text(digit)
         return self
 
@@ -847,7 +846,6 @@ class XUDialBase(XUState):
 
 # ウインドウサポート
 # ---------------------------------------------------------
-# 子ウインドウをopenするかもなのでROではいけない
 class _XUWinFrameBase(XUState):
     # 0 1 2
     # 3 4 5
