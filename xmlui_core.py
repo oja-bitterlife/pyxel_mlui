@@ -683,9 +683,6 @@ class XUSelectBase(_XUUtilBase):
         super().__init__(state, self.ROOT_TAG)
         self._rows = rows
 
-        for src_item in items:
-            src_item.set_attr("enable", False)  # 全部無効にしておく
-
         # コピーを登録
         self._items = [self.state_copy(item) for item in items]
         for item in self._items:
