@@ -31,68 +31,38 @@ class FONT:
 
 # ラベルを扱う
 # #############################################################################
-class LabelRO(XUState):
-    TEXT_OFFSET_X_ATTR:str = "text_x"
-    TEXT_OFFSET_Y_ATTR:str = "text_y"
-
+class Label(XUState):
     def __init__(self, state:XUState, align:str="center"):
         super().__init__(state.xmlui, state._element)
         self._align = align
 
     def draw(self):
         area = self.area  # 低速なので使うときは必ず一旦ローカルに
-        pyxel.rect(area.x, area.y, area.w, area.h, 12)
 
         text_w = default.text_width(self.text)
         match self.align:
             case "left":
-                x =  area.x + self.offset_x
+                x =  area.x
             case "center":
-                x = area.center_x(text_w) + self.offset_x
+                x = area.center_x(text_w)
             case "right":
-                x = area.right() - text_w - self.offset_x
+                x = area.right() - text_w
             case _:
                 raise ValueError(f"align:{self.align} is not supported.")
 
         # ラベルテキスト描画
-        default.draw(x, area.center_y(default.size) + self.offset_y, self.text, 7)
+        default.draw(x, area.center_y(default.size), self.text, 7)
 
     @property
     def align(self) -> str:
         return self._align
 
-    @property
-    def offset_x(self) -> int:
-        return self.attr_int(self.TEXT_OFFSET_X_ATTR, 0)
-
-    @property
-    def offset_y(self) -> int:
-        return self.attr_int(self.TEXT_OFFSET_Y_ATTR, 0)
-
-class Label(LabelRO, XUState):
-    def __init__(self, state:XUState, align:str="center"):
-        super().__init__(state, align)
-
-    def set_offset(self, x:int, y:int):
-        rw = self.asRW()
-        rw.set_attr(self.TEXT_OFFSET_X_ATTR, x)
-        rw.set_attr(self.TEXT_OFFSET_Y_ATTR, y)
-
 # デコレータを用意
-def label_update_bind(xmlui:XMLUI, tag_name:str):
-    def wrapper(update_func:Callable[[Label,XUEvent], None]):
+def label(xmlui:XMLUI, tag_name:str):
+    def wrapper(bind_func:Callable[[Label,XUEvent], None]):
         # 登録用関数をジェネレート
-        def update(state:XUState, event:XUEvent):
-            update_func(Label(state), event)
-        # 関数登録
-        xmlui.set_updatefunc(tag_name, update)
-    return wrapper
-
-def label_draw_bind(xmlui:XMLUI, tag_name:str, align:str="center"):
-    def wrapper(draw_func:Callable[[LabelRO], None]):
-        # 登録用関数をジェネレート
-        def draw(state:XUState):
-            draw_func(LabelRO(state, align))
+        def draw(state:XUState, event:XUEvent):
+            bind_func(Label(state), event)
         # 関数登録
         xmlui.set_drawfunc(tag_name, draw)
     return wrapper
@@ -100,7 +70,7 @@ def label_draw_bind(xmlui:XMLUI, tag_name:str, align:str="center"):
 
 # メッセージ
 # *****************************************************************************
-class MsgRO(XUPageBase):
+class Msg(XUPageBase):
     PAGE_LINES_ATTR = "page_lines"  # ページの行数
     WRAP_ATTR = "wrap"  # ワードラップ文字数
 
@@ -117,39 +87,12 @@ class MsgRO(XUPageBase):
                 area = self.page_root.area
                 text.default.draw(area.x, area.y+i*text.default.size, page, 7)
 
-class Msg(MsgRO):
-    # tag_textタグのテキストを処理する
-    def __init__(self, state:XUState):
-        super().__init__(state)
-
-        # tag_textタグ下にpage管理タグとpage全部が入っている
-        # super()でそれらを読むので、super()の前に作っておく
-        # root = state.find_by_tag(tag_text).asRW()
-        # page = XUPage(root, root.text, root.attr_int(self.LINE_NUM_ATTR, 1), root.attr_int(self.WRAP_ATTR))
-
-        # page管理タグがなければ新規作成。あればそれを使う
-        # super().__init__(state)
-
-        # super().__init__でself.pageが上書きされるので、あとからself.pageに突っ込み直す
-        # self.page = page
-
 # デコレータを用意
-def msg_update_bind(xmlui:XMLUI, tag_name:str):
-    def wrapper(update_func:Callable[[Msg,XUEvent], None]):
+def msg(xmlui:XMLUI, tag_name:str):
+    def wrapper(bind_func:Callable[[Msg,XUEvent], None]):
         # 登録用関数をジェネレート
-        def update(state:XUState, event:XUEvent):
-            update_func(Msg(state), event)
-        # 関数登録
-        xmlui.set_updatefunc(tag_name, update)
-    return wrapper
-
-def msg_draw_bind(xmlui:XMLUI, tag_name:str):
-    def wrapper(draw_func:Callable[[MsgRO], None]):
-        # 登録用関数をジェネレート
-        def draw(state:XUState):
-            draw_func(MsgRO(state))
+        def draw(state:XUState, event:XUEvent):
+            bind_func(Msg(state), event)
         # 関数登録
         xmlui.set_drawfunc(tag_name, draw)
     return wrapper
-
-

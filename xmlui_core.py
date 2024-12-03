@@ -471,7 +471,7 @@ class XMLUI(XUState):
         self._draw_funcs[tag_name] = func
 
     # デコレータを用意
-    def draw_bind(self, tag_name:str):
+    def bind_func(self, tag_name:str):
         def wrapper(draw_func:Callable[[XUState,XUEvent], None]):
             self.set_drawfunc(tag_name, draw_func)
         return wrapper
