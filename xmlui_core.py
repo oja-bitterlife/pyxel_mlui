@@ -21,6 +21,9 @@ class XURect:
         self.w = max(0, w)
         self.h = max(0, h)
 
+    def copy(self) -> "XURect":
+        return XURect(self.x, self.y, self.w, self.h)
+
     def intersect(self, other:"XURect") -> "XURect":
         right = min(self.x+self.w, other.x+other.w)
         left = max(self.x, other.x)
@@ -28,8 +31,8 @@ class XURect:
         top = max(self.y, other.y)
         return XURect(left, top, right-left, bottom-top)
 
-    def inflate(self, size) -> "XURect":
-        return XURect(self.x-size, self.y-size, self.w+size*2, self.h+size*2)
+    def inflate(self, w, h) -> "XURect":
+        return XURect(self.x-w, self.y-h, self.w+w*2, self.h+h*2)
 
     def contains(self, x, y) -> bool:
         return self.x <= x < self.x+self.w and self.y <= y < self.y+self.h
@@ -40,19 +43,14 @@ class XURect:
     def center_y(self, h:int=0) -> int:
         return self.y + (self.h-h)//2
 
-    def right(self, w:int=0) -> int:
-        return self.x + self.w - w
+    def right(self, right_space:int=0) -> int:
+        return self.x + self.w - right_space
 
-    def bottom(self, h:int=0) -> int:
-        return self.y + self.h - h
+    def bottom(self, bottom_space:int=0) -> int:
+        return self.y + self.h - bottom_space
 
-    @property
-    def cx(self) -> int:
-        return self.center_x()
-
-    @property
-    def cy(self) -> int:
-        return self.center_y()
+    def contain(self, x:int, y:int) -> bool:
+        return self.x <= x < self.x+self.w and self.y <= y < self.y+self.h
 
     @property
     def is_empty(self) -> int:
@@ -857,9 +855,6 @@ class _XUWinFrameBase(XUState):
         self.screen_w, self.screen_h = screen_w, screen_h
         self._get_patidx_func = pattern_index_func  # 枠外は-1を返す
 
-        # クリッピングエリア
-        self.clip = XURect(0, 0, screen_w, screen_h)
-
     # 1,3,5,7,4のエリア(カド以外)は特に計算が必要ない
     def _get13574index(self, x:int, y:int, w:int, h:int) -> int:
         return [-1, y, -1, x, self.pattern_size-1, w-1-x, -1, h-1-y][self.get_area(x, y, w, h)]
@@ -887,80 +882,90 @@ class _XUWinFrameBase(XUState):
 
     # 中央部分をバッファに書き込む。
     # 環境依存の塗りつぶしが使えるならそちらを使った方が高速
-    def _draw_center(self, screen_buf:bytearray, area:XURect):
-        # オフセットなので0,0～w,h
-        off_r, off_b = area.w, area.h
+    def _draw_center(self, screen_buf:bytearray, screen_area:XURect, clip:XURect):
+        # 画面外に描画しない
+        screen_area = screen_area.intersect(XURect(0, 0, self.screen_w, self.screen_h))
 
-        # 読みやすさのための展開(速度はほぼ変わらなかった)
-        size = self.pattern_size
-        clip_r,clip_b = self.clip.right(), self.clip.bottom()
+        # オフセットなので0,0～w,h
+        area = XURect(0, 0, screen_area.w, screen_area.h)
+        clip = clip.intersect(area)
+        if clip.is_empty:
+            return
 
         # 中央塗りつぶし
-        w = min(clip_r, off_r) - size*2
-        c_pat = self._pattern[-1:] * w
-        for y_ in range(max(size, self.clip.y), min(clip_b, off_b-size)):
-            offset = (area.y + y_)*self.screen_w + area.x + size
-            if w > 0:
-                screen_buf[offset:offset+w] = c_pat
+        c_pat = self._pattern[-1:] * clip.w
+        for y in range(clip.h):
+            offset = (screen_area.y + y)*self.screen_w + screen_area.x
+            screen_buf[offset:offset+clip.w] = c_pat
 
     # フレームだけバッファに書き込む(高速化や半透明用)
     # 中央部分塗りつぶしは呼び出し側で行う
-    def _draw_frame(self, screen_buf:bytearray, area:XURect):
+    def _draw_frame(self, screen_buf:bytearray, screen_area:XURect, clip:XURect):
+        # 画面外に描画しない
+        screen_area = screen_area.intersect(XURect(0, 0, self.screen_w, self.screen_h))
+
         # オフセットなので0,0～w,h
-        off_r, off_b = area.w, area.h
+        area = XURect(0, 0, screen_area.w, screen_area.h)
+        clip = clip.intersect(area)
+        if clip.is_empty:
+            return
 
         # 読みやすさのための展開(速度はほぼ変わらなかった)
         size = self.pattern_size
-        clip_r,clip_b = self.clip.right(), self.clip.bottom()
 
         # 角の描画
         # ---------------------------------------------------------------------
         def _draw_shoulder(self, off_x:int, off_y:int, pattern:bytes|bytearray):
            # クリップチェック
-            if self.clip.x <= off_x < clip_r and self.clip.y <= off_y < clip_b:
-                index = self._get_patidx_func(off_x, off_y, off_r, off_b)
+            if clip.contain(off_x, off_y):
+                index = self._get_patidx_func(off_x, off_y, area.w, area.h)
                 if index >= 0:  # 枠外チェック
-                    screen_buf[(area.y + off_y)*self.screen_w + (area.x + off_x)] = pattern[index]
+                    screen_buf[(screen_area.y + off_y)*self.screen_w + (screen_area.x + off_x)] = pattern[index]
 
         for y_ in range(size):
             for x_ in range(size):
                 _draw_shoulder(self, x_, y_, self._shadow_pattern)  # 左上
-                _draw_shoulder(self, off_r-1-x_, y_, self._shadow_pattern)  # 右上
-                _draw_shoulder(self, x_, off_b-1-y_, self._shadow_pattern)  # 左下
-                _draw_shoulder(self, off_r-1-x_, off_b-1-y_, self._pattern)  # 右下
+                _draw_shoulder(self, area.w-1-x_, y_, self._shadow_pattern)  # 右上
+                _draw_shoulder(self, x_, area.h-1-y_, self._shadow_pattern)  # 左下
+                _draw_shoulder(self, area.w-1-x_, area.h-1-y_, self._pattern)  # 右下
 
         # bytearrayによる角以外の高速描画(patternキャッシュを作ればもっと速くなるかも)
         # ---------------------------------------------------------------------
         # 上下のライン
-        w = min(clip_r, off_r) - max(0, self.clip.x) - size*2
-        if w <= 0:
-            return
-        for y_ in range(size):
-            if y_ >= self.clip.y:  # 上
-                offset = (area.y + y_)*self.screen_w + area.x
-                screen_buf[offset+max(0, self.clip.x)+size: offset+min(clip_r, off_r)-size] = self._shadow_pattern[y_:y_+1] * w
-            if off_b-1-y_ < clip_b:  # 下
-                offset = (area.y + off_b-1-y_)*self.screen_w + area.x
-                screen_buf[offset+max(0, self.clip.x)+size: offset+min(clip_r, off_r)-size] = self._pattern[y_:y_+1] * w
+        y_draw_clip = clip.inflate(-size, 0)
+        if not y_draw_clip.is_empty:
+            for y_ in range(size):
+                # 上
+                if y_ >= clip.y:
+                    offset = (screen_area.y + y_)*self.screen_w + screen_area.x
+                    screen_buf[offset+clip.x: offset+clip.right()] = self._shadow_pattern[y_:y_+1] * clip.w
+                # 下
+                if y_ < clip.bottom():
+                    offset = (screen_area.y + clip.bottom()-1-y_)*self.screen_w + screen_area.x
+                    screen_buf[offset+clip.x: offset+clip.right()] = self._pattern[y_:y_+1] * clip.w
 
         # 左右のライン
-        r_pat = bytes(reversed(self._pattern))
-        for y_ in range(max(size, self.clip.y), min(clip_b, off_b-size)):
-            # 左
-            offset = (area.y + y_)*self.screen_w + area.x
-            w = size-max(0, self.clip.x)
-            if w > 0:
-                screen_buf[offset:offset+w] = self._shadow_pattern[:w]
-            # 右
-            offset = (area.y + y_)*self.screen_w + area.x + off_r - size
-            w = min(clip_r-off_r, size)
-            if w > 0:
-                screen_buf[offset:offset+w] = r_pat[:w]
+        # x_draw_clip = clip.inflate(0, -size)
+        # if not y_draw_clip.is_empty:
+        #     r_pat = bytes(reversed(self._pattern))
+        #     for y_ in range(max(size, self.clip.y), min(clip_b, off_b-size)):
+        #         # 左
+        #         offset = (screen_area.y + y_)*self.screen_w + screen_area.x
+        #         w = size-max(0, self.clip.x)
+        #         if w > 0:
+        #             screen_buf[offset:offset+w] = self._shadow_pattern[:w]
+        #         # 右
+        #         offset = (screen_area.y + y_)*self.screen_w + screen_area.x + off_r - size
+        #         w = min(clip_r-off_r, size)
+        #         if w > 0:
+        #             screen_buf[offset:offset+w] = r_pat[:w]
 
     # ウインドウ全体をバッファに書き込む
-    def draw_buf(self, screen_buf:bytearray, area:XURect):
-        self._draw_center(screen_buf, area)
-        self._draw_frame(screen_buf, area)
+    def draw_buf(self, screen_buf:bytearray, clip:XURect|None=None):
+        area = self.area  # areaへのアクセスは遅いので必ずキャッシュしてアクセス
+        clip = area.copy() if clip is None else clip
+        self._draw_center(screen_buf, area.inflate(-self.pattern_size, -self.pattern_size), clip)
+        self._draw_frame(screen_buf, area, clip)
 
 class XUWinRoundFrame(_XUWinFrameBase):
     def __init__(self, state:XUState, pattern:list[int], screen_w:int, screen_h:int):
