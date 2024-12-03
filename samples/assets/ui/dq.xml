@@ -16,7 +16,7 @@
         <dial x="6" y="3" w="64" h="16"/>
     </rect_win>
 
-    <round_win w="56" h="50" item_h="16" id="yes_no">
+    <round_win y="20" w="56" h="50" item_h="16" id="yes_no">
         <ok_title x="16" y="0" w="24" h="12" id="label">OK?</ok_title>
         <yes_no_list x="6" y="12" rows="2" item_w="58" item_h="18">
             <menu_item value="yes">はい</menu_item>
