@@ -54,8 +54,7 @@ def round_win_draw(win:win.Round, event:xuc.XUEvent):
 # *****************************************************************************
 @select.item(xmlui, "menu_item")
 def menu_item(menu_item:select.Item, event:xuc.XUEvent):
-    pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, 7, text.default.data)
-
+    pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, 7, text.default.font)
 
 
 # コマンドメニュー

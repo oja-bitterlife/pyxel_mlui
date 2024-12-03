@@ -10,7 +10,7 @@ default:"FONT" = None # type: ignore
 class FONT:
     def __init__(self, font_path:str):
         # フォントデータ読み込み
-        self.data = pyxel.Font(font_path)
+        self.font = pyxel.Font(font_path)
 
         # フォントサイズ算出
         self.size = 0
@@ -23,10 +23,10 @@ class FONT:
                     break
  
     def text_width(self, text:str) -> int:
-        return self.data.text_width(text)
+        return self.font.text_width(text)
 
     def draw(self, x:int, y:int, text:str, color:int):
-        pyxel.text(x, y, text, color, self.data)
+        pyxel.text(x, y, text, color, self.font)
 
 
 # ラベルを扱う
