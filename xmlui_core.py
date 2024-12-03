@@ -410,7 +410,7 @@ class XMLUI(XUState):
         self._input_lists:dict[str, list[int]] = {}
 
         # 処理関数の登録
-        self._draw_funcs:dict[str,Callable[[XUState], None]] = {}
+        self._draw_funcs:dict[str,Callable[[XUState,XUEvent], None]] = {}
 
         # XMLテンプレート置き場
         self._templates:dict[str,XMLUI_Template] = {}
@@ -452,27 +452,27 @@ class XMLUI(XUState):
 
             # 更新処理
             state.set_attr("update_count", state.update_count+1)  # 1スタート(0は初期化時)
-            self.update_element(state.tag, state, event)
+            self.draw_element(state.tag, state, event)
 
         # デバッグ
         if self.debug.is_lib_debug:
             self.debug.update()
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
-    def draw_element(self, tag_name:str, state:XUState):
+    def draw_element(self, tag_name:str, state:XUState, event:XUEvent):
         # 登録済みの関数だけ実行
         if tag_name in self._draw_funcs:
-            self._draw_funcs[tag_name](state)
+            self._draw_funcs[tag_name](state, event)
 
 
     # 処理登録
     # *************************************************************************
-    def set_drawfunc(self, tag_name:str, func:Callable[[XUState], None]):
+    def set_drawfunc(self, tag_name:str, func:Callable[[XUState,XUEvent], None]):
         self._draw_funcs[tag_name] = func
 
     # デコレータを用意
     def draw_bind(self, tag_name:str):
-        def wrapper(draw_func:Callable[[XUState], None]):
+        def wrapper(draw_func:Callable[[XUState,XUEvent], None]):
             self.set_drawfunc(tag_name, draw_func)
         return wrapper
 
