@@ -796,7 +796,7 @@ class XUDial(_XUUtilBase):
 
     def __init__(self, state:XUState, digit_length:int, digit_list:str="0123456789"):
         super().__init__(state, self.ROOT_TAG)
-        self.length = digit_length
+        self._digit_length = digit_length
         self._digit_list = digit_list
 
         # Digitのデータを引き継ぐ
@@ -805,11 +805,15 @@ class XUDial(_XUUtilBase):
         self._util_root.set_attr(self.DIGIT_ATTR, "".join(new_digit))
 
     @property
+    def length(self) -> int:
+        return self._digit_length
+
+    @property
     def edit_pos_raw(self) -> int:
         return self._util_root.attr_int(self.EDIT_POS_ATTR)
     @property
     def edit_pos(self) -> int:
-        return self.length-1 - self._util_root.attr_int(self.EDIT_POS_ATTR)
+        return self._digit_length-1 - self._util_root.attr_int(self.EDIT_POS_ATTR)
 
     @property
     def digits_raw(self) -> list[str]:
@@ -827,7 +831,7 @@ class XUDial(_XUUtilBase):
 
     # 回り込み付き操作位置の設定
     def set_editpos(self, edit_pos:int) -> Self:
-        self._util_root.set_attr(self.EDIT_POS_ATTR, (edit_pos + self.length) % self.length)
+        self._util_root.set_attr(self.EDIT_POS_ATTR, (edit_pos + self._digit_length) % self._digit_length)
         return self
 
     # 操作位置の移動
