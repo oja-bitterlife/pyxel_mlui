@@ -509,8 +509,6 @@ class XMLUI(XUState):
 # 基本は必要な情報をツリーでぶら下げる
 # Treeが不要ならたぶんXUStateで事足りる
 class _XUUtilBase(XUState):
-    COPYED_TAG_PREFIX = "_xmlui_copy_"
-
     def __init__(self, state, root_tag:str):
         super().__init__(state.xmlui, state._element)
         state.set_attr("use_event", True)  # イベント使う系Util
@@ -522,15 +520,6 @@ class _XUUtilBase(XUState):
         except:
             self._util_root = XUState(state.xmlui, Element(root_tag))
             state.add_child(self._util_root)
-
-    @classmethod
-    def copyed_tagname(cls, name:str) -> str:
-        return cls.COPYED_TAG_PREFIX + name
-
-    def state_copy(self, src:XUState) -> XUState:
-        copyed = copy.deepcopy(src._element)
-        copyed.tag = self.copyed_tagname(copyed.tag)
-        return XUState(self.xmlui, copyed)
 
 
 # テキスト系
@@ -676,6 +665,12 @@ class XUPageBase(_XUUtilBase):
 
 # メニュー系
 # ---------------------------------------------------------
+class XUSelectItemTagName:
+    TAG_PREFIX = "_xmlui_copy_"
+
+    def __init__(self, name:str):
+        self.name = self.TAG_PREFIX + name
+
 # グリッド情報
 class XUSelectBase(_XUUtilBase):
     # クラス定数
@@ -686,15 +681,21 @@ class XUSelectBase(_XUUtilBase):
         super().__init__(state, self.ROOT_TAG)
         self._rows = rows
 
-        # オリジナルは無効に
-        for src_item in items:
-            src_item.set_enable(False)
-
         # コピーを登録
-        self._items = [self.state_copy(item) for item in items]
-        for item in self._items:
-            item.set_enable(True)
-            self._util_root.add_child(item)
+        self._items:list[XUState] = []
+        for item in items:
+            clone = XUState(self.xmlui, copy.deepcopy(item._element))
+            clone._element.tag = XUSelectItemTagName(item.tag).name  # タグ名を特殊なものに
+            clone.set_enable(True)  # 使うためにコピーしたはず
+
+            # 登録
+            self._util_root.add_child(clone)
+            self._items.append(clone)
+
+    # 選択アイテム用の特殊な名前に変更する
+    @classmethod
+    def item_tagname(cls, name:str) -> XUSelectItemTagName:
+        return XUSelectItemTagName(name)
 
     @property
     def selected_no(self) -> int:
