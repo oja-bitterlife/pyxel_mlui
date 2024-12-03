@@ -512,6 +512,7 @@ class XMLUI(XUState):
 class _XUUtilBase(XUState):
     def __init__(self, state):
         super().__init__(state.xmlui, state._element)
+        self.set_attr("use_event", True)  # イベント使う系Util
 
     # すでに存在するElementを回収
     def find_child_root(self, state:XUState, child_root_tag:str) -> XUState:
