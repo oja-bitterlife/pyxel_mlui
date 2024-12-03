@@ -163,4 +163,6 @@ def dial_yes_no_update(list_win:select.List, event:xuc.XUEvent):
 # *****************************************************************************
 @text.label(xmlui, "title")
 def title_draw(label:text.Label, event:xuc.XUEvent):
+    pyxel.rect(label.area.x, label.area.y, label.area.w, label.area.h, 12)
     x, y = label.get_aligned_pos(text.default)
+    pyxel.text(x, y, label.text, 7, text.default.font)
