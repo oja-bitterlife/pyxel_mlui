@@ -12,7 +12,7 @@
     </round_win>
 
 
-    <rect_win x="32" y="16" w="128" h="52" id="win_dial">
+    <rect_win x="70" y="0" w="128" h="52" id="win_dial">
         <dial w="64" h="16"/>
     </rect_win>
 
