@@ -28,20 +28,23 @@ class Font:
 # ラベルを扱う
 # #############################################################################
 class Label(XUState):
-    def __init__(self, state:XUState, align:str="center"):
+    def __init__(self, state:XUState, align:str="center", valign:str="center"):
         super().__init__(state.xmlui, state._element)
         self._align = align
+        self._valign = valign
 
-    def aligned_pos(self, font:Font, w:int=0) -> tuple[int, int]:
+    def aligned_pos(self, font:Font, w:int=0, h:int=0) -> tuple[int, int]:
         area = self.area  # 低速なので使うときは必ず一旦ローカルに
-        return area.aligned_x(font.text_width(self.text)+w, self._align), area.center_y(font.size)
+        x = area.aligned_x(font.text_width(self.text)+w, self._align)
+        y = area.aligned_y(font.size, self._valign)
+        return x, y
 
 # デコレータを用意
-def label(xmlui:XMLUI, tag_name:str):
+def label(xmlui:XMLUI, tag_name:str, align:str="center", valign:str="center"):
     def wrapper(bind_func:Callable[[Label,XUEvent], None]):
         # 登録用関数をジェネレート
         def draw(state:XUState, event:XUEvent):
-            bind_func(Label(state), event)
+            bind_func(Label(state, align, valign), event)
         # 関数登録
         xmlui.set_drawfunc(tag_name, draw)
     return wrapper

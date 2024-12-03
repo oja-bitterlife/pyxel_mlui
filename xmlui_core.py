@@ -80,16 +80,16 @@ class XURect:
                 raise ValueError(f"align:{align} is not supported.")
         return x
 
-    def aligned_y(self, h:int, align="center") -> int:
-        match align:
+    def aligned_y(self, h:int, valign="center") -> int:
+        match valign:
             case "top":
-                y =  self.x
+                y =  self.y
             case "center":
-                y = self.center_x(h)
+                y = self.center_y(h)
             case "bottom":
-                y = self.right() - h
+                y = self.bottom() - h
             case _:
-                raise ValueError(f"align:{align} is not supported.")
+                raise ValueError(f"align:{valign} is not supported.")
         return y
 
     def __repr__(self) -> str:

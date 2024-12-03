@@ -76,23 +76,29 @@ class Dial(XUDial):
     WRAP_ATTR = "wrap"  # ワードラップ文字数
 
     # タグのテキストを処理する
-    def __init__(self, state:XUState, digit_length:int, digit_list:str="0123456789"):
+    def __init__(self, state:XUState, digit_length:int, align:str="right", valign:str="center", digit_list:str="0123456789"):
         super().__init__(state, digit_length, digit_list)
+        self._align = align
+        self._valign = valign
 
-    def aligned_pos(self, font:text.Font, w:int=0, align="right") -> tuple[int, int]:
+    def aligned_pos(self, font:text.Font, w:int=0, h:int=0) -> tuple[int, int]:
         area = self.area  # 低速なので使うときは必ず一旦ローカルに
-        return area.aligned_x(font.text_width("".join(self.digits_raw))+w, align), area.y
+        x = area.aligned_x(font.text_width("".join(self.digits_raw))+w, self._align)
+        y = area.aligned_y(font.size+h, self._valign)
+        return x, y
 
-    def aligned_zenkaku_pos(self, font:text.Font, w:int=0, align="right") -> tuple[int, int]:
+    def aligned_zenkaku_pos(self, font:text.Font, w:int=0, h:int=0) -> tuple[int, int]:
         area = self.area  # 低速なので使うときは必ず一旦ローカルに
-        return area.aligned_x(font.text_width("".join(self.zenkaku_digits_raw))+w, align), area.y
+        x = area.aligned_x(font.text_width("".join(self.zenkaku_digits_raw))+w, self._align)
+        y = area.aligned_y(font.size+h, self._valign)
+        return x, y
 
 # デコレータを用意
-def dial(xmlui:XMLUI, tag_name:str, digit_length:int, digit_list:str="0123456789"):
+def dial(xmlui:XMLUI, tag_name:str, digit_length:int, align:str="center", valign:str="center", digit_list:str="0123456789"):
     def wrapper(bind_func:Callable[[Dial,XUEvent], None]):
         # 登録用関数をジェネレート
         def draw(state:XUState, event:XUEvent):
-            bind_func(Dial(state, digit_length, digit_list), event)
+            bind_func(Dial(state, digit_length, align, valign, digit_list), event)
         # 関数登録
         xmlui.set_drawfunc(tag_name, draw)
     return wrapper

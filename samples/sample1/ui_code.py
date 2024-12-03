@@ -124,7 +124,7 @@ def dial(dial:input.Dial, event:xuc.XUEvent):
 
     for i,digit in enumerate(dial.zenkaku_digits):
         color = 2 if dial.edit_pos == i else 7
-        x,y = dial.aligned_zenkaku_pos(text.default, 4)
+        x,y = dial.aligned_zenkaku_pos(text.default, 4, 4)
         pyxel.text(x + i*text.default.size, y, digit, color, text.default.font)
 
     # 確定
@@ -162,7 +162,7 @@ def yes_no_list(list_win:select.List, event:xuc.XUEvent):
 
 # ラベル全般
 # *****************************************************************************
-@text.label(xmlui, "title")
+@text.label(xmlui, "title", "center", "top")
 def title_draw(label:text.Label, event:xuc.XUEvent):
     pyxel.rect(label.area.x, label.area.y, label.area.w, label.area.h, 12)
     x, y = label.aligned_pos(text.default)
