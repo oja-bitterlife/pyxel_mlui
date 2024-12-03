@@ -756,7 +756,9 @@ class XUSelectBase(_XUUtilBase):
 # グリッド選択
 class XUSelectGrid(XUSelectBase):
     def __init__(self, state:XUState, item_tag:str, rows_attr:str, item_w_attr:str, item_h_attr:str):
-        super().__init__(state, state.attr_int(rows_attr, 1), state.find_by_tagall(item_tag))
+        # 自分の直下のitemだけ回収する
+        items = list(filter(lambda state: state.enable and state.tag==item_tag, [XUState(state.xmlui, element) for element in state._element]))
+        super().__init__(state, state.attr_int(rows_attr, 1), items)
 
         # 座標設定
         item_w = state.attr_int(item_w_attr, 0)
@@ -789,7 +791,9 @@ class XUSelectGrid(XUSelectBase):
 # リスト選択
 class XUSelectList(XUSelectBase):
     def __init__(self, state:XUState, item_tag:str, item_h_attr:str):
-        super().__init__(state, 1, state.find_by_tagall(item_tag))
+        # 自分の直下のitemだけ回収する
+        items = list(filter(lambda state: state.enable and state.tag==item_tag, [XUState(state.xmlui, element) for element in state._element]))
+        super().__init__(state, 1, items)
 
         # 座標設定
         item_h = state.attr_int(item_h_attr, 0)
