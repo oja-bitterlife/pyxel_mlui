@@ -26,7 +26,7 @@
 
     <round_win abs_x="16" abs_y="180" w="224" h="60" id="win_message">
         <msg_text x="8" y="8" wrap="17" page_lines="3">
-            サンプルテキスト
+            サンプルテキスト\nサンプルテキスト\nサンプルテキスト\nサンプルテキスト
         </msg_text>
     </round_win>
 

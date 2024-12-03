@@ -693,7 +693,7 @@ class XUPageBase(_XUUtilBase):
 
     # 表示カウンタのリセット
     def reset(self) -> Self:
-        self._util_root.set_attr("update_count", 0)
+        self.set_attr("update_count", 1)  # update_countは1始まり
         return self
 
     # 一気に表示
