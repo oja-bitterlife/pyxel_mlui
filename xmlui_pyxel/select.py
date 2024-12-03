@@ -28,12 +28,6 @@ class Grid(XUSelectGrid):
     def __init__(self, state:XUState, item_tag:str, rows_attr:str, item_w_attr:str, item_h_attr:str):
         super().__init__(state, item_tag, rows_attr, item_w_attr, item_h_attr)
 
-    def draw(self):
-        # area = self.area  # areaを扱うときは必ず一旦ローカル化する
-        for item in self._items:
-            item_area = item.area  # areaを扱うときは必ず一旦ローカル化する
-            pyxel.text(item_area.x+6, item_area.y, item.text, 7, text.default.data)
-
 # デコレータを用意
 def grid(xmlui:XMLUI, tag_name:str, item_tag:str, rows_attr:str, item_w_attr:str, item_h_attr:str):
     def wrapper(bind_func:Callable[[Grid,XUEvent], None]):

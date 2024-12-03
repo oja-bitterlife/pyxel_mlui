@@ -46,23 +46,24 @@ def draw_msg_cursor(state:xuc.XUState):
 # *****************************************************************************
 # 角丸ウインドウ
 # ---------------------------------------------------------
-@win.round(xmlui, "round_win")
+@win.round(xmlui, "round_win", speed=1)
 def round_win_draw(win:win.Round, event:xuc.XUEvent):
     win.draw()
-
 
 # コマンドメニュー
 # *****************************************************************************
 @select.item(xmlui, "menu_item")
-def menu_item(item:select.Item, event:xuc.XUEvent):
-    print(item.enable)
+def menu_item(menu_item:select.Item, event:xuc.XUEvent):
+    pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, 7, text.default.data)
 
-# 更新
-# ---------------------------------------------------------
+
+
+# コマンドメニュー
+# *****************************************************************************
 @select.grid(xmlui, "menu_grid", "menu_item", "rows", "item_w", "item_h")
-def menu_win_update(grid:select.Grid, event:xuc.XUEvent):
+def menu_grid(menu_grid:select.Grid, event:xuc.XUEvent):
     # メニュー選択
-    selected_item = grid.select_by_event(event.trg, *input.CURSOR)
+    selected_item = menu_grid.select_by_event(event.trg, *input.CURSOR)
 
     # 選択アイテムの表示
     if input.BTN_A in event.trg:
@@ -76,35 +77,31 @@ def menu_win_update(grid:select.Grid, event:xuc.XUEvent):
 
     # 閉じる
     if input.BTN_B in event.trg:
-        grid.close()
-
-    # menu_win.draw()
+        menu_grid.close()
 
     # カーソル追加
-    draw_menu_cursor(grid.selected_item, 0, 0)
+    draw_menu_cursor(menu_grid.selected_item, 0, 0)
 
 
 # メッセージウインドウ
 # *****************************************************************************
-# 更新
-# ---------------------------------------------------------
 @text.msg(xmlui, "msg_text")
-def msg_win_update(msg_win:text.Msg, event:xuc.XUEvent):
+def msg_text(msg_text:text.Msg, event:xuc.XUEvent):
     if input.BTN_A in event.trg or input.BTN_B in event.trg:
-        action = msg_win.check_action()
+        action = msg_text.check_action()
         match action:
             case "close":
-                msg_win.close("command_menu_win")  # メニューごと閉じる
+                msg_text.close("command_menu_win")  # メニューごと閉じる
             case "finish":
-                msg_win.finish()
+                msg_text.finish()
             case "next_page":
-                msg_win.next_page()
+                msg_text.next_page()
 
-    msg_win.draw()
+    msg_text.draw()
 
     # カーソル表示
-    if msg_win.is_next_wait:
-        draw_msg_cursor(msg_win)
+    if msg_text.is_next_wait:
+        draw_msg_cursor(msg_text)
 
 
 
