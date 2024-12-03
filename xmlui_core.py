@@ -628,7 +628,7 @@ class XUPageBase(_XUUtilBase):
     # 表示カウンタ取得
     @property
     def draw_count(self) -> float:
-        return self._util_root.update_count * self.speed
+        return self.update_count * self.speed
 
     # 現在ページを表示しきったかどうか
     @property
