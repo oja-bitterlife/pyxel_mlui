@@ -891,6 +891,7 @@ class _XUWinFrameBase(XUState):
         clip = clip.intersect(area)
         if clip.is_empty:
             return
+        print(screen_area, clip)
 
         # 中央塗りつぶし
         c_pat = self._pattern[-1:] * clip.w
@@ -963,7 +964,7 @@ class _XUWinFrameBase(XUState):
     # ウインドウ全体をバッファに書き込む
     def draw_buf(self, screen_buf:bytearray, clip:XURect|None=None):
         area = self.area  # areaへのアクセスは遅いので必ずキャッシュしてアクセス
-        clip = area.copy() if clip is None else clip
+        clip = XURect(0, 0, area.w, area.h) if clip is None else clip
         self._draw_center(screen_buf, area.inflate(-self.pattern_size, -self.pattern_size), clip)
         self._draw_frame(screen_buf, area, clip)
 
