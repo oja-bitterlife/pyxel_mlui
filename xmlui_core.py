@@ -198,9 +198,6 @@ class XUState:
     def set_enable(self, enable:bool) -> Self:
         return self.set_attr("enable", enable)
 
-    def set_visible(self, visible:bool) -> Self:
-        return self.set_attr("visible", visible)
-
     # ツリー操作用
     # *************************************************************************
     def find_by_ID(self, id:str) -> 'XUState':
@@ -241,7 +238,7 @@ class XUState:
 
     def add_child(self, child:"XUState"):
         self._element.append(child._element)
-        self.xmlui._update_cache()
+        self.xmlui._parent_cache[child._element] = self
 
     def clear_children(self):
         self._element.clear()
@@ -306,9 +303,10 @@ class XUState:
     @property
     def enable(self) -> bool:  # 有効フラグ
         return self.attr_bool("enable", True)
+
     @property
-    def visible(self) -> bool:  # 表示フラグ
-        return self.attr_bool("visible", True)
+    def owner(self) -> str:  # close時のidを設定
+        return self.attr_str("owner", "")
 
     @property
     def x(self) -> int:  # 親からの相対座標x
@@ -340,17 +338,6 @@ class XUState:
     @property
     def use_event(self) -> bool:  # eventを使うかどうか
         return self.attr_bool("use_event", False)
-
-    @property
-    def layer(self) -> int:  # 描画レイヤ
-        if self.has_attr("layer") or self.parent is None:
-            return self.attr_int("layer", 0)
-        else:  # 無ければ親のlayerを持ってくる
-            return self.parent.layer
-
-    @property
-    def owner(self) -> str:  # close時のidを設定
-        return self.attr_str("owner", "")
 
     @property
     def marker(self) -> str:  # デバッグ用
@@ -413,7 +400,7 @@ class XMLUI(XUState):
         super().__init__(self, root)
 
         # キャッシュ
-        self._parent_cache:dict[Element, XUState] = {}
+        self._parent_cache:dict[Element, XUState] = {}  # dict[child] = parent_state
 
         # デバッグ用
         self.debug = XMLUI_Debug(self)
@@ -423,7 +410,6 @@ class XMLUI(XUState):
         self._input_lists:dict[str, list[int]] = {}
 
         # 処理関数の登録
-        self._update_funcs:dict[str,Callable[[XUState,XUEvent], None]] = {}
         self._draw_funcs:dict[str,Callable[[XUState], None]] = {}
 
         # XMLテンプレート置き場
@@ -442,59 +428,37 @@ class XMLUI(XUState):
 
     # 更新用
     # *************************************************************************
-    def update(self):
+    def draw(self):
         # (入力)イベントの更新
         self.event.update()
 
-        # 更新対象を取得
-        update_targets = [XUState(self, element) for element in self._element.iter() if bool(element.attrib.get("enable", "True"))]
+        # 描画対象を取得
+        draw_targets = [XUState(self, element) for element in self._element.iter() if bool(element.attrib.get("enable", "True"))]
 
         # ActiveStateの取得
-        event_targets = [state for state in update_targets if state.use_event]
+        event_targets = [state for state in draw_targets if state.use_event]
         self.active_state = event_targets[-1] if event_targets else self  # Active=最後
 
+        # 親情報の更新
+        self._parent_cache = {c:XUState(self, p) for p in self._element.iter() for c in p}
+
         # 更新処理
-        self._update_cache()  # Update実行前にキャッシュの更新
+        for state in draw_targets:
+            # active/inactiveどちらのeventを使うか決定
+            event = copy.copy(self.event) if state == self.active_state else XUEvent()
 
-        for state in update_targets:
-            if state.enable:  # update中にdisable(remove)になる場合があるので毎回チェック
-                # active/inactiveどちらのeventを使うか決定
-                event = copy.copy(self.event) if state == self.active_state else XUEvent()
+            # やっぱりinitialize情報がどこかに欲しい
+            event.on_init = state.update_count == 0
 
-                # やっぱりinitialize情報がどこかに欲しい
-                event.on_init = state.update_count == 0
-
-                # 更新処理
-                state.set_attr("update_count", state.update_count+1)  # 1スタート(0は初期化時)
-                self.update_element(state.tag, state, event)
-
-        self._update_cache()  # 更新処理で変更された可能性があるキャッシュの再更新
+            # 更新処理
+            state.set_attr("update_count", state.update_count+1)  # 1スタート(0は初期化時)
+            self.update_element(state.tag, state, event)
 
         # デバッグ
         if self.debug.is_lib_debug:
             self.debug.update()
 
-    # キャッシュの更新
-    def _update_cache(self):
-        self._parent_cache = {c:XUState(self, p) for p in self._element.iter() for c in p}
-
-    # 描画用
-    # *************************************************************************
-    def draw(self):
-        # 描画対象を取得。update_countが0の時は未Updateなのではじく
-        draw_targets = list(filter(lambda state: state.enable and state.visible and state.update_count>0, [XUState(self, element) for element in self._element.iter()]))
-
-        # 描画処理
-        layer_cache = {state._element:state.layer for state in draw_targets}
-        for state in sorted(draw_targets, key=lambda state: layer_cache[state._element]):
-            self.draw_element(state.tag, state)
-
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
-    def update_element(self, tag_name:str, state:XUState, event:XUEvent):
-        # 登録済みの関数だけ実行
-        if tag_name in self._update_funcs:
-            self._update_funcs[tag_name](state, event)
-
     def draw_element(self, tag_name:str, state:XUState):
         # 登録済みの関数だけ実行
         if tag_name in self._draw_funcs:
@@ -503,18 +467,10 @@ class XMLUI(XUState):
 
     # 処理登録
     # *************************************************************************
-    def set_updatefunc(self, tag_name:str, func:Callable[[XUState,XUEvent], None]):
-        self._update_funcs[tag_name] = func
-
     def set_drawfunc(self, tag_name:str, func:Callable[[XUState], None]):
         self._draw_funcs[tag_name] = func
 
     # デコレータを用意
-    def update_bind(self, tag_name:str):
-        def wrapper(update_func:Callable[[XUState,XUEvent], None]):
-            self.set_updatefunc(tag_name, update_func)
-        return wrapper
-
     def draw_bind(self, tag_name:str):
         def wrapper(draw_func:Callable[[XUState], None]):
             self.set_drawfunc(tag_name, draw_func)
