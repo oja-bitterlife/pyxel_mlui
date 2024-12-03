@@ -24,6 +24,7 @@ class XURect:
     def copy(self) -> "XURect":
         return XURect(self.x, self.y, self.w, self.h)
 
+    # 変換
     def intersect(self, other:"XURect") -> "XURect":
         right = min(self.x+self.w, other.x+other.w)
         left = max(self.x, other.x)
@@ -34,13 +35,26 @@ class XURect:
     def inflate(self, w, h) -> "XURect":
         return XURect(self.x-w, self.y-h, self.w+w*2, self.h+h*2)
 
+    # offset化
+    def to_offset(self) -> "XURect":
+        return XURect(0, 0, self.w, self.h)
+
+    # 内包チェック
     def contains_x(self, x:int) -> bool:
         return self.x <= x < self.x+self.w
+
     def contains_y(self, y:int) -> bool:
         return self.y <= y < self.y+self.h
+
     def contains(self, x, y) -> bool:
         return self.x <= x < self.x+self.w and self.y <= y < self.y+self.h
 
+    # 空チェック
+    @property
+    def is_empty(self) -> int:
+        return self.w <= 0 or self.h <= 0
+
+    # 座標取得
     def center_x(self, w:int=0) -> int:
         return self.x + (self.w-w)//2
 
@@ -52,11 +66,6 @@ class XURect:
 
     def bottom(self, bottom_space:int=0) -> int:
         return self.y + self.h - bottom_space
-
-
-    @property
-    def is_empty(self) -> int:
-        return self.w <= 0 or self.h <= 0
 
     def __repr__(self) -> str:
         return f"RECT({self.x}, {self.y}, {self.w}, {self.h})"

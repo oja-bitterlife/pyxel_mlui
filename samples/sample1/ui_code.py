@@ -48,7 +48,8 @@ def draw_msg_cursor(state:xuc.XUState):
 # ---------------------------------------------------------
 @win.round(xmlui, "round_win", speed=1)
 def round_win_draw(win:win.Round, event:xuc.XUEvent):
-    clip = win.anim_clip()
+    clip = win.area.to_offset()
+    clip.h = int(win.update_count*win.speed)
     win.draw_buf(pyxel.screen.data_ptr(), clip)
 
 # コマンドメニュー

@@ -1,7 +1,6 @@
 import pyxel
 
 from xmlui_core import *
-from . import text
 
 # 角丸ウインドウ
 # *****************************************************************************
@@ -11,9 +10,6 @@ class Round(XUWinRoundFrame):
     def __init__(self, state:XUState, speed:float):
         super().__init__(state, self.DEFAULT_PAT, pyxel.width, pyxel.height)
         self.set_attr("speed", speed)
-
-    def anim_clip(self) -> "XURect":
-        return XURect(0, 0, self.area.w, min(self.area.h, int(self.update_count*self.speed)))
 
 # デコレータを用意
 def round(xmlui:XMLUI, tag_name:str, speed:float=16):
@@ -34,9 +30,6 @@ class Rect(XUWinRectFrame):
     def __init__(self, state:XUState, speed:float):
         super().__init__(state, self.DEFAULT_PAT, pyxel.width, pyxel.height)
         self.set_attr("speed", speed)
-
-    def anim_clip(self) -> "XURect":
-        return XURect(0, 0, self.area.w, min(self.area.h, int(self.update_count*self.speed)))
 
 # デコレータを用意
 def rect(xmlui:XMLUI, tag_name:str, speed:float=16):

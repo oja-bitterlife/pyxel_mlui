@@ -1,7 +1,4 @@
-import pyxel
-
 from xmlui_core import *
-from . import text
 
 
 # セレクトアイテム
