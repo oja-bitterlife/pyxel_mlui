@@ -34,9 +34,9 @@ class XURect:
     def inflate(self, w, h) -> "XURect":
         return XURect(self.x-w, self.y-h, self.w+w*2, self.h+h*2)
 
-    def contain_x(self, x:int) -> bool:
+    def contains_x(self, x:int) -> bool:
         return self.x <= x < self.x+self.w
-    def contain_y(self, y:int) -> bool:
+    def contains_y(self, y:int) -> bool:
         return self.y <= y < self.y+self.h
     def contains(self, x, y) -> bool:
         return self.x <= x < self.x+self.w and self.y <= y < self.y+self.h
@@ -938,29 +938,30 @@ class _XUWinFrameBase(XUState):
         if not line_clip.is_empty:
             for y_ in range(size):
                 # 上
-                if line_clip.contain_y(y_):
+                if line_clip.contains_y(y_):
                     offset = (screen_area.y + y_)*self.screen_w + screen_area.x
                     screen_buf[offset+line_clip.x: offset+line_clip.right()] = self._shadow_pattern[y_:y_+1] * line_clip.w
                 # 下
-                if line_clip.contain_y(area.h-1-y_):
+                if line_clip.contains_y(area.h-1-y_):
                     offset = (screen_area.bottom()-1-y_)*self.screen_w + screen_area.x
                     screen_buf[offset+line_clip.x: offset+line_clip.right()] = self._pattern[y_:y_+1] * line_clip.w
 
-        # 左右のライン
-        # x_draw_clip = clip.inflate(0, -size)
-        # if not y_draw_clip.is_empty:
-        #     r_pat = bytes(reversed(self._pattern))
-        #     for y_ in range(max(size, self.clip.y), min(clip_b, off_b-size)):
-        #         # 左
-        #         offset = (screen_area.y + y_)*self.screen_w + screen_area.x
-        #         w = size-max(0, self.clip.x)
-        #         if w > 0:
-        #             screen_buf[offset:offset+w] = self._shadow_pattern[:w]
-        #         # 右
-        #         offset = (screen_area.y + y_)*self.screen_w + screen_area.x + off_r - size
-        #         w = min(clip_r-off_r, size)
-        #         if w > 0:
-        #             screen_buf[offset:offset+w] = r_pat[:w]
+        # 左
+        left_clip = clip.intersect(XURect(0, 0, self.pattern_size, area.h).inflate(0, -self.pattern_size))
+        if not left_clip.is_empty:
+            for y_ in range(area.h):
+                if left_clip.contains_y(y_):
+                    offset = (screen_area.y + y_)*self.screen_w + screen_area.x
+                    screen_buf[offset:offset+left_clip.w] = self._shadow_pattern[:left_clip.w]
+
+        # 右
+        right_clip = clip.intersect(XURect(area.w-self.pattern_size, 0, self.pattern_size, area.h).inflate(0, -self.pattern_size))
+        if not right_clip.is_empty:
+            r_pat = bytes(reversed(self._pattern))
+            for y_ in range(area.h):
+                if right_clip.contains_y(y_):
+                    offset = (screen_area.y + y_)*self.screen_w + screen_area.x + area.w-self.pattern_size
+                    screen_buf[offset:offset+right_clip.w] = r_pat[:right_clip.w]
 
     # ウインドウ全体をバッファに書き込む
     def draw_buf(self, screen_buf:bytearray, clip:XURect|None=None):
