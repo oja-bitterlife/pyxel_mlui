@@ -124,7 +124,8 @@ def dial(dial:input.Dial, event:xuc.XUEvent):
 
     for i,digit in enumerate(dial.zenkaku_digits):
         color = 2 if dial.edit_pos == i else 7
-        pyxel.text(dial.area.x + i*text.default.size, dial.area.y, digit, color, text.default.font)
+        x,y = dial.aligned_zenkaku_pos(text.default, 4)
+        pyxel.text(x + i*text.default.size, y, digit, color, text.default.font)
 
     # 確定
     if input.BTN_A in event.trg:

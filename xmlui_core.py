@@ -67,6 +67,31 @@ class XURect:
     def bottom(self, bottom_space:int=0) -> int:
         return self.y + self.h - bottom_space
 
+    # 座標取得
+    def aligned_x(self, w:int, align="center") -> int:
+        match align:
+            case "left":
+                x =  self.x
+            case "center":
+                x = self.center_x(w)
+            case "right":
+                x = self.right() - w
+            case _:
+                raise ValueError(f"align:{align} is not supported.")
+        return x
+
+    def aligned_y(self, h:int, align="center") -> int:
+        match align:
+            case "top":
+                y =  self.x
+            case "center":
+                y = self.center_x(h)
+            case "bottom":
+                y = self.right() - h
+            case _:
+                raise ValueError(f"align:{align} is not supported.")
+        return y
+
     def __repr__(self) -> str:
         return f"RECT({self.x}, {self.y}, {self.w}, {self.h})"
 
