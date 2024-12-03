@@ -32,22 +32,9 @@ class Label(XUState):
         super().__init__(state.xmlui, state._element)
         self._align = align
 
-    def get_aligned_pos(self, font:Font) -> tuple[int, int]:
+    def aligned_pos(self, font:Font, w:int=0) -> tuple[int, int]:
         area = self.area  # 低速なので使うときは必ず一旦ローカルに
-
-        text_w = default.text_width(self.text)
-        match self._align:
-            case "left":
-                x =  area.x
-            case "center":
-                x = area.center_x(text_w)
-            case "right":
-                x = area.right() - text_w
-            case _:
-                raise ValueError(f"align:{self._align} is not supported.")
-
-        return x, area.center_y(default.size)
-
+        return area.aligned_x(font.text_width(self.text)+w, self._align), area.center_y(font.size)
 
 # デコレータを用意
 def label(xmlui:XMLUI, tag_name:str):

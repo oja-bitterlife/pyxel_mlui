@@ -79,11 +79,11 @@ class Dial(XUDial):
     def __init__(self, state:XUState, digit_length:int, digit_list:str="0123456789"):
         super().__init__(state, digit_length, digit_list)
 
-    def aligned_pos(self, font:text.Font, w:int, align="right") -> tuple[int, int]:
+    def aligned_pos(self, font:text.Font, w:int=0, align="right") -> tuple[int, int]:
         area = self.area  # 低速なので使うときは必ず一旦ローカルに
         return area.aligned_x(font.text_width("".join(self.digits_raw))+w, align), area.y
 
-    def aligned_zenkaku_pos(self, font:text.Font, w:int, align="right") -> tuple[int, int]:
+    def aligned_zenkaku_pos(self, font:text.Font, w:int=0, align="right") -> tuple[int, int]:
         area = self.area  # 低速なので使うときは必ず一旦ローカルに
         return area.aligned_x(font.text_width("".join(self.zenkaku_digits_raw))+w, align), area.y
 
