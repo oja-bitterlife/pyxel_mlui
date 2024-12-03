@@ -55,8 +55,7 @@ def round_win_draw(win:win.Round, event:xuc.XUEvent):
 # *****************************************************************************
 @select.item(xmlui, "menu_item")
 def menu_item(item:select.Item, event:xuc.XUEvent):
-    pass
-#    print(item.enable)
+    print(item.enable)
 
 # 更新
 # ---------------------------------------------------------

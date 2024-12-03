@@ -9,9 +9,8 @@ import unicodedata
 import re
 import math
 import copy
+from distutils.util import strtobool
 from typing import Generator,Callable,Any,Self  # 型を使うよ
-import weakref
-
 
 # 描画領域計算用
 # #############################################################################
@@ -140,7 +139,7 @@ class XUState:
 
     def attr_bool(self, key:str, default:bool=False) -> bool:
         attr = self._element.attrib.get(key)
-        return default if attr is None else (True if attr.lower() in ["true", "ok", "yes", "on"] else False)
+        return default if attr is None else bool(strtobool(attr))
 
     def has_attr(self, key: str) -> bool:
         return key in self._element.attrib
@@ -433,7 +432,7 @@ class XMLUI(XUState):
         self.event.update()
 
         # 描画対象を取得
-        draw_targets = [XUState(self, element) for element in self._element.iter() if bool(element.attrib.get("enable", "True"))]
+        draw_targets = list(filter(lambda state: state.enable, [XUState(self, element) for element in self._element.iter()]))
 
         # ActiveStateの取得
         event_targets = [state for state in draw_targets if state.use_event]
