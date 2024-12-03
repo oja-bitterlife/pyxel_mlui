@@ -150,11 +150,11 @@ def yes_no_list(list_win:select.List, event:xuc.XUEvent):
         # Yes時処理
         if selected_item == "yes":
 #            test_params["age"] = core.XUDialRO(list_win.find_by_tagR("win_dial")).number
-            list_win.xmlui.close("menu_command")
+            list_win.close("command_menu_win")
 
         # No時処理
-        # if selected_item == "no":
-        #     list_win.close()
+        if selected_item == "no":
+            list_win.close()
 
     draw_menu_cursor(list_win.selected_item, 0, 0)
 

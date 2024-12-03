@@ -319,10 +319,10 @@ class XUState:
         self.xmlui.event.clearTrg()
 
         if id is not None:
-            self.xmlui.find_by_ID(id).remove()
+            return self.xmlui.find_by_ID(id).remove()
 
         if self.owner:
-            self.xmlui.find_by_ID(self.owner).remove()
+            return self.xmlui.find_by_ID(self.owner).remove()
 
         self.remove()  # 何もcloseできなかったら自分をclose
 
