@@ -510,24 +510,22 @@ class XMLUI(XUState):
 # 基本は必要な情報をツリーでぶら下げる
 # Treeが不要ならたぶんXUStateで事足りる
 class _XUUtilBase(XUState):
-    def __init__(self, state):
+    COPY_PREFIX = "_xmlui_copy_"
+
+    def __init__(self, state, root_tag:str):
         super().__init__(state.xmlui, state._element)
         self.set_attr("use_event", True)  # イベント使う系Util
 
-    # すでに存在するElementを回収
-    def find_child_root(self, state:XUState, child_root_tag:str) -> XUState:
-        return state.find_by_tag(child_root_tag)
- 
-    # findできなければ新規で作って追加する。新規作成時Trueを返す(is_created)
-    def find_or_create_child_root(self, state:XUState, child_root_tag:str) -> tuple[XUState, bool]:
+        # Utilityルートの作成(状態保存先)
         try:
-            # すでに存在するElementを回収
-            return state.find_by_tag(child_root_tag), False
-        except Exception:
-            # 新規作成
-            created = XUState(state.xmlui, Element(child_root_tag))
-            state.add_child(created)
-            return created, True
+            self._util_root = state.find_by_ID(root_tag)
+            self._util_root.clear_children()  # 綺麗にして構築し直す
+        except:
+            self._util_root = XUState(state.xmlui, Element(root_tag))
+
+    def copy_name(self, name):
+        return self.COPY_PREFIX + name
+
 
 # テキスト系
 # ---------------------------------------------------------
@@ -554,52 +552,41 @@ class XUPageBase(_XUUtilBase):
     def convert_zenkaku(cls, hankaku:str) -> str:
         return unicodedata.normalize("NFKC", hankaku).translate(_hankaku_zenkaku_dict)
 
+    # 初期化
     # -----------------------------------------------------
-    def __init__(self, state:XUState, text:str, page_lins:int, wrap:int=4096):
-        super().__init__(state)
+    def __init__(self, state:XUState, page_lins:int, wrap:int=4096):
+        super().__init__(state, self.ROOT_TAG)
 
         # パラメータの保存
         self._page_lines = page_lins
         self._wrap = max(wrap, 1)   # 0だと無限になってしまうので最低1を入れておく
 
-        # ページルートの設定
-        self.page_root, is_created = self.find_or_create_child_root(state, self.ROOT_TAG)
-        if is_created and text:
-            self._setup(text)
-
-    def _setup(self, text:str):
+        # page_root下(ページテキスト)の再構築
+        # -----------------------------------------------------
         # 改行を\nに統一して全角化
-        tmp_text = self.convert_zenkaku(re.sub(self.SEPARATE_REGEXP, "\n", text).strip())
+        tmp_text = self.convert_zenkaku(re.sub(self.SEPARATE_REGEXP, "\n", self.text).strip())
 
         # 各行に分解し、その行をさらにwrapで分解する
         lines =  sum([[line[i:i+self._wrap] for i in  range(0, len(line), self._wrap)] for line in tmp_text.splitlines()], [])
 
-        # 再セットアップ用
-        self.page_root.clear_children()
-        self.reset_page()
-
         # ページごとにElementを追加
         for i in range(0, len(lines), self._page_lines):
             page_text = "\n".join(lines[i:i+self._page_lines])  # 改行を\nにして全部文字列に
-            page = XUState(self.page_root.xmlui, Element(self.PAGE_TAG))
+            page = XUState(self._util_root.xmlui, Element(self.PAGE_TAG))
             page.set_text(page_text)
-            self.page_root.add_child(page)
-
-    def set_text(self, text:str) -> Self:
-        self._setup(text)
-        return self
+            self._util_root.add_child(page)
 
     # ページ関係
     # -----------------------------------------------------
     # 現在ページ
     @property
     def page_no(self) -> int:
-        return min(max(self.page_root.attr_int(self.PAGE_NO_ATTR, 0), 0), self.page_max)
+        return min(max(self._util_root.attr_int(self.PAGE_NO_ATTR, 0), 0), self.page_max)
 
     # ページの最大数
     @property
     def page_max(self) -> int:
-        return len(self.page_root.find_by_tagall(self.PAGE_TAG))
+        return len(self._util_root.find_by_tagall(self.PAGE_TAG))
 
     # ページ全部表示済みかどうか
     @property
@@ -609,7 +596,7 @@ class XUPageBase(_XUUtilBase):
     # ページタグリスト
     @property
     def pages(self) -> list[XUState]:
-        return self.page_root.find_by_tagall(self.PAGE_TAG)
+        return self._util_root.find_by_tagall(self.PAGE_TAG)
 
     # ページテキスト
     @property
@@ -619,7 +606,7 @@ class XUPageBase(_XUUtilBase):
     # page_noの操作
     def next_page(self, add:int=1) -> Self:
         self.reset()  # ページが変わればまた最初から
-        self.page_root.set_attr(self.PAGE_NO_ATTR, max(0, self.page_no+add))
+        self._util_root.set_attr(self.PAGE_NO_ATTR, max(0, self.page_no+add))
         return self
 
     # ページを0に戻す
@@ -641,7 +628,7 @@ class XUPageBase(_XUUtilBase):
     # 表示カウンタ取得
     @property
     def draw_count(self) -> float:
-        return self.page_root.update_count * self.page_root.speed
+        return self._util_root.update_count * self._util_root.speed
 
     # 現在ページを表示しきったかどうか
     @property
@@ -658,7 +645,7 @@ class XUPageBase(_XUUtilBase):
 
     # 表示カウンタのリセット
     def reset(self) -> Self:
-        self.page_root.set_attr("update_count", 0)
+        self._util_root.set_attr("update_count", 0)
         return self
 
     # 一気に表示
@@ -687,17 +674,14 @@ class XUPageBase(_XUUtilBase):
 class XUSelectBase(_XUUtilBase):
     # クラス定数
     ROOT_TAG = "_xmlui_select_root"
+    SELECTED_NO_ATTR = "_xmlui_selected_no"
 
-    SELECTED_NO_ATTR = "_xmlui_selected"
+    def __init__(self, state:XUState, rows:int, items:list[XUState]):
+        super().__init__(state, self.ROOT_TAG)
+        self._rows = rows
 
-    def __init__(self, state:XUState, item_tag:str, rows_attr:str|None):
-        super().__init__(state)
-        try:
-            self._select_root = state.find_by_tag(self.ROOT_TAG)
-            self._items = self._select_root.find_by_tagall(item_tag)
-        except:
-            self._items: list[XUState] = []
-        self._rows = self.attr_int(rows_attr, 1) if rows_attr else 1
+        # コピーを登録
+        self._items = [XUState(state.xmlui, Element(self.copy_name(item.tag), item._element.attrib)) for item in items]
 
     @property
     def selected_no(self) -> int:
@@ -737,24 +721,13 @@ class XUSelectBase(_XUUtilBase):
 # グリッド選択
 class XUSelectGrid(XUSelectBase):
     def __init__(self, state:XUState, item_tag:str, rows_attr:str, item_w_attr:str, item_h_attr:str):
-        super().__init__(state, item_tag, rows_attr)
+        super().__init__(state, state.attr_int(rows_attr, 1), state.find_by_tagall(item_tag))
 
-        # グリッドルートの設定
-        self._select_root, is_created = self.find_or_create_child_root(state, self.ROOT_TAG)
-        if is_created:
-            self._items = state.find_by_tagall(item_tag)
-            item_w = state.attr_int(item_w_attr, 0)
-            item_h = state.attr_int(item_h_attr, 0)
-
-            # 選択用ルート下に接続しなおす
-            for i,item in enumerate(self._items):
-                # 座標設定
-                item.set_attr("x", i % self._rows * item_w)
-                item.set_attr("y", i // self._rows * item_h)
-
-                # 登録しなおし
-                item.remove()
-                self._select_root.add_child(item)
+        # 座標設定
+        item_w = state.attr_int(item_w_attr, 0)
+        item_h = state.attr_int(item_h_attr, 0)
+        for i,item in enumerate(self._items):
+            item.set_pos(i % self._rows * item_w, i // self._rows * item_h)
 
     # 入力に応じた挙動一括
     def _select_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str, x_wrap:bool=False, y_wrap:bool=False) -> XUState:
@@ -781,21 +754,12 @@ class XUSelectGrid(XUSelectBase):
 # リスト選択
 class XUSelectList(XUSelectBase):
     def __init__(self, state:XUState, item_tag:str, item_h_attr:str):
-        super().__init__(state, item_tag, None)
+        super().__init__(state, 1, state.find_by_tagall(item_tag))
 
-        # リストルートの設定
-        self.select_root, is_created = self.find_or_create_child_root(state, self.ROOT_TAG)
-        if is_created:
-            self._items = state.find_by_tagall(item_tag)
-            item_h = state.attr_int(item_h_attr, 0)
-
-            # 選択用ルート下に接続しなおす
-            for i,item in enumerate(self._items):
-                # 座標設定
-                item.set_attr("y", i * item_h)
-
-                # 登録しなおし
-                self.select_root.add_child(item)
+        # 座標設定
+        item_h = state.attr_int(item_h_attr, 0)
+        for i,item in enumerate(self._items):
+            item.set_attr("y", i * item_h)
   
     # 入力に応じた挙動一括。選択リストは通常上下ラップする
     def _select_by_event(self, input:set[str], up_event:str, down_event:str, y_wrap:bool=True) -> XUState:

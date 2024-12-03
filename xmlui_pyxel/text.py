@@ -78,14 +78,13 @@ class Msg(XUPageBase):
     def __init__(self, state:XUState):
         page_lines = state.attr_int(self.PAGE_LINES_ATTR, 1)
         wrap = state.attr_int(self.WRAP_ATTR, 4096)
-        super().__init__(state, state.text, page_lines, wrap)
+        super().__init__(state, page_lines, wrap)
 
     def draw(self):
         # テキスト描画
         for i,page in enumerate(self.page_text.split()):
-            if self.page_root.update_count > 0:  # 子を強制描画するので更新済みチェック
-                area = self.page_root.area
-                text.default.draw(area.x, area.y+i*text.default.size, page, 7)
+            area = self.area  # areaは重いので必ずキャッシュ
+            text.default.draw(area.x, area.y+i*text.default.size, page, 7)
 
 # デコレータを用意
 def msg(xmlui:XMLUI, tag_name:str):
