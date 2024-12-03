@@ -791,18 +791,18 @@ class XUSelectList(XUSelectBase):
 # 情報管理のみ
 class XUDial(_XUUtilBase):
     ROOT_TAG = "_xmlui_dial_root"
-    DIGIT_TAG = "_xmlui_dial_digit"
-
     EDIT_POS_ATTR = "edit_pos"  # 操作位置
+    DIGIT_ATTR = "digits"  # 操作位置
 
     def __init__(self, state:XUState, digit_length:int, digit_list:str="0123456789"):
         super().__init__(state, self.ROOT_TAG)
-        self._digit_list = digit_list
+        self.digit_length = digit_length
+        self.digit_list = digit_list
 
-        for i in range(digit_length):
-            digit = XUState(self.xmlui, Element(self.DIGIT_TAG))
-            digit.set_text(digit_list[0])
-            self._util_root.add_child(digit)
+        # Digitのデータを引き継ぐ
+        old_digit = self._util_root.attr_str(self.DIGIT_ATTR)
+        new_digit = [old_digit[i] if i < len(old_digit) else "0" for i in range(digit_length)]
+        self._util_root.set_attr(self.DIGIT_ATTR, "".join(new_digit))
 
     @property
     def edit_pos(self) -> int:
@@ -810,7 +810,7 @@ class XUDial(_XUUtilBase):
 
     @property
     def digits(self) -> list[str]:
-        return [state.text for state in self._util_root.find_by_tagall(self.DIGIT_TAG)]
+        return [c for c in self._util_root.attr_str(self.DIGIT_ATTR)]
 
     @property
     def zenkaku_digits(self) -> list[str]:
@@ -818,7 +818,7 @@ class XUDial(_XUUtilBase):
 
     # 回り込み付き操作位置の設定
     def set_editpos(self, edit_pos:int) -> Self:
-        self._util_root.set_attr(self.EDIT_POS_ATTR, (edit_pos+len(self.digits))%len(self.digits))
+        self._util_root.set_attr(self.EDIT_POS_ATTR, (edit_pos + self.digit_length) % self.digit_length)
         return self
 
     # 操作位置の移動
@@ -827,14 +827,15 @@ class XUDial(_XUUtilBase):
 
     # 指定位置のdigitを変更する
     def set_digit(self, edit_pos:int, digit:str) -> Self:
-        state = self._util_root.find_by_tagall(self.DIGIT_TAG)[edit_pos]
-        state.set_text(digit)
+        digits = self.digits
+        digits[edit_pos] = digit
+        self._util_root.set_attr(self.DIGIT_ATTR, "".join(digits))
         return self
 
     # 回り込み付きdigit増減
     def add_digit(self, edit_pos:int, add:int) -> Self:
         old_digit = self.digits[edit_pos]
-        new_digit = self._digit_list[(self._digit_list.find(old_digit)+len(self._digit_list)+add) % len(self._digit_list)]
+        new_digit = self.digit_list[(self.digit_list.find(old_digit) + len(self.digit_list) + add) % len(self.digit_list)]
         return self.set_digit(edit_pos, new_digit)
 
     # 入力に応じた挙動一括
