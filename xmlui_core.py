@@ -205,11 +205,12 @@ class XUState:
                 return XUState(self.xmlui, element)
         raise Exception(f"ID '{id}' not found in '{self.tag}' and children")
 
-    def find_by_tagall(self, tag:str) -> list['XUState']:
-        return [XUState(self.xmlui, element) for element in self._element.iter() if element.tag == tag]
+    def find_by_tagall(self, tag:str, force:bool=False) -> list['XUState']:
+        tags = [XUState(self.xmlui, element) for element in self._element.iter() if element.tag == tag]
+        return tags if force else [state for state in tags if state.enable]
 
-    def find_by_tag(self, tag:str) -> 'XUState':
-        elements:list[XUState] = self.find_by_tagall(tag)
+    def find_by_tag(self, tag:str, force:bool=False) -> 'XUState':
+        elements:list[XUState] = self.find_by_tagall(tag, force)
         if elements:
             return elements[0]
         raise Exception(f"Tag '{tag}' not found in '{self.tag}' and children")
@@ -279,12 +280,16 @@ class XUState:
 
     # デバッグ用
     # *************************************************************************
-    def strtree(self, indent:str="  ", pre:str="") -> str:
+    def strtree(self, force:bool=False, indent:str="  ", pre:str="") -> str:
+        # forceでなければdisableの時点で止める
+        if not force and not self.enable:
+            return pre + self.tag + "<disable>"
+        # 以下forceかenable
         out = pre + self.tag
         out += f": {self.id}" if self.id else ""
         out += f" {self.marker}"
         for element in self._element:
-            out += "\n" + XUState(self.xmlui, element).strtree(indent, pre+indent)
+            out += "\n" + XUState(self.xmlui, element).strtree(force, indent, pre+indent)
         return out
 
     # xmluiで特別な意味を持つアトリビュート一覧
