@@ -250,7 +250,8 @@ class XUState:
         self.xmlui._parent_cache[child._element] = self
 
     def clear_children(self):
-        self._element.clear()
+        for child in self._element:
+            self._element.remove(child)
 
     def remove(self):  # removeの後なにかすることはないのでNone
         # 処理対象から外れるように
@@ -793,9 +794,9 @@ class XUDial(_XUUtilBase):
     EDIT_POS_ATTR = "edit_pos"  # 操作位置
 
     def __init__(self, state:XUState, digit_length:int, digit_list:str="0123456789"):
-        super().__init__(state.xmlui, self.ROOT_TAG)
-
+        super().__init__(state, self.ROOT_TAG)
         self._digit_list = digit_list
+
         for _ in range(digit_length):
             digit = XUState(self.xmlui, Element(self.DIGIT_TAG))
             digit.set_text(digit_list[0])
