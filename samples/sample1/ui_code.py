@@ -113,7 +113,8 @@ def msg_text(msg_text:text.Msg, event:xuc.XUEvent):
 def dial(dial:input.Dial, event:xuc.XUEvent):
     dial.change_by_event(event.trg, *input.CURSOR)
     for i,digit in enumerate(dial.zenkaku_digits):
-        pyxel.text(dial.area.x+3+(4-i)*text.default.size, dial.area.y+2, digit, 2 if dial.edit_pos == i else 7, text.default.font)
+        color = 2 if dial.edit_pos == i else 7
+        pyxel.text(dial.area.x + i*text.default.size, dial.area.y, digit, color, text.default.font)
 
 #     # 確定
 #     if input.BTN_A in event.trg:
