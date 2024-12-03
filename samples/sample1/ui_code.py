@@ -52,6 +52,15 @@ def round_win_draw(win:win.Round, event:xuc.XUEvent):
     clip.h = int(win.update_count*win.speed)
     win.draw_buf(pyxel.screen.data_ptr(), clip)
 
+# 四角ウインドウ
+# ---------------------------------------------------------
+@win.rect(xmlui, "rect_win", speed=1)
+def rect_win_draw(win:win.Rect, event:xuc.XUEvent):
+    clip = win.area.to_offset()
+    clip.h = int(win.update_count*win.speed)
+    win.draw_buf(pyxel.screen.data_ptr(), clip)
+
+
 # コマンドメニュー
 # *****************************************************************************
 # メニューアイテム
@@ -112,7 +121,7 @@ def msg_text(msg_text:text.Msg, event:xuc.XUEvent):
 @input.dial(xmlui, "dial", 5)
 def dial(dial:input.Dial, event:xuc.XUEvent):
     dial.change_by_event(event.trg, *input.CURSOR)
-    print(dial.area)
+
     for i,digit in enumerate(dial.zenkaku_digits):
         color = 2 if dial.edit_pos == i else 7
         pyxel.text(dial.area.x + i*text.default.size, dial.area.y, digit, color, text.default.font)
