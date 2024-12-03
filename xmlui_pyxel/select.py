@@ -44,13 +44,6 @@ class List(XUSelectList):
     def __init__(self, state:XUState, item_tag:str, item_h_attr:str):
         super().__init__(state, item_tag, item_h_attr)
 
-    def draw(self):
-        # area = self.area  # areaを扱うときは必ず一旦ローカル化する
-        for item in self._items:
-            item_area = item.area  # areaを扱うときは必ず一旦ローカル化する
-            # if self.clip.h >= item_area.y-area.y + text.default.size:  # ウインドウが表示されるまで表示しない
-            pyxel.text(item_area.x+6, item_area.y, item.text, 7, text.default.font)
-
 # デコレータを用意
 def list(xmlui:XMLUI, tag_name:str, tag_item:str, item_h_attr:str):
     def wrapper(bind_func:Callable[[List,XUEvent], None]):

@@ -50,15 +50,15 @@ def draw_msg_cursor(state:xuc.XUState):
 def round_win_draw(win:win.Round, event:xuc.XUEvent):
     win.draw()
 
+
 # コマンドメニュー
 # *****************************************************************************
+# メニューアイテム
 @select.item(xmlui, "menu_item")
 def menu_item(menu_item:select.Item, event:xuc.XUEvent):
     pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, 7, text.default.font)
 
-
-# コマンドメニュー
-# *****************************************************************************
+# メニューグリッド
 @select.grid(xmlui, "menu_grid", "menu_item", "rows", "item_w", "item_h")
 def menu_grid(menu_grid:select.Grid, event:xuc.XUEvent):
     # メニュー選択
@@ -152,7 +152,6 @@ def dial_yes_no_update(list_win:select.List, event:xuc.XUEvent):
         # if selected_item == "no":
         #     list_win.close()
 
-    list_win.draw()
     draw_menu_cursor(list_win.selected_item, 0, 0)
 
 
