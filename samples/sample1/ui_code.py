@@ -166,3 +166,9 @@ def title_draw(label:text.Label, event:xuc.XUEvent):
     pyxel.rect(label.area.x, label.area.y, label.area.w, label.area.h, 12)
     x, y = label.aligned_pos(text.default)
     pyxel.text(x, y, label.text, 7, text.default.font)
+
+@text.label(xmlui, "ok_title", "center", "top")
+def ok_title_draw(label:text.Label, event:xuc.XUEvent):
+    pyxel.rect(label.area.x, label.area.y, label.area.w, label.area.h, 12)
+    x, y = label.aligned_pos(text.default)
+    pyxel.text(x, y-3, label.text, 7, text.default.font)

@@ -17,8 +17,8 @@
     </rect_win>
 
     <round_win w="56" h="50" item_h="16" id="yes_no">
-        <title x="19" y="-2" w="18" h="12" id="label">OK?</title>
-        <yes_no_list x="6" y="14" rows="2" item_w="58" item_h="18">
+        <ok_title x="16" y="0" w="24" h="12" id="label">OK?</ok_title>
+        <yes_no_list x="6" y="12" rows="2" item_w="58" item_h="18">
             <menu_item value="yes">はい</menu_item>
             <menu_item value="no">いいえ</menu_item>
         </yes_no_list>
