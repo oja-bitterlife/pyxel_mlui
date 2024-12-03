@@ -887,10 +887,9 @@ class _XUWinFrameBase(XUState):
 
     # 中央部分をバッファに書き込む。
     # 環境依存の塗りつぶしが使えるならそちらを使った方が高速
-    def _draw_center(self, screen_buf:bytearray):
-        # self.areaは低速なので何度もアクセスするならローカル化
-        area = self.area
-        off_r, off_b = area.w, area.h  # オフセットなので0,0～w,h
+    def _draw_center(self, screen_buf:bytearray, area:XURect):
+        # オフセットなので0,0～w,h
+        off_r, off_b = area.w, area.h
 
         # 読みやすさのための展開(速度はほぼ変わらなかった)
         size = self.pattern_size
@@ -906,10 +905,9 @@ class _XUWinFrameBase(XUState):
 
     # フレームだけバッファに書き込む(高速化や半透明用)
     # 中央部分塗りつぶしは呼び出し側で行う
-    def _draw_frame(self, screen_buf:bytearray):
-        # self.areaは低速なので何度もアクセスするならローカル化
-        area = self.area
-        off_r, off_b = area.w, area.h  # オフセットなので0,0～w,h
+    def _draw_frame(self, screen_buf:bytearray, area:XURect):
+        # オフセットなので0,0～w,h
+        off_r, off_b = area.w, area.h
 
         # 読みやすさのための展開(速度はほぼ変わらなかった)
         size = self.pattern_size
@@ -960,9 +958,9 @@ class _XUWinFrameBase(XUState):
                 screen_buf[offset:offset+w] = r_pat[:w]
 
     # ウインドウ全体をバッファに書き込む
-    def draw_buf(self, screen_buf:bytearray):
-        self._draw_center(screen_buf)
-        self._draw_frame(screen_buf)
+    def draw_buf(self, screen_buf:bytearray, area:XURect):
+        self._draw_center(screen_buf, area)
+        self._draw_frame(screen_buf, area)
 
 class XUWinRoundFrame(_XUWinFrameBase):
     def __init__(self, state:XUState, pattern:list[int], screen_w:int, screen_h:int):

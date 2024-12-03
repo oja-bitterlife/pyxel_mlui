@@ -48,8 +48,8 @@ def draw_msg_cursor(state:xuc.XUState):
 # ---------------------------------------------------------
 @win.round(xmlui, "round_win", speed=1)
 def round_win_draw(win:win.Round, event:xuc.XUEvent):
-    win.draw()
-
+    win.anim_clip()
+    win.draw_buf(pyxel.screen.data_ptr(), win.area)
 
 # コマンドメニュー
 # *****************************************************************************
@@ -96,7 +96,10 @@ def msg_text(msg_text:text.Msg, event:xuc.XUEvent):
             case "next_page":
                 msg_text.next_page()
 
-    msg_text.draw()
+    # テキスト描画
+    area = msg_text.area  # areaは重いので必ずキャッシュ
+    for i,page in enumerate(msg_text.page_text.split()):
+        pyxel.text(area.x, area.y+i*text.default.size, page, 7, text.default.font)
 
     # カーソル表示
     if msg_text.is_next_wait:
@@ -159,4 +162,4 @@ def dial_yes_no_update(list_win:select.List, event:xuc.XUEvent):
 # *****************************************************************************
 @text.label(xmlui, "title")
 def title_draw(label:text.Label, event:xuc.XUEvent):
-    label.draw()
+    x, y = label.get_aligned_pos(text.default)

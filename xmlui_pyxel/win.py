@@ -12,10 +12,9 @@ class Round(XUWinRoundFrame):
         super().__init__(state, self.DEFAULT_PAT, pyxel.width, pyxel.height)
         self.set_attr("speed", speed)
 
-    def draw(self):
+    def anim_clip(self):
         self.clip.h = int(self.update_count*self.speed)
         self.clip = self.clip.intersect(XURect(0, 0, pyxel.width, pyxel.height))
-        self.draw_buf(pyxel.screen.data_ptr())
 
 # デコレータを用意
 def round(xmlui:XMLUI, tag_name:str, speed:float=16):
@@ -37,10 +36,9 @@ class Rect(XUWinRectFrame):
         super().__init__(state, self.DEFAULT_PAT, pyxel.width, pyxel.height)
         self.set_attr("speed", speed)
 
-    def draw(self):
+    def anim_clip(self):
         self.clip.h = int(self.update_count*self.speed)
         self.clip = self.clip.intersect(XURect(0, 0, pyxel.width, pyxel.height))
-        self.draw_buf(pyxel.screen.data_ptr())
 
 # デコレータを用意
 def rect(xmlui:XMLUI, tag_name:str, speed:float=16):

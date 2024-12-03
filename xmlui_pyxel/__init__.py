@@ -15,5 +15,5 @@ def initialize(
     ):
     input.set_Inputlist_fromdict(xmlui, inputlist_dict)
 
-    text.default = text.FONT(font_path)
+    text.default = text.Font(font_path)
 
