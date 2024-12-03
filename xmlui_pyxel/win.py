@@ -8,7 +8,7 @@ from . import text
 class RoundRO(XUWinRoundFrame):
     DEFAULT_PAT = [7,7,12]
 
-    def __init__(self, state:XUStateRO):
+    def __init__(self, state:XUState):
         super().__init__(state, self.DEFAULT_PAT, pyxel.width, pyxel.height)
 
 
@@ -18,7 +18,7 @@ class RoundRO(XUWinRoundFrame):
         self.draw_buf(pyxel.screen.data_ptr())
 
 class Round(RoundRO, XUState):
-    def __init__(self, state:XUStateRO, speed:float):
+    def __init__(self, state:XUState, speed:float):
         super().__init__(state)
         self.set_attr("speed", speed)
 
@@ -35,7 +35,7 @@ def round_update_bind(xmlui:XMLUI, tag_name:str, speed:float=16):
 def round_draw_bind(xmlui:XMLUI, tag_name:str):
     def wrapper(draw_func:Callable[[RoundRO], None]):
         # 登録用関数をジェネレート
-        def draw(state:XUStateRO):
+        def draw(state:XUState):
             draw_func(RoundRO(state))
         # 関数登録
         xmlui.set_drawfunc(tag_name, draw)
@@ -47,7 +47,7 @@ def round_draw_bind(xmlui:XMLUI, tag_name:str):
 class RectRO(XUWinRectFrame):
     DEFAULT_PAT = [7,7,12]
 
-    def __init__(self, state:XUStateRO):
+    def __init__(self, state:XUState):
         super().__init__(state, self.DEFAULT_PAT, pyxel.width, pyxel.height)
 
     def draw(self):
@@ -56,7 +56,7 @@ class RectRO(XUWinRectFrame):
         self.draw_buf(pyxel.screen.data_ptr())
 
 class Rect(RectRO, XUState):
-    def __init__(self, state:XUStateRO, speed:float):
+    def __init__(self, state:XUState, speed:float):
         super().__init__(state)
         self.set_attr("speed", speed)
 
@@ -73,7 +73,7 @@ def rect_update_bind(xmlui:XMLUI, tag_name:str, speed:float=16):
 def rect_draw_bind(xmlui:XMLUI, tag_name:str):
     def wrapper(draw_func:Callable[[RectRO], None]):
         # 登録用関数をジェネレート
-        def draw(state:XUStateRO):
+        def draw(state:XUState):
             draw_func(RectRO(state))
         # 関数登録
         xmlui.set_drawfunc(tag_name, draw)

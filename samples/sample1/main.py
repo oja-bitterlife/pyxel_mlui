@@ -15,15 +15,13 @@ def update(): # フレームの更新処理
     # ゲームの中でメインメニューを開く
     xmlui.open_by_event(input.BTN_A, UI_TEMPLATE, "command_menu_win")
 
-    # UI更新
-    xmlui.check_input_on(pyxel.btn)
-    xmlui.update()
 
 def draw(): # 描画処理
     # ゲームの描画コード
     pyxel.cls(0)
 
     # UI描画
+    xmlui.check_input_on(pyxel.btn)
     xmlui.draw()
 
 # アプリケーションの実行

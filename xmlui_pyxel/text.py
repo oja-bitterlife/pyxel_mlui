@@ -31,11 +31,11 @@ class FONT:
 
 # ラベルを扱う
 # #############################################################################
-class LabelRO(XUStateRO):
+class LabelRO(XUState):
     TEXT_OFFSET_X_ATTR:str = "text_x"
     TEXT_OFFSET_Y_ATTR:str = "text_y"
 
-    def __init__(self, state:XUStateRO, align:str="center"):
+    def __init__(self, state:XUState, align:str="center"):
         super().__init__(state.xmlui, state._element)
         self._align = align
 
@@ -91,7 +91,7 @@ def label_update_bind(xmlui:XMLUI, tag_name:str):
 def label_draw_bind(xmlui:XMLUI, tag_name:str, align:str="center"):
     def wrapper(draw_func:Callable[[LabelRO], None]):
         # 登録用関数をジェネレート
-        def draw(state:XUStateRO):
+        def draw(state:XUState):
             draw_func(LabelRO(state, align))
         # 関数登録
         xmlui.set_drawfunc(tag_name, draw)
@@ -105,7 +105,7 @@ class MsgRO(XUPageBase):
     WRAP_ATTR = "wrap"  # ワードラップ文字数
 
     # タグのテキストを処理する
-    def __init__(self, state:XUStateRO):
+    def __init__(self, state:XUState):
         page_lines = state.attr_int(self.PAGE_LINES_ATTR, 1)
         wrap = state.attr_int(self.WRAP_ATTR, 4096)
         super().__init__(state, state.text, page_lines, wrap)
@@ -146,7 +146,7 @@ def msg_update_bind(xmlui:XMLUI, tag_name:str):
 def msg_draw_bind(xmlui:XMLUI, tag_name:str):
     def wrapper(draw_func:Callable[[MsgRO], None]):
         # 登録用関数をジェネレート
-        def draw(state:XUStateRO):
+        def draw(state:XUState):
             draw_func(MsgRO(state))
         # 関数登録
         xmlui.set_drawfunc(tag_name, draw)

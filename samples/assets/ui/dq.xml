@@ -3,7 +3,7 @@
 <xmlui>
     <round_win x="32" y="16" w="128" h="52" id="command_menu_win">
         <title x="40" y="0" w="52" h="12">コマンド</title>
-        <menu_grid x="6" y="14" rows="2" item_w="58" item_h="18" use_event="True">
+        <menu_grid x="6" y="14" rows="2" item_w="58" item_h="18" owner="command_menu_win">
             <menu_item value="speak">はなす</menu_item>
             <menu_item value="dial">ダイアル</menu_item>
             <menu_item value="satus">つよさ</menu_item>
@@ -25,7 +25,7 @@
     </yes_no>
 
     <round_win abs_x="16" abs_y="180" w="224" h="60" id="win_message">
-        <msg_text x="8" y="8" wrap="17" page_lines="3" use_event="True">
+        <msg_text x="8" y="8" wrap="17" page_lines="3">
             サンプルテキスト
         </msg_text>
     </round_win>

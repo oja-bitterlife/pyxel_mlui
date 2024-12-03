@@ -29,13 +29,13 @@ xmlui.template_fromfile("samples/assets/ui/dq.xml", "ui_template")
 # ユーティリティ
 # *****************************************************************************
 # カーソル描画
-def draw_menu_cursor(state:xuc.XUStateRO, x:int, y:int):
+def draw_menu_cursor(state:xuc.XUState, x:int, y:int):
     tri_size = 6
     left = state.area.x + x
     top = state.area.y+2 + y
     pyxel.tri(left, top, left, top+tri_size, left+tri_size//2, top+tri_size//2, 7)
 
-def draw_msg_cursor(state:xuc.XUStateRO):
+def draw_msg_cursor(state:xuc.XUState):
     tri_size = 6
     center_x = state.area.center_x(tri_size)
     bottom = state.area.bottom(tri_size) - 2

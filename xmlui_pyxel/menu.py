@@ -7,7 +7,7 @@ from . import text
 # グリッドメニュー付きウインドウ
 # *****************************************************************************
 class GridRO(XUSelectBase):
-    def __init__(self, state:XUStateRO, item_tag:str, rows_attr:str):
+    def __init__(self, state:XUState, item_tag:str, rows_attr:str):
         super().__init__(state, item_tag, rows_attr)
 
     def draw(self):
@@ -33,7 +33,7 @@ def grid_update_bind(xmlui:XMLUI, tag_name:str, item_tag:str, rows_attr:str, ite
 def grid_draw_bind(xmlui:XMLUI, tag_name:str, item_tag:str, rows_attr:str):
     def wrapper(draw_func:Callable[[GridRO], None]):
         # 登録用関数をジェネレート
-        def draw(state:XUStateRO):
+        def draw(state:XUState):
             draw_func(GridRO(state, item_tag, rows_attr))
         # 関数登録
         xmlui.set_drawfunc(tag_name, draw)
@@ -43,7 +43,7 @@ def grid_draw_bind(xmlui:XMLUI, tag_name:str, item_tag:str, rows_attr:str):
 # リストウインドウ
 # *****************************************************************************
 class ListRO(XUSelectBase):
-    def __init__(self, state:XUStateRO, item_tag:str, rows_attr:str):
+    def __init__(self, state:XUState, item_tag:str, rows_attr:str):
         super().__init__(state, item_tag, rows_attr)
 
     def draw(self):
@@ -70,7 +70,7 @@ def list_update_bind(xmlui:XMLUI, tag_name:str, tag_item:str, item_h_attr:str):
 def list_draw_bind(xmlui:XMLUI, tag_name:str, tag_item:str, item_h_attr:str):
     def wrapper(draw_func:Callable[[ListRO], None]):
         # 登録用関数をジェネレート
-        def draw(state:XUStateRO):
+        def draw(state:XUState):
             draw_func(ListRO(state, tag_item, item_h_attr))
         # 関数登録
         xmlui.set_drawfunc(tag_name, draw)

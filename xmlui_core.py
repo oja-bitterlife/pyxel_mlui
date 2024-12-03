@@ -112,14 +112,14 @@ class XUEvent:
 # UIパーツの状態取得
 # #############################################################################
 # XMLの状態管理ReadOnly
-class XUStateRO:
+class XUState:
     def __init__(self, xmlui:'XMLUI', element:Element):
         self.xmlui = xmlui  # ライブラリへのIF
         self._element = element  # 自身のElement
 
     def __eq__(self, other) -> bool:
         # UI_Stateは都度使い捨てなので、対象となるElementで比較する
-        if isinstance(other, XUStateRO):
+        if isinstance(other, XUState):
             return other._element is self._element
         # 文字列との比較はvalueとで行う(イベント用)
         elif isinstance(other, str):
@@ -145,14 +145,32 @@ class XUStateRO:
     def has_attr(self, key: str) -> bool:
         return key in self._element.attrib
 
+    def set_attr(self, key:str|list[str], value: Any) -> Self:
+        # attribはdict[str,str]なのでstrで保存する
+        if isinstance(key, list):
+            for i, k in enumerate(key):
+                self._element.attrib[k] = str(value[i])
+        else:
+            self._element.attrib[key] = str(value)
+        return self
+
+    # tagアクセス用
+    @property
+    def tag(self) -> str:
+        return self._element.tag
+
     # textアクセス用
-    # *************************************************************************
     @property
     def text(self) -> str:
         return self._element.text.strip() if self._element.text else ""
 
+    def set_text(self, text:str) -> Self:
+        self._element.text = text
+        return self
+
     # その他
      # *************************************************************************
+
     @property
     def area(self) -> XURect:  # 親からの相対座標
         # areaは良く呼ばれるので、一回でもparent探しのdictアクセスを軽減する
@@ -171,32 +189,37 @@ class XUStateRO:
             self.attr_int("h", parent_area.h-offset_y)
         )
 
-    @property
-    def tag(self) -> str:
-        return self._element.tag
+    def set_pos(self, x:int, y:int) -> Self:
+        return self.set_attr(["x", "y"], [x, y])
 
-    def asRW(self) -> 'XUState':
-        return XUState(self.xmlui, self._element)
+    def set_abspos(self, x:int, y:int) -> Self:
+        return self.set_attr(["abs_x", "abs_y"], [x, y])
+
+    def set_enable(self, enable:bool) -> Self:
+        return self.set_attr("enable", enable)
+
+    def set_visible(self, visible:bool) -> Self:
+        return self.set_attr("visible", visible)
 
     # ツリー操作用
     # *************************************************************************
-    def find_by_ID(self, id:str) -> 'XUStateRO':
+    def find_by_ID(self, id:str) -> 'XUState':
         for element in self._element.iter():
             if element.attrib.get("id") == id:
                 return XUState(self.xmlui, element)
         raise Exception(f"ID '{id}' not found in '{self.tag}' and children")
 
-    def find_by_tagall(self, tag:str) -> list['XUStateRO']:
+    def find_by_tagall(self, tag:str) -> list['XUState']:
         return [XUState(self.xmlui, element) for element in self._element.iter() if element.tag == tag]
 
-    def find_by_tag(self, tag:str) -> 'XUStateRO':
-        elements:list[XUStateRO] = self.find_by_tagall(tag)
+    def find_by_tag(self, tag:str) -> 'XUState':
+        elements:list[XUState] = self.find_by_tagall(tag)
         if elements:
             return elements[0]
         raise Exception(f"Tag '{tag}' not found in '{self.tag}' and children")
 
     # ツリーを遡って親を探す
-    def find_parent(self, id:str) -> 'XUStateRO':
+    def find_parent(self, id:str) -> 'XUState':
         parent = self.parent
         while parent:
             if parent.id == id:
@@ -205,7 +228,7 @@ class XUStateRO:
         raise Exception(f"Parent '{id}' not found in '{self.tag}' and parents")
 
     @property
-    def parent(self) -> 'XUStateRO|None':
+    def parent(self) -> 'XUState|None':
         return self.xmlui._parent_cache.get(self._element, None)
 
     # すでにidツリーに存在するか
@@ -215,7 +238,49 @@ class XUStateRO:
             return True
         except:
             return False
- 
+
+    def add_child(self, child:"XUState"):
+        self._element.append(child._element)
+        self.xmlui._update_cache()
+
+    def clear_children(self):
+        self._element.clear()
+
+    def remove(self):  # removeの後なにかすることはないのでNone
+        # 処理対象から外れるように
+        self.set_attr("enable", False)
+        if self.parent:  # 親から外す
+            self.parent._element.remove(self._element)
+
+    # 子に別Element一式を追加する
+    def open(self, template_name:str, id:str, id_alias:str|None=None) -> "XUState":
+        # open/closeが連続しないようTrg入力を落とす
+        self.xmlui.event.clearTrg()
+
+        # idがかぶらないよう別名を付けられる
+        id_alias = id if id_alias is None else id_alias
+
+        # IDがかぶってはいけない
+        if self.xmlui.is_open(id_alias):
+            raise Exception(f"ID '{id_alias}' already exists")
+
+        opend = self.xmlui._templates[template_name].duplicate(id).set_attr("id", id_alias)
+        self.add_child(opend)
+        return opend
+
+     # 閉じる
+    def close(self, id:str|None=None):  # closeの後なにもしないのでNone
+        # open/closeが連続しないようTrg入力を落とす
+        self.xmlui.event.clearTrg()
+
+        if id is not None:
+            self.xmlui.find_by_ID(id).close()
+
+        if self.owner:
+            self.xmlui.find_by_ID(self.owner).close()
+
+        self.remove()  # 何もcloseできなかったら自分をclose
+
     # デバッグ用
     # *************************************************************************
     def strtree(self, indent:str="  ", pre:str="") -> str:
@@ -284,100 +349,18 @@ class XUStateRO:
             return self.parent.layer
 
     @property
+    def owner(self) -> str:  # close時のidを設定
+        return self.attr_str("owner", "")
+
+    @property
     def marker(self) -> str:  # デバッグ用
         return self.attr_str("marker", "")
-
-# XMLの状態設定
-class XUState(XUStateRO):
-    # attribアクセス用
-    # *************************************************************************
-    def set_attr(self, key:str|list[str], value: Any) -> Self:
-        # attribはdict[str,str]なのでstrで保存する
-        if isinstance(key, list):
-            for i, k in enumerate(key):
-                self._element.attrib[k] = str(value[i])
-        else:
-            self._element.attrib[key] = str(value)
-        return self
-
-    # textアクセス用
-    # *************************************************************************
-    def set_text(self, text:str) -> Self:
-        self._element.text = text
-        return self
-
-    # その他
-    # *************************************************************************
-    def set_pos(self, x:int, y:int) -> Self:
-        return self.set_attr(["x", "y"], [x, y])
-
-    def set_abspos(self, x:int, y:int) -> Self:
-        return self.set_attr(["abs_x", "abs_y"], [x, y])
-
-    def set_enable(self, enable:bool) -> Self:
-        return self.set_attr("enable", enable)
-
-    def set_visible(self, visible:bool) -> Self:
-        return self.set_attr("visible", visible)
-
-    # ツリー操作用
-    # *************************************************************************
-    def add_child(self, child:XUStateRO):
-        self._element.append(child._element)
-        self.xmlui._update_cache()
-
-    def clear_children(self):
-        self._element.clear()
-
-    def remove(self):  # removeの後なにかすることはないのでNone
-        # 処理対象から外れるように
-        self.set_attr("enable", False)
-        if self.parent:  # 親から外す
-            self.parent._element.remove(self._element)
-
-    # 子に別Element一式を追加する
-    def open(self, template_name:str, id:str, id_alias:str|None=None) -> "XUState":
-        # open/closeが連続しないようTrg入力を落とす
-        self.xmlui.event.clearTrg()
-
-        # idがかぶらないよう別名を付けられる
-        id_alias = id if id_alias is None else id_alias
-
-        # IDがかぶってはいけない
-        if self.xmlui.is_open(id_alias):
-            raise Exception(f"ID '{id_alias}' already exists")
-
-        opend = self.xmlui._templates[template_name].duplicate(id).set_attr("id", id_alias)
-        self.add_child(opend)
-        return opend
-
-     # 閉じる
-    def close(self, id:str|None=None):  # closeの後なにもしないのでNone
-        # open/closeが連続しないようTrg入力を落とす
-        self.xmlui.event.clearTrg()
-
-        # idをもつものを遡って閉じる
-        def _rec_close(state:XUState, id:str|None=None) -> bool:  # closeの後なにもしないのでNone
-            # idが一致している。id指定がない場合はidを持っていれば値は問わない
-            if state.id == id or (id is None and state.id):
-                state.remove()
-                return True
-
-            # 一番上まで検索した
-            if state.parent is None or state.parent == state.xmlui:
-                return False  # なにもcloseできなかった
-
-            # 親があるなら遡って閉じに行く
-            return _rec_close(state.parent.asRW(), id)
-
-        if not _rec_close(self, id):
-            self.remove()  # 何もcloseできなかったら自分をclose
 
 
 # XMLでUIライブラリ本体
 # #############################################################################
 # テンプレート用
-class XMLUI_Template(XUStateRO):
+class XMLUI_Template(XUState):
     # 初期化
     # *************************************************************************
     # ファイルから読み込み
@@ -391,7 +374,7 @@ class XMLUI_Template(XUStateRO):
     def _fromstring(cls, xmlui:'XMLUI', xml_data:str) -> "XMLUI_Template":
         return XMLUI_Template(XUState(xmlui, xml.etree.ElementTree.fromstring(xml_data)))
 
-    def __init__(self, root:XUStateRO):
+    def __init__(self, root:XUState):
         super().__init__(root.xmlui, root._element)
 
     # XML操作
@@ -430,7 +413,7 @@ class XMLUI(XUState):
         super().__init__(self, root)
 
         # キャッシュ
-        self._parent_cache:dict[Element, XUStateRO] = {}
+        self._parent_cache:dict[Element, XUState] = {}
 
         # デバッグ用
         self.debug = XMLUI_Debug(self)
@@ -441,7 +424,7 @@ class XMLUI(XUState):
 
         # 処理関数の登録
         self._update_funcs:dict[str,Callable[[XUState,XUEvent], None]] = {}
-        self._draw_funcs:dict[str,Callable[[XUStateRO], None]] = {}
+        self._draw_funcs:dict[str,Callable[[XUState], None]] = {}
 
         # XMLテンプレート置き場
         self._templates:dict[str,XMLUI_Template] = {}
@@ -493,7 +476,7 @@ class XMLUI(XUState):
 
     # キャッシュの更新
     def _update_cache(self):
-        self._parent_cache = {c:XUStateRO(self, p) for p in self._element.iter() for c in p}
+        self._parent_cache = {c:XUState(self, p) for p in self._element.iter() for c in p}
 
     # 描画用
     # *************************************************************************
@@ -512,7 +495,7 @@ class XMLUI(XUState):
         if tag_name in self._update_funcs:
             self._update_funcs[tag_name](state, event)
 
-    def draw_element(self, tag_name:str, state:XUStateRO):
+    def draw_element(self, tag_name:str, state:XUState):
         # 登録済みの関数だけ実行
         if tag_name in self._draw_funcs:
             self._draw_funcs[tag_name](state)
@@ -523,7 +506,7 @@ class XMLUI(XUState):
     def set_updatefunc(self, tag_name:str, func:Callable[[XUState,XUEvent], None]):
         self._update_funcs[tag_name] = func
 
-    def set_drawfunc(self, tag_name:str, func:Callable[[XUStateRO], None]):
+    def set_drawfunc(self, tag_name:str, func:Callable[[XUState], None]):
         self._draw_funcs[tag_name] = func
 
     # デコレータを用意
@@ -533,7 +516,7 @@ class XMLUI(XUState):
         return wrapper
 
     def draw_bind(self, tag_name:str):
-        def wrapper(draw_func:Callable[[XUStateRO], None]):
+        def wrapper(draw_func:Callable[[XUState], None]):
             self.set_drawfunc(tag_name, draw_func)
         return wrapper
 
@@ -575,14 +558,14 @@ class _XUUtilBase(XUState):
         super().__init__(state.xmlui, state._element)
 
     # すでに存在するElementを回収
-    def find_child_root(self, state:XUStateRO, child_root_tag:str) -> XUState:
-        return state.find_by_tag(child_root_tag).asRW()
+    def find_child_root(self, state:XUState, child_root_tag:str) -> XUState:
+        return state.find_by_tag(child_root_tag)
  
     # findできなければ新規で作って追加する。新規作成時Trueを返す(is_created)
     def find_or_create_child_root(self, state:XUState, child_root_tag:str) -> tuple[XUState, bool]:
         try:
             # すでに存在するElementを回収
-            return state.find_by_tag(child_root_tag).asRW(), False
+            return state.find_by_tag(child_root_tag), False
         except Exception:
             # 新規作成
             created = XUState(state.xmlui, Element(child_root_tag))
@@ -615,7 +598,7 @@ class XUPageBase(_XUUtilBase):
         return unicodedata.normalize("NFKC", hankaku).translate(_hankaku_zenkaku_dict)
 
     # -----------------------------------------------------
-    def __init__(self, state:XUStateRO, text:str, page_lins:int, wrap:int=4096):
+    def __init__(self, state:XUState, text:str, page_lins:int, wrap:int=4096):
         super().__init__(state)
 
         # パラメータの保存
@@ -623,7 +606,7 @@ class XUPageBase(_XUUtilBase):
         self._wrap = max(wrap, 1)   # 0だと無限になってしまうので最低1を入れておく
 
         # ページルートの設定
-        self.page_root, is_created = self.find_or_create_child_root(state.asRW(), self.ROOT_TAG)
+        self.page_root, is_created = self.find_or_create_child_root(state, self.ROOT_TAG)
         if is_created and text:
             self._setup(text)
 
@@ -668,7 +651,7 @@ class XUPageBase(_XUUtilBase):
 
     # ページタグリスト
     @property
-    def pages(self) -> list[XUStateRO]:
+    def pages(self) -> list[XUState]:
         return self.page_root.find_by_tagall(self.PAGE_TAG)
 
     # ページテキスト
@@ -750,13 +733,13 @@ class XUSelectBase(_XUUtilBase):
 
     SELECTED_NO_ATTR = "_xmlui_selected"
 
-    def __init__(self, state:XUStateRO, item_tag:str, rows_attr:str|None):
+    def __init__(self, state:XUState, item_tag:str, rows_attr:str|None):
         super().__init__(state)
         try:
             self._select_root = state.find_by_tag(self.ROOT_TAG)
             self._items = self._select_root.find_by_tagall(item_tag)
         except:
-            self._items: list[XUStateRO] = []
+            self._items: list[XUState] = []
         self._rows = self.attr_int(rows_attr, 1) if rows_attr else 1
 
     @property
@@ -764,7 +747,7 @@ class XUSelectBase(_XUUtilBase):
         return self.attr_int(self.SELECTED_NO_ATTR, 0)
 
     @property
-    def selected_item(self) -> XUStateRO:
+    def selected_item(self) -> XUState:
         return self._items[self.selected_no]
 
     @property
@@ -809,7 +792,6 @@ class XUSelectGrid(XUSelectBase):
             # 選択用ルート下に接続しなおす
             for i,item in enumerate(self._items):
                 # 座標設定
-                item = item.asRW()
                 item.set_attr("x", i % self._rows * item_w)
                 item.set_attr("y", i // self._rows * item_h)
 
@@ -827,7 +809,7 @@ class XUSelectGrid(XUSelectBase):
             self.next(-self._rows, x_wrap, y_wrap)
         elif down_event in input:
             self.next(self._rows, x_wrap, y_wrap)
-        return self.selected_item.asRW()
+        return self.selected_item
 
     def select_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> XUState:
         return self._select_by_event(input, left_event, right_event, up_event, down_event, False, False)
@@ -853,7 +835,6 @@ class XUSelectList(XUSelectBase):
             # 選択用ルート下に接続しなおす
             for i,item in enumerate(self._items):
                 # 座標設定
-                item = item.asRW()
                 item.set_attr("y", i * item_h)
 
                 # 登録しなおし
@@ -865,7 +846,7 @@ class XUSelectList(XUSelectBase):
             self.next(-1, False, y_wrap)
         elif down_event in input:
             self.next(1, False, y_wrap)
-        return self.selected_item.asRW()
+        return self.selected_item
 
     def select_by_event(self, input:set[str], up_event:str, down_event:str) -> XUState:
         return self._select_by_event(input, up_event, down_event, False)
@@ -920,7 +901,7 @@ class XUDialBase(XUState):
 
     # 指定位置のdigitを変更する
     def set_digit(self, edit_pos:int, digit:str) -> Self:
-        state = self.find_by_tagall(self.DIGIT_TAG)[edit_pos].asRW()
+        state = self.find_by_tagall(self.DIGIT_TAG)[edit_pos]
         state.set_text(digit)
         return self
 
@@ -946,11 +927,11 @@ class XUDialBase(XUState):
 # ウインドウサポート
 # ---------------------------------------------------------
 # 子ウインドウをopenするかもなのでROではいけない
-class _XUWinFrameBase(XUStateRO):
+class _XUWinFrameBase(XUState):
     # 0 1 2
     # 3 4 5
     # 6 7 8
-    def __init__(self, state:XUStateRO, pattern:list[int], screen_w:int, screen_h:int, pattern_index_func:Callable[[int,int,int,int], int]):
+    def __init__(self, state:XUState, pattern:list[int], screen_w:int, screen_h:int, pattern_index_func:Callable[[int,int,int,int], int]):
         super().__init__(state.xmlui, state._element)
 
         self._pattern = bytes(pattern)
@@ -1067,7 +1048,7 @@ class _XUWinFrameBase(XUStateRO):
         self._draw_frame(screen_buf)
 
 class XUWinRoundFrame(_XUWinFrameBase):
-    def __init__(self, state:XUStateRO, pattern:list[int], screen_w:int, screen_h:int):
+    def __init__(self, state:XUState, pattern:list[int], screen_w:int, screen_h:int):
         super().__init__(state, pattern, screen_w, screen_h, self._get_patternindex)
 
     def _get_veclen(self, x:int, y:int, org_x:int, org_y:int) -> int:
@@ -1091,7 +1072,7 @@ class XUWinRoundFrame(_XUWinFrameBase):
         return self._get13574index(x, y, w, h)
 
 class XUWinRectFrame(_XUWinFrameBase):
-    def __init__(self, state:XUStateRO, pattern:list[int], screen_w:int, screen_h:int):
+    def __init__(self, state:XUState, pattern:list[int], screen_w:int, screen_h:int):
         super().__init__(state, pattern, screen_w, screen_h, self._get_pattern_index)
 
     def _get_pattern_index(self, x:int, y:int, w:int, h:int) -> int:
