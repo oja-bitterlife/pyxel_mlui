@@ -891,7 +891,6 @@ class _XUWinFrameBase(XUState):
         clip = clip.intersect(area)
         if clip.is_empty:
             return
-        print(screen_area, clip)
 
         # 中央塗りつぶし
         c_pat = self._pattern[-1:] * clip.w
@@ -937,13 +936,13 @@ class _XUWinFrameBase(XUState):
         if not y_draw_clip.is_empty:
             for y_ in range(size):
                 # 上
-                if y_ >= clip.y:
+                if clip.contain(clip.x, y_):
                     offset = (screen_area.y + y_)*self.screen_w + screen_area.x
-                    screen_buf[offset+clip.x: offset+clip.right()] = self._shadow_pattern[y_:y_+1] * clip.w
+                    screen_buf[offset+y_draw_clip.x: offset+y_draw_clip.right()] = self._shadow_pattern[y_:y_+1] * y_draw_clip.w
                 # 下
-                if y_ < clip.bottom():
-                    offset = (screen_area.y + clip.bottom()-1-y_)*self.screen_w + screen_area.x
-                    screen_buf[offset+clip.x: offset+clip.right()] = self._pattern[y_:y_+1] * clip.w
+                if clip.contain(clip.x, area.h-1-y_):
+                    offset = (screen_area.bottom()-1-y_)*self.screen_w + screen_area.x
+                    screen_buf[offset+y_draw_clip.x: offset+y_draw_clip.right()] = self._pattern[y_:y_+1] * y_draw_clip.w
 
         # 左右のライン
         # x_draw_clip = clip.inflate(0, -size)
