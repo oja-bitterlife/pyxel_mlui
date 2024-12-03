@@ -12,8 +12,8 @@
     </round_win>
 
 
-    <rect_win x="32" y="16" w="128" h="52" id="dial_test">
-        <win_dial w="64" h="16" id="win_dial"/>
+    <rect_win x="32" y="16" w="128" h="52" id="win_dial">
+        <dial w="64" h="16"/>
     </rect_win>
 
     <yes_no w="56" h="50" item_h="16" id="yes_no">

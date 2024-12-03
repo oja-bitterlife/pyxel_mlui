@@ -786,7 +786,7 @@ class XUSelectList(XUSelectBase):
 # ダイアル
 # ---------------------------------------------------------
 # 情報管理のみ
-class XUDialBase(_XUUtilBase):
+class XUDial(_XUUtilBase):
     ROOT_TAG = "_xmlui_dial_root"
     DIGIT_TAG = "_xmlui_dial_digit"
 
@@ -839,7 +839,7 @@ class XUDialBase(_XUUtilBase):
         return self.set_digit(edit_pos, new_digit)
 
     # 入力に応じた挙動一括
-    def change_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> Self:
+    def change_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str):
         if left_event in input:
             self.move_editpos(1)
         if right_event in input:
@@ -848,7 +848,6 @@ class XUDialBase(_XUUtilBase):
             self.add_digit(self.edit_pos, +1)  # digitを増やす
         if down_event in input:
             self.add_digit(self.edit_pos, -1)  # digitを減らす
-        return self
 
 
 # ウインドウサポート

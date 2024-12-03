@@ -67,3 +67,23 @@ def set_Inputlist_fromdict(xmlui:XMLUI, dict_:dict[str,list[int]]):
     for key,value in dict_.items():
         xmlui.set_inputlist(key, value)
 
+
+# メッセージ
+# *****************************************************************************
+class Dial(XUDial):
+    PAGE_LINES_ATTR = "page_lines"  # ページの行数
+    WRAP_ATTR = "wrap"  # ワードラップ文字数
+
+    # タグのテキストを処理する
+    def __init__(self, state:XUState, digit_length:int, digit_list:str="0123456789"):
+        super().__init__(state, digit_length, digit_list)
+
+# デコレータを用意
+def dial(xmlui:XMLUI, tag_name:str, digit_length:int, digit_list:str="0123456789"):
+    def wrapper(bind_func:Callable[[Dial,XUEvent], None]):
+        # 登録用関数をジェネレート
+        def draw(state:XUState, event:XUEvent):
+            bind_func(Dial(state, digit_length, digit_list), event)
+        # 関数登録
+        xmlui.set_drawfunc(tag_name, draw)
+    return wrapper

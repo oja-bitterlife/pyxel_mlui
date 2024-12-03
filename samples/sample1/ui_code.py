@@ -107,14 +107,14 @@ def msg_text(msg_text:text.Msg, event:xuc.XUEvent):
         draw_msg_cursor(msg_text)
 
 
-
 # ダイアル
 # *****************************************************************************
-# @xmlui.update_bind("win_dial")
-# def win_dial_update(win_dial:xuc.XUState, event:xuc.XUEvent):
-#     # 数値変更
-#     dial = xuc.XUDial(win_dial, 5)
-#     dial.change_by_event(event.trg, *input.CURSOR)
+@input.dial(xmlui, "dial", 5)
+def dial(dial:input.Dial, event:xuc.XUEvent):
+    print(event.active)
+    dial.change_by_event(event.trg, *input.CURSOR)
+    for i,digit in enumerate(dial.zenkaku_digits):
+        pyxel.text(dial.area.x+3+(4-i)*text.default.size, dial.area.y+2, digit, 2 if dial.edit_pos == i else 7, text.default.font)
 
 #     # 確定
 #     if input.BTN_A in event.trg:
