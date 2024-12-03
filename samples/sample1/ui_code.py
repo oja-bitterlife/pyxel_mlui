@@ -3,7 +3,7 @@ import pyxel
 
 # xmlui_pyxelの初期化
 # *********************************************************
-from xmlui_pyxel import xuc,text,win,input,menu
+from xmlui_pyxel import select, xuc,text,win,input
 import xmlui_pyxel
 
 # ライブラリのインスタンス化
@@ -53,12 +53,17 @@ def round_win_draw(win:win.Round, event:xuc.XUEvent):
 
 # コマンドメニュー
 # *****************************************************************************
+@select.item(xmlui, "menu_item")
+def menu_item(item:select.Item, event:xuc.XUEvent):
+    pass
+#    print(item.enable)
+
 # 更新
 # ---------------------------------------------------------
-@menu.grid(xmlui, "menu_grid", "menu_item", "rows", "item_w", "item_h")
-def menu_win_update(menu_win:menu.Grid, event:xuc.XUEvent):
+@select.grid(xmlui, "menu_grid", "menu_item", "rows", "item_w", "item_h")
+def menu_win_update(grid:select.Grid, event:xuc.XUEvent):
     # メニュー選択
-    selected_item = menu_win.select_by_event(event.trg, *input.CURSOR)
+    selected_item = grid.select_by_event(event.trg, *input.CURSOR)
 
     # 選択アイテムの表示
     if input.BTN_A in event.trg:
@@ -72,12 +77,12 @@ def menu_win_update(menu_win:menu.Grid, event:xuc.XUEvent):
 
     # 閉じる
     if input.BTN_B in event.trg:
-        menu_win.close()
+        grid.close()
 
-    menu_win.draw()
+    # menu_win.draw()
 
     # カーソル追加
-    draw_menu_cursor(menu_win.selected_item, 0, 0)
+    draw_menu_cursor(grid.selected_item, 0, 0)
 
 
 # メッセージウインドウ
@@ -132,8 +137,8 @@ def msg_win_update(msg_win:text.Msg, event:xuc.XUEvent):
 #     for i,digit in enumerate(dial.zenkaku_digits):
 #         pyxel.text(dial_win.area.x+3+(4-i)*text.default.size, dial_win.area.y+2, digit, 2 if dial.edit_pos == i else 7, text.default.data)
 
-@menu.list(xmlui, "yes_no", "yes_no_item", "item_h")
-def dial_yes_no_update(list_win:menu.List, event:xuc.XUEvent):
+@select.list(xmlui, "yes_no", "yes_no_item", "item_h")
+def dial_yes_no_update(list_win:select.List, event:xuc.XUEvent):
     # メニュー選択
     selected_item = list_win.select_by_event(event.trg, *input.UP_DOWN)
 

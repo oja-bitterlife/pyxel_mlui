@@ -245,7 +245,7 @@ class XUState:
 
     def remove(self):  # removeの後なにかすることはないのでNone
         # 処理対象から外れるように
-        self.set_attr("enable", False)
+        self.set_enable(False)
         if self.parent:  # 親から外す
             self.parent._element.remove(self._element)
 
@@ -510,7 +510,7 @@ class XMLUI(XUState):
 # 基本は必要な情報をツリーでぶら下げる
 # Treeが不要ならたぶんXUStateで事足りる
 class _XUUtilBase(XUState):
-    COPY_PREFIX = "_xmlui_copy_"
+    COPYED_TAG_PREFIX = "_xmlui_copy_"
 
     def __init__(self, state, root_tag:str):
         super().__init__(state.xmlui, state._element)
@@ -524,9 +524,13 @@ class _XUUtilBase(XUState):
             self._util_root = XUState(state.xmlui, Element(root_tag))
             state.add_child(self._util_root)
 
+    @classmethod
+    def copyed_tagname(cls, name:str) -> str:
+        return cls.COPYED_TAG_PREFIX + name
+
     def state_copy(self, src:XUState) -> XUState:
         copyed = copy.deepcopy(src._element)
-        copyed.tag = self.COPY_PREFIX + src._element.tag
+        copyed.tag = self.copyed_tagname(copyed.tag)
         return XUState(self.xmlui, copyed)
 
 
@@ -683,9 +687,14 @@ class XUSelectBase(_XUUtilBase):
         super().__init__(state, self.ROOT_TAG)
         self._rows = rows
 
+        # オリジナルは無効に
+        for src_item in items:
+            src_item.set_enable(False)
+
         # コピーを登録
         self._items = [self.state_copy(item) for item in items]
         for item in self._items:
+            item.set_enable(True)
             self._util_root.add_child(item)
 
     @property

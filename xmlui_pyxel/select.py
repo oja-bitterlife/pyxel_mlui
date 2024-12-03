@@ -4,6 +4,24 @@ from xmlui_core import *
 from . import text
 
 
+# セレクトアイテム
+# *****************************************************************************
+class Item(XUState):
+    def __init__(self, state:XUState):
+        super().__init__(state.xmlui, state._element)
+
+# デコレータを用意
+def item(xmlui:XMLUI, tag_name:str):
+    def wrapper(bind_func:Callable[[Item,XUEvent], None]):
+        # 登録用関数をジェネレート
+        def draw(state:XUState, event:XUEvent):
+            bind_func(Item(state), event)
+        # 関数登録
+        xmlui.set_drawfunc(tag_name, draw)
+        xmlui.set_drawfunc(XUSelectBase.copyed_tagname(tag_name), draw)  # コピー名も一緒に登録
+    return wrapper
+
+
 # グリッドメニュー付きウインドウ
 # *****************************************************************************
 class Grid(XUSelectGrid):
