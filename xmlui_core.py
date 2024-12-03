@@ -34,6 +34,10 @@ class XURect:
     def inflate(self, w, h) -> "XURect":
         return XURect(self.x-w, self.y-h, self.w+w*2, self.h+h*2)
 
+    def contain_x(self, x:int) -> bool:
+        return self.x <= x < self.x+self.w
+    def contain_y(self, y:int) -> bool:
+        return self.y <= y < self.y+self.h
     def contains(self, x, y) -> bool:
         return self.x <= x < self.x+self.w and self.y <= y < self.y+self.h
 
@@ -49,8 +53,6 @@ class XURect:
     def bottom(self, bottom_space:int=0) -> int:
         return self.y + self.h - bottom_space
 
-    def contain(self, x:int, y:int) -> bool:
-        return self.x <= x < self.x+self.w and self.y <= y < self.y+self.h
 
     @property
     def is_empty(self) -> int:
@@ -917,7 +919,7 @@ class _XUWinFrameBase(XUState):
         # ---------------------------------------------------------------------
         def _draw_shoulder(self, off_x:int, off_y:int, pattern:bytes|bytearray):
            # クリップチェック
-            if clip.contain(off_x, off_y):
+            if clip.contains(off_x, off_y):
                 index = self._get_patidx_func(off_x, off_y, area.w, area.h)
                 if index >= 0:  # 枠外チェック
                     screen_buf[(screen_area.y + off_y)*self.screen_w + (screen_area.x + off_x)] = pattern[index]
@@ -932,17 +934,17 @@ class _XUWinFrameBase(XUState):
         # bytearrayによる角以外の高速描画(patternキャッシュを作ればもっと速くなるかも)
         # ---------------------------------------------------------------------
         # 上下のライン
-        y_draw_clip = clip.inflate(-size, 0)
-        if not y_draw_clip.is_empty:
+        line_clip = clip.inflate(-size, 0)
+        if not line_clip.is_empty:
             for y_ in range(size):
                 # 上
-                if clip.contain(clip.x, y_):
+                if line_clip.contain_y(y_):
                     offset = (screen_area.y + y_)*self.screen_w + screen_area.x
-                    screen_buf[offset+y_draw_clip.x: offset+y_draw_clip.right()] = self._shadow_pattern[y_:y_+1] * y_draw_clip.w
+                    screen_buf[offset+line_clip.x: offset+line_clip.right()] = self._shadow_pattern[y_:y_+1] * line_clip.w
                 # 下
-                if clip.contain(clip.x, area.h-1-y_):
+                if line_clip.contain_y(area.h-1-y_):
                     offset = (screen_area.bottom()-1-y_)*self.screen_w + screen_area.x
-                    screen_buf[offset+y_draw_clip.x: offset+y_draw_clip.right()] = self._pattern[y_:y_+1] * y_draw_clip.w
+                    screen_buf[offset+line_clip.x: offset+line_clip.right()] = self._pattern[y_:y_+1] * line_clip.w
 
         # 左右のライン
         # x_draw_clip = clip.inflate(0, -size)
@@ -964,7 +966,7 @@ class _XUWinFrameBase(XUState):
     def draw_buf(self, screen_buf:bytearray, clip:XURect|None=None):
         area = self.area  # areaへのアクセスは遅いので必ずキャッシュしてアクセス
         clip = XURect(0, 0, area.w, area.h) if clip is None else clip
-        self._draw_center(screen_buf, area.inflate(-self.pattern_size, -self.pattern_size), clip)
+        self._draw_center(screen_buf, area.inflate(-self.pattern_size, -self.pattern_size), XURect(0, 0, clip.w-self.pattern_size, clip.h-self.pattern_size))
         self._draw_frame(screen_buf, area, clip)
 
 class XUWinRoundFrame(_XUWinFrameBase):
