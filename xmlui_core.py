@@ -250,8 +250,10 @@ class XUState:
         self.xmlui._parent_cache[child._element] = self
 
     def clear_children(self):
-        for child in self._element:
-            self._element.remove(child)
+        # clearでattribまで消えるので、attrに保存して戻す
+        attr = self._element.attrib.copy()
+        self._element.clear()
+        self._element.attrib = attr
 
     def remove(self):  # removeの後なにかすることはないのでNone
         # 処理対象から外れるように
@@ -797,7 +799,7 @@ class XUDial(_XUUtilBase):
         super().__init__(state, self.ROOT_TAG)
         self._digit_list = digit_list
 
-        for _ in range(digit_length):
+        for i in range(digit_length):
             digit = XUState(self.xmlui, Element(self.DIGIT_TAG))
             digit.set_text(digit_list[0])
             self._util_root.add_child(digit)
@@ -813,10 +815,6 @@ class XUDial(_XUUtilBase):
     @property
     def zenkaku_digits(self) -> list[str]:
         return [XUPageBase.convert_zenkaku(digit) for digit in self.digits]
-
-    @property
-    def number(self) -> int:
-        return int("".join(reversed(self.digits)))
 
     # 回り込み付き操作位置の設定
     def set_editpos(self, edit_pos:int) -> Self:
