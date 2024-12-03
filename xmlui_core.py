@@ -514,17 +514,20 @@ class _XUUtilBase(XUState):
 
     def __init__(self, state, root_tag:str):
         super().__init__(state.xmlui, state._element)
-        self.set_attr("use_event", True)  # イベント使う系Util
+        state.set_attr("use_event", True)  # イベント使う系Util
 
         # Utilityルートの作成(状態保存先)
         try:
-            self._util_root = state.find_by_ID(root_tag)
+            self._util_root = state.find_by_tag(root_tag)
             self._util_root.clear_children()  # 綺麗にして構築し直す
         except:
             self._util_root = XUState(state.xmlui, Element(root_tag))
+            state.add_child(self._util_root)
 
     def state_copy(self, src:XUState) -> XUState:
-        return XUState(self.xmlui, Element(self.COPY_PREFIX + src._element.tag, src._element.attrib))
+        copyed = copy.deepcopy(src._element)
+        copyed.tag = self.COPY_PREFIX + src._element.tag
+        return XUState(self.xmlui, copyed)
 
 
 # テキスト系
@@ -680,8 +683,13 @@ class XUSelectBase(_XUUtilBase):
         super().__init__(state, self.ROOT_TAG)
         self._rows = rows
 
+        for src_item in items:
+            src_item.set_attr("enable", False)  # 全部無効にしておく
+
         # コピーを登録
         self._items = [self.state_copy(item) for item in items]
+        for item in self._items:
+            self._util_root.add_child(item)
 
     @property
     def selected_no(self) -> int:
