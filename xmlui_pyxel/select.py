@@ -11,13 +11,13 @@ class Item(XUState):
         super().__init__(state.xmlui, state._element)
 
 # デコレータを用意
-def item(xmlui:XMLUI, select_item_tag:XUSelectItemTagName):
+def item(xmlui:XMLUI, item_tag:str):
     def wrapper(bind_func:Callable[[Item,XUEvent], None]):
         # 登録用関数をジェネレート
         def draw(state:XUState, event:XUEvent):
             bind_func(Item(state), event)
         # 関数登録
-        xmlui.set_drawfunc(select_item_tag.name, draw)
+        xmlui.set_drawfunc(item_tag, draw)
     return wrapper
 
 

@@ -665,12 +665,6 @@ class XUPageBase(_XUUtilBase):
 
 # メニュー系
 # ---------------------------------------------------------
-class XUSelectItemTagName:
-    TAG_PREFIX = "_xmlui_copy_"
-
-    def __init__(self, name:str):
-        self.name = self.TAG_PREFIX + name
-
 # グリッド情報
 class XUSelectBase(_XUUtilBase):
     # クラス定数
@@ -680,22 +674,7 @@ class XUSelectBase(_XUUtilBase):
     def __init__(self, state:XUState, rows:int, items:list[XUState]):
         super().__init__(state, self.ROOT_TAG)
         self._rows = rows
-
-        # コピーを登録
-        self._items:list[XUState] = []
-        for item in items:
-            clone = XUState(self.xmlui, copy.deepcopy(item._element))
-            clone._element.tag = XUSelectItemTagName(item.tag).name  # タグ名を特殊なものに
-            clone.set_enable(True)  # 使うためにコピーしたはず
-
-            # 登録
-            self._util_root.add_child(clone)
-            self._items.append(clone)
-
-    # 選択アイテム用の特殊な名前に変更する
-    @classmethod
-    def item_tagname(cls, name:str) -> XUSelectItemTagName:
-        return XUSelectItemTagName(name)
+        self._items = items
 
     @property
     def selected_no(self) -> int:
