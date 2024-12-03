@@ -270,16 +270,19 @@ class XUState:
         except:
             return False
 
+    # 子を追加する
     def add_child(self, child:"XUState"):
         self._element.append(child._element)
         self.xmlui._parent_cache[child._element] = self
 
+    # 子を全部削除する
     def clear_children(self):
         # clearでattribまで消えるので、attrに保存して戻す
         attr = self._element.attrib.copy()
         self._element.clear()
         self._element.attrib = attr
 
+    # 自分を親から外す
     def remove(self):  # removeの後なにかすることはないのでNone
         # 処理対象から外れるように
         self.set_enable(False)
@@ -300,18 +303,26 @@ class XUState:
 
         opend = self.xmlui._templates[template_name].duplicate(id).set_attr("id", id_alias)
         self.add_child(opend)
+
+        # ownerを設定しておく
+        def _req_set_owner(element:Element, owner:str):
+            element.set("owner", owner)
+            for child in element:
+                _req_set_owner(child, owner)
+        _req_set_owner(opend._element, id_alias)
+
         return opend
 
-     # 閉じる
+    # 閉じる
     def close(self, id:str|None=None):  # closeの後なにもしないのでNone
         # open/closeが連続しないようTrg入力を落とす
         self.xmlui.event.clearTrg()
 
         if id is not None:
-            self.xmlui.find_by_ID(id).close()
+            self.xmlui.find_by_ID(id).remove()
 
         if self.owner:
-            self.xmlui.find_by_ID(self.owner).close()
+            self.xmlui.find_by_ID(self.owner).remove()
 
         self.remove()  # 何もcloseできなかったら自分をclose
 
