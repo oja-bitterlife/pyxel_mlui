@@ -278,7 +278,7 @@ class XUState:
             if parent.id == id:
                 return parent
             parent = parent.parent
-        raise Exception(f"Parent '{id}' not found in '{self.tag}' and parents")
+        raise Exception(f"Parent '{id}' not found in '{self.tag}' parents")
 
     @property
     def parent(self) -> 'XUState|None':
@@ -335,24 +335,27 @@ class XUState:
 
         return opend
 
-    # 閉じる
-    def close(self, id:str|None=None):
+    # owner以下を閉じる
+    def close(self):
         # open/closeが連続しないようTrg入力を落とす
         self.xmlui.event.clearTrg()
 
-        if id is not None:
-            return self.xmlui.find_by_ID(id).remove()
-
+        # ownerが設定されていればownerを、無ければ自身をremoveする
         if self.owner:
             return self.xmlui.find_by_ID(self.owner).remove()
+        self.remove()
 
-        self.remove()  # 何もcloseできなかったら自分をclose
+    def close_parent(self, parent_id:str):
+        self.find_parent(parent_id).close()
 
     # 閉じる際に通知も送る
-    def close_on(self, event_name:str="close", id:str|None=None):
+    def close_on(self, event_name:str="close"):
         self.xmlui.event.on(event_name, self)  # closeイベントを発行する
-        self.close(id)
+        self.close()
 
+    def close_parent_on(self, parent_id:str,  event_name:str="close"):
+        self.xmlui.event.on(event_name, self)  # closeイベントを発行する
+        self.close_parent(parent_id)
 
     # デバッグ用
     # *************************************************************************

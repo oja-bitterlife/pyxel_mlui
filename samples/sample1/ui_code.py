@@ -120,7 +120,7 @@ def yes_no_list(list_win:select.List, event:xuc.XUEvent):
     if input.BTN_A in event.trg:
         # Yes時処理
         if selected_item == "yes":
-            list_win.close("command_menu_win")
+            list_win.close_parent_on("command_menu_win")
 
         # No時処理
         if selected_item == "no":
@@ -138,7 +138,7 @@ def msg_text(msg_text:text.Msg, event:xuc.XUEvent):
         action = msg_text.check_action()
         match action:
             case "close":
-                msg_text.close("command_menu_win")  # メニューごと閉じる
+                msg_text.close_parent("command_menu_win")  # メニューごと閉じる
             case "finish":
                 msg_text.finish()
             case "next_page":
