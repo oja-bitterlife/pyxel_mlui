@@ -42,7 +42,7 @@ def draw_msg_cursor(state:xuc.XUState):
     pyxel.tri(center_x, bottom, center_x+tri_size, bottom, center_x+tri_size//2, bottom+tri_size//2, 7)
 
 
-# ウインドウ
+# 表示物
 # *****************************************************************************
 # 角丸ウインドウ
 # ---------------------------------------------------------
@@ -60,15 +60,30 @@ def rect_win_draw(win:win.Rect, event:xuc.XUEvent):
     clip.h = int(win.update_count*win.speed)
     win.draw_buf(pyxel.screen.data_ptr(), clip)
 
-
-# コマンドメニュー
-# *****************************************************************************
 # メニューアイテム
+# ---------------------------------------------------------
 @select.item(xmlui, "menu_item")
 def menu_item(menu_item:select.Item, event:xuc.XUEvent):
     pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, 7, text.default.font)
 
-# メニューグリッド
+# ラベル
+# ---------------------------------------------------------
+@text.label(xmlui, "title", "center", "top")
+def title_draw(label:text.Label, event:xuc.XUEvent):
+    pyxel.rect(label.area.x, label.area.y, label.area.w, label.area.h, 12)
+    x, y = label.aligned_pos(text.default)
+    pyxel.text(x, y, label.text, 7, text.default.font)
+
+@text.label(xmlui, "ok_title", "center", "top")
+def ok_title_draw(label:text.Label, event:xuc.XUEvent):
+    pyxel.rect(label.area.x, label.area.y, label.area.w, label.area.h, 12)
+    x, y = label.aligned_pos(text.default)
+    pyxel.text(x, y-3, label.text, 7, text.default.font)
+
+
+# メニュー
+# *****************************************************************************
+# コマンドメニュー
 @select.grid(xmlui, "menu_grid", "menu_item", "rows", "item_w", "item_h")
 def menu_grid(menu_grid:select.Grid, event:xuc.XUEvent):
     # メニュー選択
@@ -90,6 +105,29 @@ def menu_grid(menu_grid:select.Grid, event:xuc.XUEvent):
 
     # カーソル追加
     draw_menu_cursor(menu_grid.selected_item, 0, 0)
+
+
+@select.list(xmlui, "yes_no_list", "menu_item", "item_h")
+def yes_no_list(list_win:select.List, event:xuc.XUEvent):
+    # メニュー選択
+    selected_item = list_win.select_by_event(event.trg, *input.UP_DOWN)
+
+    # 閉じる
+    if input.BTN_B in event.trg:
+        list_win.close()
+
+    # 決定
+    if input.BTN_A in event.trg:
+        # Yes時処理
+        if selected_item == "yes":
+            list_win.close("command_menu_win")
+
+        # No時処理
+        if selected_item == "no":
+            list_win.close()
+
+    # カーソル追加
+    draw_menu_cursor(list_win.selected_item, 0, 0)
 
 
 # メッセージウインドウ
@@ -136,39 +174,5 @@ def dial(dial:input.Dial, event:xuc.XUEvent):
         dial.close()
 
 
-@select.list(xmlui, "yes_no_list", "menu_item", "item_h")
-def yes_no_list(list_win:select.List, event:xuc.XUEvent):
-    # メニュー選択
-    selected_item = list_win.select_by_event(event.trg, *input.UP_DOWN)
-
-    # 閉じる
-    if input.BTN_B in event.trg:
-        list_win.close()
-
-    # 決定
-    if input.BTN_A in event.trg:
-        # Yes時処理
-        if selected_item == "yes":
-#            test_params["age"] = core.XUDialRO(list_win.find_by_tagR("win_dial")).number
-            list_win.close("command_menu_win")
-
-        # No時処理
-        if selected_item == "no":
-            list_win.close()
-
-    draw_menu_cursor(list_win.selected_item, 0, 0)
 
 
-# ラベル全般
-# *****************************************************************************
-@text.label(xmlui, "title", "center", "top")
-def title_draw(label:text.Label, event:xuc.XUEvent):
-    pyxel.rect(label.area.x, label.area.y, label.area.w, label.area.h, 12)
-    x, y = label.aligned_pos(text.default)
-    pyxel.text(x, y, label.text, 7, text.default.font)
-
-@text.label(xmlui, "ok_title", "center", "top")
-def ok_title_draw(label:text.Label, event:xuc.XUEvent):
-    pyxel.rect(label.area.x, label.area.y, label.area.w, label.area.h, 12)
-    x, y = label.aligned_pos(text.default)
-    pyxel.text(x, y-3, label.text, 7, text.default.font)
