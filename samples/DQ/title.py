@@ -2,15 +2,18 @@ import pyxel
 
 # タイトル画面
 from xmlui_core import XMLUI,XUState,XUEvent
-from ui_common import xmlui,draw_menu_cursor,draw_msg_cursor
+from ui_common import xmlui,draw_menu_cursor
 from xmlui_pyxel import select,text,win,input
 
 UI_TEMPLATE_TITLE = "ui_title"
-xmlui.template_fromfile("assets/ui/dq.xml", UI_TEMPLATE_TITLE)
 
 class Title:
     def __init__(self):
+        xmlui.template_fromfile("assets/ui/dq.xml", UI_TEMPLATE_TITLE)
         xmlui.open(UI_TEMPLATE_TITLE, "game_title")
+
+    def __del__(self):
+        print("remove title")
 
     def update(self):
         pass
@@ -20,8 +23,7 @@ class Title:
         xmlui.draw()
 
 
-
-# メニューアイテム
+# タイトル画面UI
 # ---------------------------------------------------------
 @select.list(xmlui, "game_start", "menu_item", "item_w", "item_h")
 def game_start(game_start:select.List, event:XUEvent):
