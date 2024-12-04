@@ -5,10 +5,8 @@ from xmlui_core import *
 # 角丸ウインドウ
 # *****************************************************************************
 class Round(XUWinRoundFrame):
-    DEFAULT_PAT = [7,7,12]
-
     def __init__(self, state:XUState, speed:float):
-        super().__init__(state, self.DEFAULT_PAT, pyxel.width, pyxel.height)
+        super().__init__(state, pyxel.width, pyxel.height)
         self.set_attr("speed", speed)
 
 # デコレータを用意
@@ -25,10 +23,8 @@ def round(xmlui:XMLUI, tag_name:str, speed:float=16):
 # 四角ウインドウ
 # *****************************************************************************
 class Rect(XUWinRectFrame):
-    DEFAULT_PAT = [7,7,12]
-
     def __init__(self, state:XUState, speed:float):
-        super().__init__(state, self.DEFAULT_PAT, pyxel.width, pyxel.height)
+        super().__init__(state, pyxel.width, pyxel.height)
         self.set_attr("speed", speed)
 
 # デコレータを用意

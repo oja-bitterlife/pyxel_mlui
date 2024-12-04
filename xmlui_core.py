@@ -909,43 +909,36 @@ class _XUWinFrameBase(XUState):
     # 0 1 2
     # 3 4 5
     # 6 7 8
-    def __init__(self, state:XUState, pattern:list[int], screen_w:int, screen_h:int, pattern_index_func:Callable[[int,int,int,int], int]):
+    def __init__(self, state:XUState, screen_w:int, screen_h:int):
         super().__init__(state.xmlui, state._element)
-
-        self._pattern = bytes(pattern)
-        self._shadow_pattern = bytearray(pattern)
-        self.pattern_size = len(pattern)  # 高速化のためここで変数に
         self.screen_w, self.screen_h = screen_w, screen_h
-        self._get_patidx_func = pattern_index_func  # 枠外は-1を返す
+        
+    # 枠外は-1を返す
+    def _get_pattern_index(self, size:int, x:int, y:int, w:int, h:int) -> int:
+        raise Exception("no implements")
 
     # 1,3,5,7,4のエリア(カド以外)は特に計算が必要ない
-    def _get13574index(self, x:int, y:int, w:int, h:int) -> int:
-        return [-1, y, -1, x, self.pattern_size-1, w-1-x, -1, h-1-y][self.get_area(x, y, w, h)]
+    def _get13574index(self, size:int, x:int, y:int, w:int, h:int) -> int:
+        return [-1, y, -1, x, size-1, w-1-x, -1, h-1-y][self.get_area(size, x, y, w, h)]
 
     # どのエリアに所属するかを返す
-    def get_area(self, x:int, y:int, w:int, h:int) -> int:
-        if x < self.pattern_size:
-            if y < self.pattern_size:
+    def get_area(self, size:int, x:int, y:int, w:int, h:int) -> int:
+        if x < size:
+            if y < size:
                 return 0
-            return 3 if y < h-self.pattern_size else 6
-        elif x < w-self.pattern_size:
-            if y < self.pattern_size:
+            return 3 if y < h-size else 6
+        elif x < w-size:
+            if y < size:
                 return 1
-            return 4 if y < h-self.pattern_size else 7
+            return 4 if y < h-size else 7
         else:
-            if y < self.pattern_size:
+            if y < size:
                 return 2
-            return 5 if y < h-self.pattern_size else 8
-
-    # シャドウ対応(0,1,3のパターン上書き)
-    def set_shadow(self, index:int, color:int) -> Self:
-        if self._shadow_pattern:
-            self._shadow_pattern[index] = color
-        return self
+            return 5 if y < h-size else 8
 
     # 中央部分をバッファに書き込む。
     # 環境依存の塗りつぶしが使えるならそちらを使った方が高速
-    def _draw_center(self, screen_buf:bytearray, screen_area:XURect, clip:XURect):
+    def _draw_center(self, screen_buf:bytearray, color:int, screen_area:XURect, clip:XURect):
         # 画面外に描画しない
         screen_area = screen_area.intersect(XURect(0, 0, self.screen_w, self.screen_h))
 
@@ -956,14 +949,15 @@ class _XUWinFrameBase(XUState):
             return
 
         # 中央塗りつぶし
-        c_pat = self._pattern[-1:] * clip.w
+        c_pat = color.to_bytes() * clip.w
+        print(c_pat)
         for y in range(clip.h):
             offset = (screen_area.y + y)*self.screen_w + screen_area.x
             screen_buf[offset:offset+clip.w] = c_pat
 
     # フレームだけバッファに書き込む(高速化や半透明用)
     # 中央部分塗りつぶしは呼び出し側で行う
-    def _draw_frame(self, screen_buf:bytearray, screen_area:XURect, clip:XURect):
+    def _draw_frame(self, screen_buf:bytearray, pattern:list[int], screen_area:XURect, clip:XURect):
         # 画面外に描画しない
         screen_area = screen_area.intersect(XURect(0, 0, self.screen_w, self.screen_h))
 
@@ -973,24 +967,25 @@ class _XUWinFrameBase(XUState):
         if clip.is_empty:
             return
 
-        # 読みやすさのための展開(速度はほぼ変わらなかった)
-        size = self.pattern_size
+        size = len(pattern)
+        byte_pat = bytes(pattern)
+        byte_shadow = bytes(pattern)
 
         # 角の描画
         # ---------------------------------------------------------------------
-        def _draw_shoulder(self, off_x:int, off_y:int, pattern:bytes|bytearray):
+        def _draw_shoulder(self, off_x:int, off_y:int, pattern:bytes):
            # クリップチェック
             if clip.contains(off_x, off_y):
-                index = self._get_patidx_func(off_x, off_y, area.w, area.h)
+                index = self._get_pattern_index(size, off_x, off_y, area.w, area.h)
                 if index >= 0:  # 枠外チェック
                     screen_buf[(screen_area.y + off_y)*self.screen_w + (screen_area.x + off_x)] = pattern[index]
 
         for y_ in range(size):
             for x_ in range(size):
-                _draw_shoulder(self, x_, y_, self._shadow_pattern)  # 左上
-                _draw_shoulder(self, area.w-1-x_, y_, self._shadow_pattern)  # 右上
-                _draw_shoulder(self, x_, area.h-1-y_, self._shadow_pattern)  # 左下
-                _draw_shoulder(self, area.w-1-x_, area.h-1-y_, self._pattern)  # 右下
+                _draw_shoulder(self, x_, y_, byte_shadow)  # 左上
+                _draw_shoulder(self, area.w-1-x_, y_, byte_shadow)  # 右上
+                _draw_shoulder(self, x_, area.h-1-y_, byte_shadow)  # 左下
+                _draw_shoulder(self, area.w-1-x_, area.h-1-y_, byte_pat)  # 右下
 
         # bytearrayによる角以外の高速描画(patternキャッシュを作ればもっと速くなるかも)
         # ---------------------------------------------------------------------
@@ -1001,46 +996,47 @@ class _XUWinFrameBase(XUState):
                 # 上
                 if line_clip.contains_y(y_):
                     offset = (screen_area.y + y_)*self.screen_w + screen_area.x
-                    screen_buf[offset+line_clip.x: offset+line_clip.right()] = self._shadow_pattern[y_:y_+1] * line_clip.w
+                    screen_buf[offset+line_clip.x: offset+line_clip.right()] = byte_shadow[y_:y_+1] * line_clip.w
                 # 下
                 if line_clip.contains_y(area.h-1-y_):
                     offset = (screen_area.bottom()-1-y_)*self.screen_w + screen_area.x
-                    screen_buf[offset+line_clip.x: offset+line_clip.right()] = self._pattern[y_:y_+1] * line_clip.w
+                    screen_buf[offset+line_clip.x: offset+line_clip.right()] = byte_pat[y_:y_+1] * line_clip.w
 
         # 左
-        left_clip = clip.intersect(XURect(0, 0, self.pattern_size, area.h).inflate(0, -self.pattern_size))
+        left_clip = clip.intersect(XURect(0, 0, size, area.h).inflate(0, -size))
         if not left_clip.is_empty:
             for y_ in range(area.h):
                 if left_clip.contains_y(y_):
                     offset = (screen_area.y + y_)*self.screen_w + screen_area.x
-                    screen_buf[offset:offset+left_clip.w] = self._shadow_pattern[:left_clip.w]
+                    screen_buf[offset:offset+left_clip.w] = byte_shadow[:left_clip.w]
 
         # 右
-        right_clip = clip.intersect(XURect(area.w-self.pattern_size, 0, self.pattern_size, area.h).inflate(0, -self.pattern_size))
+        right_clip = clip.intersect(XURect(area.w-size, 0, size, area.h).inflate(0, -size))
         if not right_clip.is_empty:
-            r_pat = bytes(reversed(self._pattern))
+            r_pat = bytes(reversed(byte_pat))
             for y_ in range(area.h):
                 if right_clip.contains_y(y_):
-                    offset = (screen_area.y + y_)*self.screen_w + screen_area.x + area.w-self.pattern_size
+                    offset = (screen_area.y + y_)*self.screen_w + screen_area.x + area.w-size
                     screen_buf[offset:offset+right_clip.w] = r_pat[:right_clip.w]
 
     # ウインドウ全体をバッファに書き込む
-    def draw_buf(self, screen_buf:bytearray, clip:XURect|None=None):
+    def draw_buf(self, screen_buf:bytearray, pattern:list[int], clip:XURect|None=None):
         area = self.area  # areaへのアクセスは遅いので必ずキャッシュしてアクセス
         clip = XURect(0, 0, area.w, area.h) if clip is None else clip
-        self._draw_center(screen_buf, area.inflate(-self.pattern_size, -self.pattern_size), XURect(0, 0, clip.w-self.pattern_size, clip.h-self.pattern_size))
-        self._draw_frame(screen_buf, area, clip)
+        size = len(pattern)
+        self._draw_center(screen_buf, pattern[-1], area.inflate(-size, -size), XURect(0, 0, clip.w-size, clip.h-size))
+        self._draw_frame(screen_buf, pattern, area, clip)
 
 class XUWinRoundFrame(_XUWinFrameBase):
-    def __init__(self, state:XUState, pattern:list[int], screen_w:int, screen_h:int):
-        super().__init__(state, pattern, screen_w, screen_h, self._get_patternindex)
+    def __init__(self, state:XUState, screen_w:int, screen_h:int):
+        super().__init__(state, screen_w, screen_h)
 
     def _get_veclen(self, x:int, y:int, org_x:int, org_y:int) -> int:
         return math.ceil(math.sqrt((x-org_x)**2 + (y-org_y)**2))
 
-    def _get_patternindex(self, x:int, y:int, w:int, h:int) -> int:
-        size = self.pattern_size
-        match self.get_area(x, y, w, h):
+    # override
+    def _get_pattern_index(self, size:int, x:int, y:int, w:int, h:int) -> int:
+        match self.get_area(size, x, y, w, h):
             case 0:
                 l = size-1-self._get_veclen(x, y, size-1, size-1)
                 return l if l < size else -1
@@ -1053,14 +1049,15 @@ class XUWinRoundFrame(_XUWinFrameBase):
             case 8:
                 l = size-1-self._get_veclen(x, y, w-size, h-size)
                 return l if l < size else -1
-        return self._get13574index(x, y, w, h)
+        return self._get13574index(size, x, y, w, h)
 
 class XUWinRectFrame(_XUWinFrameBase):
-    def __init__(self, state:XUState, pattern:list[int], screen_w:int, screen_h:int):
-        super().__init__(state, pattern, screen_w, screen_h, self._get_pattern_index)
+    def __init__(self, state:XUState, screen_w:int, screen_h:int):
+        super().__init__(state, screen_w, screen_h)
 
-    def _get_pattern_index(self, x:int, y:int, w:int, h:int) -> int:
-        match self.get_area(x, y, w, h):
+    # override
+    def _get_pattern_index(self, size:int, x:int, y:int, w:int, h:int) -> int:
+        match self.get_area(size, x, y, w, h):
             case 0:
                 return y if x > y else x
             case 2:
@@ -1069,5 +1066,5 @@ class XUWinRectFrame(_XUWinFrameBase):
                 return h-1-y if x > h-1-y else x
             case 8:
                 return h-1-y if w-1-x > h-1-y else w-1-x
-        return self._get13574index(x, y, w, h)
+        return self._get13574index(size, x, y, w, h)
 
