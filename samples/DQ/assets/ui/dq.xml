@@ -21,39 +21,5 @@
         </game_speed>
     </game_title>
 
-
-
-
-
-    <round_win x="32" y="16" w="128" h="52" id="command_menu_win">
-        <title x="40" y="0" w="52" h="12">コマンド</title>
-        <menu_grid x="6" y="14" rows="2" item_w="58" item_h="18">
-            <menu_item action="speak">はなす</menu_item>
-            <menu_item action="dial">ダイアル</menu_item>
-            <menu_item action="status">つよさ</menu_item>
-            <menu_item action="check">しらべる</menu_item>
-        </menu_grid>
-    </round_win>
-
-
-    <rect_win x="70" y="0" w="68" h="18" id="win_dial">
-        <dial x="6" y="3" w="64" h="16"/>
-    </rect_win>
-
-    <round_win y="20" w="56" h="50" item_h="16" id="yes_no">
-        <ok_title x="16" y="0" w="24" h="12" id="label">OK?</ok_title>
-        <yes_no_list x="6" y="12" rows="2" item_w="58" item_h="18">
-            <menu_item action="yes">はい</menu_item>
-            <menu_item action="no">いいえ</menu_item>
-        </yes_no_list>
-    </round_win>
-
-    <round_win abs_x="16" abs_y="180" w="224" h="60" id="win_message">
-        <msg_text x="8" y="8" wrap="17" page_lines="3">
-            サンプルテキスト\nサンプルテキスト\nサンプルテキスト\nサンプルテキスト
-        </msg_text>
-    </round_win>
-
-
 </xmlui>
 

@@ -278,6 +278,9 @@ class XUState:
             parent = parent.parent
         raise Exception(f"Parent '{id}' not found in '{self.tag}' parents")
 
+    def find_owner(self) -> 'XUState':
+        return self.find_parent(self.owner)
+
     @property
     def parent(self) -> 'XUState|None':
         return self.xmlui._parent_cache.get(self._element, None)

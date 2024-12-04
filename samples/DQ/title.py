@@ -35,14 +35,25 @@ def game_start(game_start:select.List, event:XUEvent):
     draw_menu_cursor(game_start.selected_item, 0, 1)
 
     if input.BTN_A in event.trg:
-        xmlui.on("game_start", game_start)
+        game_start.close_on("game_start")
 
 @select.list(xmlui, "game_speed", "menu_item", "item_w", "item_h")
 def game_speed(game_speed:select.List, event:XUEvent):
     # メニュー選択
-    game_speed.select_by_event(event.trg, *input.LEFT_RIGHT)
+    is_change = game_speed.select_by_event(event.trg, *input.LEFT_RIGHT)
+
     # カーソル追加
     draw_menu_cursor(game_speed.selected_item, 0, 1)
+
+    # メッセージスピードを切り替える
+    if is_change:
+        match game_speed:
+            case "slow":
+                print("msg is slow")
+            case "normal":
+                print("msg is normal")
+            case "fast":
+                print("msg is fast")
 
 # メニューアイテム
 # ---------------------------------------------------------
