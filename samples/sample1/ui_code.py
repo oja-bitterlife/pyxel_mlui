@@ -46,7 +46,7 @@ def draw_msg_cursor(state:xuc.XUState):
 # *****************************************************************************
 # 角丸ウインドウ
 # ---------------------------------------------------------
-@win.round(xmlui, "round_win", speed=1)
+@win.round(xmlui, "round_win")
 def round_win_draw(win:win.Round, event:xuc.XUEvent):
     clip = win.area.to_offset()
     clip.h = int(win.update_count*win.speed)
@@ -54,7 +54,7 @@ def round_win_draw(win:win.Round, event:xuc.XUEvent):
 
 # 四角ウインドウ
 # ---------------------------------------------------------
-@win.rect(xmlui, "rect_win", speed=1)
+@win.rect(xmlui, "rect_win")
 def rect_win_draw(win:win.Rect, event:xuc.XUEvent):
     clip = win.area.to_offset()
     clip.h = int(win.update_count*win.speed)
