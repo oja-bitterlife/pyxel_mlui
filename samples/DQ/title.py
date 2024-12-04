@@ -1,9 +1,9 @@
 import pyxel
 
 # タイトル画面
-from xmlui_core import XMLUI,XUState,XUEvent
+from xmlui_core import XUState,XUEvent
 from ui_common import xmlui,draw_menu_cursor
-from xmlui_pyxel import select,text,win,input
+from xmlui_pyxel import select,text,input
 
 UI_TEMPLATE_TITLE = "ui_title"
 
@@ -39,6 +39,9 @@ def game_start(game_start:select.List, event:XUEvent):
 
 @select.list(xmlui, "game_speed", "menu_item", "item_w", "item_h")
 def game_speed(game_speed:select.List, event:XUEvent):
+    if event.on_init:  # 初期化
+        game_speed.select(1)  # デフォルトはNormal
+
     # カーソル追加
     draw_menu_cursor(game_speed.selected_item, 0, 1)
 
@@ -57,5 +60,6 @@ def game_speed(game_speed:select.List, event:XUEvent):
 # ---------------------------------------------------------
 @select.item(xmlui, "menu_item")
 def start_item(menu_item:select.Item, event:XUEvent):
-    pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, 7, text.default.font)
+    area = menu_item.area
+    pyxel.text(area.x+6, area.y, menu_item.text, 7, text.default.font)
 

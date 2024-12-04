@@ -76,7 +76,7 @@ class Dial(XUDial):
     WRAP_ATTR = "wrap"  # ワードラップ文字数
 
     # タグのテキストを処理する
-    def __init__(self, state:XUState, digit_length:int, align:str="right", valign:str="center", digit_list:str="0123456789"):
+    def __init__(self, state:XUState, digit_length:int, align:str, valign:str, digit_list:str):
         super().__init__(state, digit_length, digit_list)
         self._align = align
         self._valign = valign

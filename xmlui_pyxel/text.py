@@ -29,7 +29,7 @@ class Font:
 # ラベルを扱う
 # #############################################################################
 class Label(XUState):
-    def __init__(self, state:XUState, align:str="center", valign:str="center"):
+    def __init__(self, state:XUState, align:str, valign:str):
         super().__init__(state.xmlui, state._element)
         self._align = align
         self._valign = valign
