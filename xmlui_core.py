@@ -377,7 +377,7 @@ class XUState:
     def value(self) -> str:  # 汎用値取得
         return self.attr_str("value", "")
     @value.setter
-    def set_value(self, val:str):
+    def set_value(self, val:str):  # state間汎用値持ち運び用
         self.set_attr("value", val)
 
     @property
