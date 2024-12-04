@@ -171,7 +171,7 @@ def dial(dial:input.Dial, event:xuc.XUEvent):
 
     # 閉じる
     if input.BTN_B in event.trg:
-        dial.close()
+        dial.close_on()
 
 
 

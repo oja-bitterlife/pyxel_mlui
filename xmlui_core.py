@@ -336,10 +336,9 @@ class XUState:
         return opend
 
     # 閉じる
-    def close(self, id:str|None=None):  # closeの後なにもしないのでNone
+    def close(self, id:str|None=None):
         # open/closeが連続しないようTrg入力を落とす
         self.xmlui.event.clearTrg()
-        self.xmlui.event.on("close", self)  # closeイベントを発行する
 
         if id is not None:
             return self.xmlui.find_by_ID(id).remove()
@@ -348,6 +347,12 @@ class XUState:
             return self.xmlui.find_by_ID(self.owner).remove()
 
         self.remove()  # 何もcloseできなかったら自分をclose
+
+    # 閉じる際に通知も送る
+    def close_on(self, event_name:str="close", id:str|None=None):
+        self.xmlui.event.on(event_name, self)  # closeイベントを発行する
+        self.close(id)
+
 
     # デバッグ用
     # *************************************************************************
