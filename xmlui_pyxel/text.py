@@ -10,7 +10,6 @@ default:"Font" = None # type: ignore
 class Font:
     def __init__(self, font_path:str):
         # フォントデータ読み込み
-        print(os.getcwd()+"/"+font_path)
         self.font = pyxel.Font(font_path)
 
         # フォントサイズ算出

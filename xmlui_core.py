@@ -517,6 +517,9 @@ class XMLUI(XUState):
     def template_fromstring(self, template_str:str, template_name:str):
         self.set_template(XMLUI_Template._fromstring(self, template_str), template_name)
 
+    def remove_template(self, template_name:str):
+        del self._templates[template_name]
+
     # 更新用
     # *************************************************************************
     def draw(self):

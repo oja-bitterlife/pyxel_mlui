@@ -13,7 +13,7 @@ class Title:
         xmlui.open(UI_TEMPLATE_TITLE, "game_title")
 
     def __del__(self):
-        print("remove title")
+        xmlui.remove_template(UI_TEMPLATE_TITLE)
 
     def update(self):
         if "game_start" in xmlui.event.trg:
