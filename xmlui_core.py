@@ -124,8 +124,10 @@ class XUEvent:
         self._receive = set([])
 
     # 入力
-    def on(self, text:str) -> Self:
-        self._receive.add(text)
+    def on(self, event_name:str) -> Self:
+        if event_name in self._receive:
+            raise ValueError(f"event_name:{event_name} is already registered.")
+        self._receive.add(event_name)
         return self
 
     # 取得
@@ -317,6 +319,7 @@ class XUState:
     def close(self, id:str|None=None):  # closeの後なにもしないのでNone
         # open/closeが連続しないようTrg入力を落とす
         self.xmlui.event.clearTrg()
+        self.xmlui.on("close")
 
         if id is not None:
             return self.xmlui.find_by_ID(id).remove()
