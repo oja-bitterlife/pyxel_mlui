@@ -1,10 +1,10 @@
 import pyxel
 
-from xmlui_core import XUState,XUEvent
+from xmlui_core import XMLUI,XUState,XUEvent
 from xmlui_pyxel import xmlui_pyxel_init,select,text,win,input
 
 from . import main
-xmlui = main.xmlui
+xmlui = XMLUI()
 
 UI_TEMPLATE = "ui_template"
 
@@ -90,27 +90,6 @@ def menu_grid(menu_grid:select.Grid, event:XUEvent):
     draw_menu_cursor(menu_grid.selected_item, 0, 0)
 
 
-@select.list(xmlui, "yes_no_list", "menu_item", "item_w", "item_h")
-def yes_no_list(list_win:select.List, event:XUEvent):
-    # メニュー選択
-    list_win.select_by_event(event.trg, *input.UP_DOWN)
-
-    # 閉じる
-    if input.BTN_B in event.trg:
-        list_win.close()
-
-    # 決定
-    if input.BTN_A in event.trg:
-        # Yes時処理
-        if list_win.selected_item == "yes":
-            list_win.close_parent_on("command_menu_win", "dial_yes")
-
-        # No時処理
-        if list_win.selected_item == "no":
-            list_win.close()
-
-    # カーソル追加
-    draw_menu_cursor(list_win.selected_item, 0, 0)
 
 
 # メッセージウインドウ
