@@ -23,7 +23,7 @@ xmlui.debug.level = xmlui.debug.DEBUG_LEVEL_LIB
 
 # UIテンプレートXMLの読み込み
 UI_TEMPLATE = "ui_template"
-xmlui.template_fromfile("samples/assets/ui/dq.xml", "ui_template")
+xmlui.template_fromfile("samples/assets/ui/test.xml", "ui_template")
 
 
 # ユーティリティ
