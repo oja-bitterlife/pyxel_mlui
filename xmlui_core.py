@@ -839,15 +839,16 @@ class XUSelectGrid(XUSelectBase):
 
 # リスト選択
 class XUSelectList(XUSelectBase):
-    def __init__(self, state:XUState, item_tag:str, item_h_attr:str):
+    def __init__(self, state:XUState, item_tag:str, item_w_attr:str, item_h_attr:str):
         # 自分の直下のitemだけ回収する
         items = list(filter(lambda state: state.enable and state.tag==item_tag, [XUState(state.xmlui, element) for element in state._element]))
         super().__init__(state, 1, items)
 
         # 座標設定
+        item_w = state.attr_int(item_w_attr, 0)
         item_h = state.attr_int(item_h_attr, 0)
         for i,item in enumerate(self._items):
-            item.set_attr("y", i * item_h)
+            item.set_pos(i * item_w, i * item_h)
   
     # 入力に応じた挙動一括。変更があった場合はTrue
     # 選択リストは通常上下ラップする

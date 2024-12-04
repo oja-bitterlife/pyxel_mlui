@@ -13,7 +13,7 @@ xmlui = xuc.XMLUI()
 # input.INPUT_LIST[input.BTN_A] = [pyxel.KEY_A]
 
 # 初期化セット
-xmlui_pyxel.initialize(xmlui,
+xmlui_pyxel.init(xmlui,
         inputlist_dict = input.INPUT_LIST,
         font_path = "samples/common_assets/font/b12.bdf"
     )

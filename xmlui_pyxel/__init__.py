@@ -8,7 +8,7 @@ from . import win
 
 # XMLUIのおすすめ設定による初期化をよしなにやってくれるやつ
 # これを呼ぶだけでだいたいいい感じになるように頑張る
-def initialize(
+def xmlui_pyxel_init(
         xmlui:xuc.XMLUI,
         inputlist_dict: dict[str,list[int]],
         font_path:str

@@ -38,15 +38,15 @@ def grid(xmlui:XMLUI, tag_name:str, item_tag:str, rows_attr:str, item_w_attr:str
 # リストウインドウ
 # *****************************************************************************
 class List(XUSelectList):
-    def __init__(self, state:XUState, item_tag:str, item_h_attr:str):
-        super().__init__(state, item_tag, item_h_attr)
+    def __init__(self, state:XUState, item_tag:str, item_w_attr:str, item_h_attr:str):
+        super().__init__(state, item_tag, item_w_attr, item_h_attr)
 
 # デコレータを用意
-def list(xmlui:XMLUI, tag_name:str, tag_item:str, item_h_attr:str):
+def list(xmlui:XMLUI, tag_name:str, tag_item:str, item_w_attr:str, item_h_attr:str):
     def wrapper(bind_func:Callable[[List,XUEvent], None]):
         # 登録用関数をジェネレート
         def draw(state:XUState, event:XUEvent):
-            bind_func(List(state, tag_item, item_h_attr), event)
+            bind_func(List(state, tag_item, item_w_attr, item_h_attr), event)
         # 関数登録
         xmlui.set_drawfunc(tag_name, draw)
     return wrapper

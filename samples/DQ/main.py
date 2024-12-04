@@ -1,8 +1,14 @@
 # 今回はpyxel向けのライブラリを作るのです
 import pyxel
 
-# ui_code内のUIライブラリへのアクセス
-from .ui_code import xmlui,UI_TEMPLATE,input,select
+# xmlui_pyxelの初期化
+# *********************************************************
+from xmlui_core import XMLUI
+from xmlui_pyxel import select,text,win,input
+
+# ライブラリのインスタンス化
+xmlui = XMLUI()
+
 
 # ここからゲーム本体開始
 # *********************************************************
