@@ -805,8 +805,9 @@ class XUSelectGrid(XUSelectBase):
         for i,item in enumerate(self._items):
             item.set_pos(i % self._rows * item_w, i // self._rows * item_h)
 
-    # 入力に応じた挙動一括
-    def _select_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str, x_wrap:bool=False, y_wrap:bool=False) -> XUState:
+    # 入力に応じた挙動一括。変更があった場合はTrue
+    def _select_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str, x_wrap:bool=False, y_wrap:bool=False) -> bool:
+        old_no = self.selected_no
         if left_event in input:
             self.next(-1, x_wrap, y_wrap)
         elif right_event in input:
@@ -815,15 +816,15 @@ class XUSelectGrid(XUSelectBase):
             self.next(-self._rows, x_wrap, y_wrap)
         elif down_event in input:
             self.next(self._rows, x_wrap, y_wrap)
-        return self.selected_item
+        return self.selected_no != old_no
 
-    def select_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> XUState:
+    def select_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
         return self._select_by_event(input, left_event, right_event, up_event, down_event, False, False)
 
-    def select_wrap_x(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> XUState:
+    def select_wrap_x(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
         return self._select_by_event(input, left_event, right_event, up_event, down_event, True, False)
 
-    def select_wrap_y(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> XUState:
+    def select_wrap_y(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
         return self._select_by_event(input, left_event, right_event, up_event, down_event, False, True)
 
 
@@ -840,17 +841,18 @@ class XUSelectList(XUSelectBase):
             item.set_attr("y", i * item_h)
   
     # 入力に応じた挙動一括。選択リストは通常上下ラップする
-    def _select_by_event(self, input:set[str], up_event:str, down_event:str, y_wrap:bool=True) -> XUState:
+    def _select_by_event(self, input:set[str], up_event:str, down_event:str, y_wrap:bool=True) -> bool:
+        old_no = self.selected_no
         if up_event in input:
             self.next(-1, False, y_wrap)
         elif down_event in input:
             self.next(1, False, y_wrap)
-        return self.selected_item
+        return self.selected_no != old_no
 
-    def select_by_event(self, input:set[str], up_event:str, down_event:str) -> XUState:
+    def select_by_event(self, input:set[str], up_event:str, down_event:str) -> bool:
         return self._select_by_event(input, up_event, down_event, False)
 
-    def select_wrap(self, input:set[str], up_event:str, down_event:str) -> XUState:
+    def select_wrap(self, input:set[str], up_event:str, down_event:str) -> bool:
         return self._select_by_event(input, up_event, down_event, True)
 
 

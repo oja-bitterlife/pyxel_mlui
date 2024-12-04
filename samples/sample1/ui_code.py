@@ -87,17 +87,17 @@ def ok_title_draw(label:text.Label, event:xuc.XUEvent):
 @select.grid(xmlui, "menu_grid", "menu_item", "rows", "item_w", "item_h")
 def menu_grid(menu_grid:select.Grid, event:xuc.XUEvent):
     # メニュー選択
-    selected_item = menu_grid.select_by_event(event.trg, *input.CURSOR)
+    menu_grid.select_by_event(event.trg, *input.CURSOR)
 
     # 選択アイテムの表示
     if input.BTN_A in event.trg:
         # メッセージウインドウ表示
-        if selected_item == "speak":
-            selected_item.open(UI_TEMPLATE, "win_message")
+        if menu_grid.selected_item == "speak":
+            menu_grid.selected_item.open(UI_TEMPLATE, "win_message")
 
         # dialウインドウ表示
-        if selected_item == "dial":
-            selected_item.open(UI_TEMPLATE, "win_dial")
+        if menu_grid.selected_item == "dial":
+            menu_grid.selected_item.open(UI_TEMPLATE, "win_dial")
 
     # 閉じる
     if input.BTN_B in event.trg:
@@ -110,7 +110,7 @@ def menu_grid(menu_grid:select.Grid, event:xuc.XUEvent):
 @select.list(xmlui, "yes_no_list", "menu_item", "item_h")
 def yes_no_list(list_win:select.List, event:xuc.XUEvent):
     # メニュー選択
-    selected_item = list_win.select_by_event(event.trg, *input.UP_DOWN)
+    list_win.select_by_event(event.trg, *input.UP_DOWN)
 
     # 閉じる
     if input.BTN_B in event.trg:
@@ -119,11 +119,11 @@ def yes_no_list(list_win:select.List, event:xuc.XUEvent):
     # 決定
     if input.BTN_A in event.trg:
         # Yes時処理
-        if selected_item == "yes":
+        if list_win.selected_item == "yes":
             list_win.close_parent_on("command_menu_win")
 
         # No時処理
-        if selected_item == "no":
+        if list_win.selected_item == "no":
             list_win.close()
 
     # カーソル追加
