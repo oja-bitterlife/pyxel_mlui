@@ -1,3 +1,3 @@
-from samples.sample1 import main
+from samples.DQ import main
 
 main.run()
