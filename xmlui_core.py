@@ -130,7 +130,7 @@ class XUEvent:
         self._on_state:dict[str,XUState] = {}
 
     # 入力
-    def on(self, event_name:str, state:"XUState") -> Self:
+    def _on(self, event_name:str, state:"XUState") -> Self:
         if event_name in self._receive:
             raise ValueError(f"event_name:{event_name} is already registered.")
         self._receive.add(event_name)
@@ -348,11 +348,11 @@ class XUState:
 
     # 閉じる際に通知も送る
     def close_on(self, event_name:str="close"):
-        self.xmlui.event.on(event_name, self)  # closeイベントを発行する
+        self.xmlui.event._on(event_name, self)  # closeイベントを発行する
         self.close()
 
     def close_parent_on(self, parent_id:str,  event_name:str="close"):
-        self.xmlui.event.on(event_name, self)  # closeイベントを発行する
+        self.xmlui.event._on(event_name, self)  # closeイベントを発行する
         self.close_parent(parent_id)
 
     # デバッグ用
@@ -568,7 +568,7 @@ class XMLUI(XUState):
         return wrapper
 
 
-    # 入力
+    # イベント
     # *************************************************************************
     # キー入力
     def set_inputlist(self, input_type:str, list:list[int]):
@@ -584,13 +584,16 @@ class XMLUI(XUState):
     def check_input_on(self, check_func:Callable[[int], bool]):
         for key in self._input_lists:
             if self._check_input(key, check_func):
-                self.event.on(key, self)
+                self.event._on(key, self)
 
     # イベントでopen
     def open_by_event(self, trg_event:str, template_name:str, id:str, id_alias:str|None=None):
         if trg_event in self.xmlui.event.trg:
             if not self.is_open(id if id_alias is None else id_alias):
                 self.open(template_name, id, id_alias)
+
+    def on(self, event_name:str, state:XUState):
+        self.event._on(event_name, state)
 
 # ユーティリティークラス
 # #############################################################################
