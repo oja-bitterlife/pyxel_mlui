@@ -50,7 +50,7 @@ def draw_msg_cursor(state:xuc.XUState):
 def round_win_draw(win:win.Round, event:xuc.XUEvent):
     clip = win.area.to_offset()
     clip.h = int(win.update_count*win.speed)
-    win.draw_buf(pyxel.screen.data_ptr(), [7,7,12], clip)
+    win.draw_buf(pyxel.screen.data_ptr(), [7,7,2], 12, clip)
 
 # 四角ウインドウ
 # ---------------------------------------------------------
@@ -58,7 +58,7 @@ def round_win_draw(win:win.Round, event:xuc.XUEvent):
 def rect_win_draw(win:win.Rect, event:xuc.XUEvent):
     clip = win.area.to_offset()
     clip.h = int(win.update_count*win.speed)
-    win.draw_buf(pyxel.screen.data_ptr(), [7,7,12], clip)
+    win.draw_buf(pyxel.screen.data_ptr(), [7,7,2], 12, clip)
 
 # メニューアイテム
 # ---------------------------------------------------------

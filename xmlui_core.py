@@ -967,8 +967,8 @@ class _XUWinFrameBase(XUState):
             return
 
         size = len(pattern)
-        byte_pat = bytes(pattern)
-        byte_shadow = bytes(pattern)
+        pat_bytes = bytes(pattern)
+        rev_butes = bytes(reversed(pat_bytes))
 
         # 角の描画
         # ---------------------------------------------------------------------
@@ -981,10 +981,10 @@ class _XUWinFrameBase(XUState):
 
         for y_ in range(size):
             for x_ in range(size):
-                _draw_shoulder(self, x_, y_, byte_shadow)  # 左上
-                _draw_shoulder(self, area.w-1-x_, y_, byte_shadow)  # 右上
-                _draw_shoulder(self, x_, area.h-1-y_, byte_shadow)  # 左下
-                _draw_shoulder(self, area.w-1-x_, area.h-1-y_, byte_pat)  # 右下
+                _draw_shoulder(self, x_, y_, pat_bytes)  # 左上
+                _draw_shoulder(self, area.w-1-x_, y_, pat_bytes)  # 右上
+                _draw_shoulder(self, x_, area.h-1-y_, rev_butes)  # 左下
+                _draw_shoulder(self, area.w-1-x_, area.h-1-y_, rev_butes)  # 右下
 
         # bytearrayによる角以外の高速描画(patternキャッシュを作ればもっと速くなるかも)
         # ---------------------------------------------------------------------
@@ -995,11 +995,11 @@ class _XUWinFrameBase(XUState):
                 # 上
                 if line_clip.contains_y(y_):
                     offset = (screen_area.y + y_)*self.screen_w + screen_area.x
-                    screen_buf[offset+line_clip.x: offset+line_clip.right()] = byte_shadow[y_:y_+1] * line_clip.w
+                    screen_buf[offset+line_clip.x: offset+line_clip.right()] = pat_bytes[y_:y_+1] * line_clip.w
                 # 下
                 if line_clip.contains_y(area.h-1-y_):
                     offset = (screen_area.bottom()-1-y_)*self.screen_w + screen_area.x
-                    screen_buf[offset+line_clip.x: offset+line_clip.right()] = byte_pat[y_:y_+1] * line_clip.w
+                    screen_buf[offset+line_clip.x: offset+line_clip.right()] = rev_butes[y_:y_+1] * line_clip.w
 
         # 左
         left_clip = clip.intersect(XURect(0, 0, size, area.h).inflate(0, -size))
@@ -1007,23 +1007,22 @@ class _XUWinFrameBase(XUState):
             for y_ in range(area.h):
                 if left_clip.contains_y(y_):
                     offset = (screen_area.y + y_)*self.screen_w + screen_area.x
-                    screen_buf[offset:offset+left_clip.w] = byte_shadow[:left_clip.w]
+                    screen_buf[offset:offset+left_clip.w] = pat_bytes[:left_clip.w]
 
         # 右
         right_clip = clip.intersect(XURect(area.w-size, 0, size, area.h).inflate(0, -size))
         if not right_clip.is_empty:
-            r_pat = bytes(reversed(byte_pat))
             for y_ in range(area.h):
                 if right_clip.contains_y(y_):
                     offset = (screen_area.y + y_)*self.screen_w + screen_area.x + area.w-size
-                    screen_buf[offset:offset+right_clip.w] = r_pat[:right_clip.w]
+                    screen_buf[offset:offset+right_clip.w] = rev_butes[:right_clip.w]
 
     # ウインドウ全体をバッファに書き込む
-    def draw_buf(self, screen_buf:bytearray, pattern:list[int], clip:XURect|None=None):
+    def draw_buf(self, screen_buf:bytearray, pattern:list[int], bg_color:int, clip:XURect|None=None):
         area = self.area  # areaへのアクセスは遅いので必ずキャッシュしてアクセス
-        clip = XURect(0, 0, area.w, area.h) if clip is None else clip
+        clip = area.to_offset() if clip is None else clip  # clip指定がなければエリアサイズ
         size = len(pattern)
-        self._draw_center(screen_buf, pattern[-1], area.inflate(-size, -size), XURect(0, 0, clip.w-size, clip.h-size))
+        self._draw_center(screen_buf, bg_color, area.inflate(-size, -size), XURect(0, 0, clip.w-size, clip.h-size))
         self._draw_frame(screen_buf, pattern, area, clip)
 
 class XUWinRoundFrame(_XUWinFrameBase):
