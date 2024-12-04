@@ -16,7 +16,7 @@
         </game_start>
         <game_speed abs_x="48" abs_y="200" item_w="64" force_event="True">
             <menu_item action="slow">SLOW</menu_item>
-            <menu_item action="normal">NORMAL</menu_item>
+            <menu_item adjust_x="-10" action="normal">NORMAL</menu_item>
             <menu_item action="fast">FAST</menu_item>
         </game_speed>
     </game_title>

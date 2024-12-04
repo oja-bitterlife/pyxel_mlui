@@ -769,10 +769,16 @@ class XUSelectBase(_XUUtilBase):
     ROOT_TAG = "_xmlui_select_root"
     SELECTED_NO_ATTR = "_xmlui_selected_no"
 
-    def __init__(self, state:XUState, rows:int, items:list[XUState]):
+    def __init__(self, state:XUState, rows:int, items:list[XUState], item_w_attr:str, item_h_attr:str):
         super().__init__(state, self.ROOT_TAG)
         self._rows = rows
         self._items = items
+
+        # 座標設定
+        item_w = state.attr_int(item_w_attr, 0)
+        item_h = state.attr_int(item_h_attr, 0)
+        for i,item in enumerate(self._items):
+            item.set_pos(i * item_w, i * item_h)
 
     @property
     def selected_no(self) -> int:
@@ -819,13 +825,7 @@ class XUSelectGrid(XUSelectBase):
     def __init__(self, state:XUState, item_tag:str, rows_attr:str, item_w_attr:str, item_h_attr:str):
         # 自分の直下のitemだけ回収する
         items = list(filter(lambda state: state.enable and state.tag==item_tag, [XUState(state.xmlui, element) for element in state._element]))
-        super().__init__(state, state.attr_int(rows_attr, 1), items)
-
-        # 座標設定
-        item_w = state.attr_int(item_w_attr, 0)
-        item_h = state.attr_int(item_h_attr, 0)
-        for i,item in enumerate(self._items):
-            item.set_pos(i % self._rows * item_w, i // self._rows * item_h)
+        super().__init__(state, state.attr_int(rows_attr, 1), items, item_w_attr, item_h_attr)
 
     # 入力に応じた挙動一括。変更があった場合はTrue
     def _select_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str, x_wrap:bool, y_wrap:bool) -> bool:
@@ -857,13 +857,7 @@ class XUSelectList(XUSelectBase):
     def __init__(self, state:XUState, item_tag:str, item_w_attr:str, item_h_attr:str):
         # 自分の直下のitemだけ回収する
         items = list(filter(lambda state: state.enable and state.tag==item_tag, [XUState(state.xmlui, element) for element in state._element]))
-        super().__init__(state, 1, items)
-
-        # 座標設定
-        item_w = state.attr_int(item_w_attr, 0)
-        item_h = state.attr_int(item_h_attr, 0)
-        for i,item in enumerate(self._items):
-            item.set_pos(i * item_w, i * item_h)
+        super().__init__(state, 1, items, item_w_attr, item_h_attr)
   
     # 入力に応じた挙動一括。変更があった場合はTrue
     # 選択リストは通常上下ラップする
