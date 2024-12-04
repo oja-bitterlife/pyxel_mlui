@@ -3,7 +3,7 @@ from xmlui_core import *
 
 # セレクトアイテム
 # *****************************************************************************
-class Item(XUState):
+class Item(XUSelectItem):
     def __init__(self, state:XUState):
         super().__init__(state.xmlui, state._element)
 

@@ -62,4 +62,3 @@ def game_speed(game_speed:select.List, event:XUEvent):
 def start_item(menu_item:select.Item, event:XUEvent):
     area = menu_item.area
     pyxel.text(area.x+6, area.y, menu_item.text, 7, text.default.font)
-

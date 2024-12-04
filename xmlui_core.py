@@ -763,13 +763,33 @@ class XUPageBase(_XUUtilBase):
 
 # メニュー系
 # ---------------------------------------------------------
+# 選択クラス用アイテム
+class XUSelectItem(XUState):
+    # アイテム座標保存先
+    ITEM_X_ATTR = "_xmlui_sel_item_x"
+    ITEM_Y_ATTR = "_xmlui_sel_item_y"
+
+    def __init__(self, xmlui:XMLUI, element:Element):
+        super().__init__(xmlui, element)
+
+    def set_pos(self, x:int, y:int) -> Self:
+        self.set_attr([self.ITEM_X_ATTR, self.ITEM_Y_ATTR],  [x, y])
+        return self
+
+    @property
+    def area(self) -> XURect:
+        area = super().area
+        area.x += self.attr_int(self.ITEM_X_ATTR)
+        area.y += self.attr_int(self.ITEM_Y_ATTR)
+        return area
+
 # グリッド情報
 class XUSelectBase(_XUUtilBase):
     # クラス定数
     ROOT_TAG = "_xmlui_select_root"
     SELECTED_NO_ATTR = "_xmlui_selected_no"
 
-    def __init__(self, state:XUState, rows:int, items:list[XUState], item_w_attr:str, item_h_attr:str):
+    def __init__(self, state:XUState, rows:int, items:list[XUSelectItem], item_w_attr:str, item_h_attr:str):
         super().__init__(state, self.ROOT_TAG)
         self._rows = rows
         self._items = items
@@ -778,7 +798,7 @@ class XUSelectBase(_XUUtilBase):
         item_w = state.attr_int(item_w_attr, 0)
         item_h = state.attr_int(item_h_attr, 0)
         for i,item in enumerate(self._items):
-            item.set_pos(i * item_w, i * item_h)
+            item.set_pos(i* item_w, i * item_h)
 
     @property
     def selected_no(self) -> int:
@@ -824,7 +844,7 @@ class XUSelectBase(_XUUtilBase):
 class XUSelectGrid(XUSelectBase):
     def __init__(self, state:XUState, item_tag:str, rows_attr:str, item_w_attr:str, item_h_attr:str):
         # 自分の直下のitemだけ回収する
-        items = list(filter(lambda state: state.enable and state.tag==item_tag, [XUState(state.xmlui, element) for element in state._element]))
+        items = list(filter(lambda state: state.enable and state.tag==item_tag, [XUSelectItem(state.xmlui, element) for element in state._element]))
         super().__init__(state, state.attr_int(rows_attr, 1), items, item_w_attr, item_h_attr)
 
     # 入力に応じた挙動一括。変更があった場合はTrue
@@ -856,7 +876,7 @@ class XUSelectGrid(XUSelectBase):
 class XUSelectList(XUSelectBase):
     def __init__(self, state:XUState, item_tag:str, item_w_attr:str, item_h_attr:str):
         # 自分の直下のitemだけ回収する
-        items = list(filter(lambda state: state.enable and state.tag==item_tag, [XUState(state.xmlui, element) for element in state._element]))
+        items = list(filter(lambda state: state.enable and state.tag==item_tag, [XUSelectItem(state.xmlui, element) for element in state._element]))
         super().__init__(state, 1, items, item_w_attr, item_h_attr)
   
     # 入力に応じた挙動一括。変更があった場合はTrue
