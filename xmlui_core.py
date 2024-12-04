@@ -152,12 +152,9 @@ class XUEvent:
     def release(self) -> set[str]:
         return self._release  # 解除された入力を取得
 
-    def get_state(self, event_name:str, type_:type[T]|None=None) -> "T|None|XUState":
+    def get_state(self, event_name:str, type_:type[T]) -> T|None:
         if event_name not in self._on_state:
             return None
-
-        if type_ is None:  # type_がNoneなら何でも返す
-            return self._on_state[event_name]
 
         if isinstance(self._on_state[event_name], type_):
             return cast(T, self._on_state[event_name])

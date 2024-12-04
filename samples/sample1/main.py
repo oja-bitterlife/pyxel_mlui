@@ -2,7 +2,7 @@
 import pyxel
 
 # ui_code内のUIライブラリへのアクセス
-from .ui_code import xmlui,UI_TEMPLATE,input
+from .ui_code import xmlui,UI_TEMPLATE,input,select
 
 # ここからゲーム本体開始
 # *********************************************************
@@ -18,7 +18,9 @@ def update(): # フレームの更新処理
     dial = xmlui.event.get_state("close", input.Dial)
     if dial:
         print(dial)
-
+    yes_no = xmlui.event.get_state("close", select.List)
+    if yes_no:
+        print(yes_no.selected_no)
 
 def draw(): # 描画処理
     # ゲームの描画コード
