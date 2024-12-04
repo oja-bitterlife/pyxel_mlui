@@ -806,8 +806,9 @@ class XUSelectGrid(XUSelectBase):
             item.set_pos(i % self._rows * item_w, i // self._rows * item_h)
 
     # 入力に応じた挙動一括。変更があった場合はTrue
-    def _select_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str, x_wrap:bool=False, y_wrap:bool=False) -> bool:
+    def _select_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str, x_wrap:bool, y_wrap:bool) -> bool:
         old_no = self.selected_no
+
         if left_event in input:
             self.next(-1, x_wrap, y_wrap)
         elif right_event in input:
@@ -816,6 +817,7 @@ class XUSelectGrid(XUSelectBase):
             self.next(-self._rows, x_wrap, y_wrap)
         elif down_event in input:
             self.next(self._rows, x_wrap, y_wrap)
+
         return self.selected_no != old_no
 
     def select_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
@@ -840,20 +842,23 @@ class XUSelectList(XUSelectBase):
         for i,item in enumerate(self._items):
             item.set_attr("y", i * item_h)
   
-    # 入力に応じた挙動一括。選択リストは通常上下ラップする
-    def _select_by_event(self, input:set[str], up_event:str, down_event:str, y_wrap:bool=True) -> bool:
+    # 入力に応じた挙動一括。変更があった場合はTrue
+    # 選択リストは通常上下ラップする
+    def _select_by_event(self, input:set[str], up_event:str, down_event:str, y_wrap:bool) -> bool:
         old_no = self.selected_no
+
         if up_event in input:
             self.next(-1, False, y_wrap)
         elif down_event in input:
             self.next(1, False, y_wrap)
+
         return self.selected_no != old_no
 
     def select_by_event(self, input:set[str], up_event:str, down_event:str) -> bool:
-        return self._select_by_event(input, up_event, down_event, False)
-
-    def select_wrap(self, input:set[str], up_event:str, down_event:str) -> bool:
         return self._select_by_event(input, up_event, down_event, True)
+
+    def select_no_wrap(self, input:set[str], up_event:str, down_event:str) -> bool:
+        return self._select_by_event(input, up_event, down_event, False)
 
 
 # ダイアル
@@ -921,8 +926,11 @@ class XUDial(_XUUtilBase):
         new_digit = self._digit_list[(self._digit_list.find(old_digit) + len(self._digit_list) + add) % len(self._digit_list)]
         return self.set_digit(edit_pos, new_digit)
 
-    # 入力に応じた挙動一括
-    def change_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str):
+    # 入力に応じた挙動一括。変更があった場合はTrue
+    def change_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
+        old_digits = self.digits_raw
+        old_edit_pos = self.edit_pos_raw
+
         if left_event in input:
             self.move_editpos(1)
         if right_event in input:
@@ -931,6 +939,8 @@ class XUDial(_XUUtilBase):
             self.add_digit(self.edit_pos_raw, +1)  # digitを増やす
         if down_event in input:
             self.add_digit(self.edit_pos_raw, -1)  # digitを減らす
+
+        return self.digits_raw != old_digits or self.edit_pos_raw != old_edit_pos
 
 
 # ウインドウサポート
