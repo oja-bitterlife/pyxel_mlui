@@ -105,7 +105,7 @@ class XUEvent:
 
     def clear(self):
         self._receive:set[str] = set([])  # 次の状態受付
-        self._input:set[str] = set([])
+        self._now:set[str] = set([])
         self._trg:set[str] = set([])
         self._release:set[str] = set([])
 
@@ -116,9 +116,9 @@ class XUEvent:
     # 更新
     def update(self):
         # 状態更新
-        self._trg = set([i for i in self._receive if i not in self._input])
-        self._relase = set([i for i in self._input if i not in self._receive])
-        self._input = self._receive
+        self._trg = set([i for i in self._receive if i not in self._now])
+        self._relase = set([i for i in self._now if i not in self._receive])
+        self._now = self._receive
 
         # 取得し直す
         self._receive = set([])
@@ -130,8 +130,8 @@ class XUEvent:
 
     # 取得
     @property
-    def input(self) -> set[str]:
-        return self._input  # 現在押されているか
+    def now(self) -> set[str]:
+        return self._now  # 現在押されているか
 
     @property
     def trg(self) -> set[str]:

@@ -15,6 +15,8 @@ def update(): # フレームの更新処理
     # ゲームの中でメインメニューを開く
     xmlui.open_by_event(input.BTN_A, UI_TEMPLATE, "command_menu_win")
 
+    xmlui.event.trg
+
 
 def draw(): # 描画処理
     # ゲームの描画コード
