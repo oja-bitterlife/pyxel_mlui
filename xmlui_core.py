@@ -888,18 +888,12 @@ class XUDial(_XUUtilBase):
         return self._digit_length-1 - self._util_root.attr_int(self.EDIT_POS_ATTR)
 
     @property
-    def digits_raw(self) -> list[str]:
-        return [c for c in self._util_root.attr_str(self.DIGIT_ATTR)]
-    @property
-    def digits(self) -> list[str]:
-        return list(reversed(self.digits_raw))
+    def digits(self) -> str:
+        return "".join(list(reversed(self._util_root.attr_str(self.DIGIT_ATTR))))
 
     @property
-    def zenkaku_digits_raw(self) -> list[str]:
-        return [XUPageBase.convert_zenkaku(digit) for digit in self.digits_raw]
-    @property
-    def zenkaku_digits(self) -> list[str]:
-        return list(reversed(self.zenkaku_digits_raw))
+    def zenkaku_digits(self) -> str:
+        return "".join(list(reversed(XUPageBase.convert_zenkaku(self._util_root.attr_str(self.DIGIT_ATTR)))))
 
     # 回り込み付き操作位置の設定
     def set_editpos(self, edit_pos:int) -> Self:
@@ -912,20 +906,20 @@ class XUDial(_XUUtilBase):
 
     # 指定位置のdigitを変更する
     def set_digit(self, edit_pos:int, digit:str) -> Self:
-        digits = self.digits_raw
+        digits = [c for c in self._util_root.attr_str(self.DIGIT_ATTR)]
         digits[edit_pos] = digit
         self._util_root.set_attr(self.DIGIT_ATTR, "".join(digits))
         return self
 
     # 回り込み付きdigit増減
     def add_digit(self, edit_pos:int, add:int) -> Self:
-        old_digit = self.digits_raw[edit_pos]
+        old_digit = self._util_root.attr_str(self.DIGIT_ATTR)[edit_pos]
         new_digit = self._digit_list[(self._digit_list.find(old_digit) + len(self._digit_list) + add) % len(self._digit_list)]
         return self.set_digit(edit_pos, new_digit)
 
     # 入力に応じた挙動一括。変更があった場合はTrue
     def change_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
-        old_digits = self.digits_raw
+        old_digits = self.digits
         old_edit_pos = self.edit_pos_raw
 
         if left_event in input:
@@ -937,7 +931,7 @@ class XUDial(_XUUtilBase):
         if down_event in input:
             self.add_digit(self.edit_pos_raw, -1)  # digitを減らす
 
-        return self.digits_raw != old_digits or self.edit_pos_raw != old_edit_pos
+        return self.digits != old_digits or self.edit_pos_raw != old_edit_pos
 
 
 # ウインドウサポート

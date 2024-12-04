@@ -83,13 +83,13 @@ class Dial(XUDial):
 
     def aligned_pos(self, font:text.Font, w:int=0, h:int=0) -> tuple[int, int]:
         area = self.area  # 低速なので使うときは必ず一旦ローカルに
-        x = area.aligned_x(font.text_width("".join(self.digits_raw))+w, self._align)
+        x = area.aligned_x(font.text_width(self.digits) + w, self._align)
         y = area.aligned_y(font.size+h, self._valign)
         return x, y
 
     def aligned_zenkaku_pos(self, font:text.Font, w:int=0, h:int=0) -> tuple[int, int]:
         area = self.area  # 低速なので使うときは必ず一旦ローカルに
-        x = area.aligned_x(font.text_width("".join(self.zenkaku_digits_raw))+w, self._align)
+        x = area.aligned_x(font.text_width(self.zenkaku_digits) + w, self._align)
         y = area.aligned_y(font.size+h, self._valign)
         return x, y
 

@@ -120,7 +120,7 @@ def yes_no_list(list_win:select.List, event:xuc.XUEvent):
     if input.BTN_A in event.trg:
         # Yes時処理
         if list_win.selected_item == "yes":
-            list_win.close_parent_on("command_menu_win")
+            list_win.close_parent_on("command_menu_win", "dial_yes")
 
         # No時処理
         if list_win.selected_item == "no":
@@ -167,7 +167,9 @@ def dial(dial:input.Dial, event:xuc.XUEvent):
 
     # 確定
     if input.BTN_A in event.trg:
-        dial.open(UI_TEMPLATE, "yes_no", "dial_yes_no")
+        yesno= dial.open(UI_TEMPLATE, "yes_no", "dial_yes_no")
+        yesno.set_attr("value", "".join(dial.digits))
+
 
     # 閉じる
     if input.BTN_B in event.trg:

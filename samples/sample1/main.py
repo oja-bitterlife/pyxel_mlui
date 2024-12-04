@@ -18,9 +18,9 @@ def update(): # フレームの更新処理
     dial = xmlui.event.get_state("close", input.Dial)
     if dial:
         print(dial)
-    yes_no = xmlui.event.get_state("close", select.List)
+    yes_no = xmlui.event.get_state("dial_yes", select.List)
     if yes_no:
-        print(yes_no.selected_no)
+        print(yes_no)
 
 def draw(): # 描画処理
     # ゲームの描画コード
