@@ -430,8 +430,8 @@ class XUState:
     def use_event(self) -> bool:  # eventを使うかどうか
         return self.attr_bool("use_event", False)
     @property
-    def force_event(self) -> bool:  # 強制でeventを使うかどうか
-        return self.attr_bool("force_event", False)
+    def through_event(self) -> bool:  # eventを透過させるかどうか
+        return self.attr_bool("through_event", False)
 
     @property
     def marker(self) -> str:  # デバッグ用
@@ -532,9 +532,13 @@ class XMLUI(XUState):
         # 描画対象を取得
         draw_targets = list(filter(lambda state: state.enable, [XUState(self, element) for element in self._element.iter()]))
 
-        # ActiveStateの取得
-        event_targets = [state for state in draw_targets if state.use_event]
-        self.active_state = event_targets[-1] if event_targets else self  # Active=最後
+        # ActiveStateの取得。Active=最後、なので最後から確認
+        self.active_states:list[XUState] = []
+        for event in reversed([state for state in draw_targets if state.use_event]):
+            self.active_states.append(event)
+            # パススルーでなければそこまで
+            if not event.through_event:
+                break
 
         # 親情報の更新
         self._parent_cache = {c:XUState(self, p) for p in self._element.iter() for c in p}
@@ -542,7 +546,7 @@ class XMLUI(XUState):
         # 更新処理
         for state in draw_targets:
             # active/inactiveどちらのeventを使うか決定
-            event = copy.copy(self.event) if state.force_event or state == self.active_state else XUEvent()
+            event = copy.copy(self.event) if state in self.active_states else XUEvent()
 
             # やっぱりinitialize情報がどこかに欲しい
             event.on_init = state.update_count == 0

@@ -35,7 +35,11 @@ def game_start(game_start:select.List, event:XUEvent):
     # メニュー選択
     game_start.select_by_event(event.trg, *input.UP_DOWN)
     if input.BTN_A in event.trg:
-        game_start.close_on("game_start")
+        match game_start:
+            case "start":
+                game_start.close_on("game_start")
+            case "continue":
+                game_start.open(UI_TEMPLATE_TITLE, "under_construct")
 
 @select.list(xmlui, "game_speed", "menu_item", "item_w", "item_h")
 def game_speed(game_speed:select.List, event:XUEvent):
