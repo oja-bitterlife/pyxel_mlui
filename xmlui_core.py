@@ -942,8 +942,8 @@ class _XUWinFrameBase(XUState):
         # 画面外に描画しない
         screen_area = screen_area.intersect(XURect(0, 0, self.screen_w, self.screen_h))
 
-        # オフセットなので0,0～w,h
-        area = XURect(0, 0, screen_area.w, screen_area.h)
+        # オフセットでやるお（ ＾ω＾）おっ
+        area = screen_area.to_offset()
         clip = clip.intersect(area)
         if clip.is_empty:
             return
@@ -961,7 +961,7 @@ class _XUWinFrameBase(XUState):
         screen_area = screen_area.intersect(XURect(0, 0, self.screen_w, self.screen_h))
 
         # オフセットなので0,0～w,h
-        area = XURect(0, 0, screen_area.w, screen_area.h)
+        area = screen_area.to_offset()
         clip = clip.intersect(area)
         if clip.is_empty:
             return
