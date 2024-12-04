@@ -1,27 +1,8 @@
 import pyxel
 
-from xmlui_core import XMLUI,XUState,XUEvent
-from xmlui_pyxel import xmlui_pyxel_init,select,text,win,input
-
-from . import main
-xmlui = XMLUI()
-
-UI_TEMPLATE = "ui_template"
-
-# ユーティリティ
-# *****************************************************************************
-# カーソル描画
-def draw_menu_cursor(state:XUState, x:int, y:int):
-    tri_size = 6
-    left = state.area.x + x
-    top = state.area.y+2 + y
-    pyxel.tri(left, top, left, top+tri_size, left+tri_size//2, top+tri_size//2, 7)
-
-def draw_msg_cursor(state:XUState):
-    tri_size = 6
-    center_x = state.area.center_x(tri_size)
-    bottom = state.area.bottom(tri_size) - 2
-    pyxel.tri(center_x, bottom, center_x+tri_size, bottom, center_x+tri_size//2, bottom+tri_size//2, 7)
+from xmlui_core import XUState,XUEvent
+from xmlui_pyxel import win,text,select,input
+from ui_common import xmlui,draw_menu_cursor,draw_msg_cursor
 
 
 # 表示物
@@ -118,48 +99,20 @@ def msg_text(msg_text:text.Msg, event:XUEvent):
 
 # ダイアル
 # *****************************************************************************
-@input.dial(xmlui, "dial", 5)
-def dial(dial:input.Dial, event:XUEvent):
-    dial.change_by_event(event.trg, *input.CURSOR)
+# @input.dial(xmlui, "dial", 5)
+# def dial(dial:input.Dial, event:XUEvent):
+#     dial.change_by_event(event.trg, *input.CURSOR)
 
-    for i,digit in enumerate(dial.zenkaku_digits):
-        color = 2 if dial.edit_pos == i else 7
-        x,y = dial.aligned_zenkaku_pos(text.default, 4, 4)
-        pyxel.text(x + i*text.default.size, y, digit, color, text.default.font)
+#     for i,digit in enumerate(dial.zenkaku_digits):
+#         color = 2 if dial.edit_pos == i else 7
+#         x,y = dial.aligned_zenkaku_pos(text.default, 4, 4)
+#         pyxel.text(x + i*text.default.size, y, digit, color, text.default.font)
 
-    # 確定
-    if input.BTN_A in event.trg:
-        yesno= dial.open(UI_TEMPLATE, "yes_no", "dial_yes_no")
-        yesno.set_attr("value", dial.digits)
+#     # 確定
+#     if input.BTN_A in event.trg:
+#         yesno= dial.open(UI_TEMPLATE, "yes_no", "dial_yes_no")
+#         yesno.set_attr("value", dial.digits)
 
-    # 閉じる
-    if input.BTN_B in event.trg:
-        dial.close_on()
-
-
-
-# 工事中
-# *****************************************************************************
-# ポップアップウインドウ
-# ---------------------------------------------------------
-@win.rect(xmlui, "popup_win", 1000)  # アニメはしない
-def popup_win_draw(win:win.Rect, event:XUEvent):
-    clip = win.area.to_offset()
-    clip.h = int(win.update_count*win.speed)
-    win.draw_buf(pyxel.screen.data_ptr(), [7,13,5], 12, clip)
-
-@text.msg(xmlui, "popup_text")
-def popup_text(popup_text:text.Msg, event:XUEvent):
-    popup_text.finish()  # 常に一気に表示
-
-    if input.BTN_A in event.trg or input.BTN_B in event.trg:
-        popup_text.close()
-
-    # テキスト描画
-    area = popup_text.area  # areaは重いので必ずキャッシュ
-
-    h = len(popup_text.page_text.split()) * text.default.size
-    y = area.aligned_y(h, "center")
-    for i,page in enumerate(popup_text.page_text.split()):
-        x = area.aligned_x(text.default.font.text_width(page), "center")
-        pyxel.text(x, y+i*text.default.size, page, 7, text.default.font)
+#     # 閉じる
+#     if input.BTN_B in event.trg:
+#         dial.close_on()

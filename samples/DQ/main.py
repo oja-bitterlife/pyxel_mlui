@@ -1,11 +1,6 @@
 # 今回はpyxel向けのライブラリを作るのです
 import pyxel
 
-# xmlui_pyxelの初期化
-# *********************************************************
-from xmlui_core import XMLUI
-from xmlui_pyxel import select,text,win,input
-
 # ここからゲーム本体開始
 # *********************************************************
 pyxel.init(256, 256)
@@ -27,5 +22,4 @@ def draw(): # 描画処理
     state.draw()
 
 # アプリケーションの実行
-def run():
-    pyxel.run(update, draw)
+pyxel.run(update, draw)

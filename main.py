@@ -1,2 +1,1 @@
-from samples.DQ import main
-main.run()
+from samples.DQ import bootstrap
