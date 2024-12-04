@@ -1,7 +1,7 @@
 import pyxel
 
 # xmlui_pyxelの初期化
-# *********************************************************
+# *****************************************************************************
 from xmlui_pyxel import xmlui_pyxel_init,select,text,win,input
 from xmlui_core import XMLUI,XUState,XUEvent
 
@@ -17,7 +17,9 @@ xmlui_pyxel_init(xmlui,
 # (ライブラリ開発用)
 xmlui.debug.level = xmlui.debug.DEBUG_LEVEL_LIB
 
-# カーソル描画
+
+# 共通で使える関数
+# *****************************************************************************
 # カーソル描画
 def draw_menu_cursor(state:XUState, x:int, y:int):
     tri_size = 6

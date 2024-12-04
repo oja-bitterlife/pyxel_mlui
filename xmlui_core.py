@@ -103,6 +103,7 @@ class XURect:
 class XUEvent:
     def __init__(self, init_active=False):
         self.active = init_active  # アクティブなイベントかどうか
+        self.on_init = False
         self.clear()
 
     def clear(self):
@@ -425,6 +426,9 @@ class XUState:
     @property
     def use_event(self) -> bool:  # eventを使うかどうか
         return self.attr_bool("use_event", False)
+    @property
+    def force_event(self) -> bool:  # 強制でeventを使うかどうか
+        return self.attr_bool("force_event", False)
 
     @property
     def marker(self) -> str:  # デバッグ用
@@ -532,11 +536,10 @@ class XMLUI(XUState):
         # 更新処理
         for state in draw_targets:
             # active/inactiveどちらのeventを使うか決定
-            event = copy.copy(self.event) if state == self.active_state else XUEvent()
+            event = copy.copy(self.event) if state.force_event or state == self.active_state else XUEvent()
 
             # やっぱりinitialize情報がどこかに欲しい
-            if state.update_count == 0:
-                event.on("init", state)
+            event.on_init = state.update_count == 0
 
             # 更新処理
             state.set_attr("update_count", state.update_count+1)  # 1スタート(0は初期化時)
