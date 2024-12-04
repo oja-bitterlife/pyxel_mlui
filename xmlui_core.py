@@ -126,6 +126,7 @@ class XUEvent:
 
         # 取得し直す
         self._receive = set([])
+        self._on_state:dict[str,XUState] = {}
 
     # 入力
     def on(self, event_name:str, state:"XUState") -> Self:

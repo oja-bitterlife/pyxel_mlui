@@ -3,7 +3,6 @@ import pyxel
 
 # ui_code内のUIライブラリへのアクセス
 from .ui_code import xmlui,UI_TEMPLATE,input
-from xmlui_core import XUState
 
 # ここからゲーム本体開始
 # *********************************************************
@@ -16,8 +15,8 @@ def update(): # フレームの更新処理
     # ゲームの中でメインメニューを開く
     xmlui.open_by_event(input.BTN_A, UI_TEMPLATE, "command_menu_win")
 
-    if "close" in xmlui.event.trg:
-        dial = xmlui.event.get_state("close")
+    dial = xmlui.event.get_state("close", input.Dial)
+    if dial:
         print(dial)
 
 
