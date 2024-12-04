@@ -4,7 +4,7 @@ import pyxel
 # xmlui_pyxelの初期化
 # *********************************************************
 from xmlui_core import XMLUI
-from xmlui_pyxel import select,text,win,input
+from xmlui_pyxel import xmlui_pyxel_init,select,text,win,input
 
 # ライブラリのインスタンス化
 xmlui = XMLUI()
@@ -15,7 +15,9 @@ xmlui = XMLUI()
 pyxel.init(256, 256)
 
 import title
+
 state = "TITLE"
+title.init()
 
 # Main
 def update(): # フレームの更新処理

@@ -6,22 +6,7 @@ from xmlui_pyxel import xmlui_pyxel_init,select,text,win,input
 from . import main
 xmlui = main.xmlui
 
-# キー定義。設定しない場合はデフォルトが使われる
-# input.INPUT_LIST[input.BTN_A] = [pyxel.KEY_A]
-
-# 初期化セット
-xmlui_pyxel_init(xmlui,
-        inputlist_dict = input.INPUT_LIST,
-        font_path = "samples/common_assets/font/b12.bdf"
-    )
-
-# (ライブラリ開発用)
-xmlui.debug.level = xmlui.debug.DEBUG_LEVEL_LIB
-
-# UIテンプレートXMLの読み込み
 UI_TEMPLATE = "ui_template"
-xmlui.template_fromfile("samples/DQ/assets/ui/dq.xml", "ui_template")
-
 
 # ユーティリティ
 # *****************************************************************************
