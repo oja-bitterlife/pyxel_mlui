@@ -169,6 +169,9 @@ class XUState:
         self.xmlui = xmlui  # ライブラリへのIF
         self._element = element  # 自身のElement
 
+    def ref(self) -> "XUState":
+        return XUState(self.xmlui, self._element)
+
     # UI_Stateは都度使い捨てなので、対象となるElementで比較する
     def __eq__(self, other) -> bool:
         if isinstance(other, XUState):
