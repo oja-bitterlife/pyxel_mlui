@@ -4,10 +4,10 @@
     <round_win x="32" y="16" w="128" h="52" id="command_menu_win">
         <title x="40" y="0" w="52" h="12">コマンド</title>
         <menu_grid x="6" y="14" rows="2" item_w="58" item_h="18">
-            <menu_item value="speak">はなす</menu_item>
-            <menu_item value="dial">ダイアル</menu_item>
-            <menu_item value="satus">つよさ</menu_item>
-            <menu_item value="check">しらべる</menu_item>
+            <menu_item action="speak">はなす</menu_item>
+            <menu_item action="dial">ダイアル</menu_item>
+            <menu_item action="satus">つよさ</menu_item>
+            <menu_item action="check">しらべる</menu_item>
         </menu_grid>
     </round_win>
 
@@ -19,8 +19,8 @@
     <round_win y="20" w="56" h="50" item_h="16" id="yes_no">
         <ok_title x="16" y="0" w="24" h="12" id="label">OK?</ok_title>
         <yes_no_list x="6" y="12" rows="2" item_w="58" item_h="18">
-            <menu_item value="yes">はい</menu_item>
-            <menu_item value="no">いいえ</menu_item>
+            <menu_item action="yes">はい</menu_item>
+            <menu_item action="no">いいえ</menu_item>
         </yes_no_list>
     </round_win>
 

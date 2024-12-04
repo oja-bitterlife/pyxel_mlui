@@ -169,15 +169,12 @@ class XUState:
         self.xmlui = xmlui  # ライブラリへのIF
         self._element = element  # 自身のElement
 
+    # UI_Stateは都度使い捨てなので、対象となるElementで比較する
     def __eq__(self, other) -> bool:
-        # UI_Stateは都度使い捨てなので、対象となるElementで比較する
         if isinstance(other, XUState):
             return other._element is self._element
-        # 文字列との比較はvalueとで行う(イベント用)
-        elif isinstance(other, str):
-            return self.value == other
         else:
-            return False
+            return super().__eq__(other)
 
     # attribアクセス用
     # *************************************************************************
@@ -379,6 +376,13 @@ class XUState:
     @property
     def value(self) -> str:  # 汎用値取得
         return self.attr_str("value", "")
+    @value.setter
+    def set_value(self, val:str):
+        self.set_attr("value", val)
+
+    @property
+    def action(self) -> str:  # イベント情報取得
+        return self.attr_str("action", "")
 
     @property
     def enable(self) -> bool:  # 有効フラグ
@@ -788,6 +792,11 @@ class XUSelectBase(_XUUtilBase):
 
         self.select(y*self._rows + x)
 
+    def __eq__(self, other) -> bool:
+        if isinstance(other, str):
+            return self.selected_item.action == other
+        else:
+            return super().__eq__(other)
 
 # グリッド選択
 class XUSelectGrid(XUSelectBase):

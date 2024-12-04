@@ -92,12 +92,12 @@ def menu_grid(menu_grid:select.Grid, event:xuc.XUEvent):
     # 選択アイテムの表示
     if input.BTN_A in event.trg:
         # メッセージウインドウ表示
-        if menu_grid.selected_item == "speak":
-            menu_grid.selected_item.open(UI_TEMPLATE, "win_message")
+        if menu_grid == "speak":
+            menu_grid.open(UI_TEMPLATE, "win_message")
 
         # dialウインドウ表示
-        if menu_grid.selected_item == "dial":
-            menu_grid.selected_item.open(UI_TEMPLATE, "win_dial")
+        if menu_grid == "dial":
+            menu_grid.open(UI_TEMPLATE, "win_dial")
 
     # 閉じる
     if input.BTN_B in event.trg:
@@ -168,7 +168,8 @@ def dial(dial:input.Dial, event:xuc.XUEvent):
     # 確定
     if input.BTN_A in event.trg:
         yesno= dial.open(UI_TEMPLATE, "yes_no", "dial_yes_no")
-        yesno.set_attr("value", "".join(dial.digits))
+        yesno.set_attr("value", dial.digits)
+        print(dial.digits)
 
 
     # 閉じる
