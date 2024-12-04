@@ -29,24 +29,22 @@ class Title:
 # ---------------------------------------------------------
 @select.list(xmlui, "game_start", "menu_item", "item_w", "item_h")
 def game_start(game_start:select.List, event:XUEvent):
-    # メニュー選択
-    game_start.select_by_event(event.trg, *input.UP_DOWN)
     # カーソル追加
     draw_menu_cursor(game_start.selected_item, 0, 1)
 
+    # メニュー選択
+    game_start.select_by_event(event.trg, *input.UP_DOWN)
     if input.BTN_A in event.trg:
         game_start.close_on("game_start")
 
 @select.list(xmlui, "game_speed", "menu_item", "item_w", "item_h")
 def game_speed(game_speed:select.List, event:XUEvent):
-    # メニュー選択
-    is_change = game_speed.select_by_event(event.trg, *input.LEFT_RIGHT)
-
     # カーソル追加
     draw_menu_cursor(game_speed.selected_item, 0, 1)
 
-    # メッセージスピードを切り替える
-    if is_change:
+    # メニュー選択。カーソルが動いたらTrueが返る
+    if game_speed.select_by_event(event.trg, *input.LEFT_RIGHT):
+        # メッセージスピードを切り替える
         match game_speed:
             case "slow":
                 print("msg is slow")
