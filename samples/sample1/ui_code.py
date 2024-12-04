@@ -23,7 +23,7 @@ xmlui.debug.level = xmlui.debug.DEBUG_LEVEL_LIB
 
 # UIテンプレートXMLの読み込み
 UI_TEMPLATE = "ui_template"
-xmlui.template_fromfile("samples/assets/ui/test.xml", "ui_template")
+xmlui.template_fromfile("samples/assets/ui/dq.xml", "ui_template")
 
 
 # ユーティリティ
@@ -60,6 +60,7 @@ def rect_win_draw(win:win.Rect, event:xuc.XUEvent):
     clip.h = int(win.update_count*win.speed)
     win.draw_buf(pyxel.screen.data_ptr(), [7,13,5], 12, clip)
 
+
 # メニューアイテム
 # ---------------------------------------------------------
 @select.item(xmlui, "menu_item")
@@ -91,13 +92,13 @@ def menu_grid(menu_grid:select.Grid, event:xuc.XUEvent):
 
     # 選択アイテムの表示
     if input.BTN_A in event.trg:
-        # メッセージウインドウ表示
-        if menu_grid == "speak":
-            menu_grid.open(UI_TEMPLATE, "win_message")
-
-        # dialウインドウ表示
-        if menu_grid == "dial":
-            menu_grid.open(UI_TEMPLATE, "win_dial")
+        match menu_grid:
+            case "speak":
+                menu_grid.open(UI_TEMPLATE, "win_message")
+            case "dial":
+                menu_grid.open(UI_TEMPLATE, "win_dial")
+            case "status":
+                menu_grid.open(UI_TEMPLATE, "under_construct")
 
     # 閉じる
     if input.BTN_B in event.trg:
@@ -169,8 +170,6 @@ def dial(dial:input.Dial, event:xuc.XUEvent):
     if input.BTN_A in event.trg:
         yesno= dial.open(UI_TEMPLATE, "yes_no", "dial_yes_no")
         yesno.set_attr("value", dial.digits)
-        print(dial.digits)
-
 
     # 閉じる
     if input.BTN_B in event.trg:
@@ -178,4 +177,28 @@ def dial(dial:input.Dial, event:xuc.XUEvent):
 
 
 
+# 工事中
+# *****************************************************************************
+# ポップアップウインドウ
+# ---------------------------------------------------------
+@win.rect(xmlui, "popup_win", 1000)  # アニメはしない
+def popup_win_draw(win:win.Rect, event:xuc.XUEvent):
+    clip = win.area.to_offset()
+    clip.h = int(win.update_count*win.speed)
+    win.draw_buf(pyxel.screen.data_ptr(), [7,13,5], 12, clip)
 
+@text.msg(xmlui, "popup_text")
+def popup_text(popup_text:text.Msg, event:xuc.XUEvent):
+    popup_text.finish()  # 常に一気に表示
+
+    if input.BTN_A in event.trg or input.BTN_B in event.trg:
+        popup_text.close()
+
+    # テキスト描画
+    area = popup_text.area  # areaは重いので必ずキャッシュ
+
+    h = len(popup_text.page_text.split()) * text.default.size
+    y = area.aligned_y(h, "center")
+    for i,page in enumerate(popup_text.page_text.split()):
+        x = area.aligned_x(text.default.font.text_width(page), "center")
+        pyxel.text(x, y+i*text.default.size, page, 7, text.default.font)

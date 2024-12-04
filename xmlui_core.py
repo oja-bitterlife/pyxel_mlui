@@ -727,6 +727,7 @@ class XUPageBase(_XUUtilBase):
 
     # 一気に表示
     def finish(self) -> Self:
+        self.set_attr("update_count", 2**31-1)
         return self
 
     # イベントアクション
