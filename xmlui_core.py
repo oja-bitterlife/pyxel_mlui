@@ -5,12 +5,15 @@ from xml.etree.ElementTree import Element
 # 日本語対応
 import unicodedata
 
+
 # その他よく使う奴
 import re
 import math
 import copy
 from distutils.util import strtobool
-from typing import Generator,Callable,Any,Self  # 型を使うよ
+from typing import Callable,Any,Self,cast,TypeVar  # 型を使うよ
+
+T = TypeVar('T')
 
 # 描画領域計算用
 # #############################################################################
@@ -100,11 +103,12 @@ class XURect:
 class XUEvent:
     def __init__(self, init_active=False):
         self.active = init_active  # アクティブなイベントかどうか
-        self.on_init = False
         self.clear()
 
     def clear(self):
         self._receive:set[str] = set([])  # 次の状態受付
+        self._on_state:dict[str,XUState] = {}
+
         self._now:set[str] = set([])
         self._trg:set[str] = set([])
         self._release:set[str] = set([])
@@ -124,10 +128,14 @@ class XUEvent:
         self._receive = set([])
 
     # 入力
-    def on(self, event_name:str) -> Self:
+    def on(self, event_name:str, state:"XUState") -> Self:
         if event_name in self._receive:
             raise ValueError(f"event_name:{event_name} is already registered.")
         self._receive.add(event_name)
+
+        # ステートも記録
+        if state:
+            self._on_state[event_name] = state
         return self
 
     # 取得
@@ -143,6 +151,17 @@ class XUEvent:
     def release(self) -> set[str]:
         return self._release  # 解除された入力を取得
 
+    def get_state(self, event_name:str, type_:type[T]|None=None) -> "T|None|XUState":
+        if event_name not in self._on_state:
+            return None
+
+        if type_ is None:  # type_がNoneなら何でも返す
+            return self._on_state[event_name]
+
+        if isinstance(self._on_state[event_name], type_):
+            return cast(T, self._on_state[event_name])
+
+        return None
 
 # UIパーツの状態取得
 # #############################################################################
@@ -319,7 +338,7 @@ class XUState:
     def close(self, id:str|None=None):  # closeの後なにもしないのでNone
         # open/closeが連続しないようTrg入力を落とす
         self.xmlui.event.clearTrg()
-        self.xmlui.on("close")
+        self.xmlui.event.on("close", self)  # closeイベントを発行する
 
         if id is not None:
             return self.xmlui.find_by_ID(id).remove()
@@ -503,7 +522,8 @@ class XMLUI(XUState):
             event = copy.copy(self.event) if state == self.active_state else XUEvent()
 
             # やっぱりinitialize情報がどこかに欲しい
-            event.on_init = state.update_count == 0
+            if state.update_count == 0:
+                event.on("init", state)
 
             # 更新処理
             state.set_attr("update_count", state.update_count+1)  # 1スタート(0は初期化時)
@@ -534,10 +554,6 @@ class XMLUI(XUState):
 
     # 入力
     # *************************************************************************
-    # イベント入力
-    def on(self, input:str):
-        self.event.on(input)
-
     # キー入力
     def set_inputlist(self, input_type:str, list:list[int]):
         self._input_lists[input_type] = list
@@ -552,7 +568,7 @@ class XMLUI(XUState):
     def check_input_on(self, check_func:Callable[[int], bool]):
         for key in self._input_lists:
             if self._check_input(key, check_func):
-                self.event.on(key)
+                self.event.on(key, self)
 
     # イベントでopen
     def open_by_event(self, trg_event:str, template_name:str, id:str, id_alias:str|None=None):
