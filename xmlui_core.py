@@ -1101,8 +1101,10 @@ class XUWinRectFrame(_XUWinFrameBase):
             case 2:
                 return y if w-1-x > y else w-1-x
             case 6:
-                return h-1-y if x > h-1-y else x
+                y = (h-1-y)
+                return y if x >= y else size-1-x
             case 8:
-                return h-1-y if w-1-x > h-1-y else w-1-x
+                x = w-1-x
+                y = h-1-y
+                return y if x >= y else size-1-x
         return self._get13574index(size, x, y, w, h)
-
