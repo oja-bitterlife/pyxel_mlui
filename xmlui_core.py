@@ -950,7 +950,6 @@ class _XUWinFrameBase(XUState):
 
         # 中央塗りつぶし
         c_pat = color.to_bytes() * clip.w
-        print(c_pat)
         for y in range(clip.h):
             offset = (screen_area.y + y)*self.screen_w + screen_area.x
             screen_buf[offset:offset+clip.w] = c_pat
