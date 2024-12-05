@@ -747,12 +747,11 @@ class XUPageBase(XUTextBase):
     # 次のページに進む
     def next_page(self, add:int=1) -> Self:
         self._util_root.set_attr(self.PAGE_NO_ATTR, self.page_no+add)
-        self.reset_page_count()
-        return self
+        return self.reset_count(self.page_start_count)  # ページ先頭までリセット
 
     @property
     def page_num(self) -> int:
-        return math.ceil(self.text_count/self._page_lines)  # 切り上げ
+        return math.ceil(len(self._util_root.text.splitlines())/self._page_lines)  # 切り上げ
 
     # ページの開始カウンタ位置
     @property
@@ -771,22 +770,14 @@ class XUPageBase(XUTextBase):
     def is_page_finish(self):
         return self.text_count >= self.page_end_count
 
-    # ページの先頭までカウンタを戻す
-    def reset_page_count(self) -> Self:
-        return self.reset_count(self.page_start_count)
-
-    # ページの終了カウンタ位置まで進める
-    def finish_page_count(self):
-        return self.reset_count(self.page_end_count)
-
     # テキスト取得系
     @property
-    def page_text(self) -> str:
-        return "\n".join(self.page_lines)
+    def text(self) -> str:
+        return "\n".join(self.lines)
 
     @property
-    def page_lines(self) -> list[str]:
-        return self.lines[self.page_no*self._page_lines:(self.page_no+1)*self._page_lines]
+    def lines(self) -> list[str]:
+        return super().lines[self.page_no*self._page_lines:(self.page_no+1)*self._page_lines]
 
     # 次ページ待ち
     @property

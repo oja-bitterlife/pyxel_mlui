@@ -120,13 +120,13 @@ def msg_text(msg_text:text.Msg, event:XUEvent):
         elif msg_text.is_next_page_wait:
             msg_text.next_page()
         else:
-            msg_text.finish_page_count()
+            msg_text.reset_count(msg_text.page_end_count)
 
     msg_text.next_count()
 
     # テキスト描画
     area = msg_text.area  # areaは重いので必ずキャッシュ
-    for i,page in enumerate(msg_text.page_lines):
+    for i,page in enumerate(msg_text.lines):
         pyxel.text(area.x, area.y+i*text.default.size, page, 7, text.default.font)
 
     # # カーソル表示
