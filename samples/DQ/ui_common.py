@@ -43,7 +43,7 @@ def draw_msg_cursor(state:XUState):
 def popup_win_draw(win:win.Rect, event:XUEvent):
     clip = win.area.to_offset()
     clip.h = int(win.update_count*win.speed)
-    win.draw_buf(pyxel.screen.data_ptr(), [0,7,13], 0, clip)
+    win.draw_frame(pyxel.screen.data_ptr(), [0,7,13], win.area, clip)
 
 @text.msg(xmlui, "popup_text")
 def popup_text(popup_text:text.Msg, event:XUEvent):
@@ -66,8 +66,14 @@ def popup_text(popup_text:text.Msg, event:XUEvent):
 # *****************************************************************************
 # 角丸ウインドウ
 # ---------------------------------------------------------
-@win.round(xmlui, "round_win")
+@win.round(xmlui, "round_win", speed=1)
 def round_win_draw(round_win:win.Round, event:XUEvent):
+    area = round_win.area
+
+    # 背景
+    pyxel.rect(area.x, area.y, area.w, area.h, 0)
+
+    # フレーム
     clip = round_win.area.to_offset()
     clip.h = int(round_win.update_count*round_win.speed)
-    round_win.draw_buf(pyxel.screen.data_ptr(), [0,7,13], 0, clip)
+    round_win.draw_frame(pyxel.screen.data_ptr(), [7,13], area.inflate(-2, -2), clip)

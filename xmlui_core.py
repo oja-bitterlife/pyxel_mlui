@@ -1019,27 +1019,8 @@ class _XUWinFrameBase(XUState):
                 return 2
             return 5 if y < h-size else 8
 
-    # 中央部分をバッファに書き込む。
-    # 環境依存の塗りつぶしが使えるならそちらを使った方が高速
-    def _draw_center(self, screen_buf:bytearray, color:int, screen_area:XURect, clip:XURect):
-        # 画面外に描画しない
-        screen_area = screen_area.intersect(XURect(0, 0, self.screen_w, self.screen_h))
-
-        # オフセットでやるお（ ＾ω＾）おっ
-        area = screen_area.to_offset()
-        clip = clip.intersect(area)
-        if clip.is_empty:
-            return
-
-        # 中央塗りつぶし
-        c_pat = color.to_bytes() * clip.w
-        for y in range(clip.h):
-            offset = (screen_area.y + y)*self.screen_w + screen_area.x
-            screen_buf[offset:offset+clip.w] = c_pat
-
-    # フレームだけバッファに書き込む(高速化や半透明用)
-    # 中央部分塗りつぶしは呼び出し側で行う
-    def _draw_frame(self, screen_buf:bytearray, pattern:list[int], screen_area:XURect, clip:XURect):
+    # フレームだけバッファに書き込む。中央部分塗りつぶしは呼び出し側で行う
+    def draw_frame(self, screen_buf:bytearray, pattern:list[int], screen_area:XURect, clip:XURect):
         # 画面外に描画しない
         screen_area = screen_area.intersect(XURect(0, 0, self.screen_w, self.screen_h))
 
@@ -1100,13 +1081,6 @@ class _XUWinFrameBase(XUState):
                     offset = (screen_area.y + y_)*self.screen_w + screen_area.x + area.w-size
                     screen_buf[offset:offset+right_clip.w] = rev_butes[:right_clip.w]
 
-    # ウインドウ全体をバッファに書き込む
-    def draw_buf(self, screen_buf:bytearray, pattern:list[int], bg_color:int, clip:XURect|None=None):
-        area = self.area  # areaへのアクセスは遅いので必ずキャッシュしてアクセス
-        clip = area.to_offset() if clip is None else clip  # clip指定がなければエリアサイズ
-        size = len(pattern)
-        self._draw_center(screen_buf, bg_color, area.inflate(-size, -size), XURect(0, 0, clip.w-size, clip.h-size))
-        self._draw_frame(screen_buf, pattern, area, clip)
 
 class XUWinRoundFrame(_XUWinFrameBase):
     def __init__(self, state:XUState, screen_w:int, screen_h:int):
