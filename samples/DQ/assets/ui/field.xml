@@ -6,8 +6,8 @@
         <title x="48" y="0" w="52" h="12">コマンド</title>
         <menu_grid x="12" y="14" rows="2" item_w="68" item_h="18">
             <menu_item action="speak">はなす</menu_item>
-            <menu_item action="dial">じゅもん</menu_item>
-            <menu_item action="satus">つよさ</menu_item>
+            <menu_item action="spel">じゅもん</menu_item>
+            <menu_item action="status">つよさ</menu_item>
             <menu_item action="tools">どうぐ</menu_item>
             <menu_item action="step">かいだん</menu_item>
             <menu_item action="check">しらべる</menu_item>

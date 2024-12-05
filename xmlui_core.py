@@ -873,13 +873,10 @@ class XUSelectGrid(XUSelectBase):
         return self.selected_no != old_no
 
     def select_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
+        return self._select_by_event(input, left_event, right_event, up_event, down_event, True, True)
+
+    def select_no_wrap(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
         return self._select_by_event(input, left_event, right_event, up_event, down_event, False, False)
-
-    def select_wrap_x(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
-        return self._select_by_event(input, left_event, right_event, up_event, down_event, True, False)
-
-    def select_wrap_y(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
-        return self._select_by_event(input, left_event, right_event, up_event, down_event, False, True)
 
 
 # リスト選択
