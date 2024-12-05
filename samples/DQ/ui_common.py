@@ -44,9 +44,7 @@ common_text = text.Decorators(xmlui, "common")
 # ---------------------------------------------------------
 @common_win.rect("popup_win")  # アニメはしない
 def popup_win_draw(win:win.Rect, event:XUEvent):
-    clip = win.area.to_offset()
-    clip.h = int(win.update_count)
-    win.draw_frame(pyxel.screen.data_ptr(), [0,7,13], win.area, clip)
+    win.draw_frame(pyxel.screen.data_ptr(), [0,7,13], win.area)
 
 @common_text.msg("popup_text")
 def popup_text(popup_text:text.Msg, event:XUEvent):

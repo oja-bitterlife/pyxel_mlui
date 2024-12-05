@@ -1020,13 +1020,13 @@ class _XUWinFrameBase(XUState):
             return 5 if y < h-size else 8
 
     # フレームだけバッファに書き込む。中央部分塗りつぶしは呼び出し側で行う
-    def draw_frame(self, screen_buf:bytearray, pattern:list[int], screen_area:XURect, clip:XURect):
+    def draw_frame(self, screen_buf:bytearray, pattern:list[int], screen_area:XURect, clip:XURect|None=None):
         # 画面外に描画しない
         screen_area = screen_area.intersect(XURect(0, 0, self.screen_w, self.screen_h))
 
         # オフセットなので0,0～w,h
         area = screen_area.to_offset()
-        clip = clip.intersect(area)
+        clip = clip.intersect(area) if clip else area
         if clip.is_empty:
             return
 
