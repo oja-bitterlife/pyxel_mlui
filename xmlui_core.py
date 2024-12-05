@@ -525,15 +525,21 @@ class XMLUI(XUState):
 
     # 更新用
     # *************************************************************************
+    # 兄弟を先に取得する
     def _rec_get_draw_targets(self, element:Element):
-        pass
+        # 兄弟を先に取得する
+        for child in element:
+            yield XUState(self, child)
+        # 兄弟の後に子
+        for child in element:
+            yield from self._rec_get_draw_targets(child)
 
     def draw(self):
         # (入力)イベントの更新
         self.event.update()
 
         # 描画対象を取得
-        draw_targets = list(filter(lambda state: state.enable, [XUState(self, element) for element in self._element.iter()]))
+        draw_targets:list[XUState] = list(filter(lambda state: state.enable, self._rec_get_draw_targets(self._element)))
 
         # ActiveStateの取得。Active=最後、なので最後から確認
         self.active_states:list[XUState] = []
