@@ -734,9 +734,9 @@ class XUTextBase(_XUUtilBase):
 class XUPageBase(XUTextBase):
     PAGE_NO_ATTR="_xmlui_page_no"
 
-    def __init__(self, state:XUState, page_line_no:int, wrap:int=4096):
+    def __init__(self, state:XUState, page_lines:int, wrap:int=4096):
         super().__init__(state, wrap)
-        self._page_line_no = page_line_no
+        self._page_lines = page_lines
 
     # 現在ページ
     @property
@@ -754,13 +754,13 @@ class XUPageBase(XUTextBase):
     # ページの終了カウンタ位置
     @property
     def page_start_count(self):
-        end_line = self.page_no*self._page_line_no
+        end_line = self.page_no*self._page_lines
         return sum([len(line) for line in self.lines[:end_line]], 0)
 
     # ページの終了カウンタ位置
     @property
     def page_end_count(self):
-        end_line = (self.page_no+1)*self._page_line_no
+        end_line = (self.page_no+1)*self._page_lines
         return sum([len(line) for line in self.lines[:end_line]], 0)
 
     # ページの終了カウンタ位置を超えたかどうか
@@ -779,8 +779,7 @@ class XUPageBase(XUTextBase):
 
     @property
     def page_lines(self) -> list[str]:
-        return self.lines[self.page_no*self._page_line_no:(self.page_no+1)*self._page_line_no]
-
+        return self.lines[self.page_no*self._page_lines:(self.page_no+1)*self._page_lines]
 
     # イベントアクション
     # -----------------------------------------------------
