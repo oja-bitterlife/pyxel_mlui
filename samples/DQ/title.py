@@ -15,7 +15,8 @@ class Title:
 
     def __del__(self):
         xmlui.remove_template(self.UI_TEMPLATE_TITLE)
-        xmlui.remove_drawfunc("title")
+        global title_select
+        title_select = None
 
     def update(self):
         if "game_start" in xmlui.event.trg:
@@ -26,10 +27,11 @@ class Title:
         xmlui.check_input_on(pyxel.btn)
         xmlui.draw()
 
-title_select = select.Decorators(xmlui, "title")
 
 # タイトル画面UI
 # ---------------------------------------------------------
+title_select = select.Decorators(xmlui, "title")
+
 @title_select.list("game_start", "menu_item", "item_w", "item_h")
 def game_start(game_start:select.List, event:XUEvent):
     # カーソル追加

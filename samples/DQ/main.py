@@ -18,7 +18,6 @@ def update(): # フレームの更新処理
         # ゲームの更新コード
         next_scene = scene.update()
         if next_scene is not None:
-            print("next_scene")
             match next_scene:
                 case "title":
                     scene = Title()

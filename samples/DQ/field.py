@@ -144,7 +144,7 @@ class Field:
         pyxel.circ(128+7, 128+7, 7, 12)
 
 
-# 町の中
+# 町の中UI
 # ---------------------------------------------------------
 field_select = select.Decorators(xmlui, "field")
 field_text = text.Decorators(xmlui, "field")
