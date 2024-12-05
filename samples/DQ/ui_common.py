@@ -35,11 +35,11 @@ def draw_msg_cursor(state:XUState):
     pyxel.tri(center_x, bottom, center_x+tri_size, bottom, center_x+tri_size//2, bottom+tri_size//2, 7)
 
 
-# 工事中表示用
-# *****************************************************************************
 common_win = win.Decorators(xmlui, "common")
 common_text = text.Decorators(xmlui, "common")
 
+# 工事中表示用
+# *****************************************************************************
 # ポップアップウインドウ
 # ---------------------------------------------------------
 @common_win.rect("popup_win")  # アニメはしない
