@@ -525,7 +525,7 @@ class XMLUI(XUState):
 
     # 更新用
     # *************************************************************************
-    # 兄弟を先に取得する
+    # 兄弟を先に取得するイテレータ
     def _rec_get_draw_targets(self, element:Element):
         # 兄弟を先に取得する
         for child in element:
