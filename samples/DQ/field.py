@@ -87,7 +87,7 @@ def menu_grid(menu_grid:select.Grid, event:XUEvent):
     if input.BTN_A in event.trg:
         match menu_grid:
             case "speak":
-                menu_grid.open("common", "under_construct")
+                menu_grid.open(Field.UI_TEMPLATE_FIELD, "message")
             case "spel":
                 menu_grid.open("common", "under_construct")
             case "status":

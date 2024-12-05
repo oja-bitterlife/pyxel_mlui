@@ -257,6 +257,7 @@ class XUState:
         for element in self._element.iter():
             if element.attrib.get("id") == id:
                 return XUState(self.xmlui, element)
+        print(self.strtree())
         raise Exception(f"ID '{id}' not found in '{self.tag}' and children")
 
     def find_by_tagall(self, tag:str, force:bool=False) -> list['XUState']:
@@ -267,6 +268,7 @@ class XUState:
         elements:list[XUState] = self.find_by_tagall(tag, force)
         if elements:
             return elements[0]
+        print(self.strtree())
         raise Exception(f"Tag '{tag}' not found in '{self.tag}' and children")
 
     # ツリーを遡って親を探す
@@ -276,6 +278,7 @@ class XUState:
             if parent.id == id:
                 return parent
             parent = parent.parent
+        print(self.xmlui.strtree())
         raise Exception(f"Parent '{id}' not found in '{self.tag}' parents")
 
     def find_owner(self) -> 'XUState':
