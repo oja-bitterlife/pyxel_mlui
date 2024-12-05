@@ -18,7 +18,7 @@ class Title:
 
     def update(self):
         if "game_start" in xmlui.event.trg:
-            return "next_scene"
+            return "field"
         return None
 
     def draw(self):

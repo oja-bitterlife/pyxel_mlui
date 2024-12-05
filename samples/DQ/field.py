@@ -5,15 +5,14 @@ from xmlui_core import XUState,XUEvent
 from ui_common import xmlui,draw_menu_cursor
 from xmlui_pyxel import select,text,input
 
-UI_TEMPLATE_FIELD = "ui_field"
-
 class Field:
+    UI_TEMPLATE_FIELD = "ui_field"
+
     def __init__(self):
-        xmlui.template_fromfile("assets/ui/dq.xml", UI_TEMPLATE_FIELD)
-        xmlui.open(UI_TEMPLATE_FIELD, "game_title")
+        xmlui.template_fromfile("assets/ui/field.xml", self.UI_TEMPLATE_FIELD)
 
     def __del__(self):
-        xmlui.remove_template(UI_TEMPLATE_FIELD)
+        xmlui.remove_template(self.UI_TEMPLATE_FIELD)
 
     def update(self):
         return None
