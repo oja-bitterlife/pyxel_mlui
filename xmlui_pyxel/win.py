@@ -28,7 +28,7 @@ class Decorators:
             def draw(state:XUState, event:XUEvent):
                 bind_func(Round(state, speed), event)
             # 関数登録
-            self.xmlui.set_drawfunc(tag_name, draw)
+            self.xmlui.set_drawfunc(self.group, tag_name, draw)
         return wrapper
 
     def rect(self, tag_name:str, speed:float=16):
@@ -37,5 +37,5 @@ class Decorators:
             def draw(state:XUState, event:XUEvent):
                 bind_func(Rect(state, speed), event)
             # 関数登録
-            self.xmlui.set_drawfunc(tag_name, draw)
+            self.xmlui.set_drawfunc(self.group, tag_name, draw)
         return wrapper

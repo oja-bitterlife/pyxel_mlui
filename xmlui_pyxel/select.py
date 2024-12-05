@@ -29,7 +29,7 @@ class Decorators:
             def draw(state:XUState, event:XUEvent):
                 bind_func(Item(state), event)
             # 関数登録
-            self.xmlui.set_drawfunc(item_tag, draw)
+            self.xmlui.set_drawfunc(self.group, item_tag, draw)
         return wrapper
 
     def grid(self, tag_name:str, item_tag:str, rows_attr:str, item_w_attr:str, item_h_attr:str):
@@ -38,7 +38,7 @@ class Decorators:
             def draw(state:XUState, event:XUEvent):
                 bind_func(Grid(state, item_tag, rows_attr, item_w_attr, item_h_attr), event)
             # 関数登録
-            self.xmlui.set_drawfunc(tag_name, draw)
+            self.xmlui.set_drawfunc(self.group, tag_name, draw)
         return wrapper
 
     def list(self, tag_name:str, tag_item:str, item_w_attr:str, item_h_attr:str):
@@ -47,6 +47,6 @@ class Decorators:
             def draw(state:XUState, event:XUEvent):
                 bind_func(List(state, tag_item, item_w_attr, item_h_attr), event)
             # 関数登録
-            self.xmlui.set_drawfunc(tag_name, draw)
+            self.xmlui.set_drawfunc(self.group, tag_name, draw)
         return wrapper
 

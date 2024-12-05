@@ -503,11 +503,11 @@ class XMLUI(XUState):
         self.event = XUEvent(True)  # 唯一のactiveとする
         self._input_lists:dict[str, list[int]] = {}
 
-        # 処理関数の登録
-        self._draw_funcs:dict[str,Callable[[XUState,XUEvent], None]] = {}
+        # 処理関数の登録(dict[グループ][タグ名]())
+        self._draw_funcs:dict[str, dict[str, Callable[[XUState, XUEvent], None]]] = {}
 
         # XMLテンプレート置き場
-        self._templates:dict[str,XMLUI_Template] = {}
+        self._templates:dict[str, XMLUI_Template] = {}
 
     # template操作
     # *************************************************************************
@@ -570,21 +570,20 @@ class XMLUI(XUState):
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
     def draw_element(self, tag_name:str, state:XUState, event:XUEvent):
         # 登録済みの関数だけ実行
-        if tag_name in self._draw_funcs:
-            self._draw_funcs[tag_name](state, event)
-
+        for group_name in self._draw_funcs:
+            if tag_name in self._draw_funcs[group_name]:
+                self._draw_funcs[group_name][tag_name](state, event)
 
     # 処理登録
     # *************************************************************************
-    def set_drawfunc(self, tag_name:str, func:Callable[[XUState,XUEvent], None]):
-        self._draw_funcs[tag_name] = func
+    def set_drawfunc(self, group_name:str, tag_name:str, func:Callable[[XUState,XUEvent], None]):
+        # 初回は辞書を作成
+        if group_name not in self._draw_funcs:
+            self._draw_funcs[group_name] = {}
+        self._draw_funcs[group_name][tag_name] = func
 
-    # デコレータを用意
-    def bind_func(self, tag_name:str):
-        def wrapper(draw_func:Callable[[XUState,XUEvent], None]):
-            self.set_drawfunc(tag_name, draw_func)
-        return wrapper
-
+    def remove_drawfunc(self, group_name:str):
+        del self._draw_funcs[group_name]
 
     # イベント
     # *************************************************************************
@@ -606,6 +605,7 @@ class XMLUI(XUState):
 
     def on(self, event_name:str, state:XUState):
         self.event._on(event_name, state)
+
 
 # ユーティリティークラス
 # #############################################################################

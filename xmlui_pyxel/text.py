@@ -66,7 +66,7 @@ class Decorators:
             def draw(state:XUState, event:XUEvent):
                 bind_func(Label(state, align, valign), event)
             # 関数登録
-            self.xmlui.set_drawfunc(tag_name, draw)
+            self.xmlui.set_drawfunc(self.group, tag_name, draw)
         return wrapper
 
     def msg(self, tag_name:str):
@@ -75,5 +75,5 @@ class Decorators:
             def draw(state:XUState, event:XUEvent):
                 bind_func(Msg(state), event)
             # 関数登録
-            self.xmlui.set_drawfunc(tag_name, draw)
+            self.xmlui.set_drawfunc(self.group, tag_name, draw)
         return wrapper

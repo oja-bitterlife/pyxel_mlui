@@ -109,5 +109,5 @@ class Decorators:
             def draw(state:XUState, event:XUEvent):
                 bind_func(Dial(state, digit_length, align, valign, digit_list), event)
             # 関数登録
-            self.xmlui.set_drawfunc(tag_name, draw)
+            self.xmlui.set_drawfunc(self.group, tag_name, draw)
         return wrapper
