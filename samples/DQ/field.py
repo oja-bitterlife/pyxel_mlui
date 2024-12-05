@@ -28,7 +28,7 @@ class Field:
 
     def update(self):
         # メニューが開いていたら他はなにもできない
-        if xmlui.is_open("menu"):
+        if xmlui.exists_id("menu"):
             return None
 
         # メニューオープン
@@ -57,7 +57,7 @@ class Field:
 
 
 # 町の中UI
-# ---------------------------------------------------------
+# *****************************************************************************
 field_select = select.Decorators(xmlui, "field")
 field_text = text.Decorators(xmlui, "field")
 
@@ -75,9 +75,8 @@ def title_draw(label:text.Label, event:XUEvent):
 def menu_item(menu_item:select.Item, event:XUEvent):
     pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, 7, text.default.font)
 
-# メニュー
-# *****************************************************************************
 # コマンドメニュー
+# ---------------------------------------------------------
 @field_select.grid("menu_grid", "menu_item", "rows", "item_w", "item_h")
 def menu_grid(menu_grid:select.Grid, event:XUEvent):
     # メニュー選択
@@ -109,3 +108,26 @@ def menu_grid(menu_grid:select.Grid, event:XUEvent):
 
     # カーソル追加
     draw_menu_cursor(menu_grid.selected_item, 0, 0)
+
+# メッセージウインドウ
+# ---------------------------------------------------------
+@field_text.msg("msg_text")
+def msg_text(msg_text:text.Msg, event:XUEvent):
+    # if input.BTN_A in event.trg or input.BTN_B in event.trg:
+    #     action = msg_text.check_action()
+    #     match action:
+    #         case "close":
+    #             msg_text.close_parent("command_menu_win")  # メニューごと閉じる
+    #         case "finish":
+    #             msg_text.finish()
+    #         case "next_page":
+    #             msg_text.next_page()
+
+    # テキスト描画
+    area = msg_text.area  # areaは重いので必ずキャッシュ
+    for i,page in enumerate(msg_text.text.split()):
+        pyxel.text(area.x, area.y+i*text.default.size, page, 7, text.default.font)
+
+    # # カーソル表示
+    # if msg_text.is_next_wait:
+    #     draw_msg_cursor(msg_text)

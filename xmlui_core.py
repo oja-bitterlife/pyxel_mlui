@@ -257,8 +257,7 @@ class XUState:
         for element in self._element.iter():
             if element.attrib.get("id") == id:
                 return XUState(self.xmlui, element)
-        print(self.strtree())
-        raise Exception(f"ID '{id}' not found in '{self.tag}' and children")
+        raise Exception(f"{self.strtree()}\nID '{id}' not found in '{self.tag}' and children")
 
     def find_by_tagall(self, tag:str, force:bool=False) -> list['XUState']:
         tags = [XUState(self.xmlui, element) for element in self._element.iter() if element.tag == tag]
@@ -268,8 +267,7 @@ class XUState:
         elements:list[XUState] = self.find_by_tagall(tag, force)
         if elements:
             return elements[0]
-        print(self.strtree())
-        raise Exception(f"Tag '{tag}' not found in '{self.tag}' and children")
+        raise Exception(f"{self.strtree()}\nTag '{tag}' not found in '{self.tag}' and children")
 
     # ツリーを遡って親を探す
     def find_parent(self, id:str) -> 'XUState':
@@ -278,8 +276,7 @@ class XUState:
             if parent.id == id:
                 return parent
             parent = parent.parent
-        print(self.xmlui.strtree())
-        raise Exception(f"Parent '{id}' not found in '{self.tag}' parents")
+        raise Exception(f"{self.strtree()}\nParent '{id}' not found in '{self.tag}' parents")
 
     def find_owner(self) -> 'XUState':
         return self.find_parent(self.owner)
@@ -288,13 +285,18 @@ class XUState:
     def parent(self) -> 'XUState|None':
         return self.xmlui._parent_cache.get(self._element, None)
 
-    # すでにidツリーに存在するか
-    def is_open(self, id:str) -> bool:
-        try:
-            self.find_by_ID(id)
+    # すでにツリーに存在するか
+    def exists_id(self, id:str) -> bool:
+        for element in self._element.iter():
+            if element.attrib.get("id") == id:
+                return True
+        return False
+
+    def exists_tag(self, tag:str, force:bool=False) -> bool:
+        elements:list[XUState] = self.find_by_tagall(tag, force)
+        if elements:
             return True
-        except:
-            return False
+        return False
 
     # 子を追加する
     def add_child(self, child:"XUState"):
@@ -324,7 +326,7 @@ class XUState:
         id_alias = id if id_alias is None else id_alias
 
         # IDがかぶってはいけない
-        if self.xmlui.is_open(id_alias):
+        if self.xmlui.exists_id(id_alias):
             raise Exception(f"ID '{id_alias}' already exists")
 
         # オープン
@@ -623,10 +625,10 @@ class _XUUtilBase(XUState):
             self.set_attr("event_absorber", "True")
 
         # Utilityルートの作成(状態保存先)
-        try:
+        if state.exists_tag(root_tag):
             self._util_root = state.find_by_tag(root_tag)
             self._util_root.clear_children()  # 綺麗にして構築し直す
-        except:
+        else:
             self._util_root = XUState(state.xmlui, Element(root_tag))
             state.add_child(self._util_root)
 
@@ -663,7 +665,8 @@ class XUTextBase(_XUUtilBase):
         # page_root下(ページテキスト)の再構築
         # -----------------------------------------------------
         # 改行を\nに統一して全角化
-        tmp_text = "\n".join([line.strip() for line in self.text.splitlines()])  # XMLの改行テキストを前後を削って結合
+        tmp_text = self._element.text if self._element.text else ""  # self.textは使ってはいけない(propertyで再定義)
+        tmp_text = "\n".join([line.strip() for line in tmp_text.splitlines()])  # XMLの改行テキストを前後を削って結合
         tmp_text = re.sub(self.SEPARATE_REGEXP, "\n", tmp_text).strip()  # \nという文字列を改行コードに
         tmp_text = self.convert_zenkaku(tmp_text)  # 全角化
 
@@ -699,6 +702,10 @@ class XUTextBase(_XUUtilBase):
     def reset(self) -> Self:
         self._util_root.set_attr(self.TEXT_COUNT_ATTR, 0)
         return self
+
+    @property
+    def text(self) -> str:
+        return self._util_root.text
 
     # イベントアクション
     # -----------------------------------------------------
