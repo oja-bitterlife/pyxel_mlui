@@ -893,14 +893,13 @@ class XUSelectList(XUSelectBase):
         super().__init__(state, items, rows, item_w, item_h)
   
     # 入力に応じた挙動一括。変更があった場合はTrue
-    # 選択リストは通常上下ラップする
-    def _select_by_event(self, input:set[str], up_event:str, down_event:str, y_wrap:bool) -> bool:
+    def _select_by_event(self, input:set[str], up_event:str, down_event:str, wrap:bool) -> bool:
         old_no = self.selected_no
 
         if up_event in input:
-            self.next(-1, False, y_wrap)
+            self.next(-1, wrap, wrap)
         elif down_event in input:
-            self.next(1, False, y_wrap)
+            self.next(1, wrap, wrap)
 
         return self.selected_no != old_no
 
