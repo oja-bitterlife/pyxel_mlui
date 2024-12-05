@@ -671,7 +671,8 @@ class XUPageBase(_XUUtilBase):
         # page_root下(ページテキスト)の再構築
         # -----------------------------------------------------
         # 改行を\nに統一して全角化
-        tmp_text = self.convert_zenkaku(re.sub(self.SEPARATE_REGEXP, "\n", self.text).strip())
+        strip_marge = "\n".join([line.strip() for line in self.text.splitlines()])  # XMLの改行テキストを前後を削って結合
+        tmp_text = self.convert_zenkaku(re.sub(self.SEPARATE_REGEXP, "\n", strip_marge).strip())
 
         # 各行に分解し、その行をさらにwrapで分解する
         lines =  sum([[line[i:i+self._wrap] for i in  range(0, len(line), self._wrap)] for line in tmp_text.splitlines()], [])

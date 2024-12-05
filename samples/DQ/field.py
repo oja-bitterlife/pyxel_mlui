@@ -15,6 +15,7 @@ class Field:
         xmlui.remove_template(self.UI_TEMPLATE_FIELD)
 
     def update(self):
+        print("field")
         return None
 
     def draw(self):
