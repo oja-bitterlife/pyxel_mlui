@@ -70,11 +70,11 @@ def popup_text(popup_text:text.Msg, event:XUEvent):
 @common_win.round("round_win")
 def round_win_draw(round_win:win.Round, event:XUEvent):
     area = round_win.area
+    clip = round_win.area.to_offset()
+    clip.h = int(round_win.update_count*16)
 
     # 背景
-    pyxel.rect(area.x, area.y, area.w, area.h, 0)
+    pyxel.rect(area.x, area.y, area.w, min(area.h, clip.h+2), 0)
 
     # フレーム
-    clip = round_win.area.to_offset()
-    clip.h = int(round_win.update_count*round_win.speed)
     round_win.draw_frame(pyxel.screen.data_ptr(), [7,13], area.inflate(-2, -2), clip)
