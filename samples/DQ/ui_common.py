@@ -60,3 +60,14 @@ def popup_text(popup_text:text.Msg, event:XUEvent):
     for i,page in enumerate(popup_text.page_text.split()):
         x = area.aligned_x(text.default.font.text_width(page), "center")
         pyxel.text(x, y+i*text.default.size, page, 7, text.default.font)
+
+
+# ゲーム内共通
+# *****************************************************************************
+# 角丸ウインドウ
+# ---------------------------------------------------------
+@win.round(xmlui, "round_win")
+def round_win_draw(round_win:win.Round, event:XUEvent):
+    clip = round_win.area.to_offset()
+    clip.h = int(round_win.update_count*round_win.speed)
+    round_win.draw_buf(pyxel.screen.data_ptr(), [7,13,5], 12, clip)

@@ -2,5 +2,14 @@
 
 <xmlui>
     <info>フィールド画面用</info>
+    <round_win x="32" y="16" w="128" h="52" id="menu">
+        <title x="40" y="0" w="52" h="12">コマンド</title>
+        <menu_grid x="6" y="14" rows="2" item_w="58" item_h="18">
+            <menu_item action="speak">はなす</menu_item>
+            <menu_item action="dial">ダイアル</menu_item>
+            <menu_item action="satus">つよさ</menu_item>
+            <menu_item action="check">しらべる</menu_item>
+        </menu_grid>
+    </round_win>
 </xmlui>
 

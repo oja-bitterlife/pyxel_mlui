@@ -3,7 +3,7 @@ import pyxel
 # タイトル画面
 from xmlui_core import XUState,XUEvent
 from ui_common import xmlui,draw_menu_cursor
-from xmlui_pyxel import select,text,input
+from xmlui_pyxel import select,text,input,win
 
 class Field:
     UI_TEMPLATE_FIELD = "ui_field"
@@ -19,6 +19,9 @@ class Field:
         xmlui.remove_template(self.UI_TEMPLATE_FIELD)
 
     def update(self):
+        if xmlui.is_open("menu"):
+            return None
+
         def _hitcheck(x, y):
             block_x = x // 16
             block_y = y // 16
@@ -57,6 +60,10 @@ class Field:
         if self.move_y > 0:
             self.player_y += 1
             self.move_y -= 1
+
+        # メニューオープン
+        if pyxel.btnp(pyxel.KEY_SPACE) or pyxel.btnp(pyxel.KEY_RETURN):
+            xmlui.open(self.UI_TEMPLATE_FIELD, "menu")
 
         return None
 
@@ -139,3 +146,49 @@ class Field:
 
 # 町の中
 # ---------------------------------------------------------
+# 角丸ウインドウ
+# ---------------------------------------------------------
+@win.round(xmlui, "round_win")
+def round_win_draw(round_win:win.Round, event:XUEvent):
+    clip = round_win.area.to_offset()
+    clip.h = int(round_win.update_count*round_win.speed)
+    round_win.draw_buf(pyxel.screen.data_ptr(), [7,13,5], 12, clip)
+
+# ラベル
+# ---------------------------------------------------------
+@text.label(xmlui, "title", "center", "top")
+def title_draw(label:text.Label, event:XUEvent):
+    pyxel.rect(label.area.x, label.area.y, label.area.w, label.area.h, 12)
+    x, y = label.aligned_pos(text.default)
+    pyxel.text(x, y, label.text, 7, text.default.font)
+
+# メニューアイテム
+# ---------------------------------------------------------
+@select.item(xmlui, "menu_item")
+def menu_item(menu_item:select.Item, event:XUEvent):
+    pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, 7, text.default.font)
+
+# メニュー
+# *****************************************************************************
+# コマンドメニュー
+@select.grid(xmlui, "menu_grid", "menu_item", "rows", "item_w", "item_h")
+def menu_grid(menu_grid:select.Grid, event:XUEvent):
+    # メニュー選択
+    menu_grid.select_by_event(event.trg, *input.CURSOR)
+
+    # 選択アイテムの表示
+    if input.BTN_A in event.trg:
+        match menu_grid:
+            case "speak":
+                menu_grid.open(UI_TEMPLATE, "win_message")
+            case "dial":
+                menu_grid.open(UI_TEMPLATE, "win_dial")
+            case "status":
+                menu_grid.open(UI_TEMPLATE, "under_construct")
+
+    # 閉じる
+    if input.BTN_B in event.trg:
+        menu_grid.close()
+
+    # カーソル追加
+    draw_menu_cursor(menu_grid.selected_item, 0, 0)

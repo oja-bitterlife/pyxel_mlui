@@ -604,12 +604,6 @@ class XMLUI(XUState):
             if self._check_input(key, check_func):
                 self.event._on(key, self)
 
-    # イベントでopen
-    def open_by_event(self, trg_event:str, template_name:str, id:str, id_alias:str|None=None):
-        if trg_event in self.xmlui.event.trg:
-            if not self.is_open(id if id_alias is None else id_alias):
-                self.open(template_name, id, id_alias)
-
     def on(self, event_name:str, state:XUState):
         self.event._on(event_name, state)
 
