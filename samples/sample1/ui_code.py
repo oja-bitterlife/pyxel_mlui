@@ -141,7 +141,7 @@ def msg_text(msg_text:text.Msg, event:xuc.XUEvent):
             case "close":
                 msg_text.close_parent("command_menu_win")  # メニューごと閉じる
             case "finish":
-                msg_text.finish()
+                msg_text.finish_count()
             case "next_page":
                 msg_text.next_page()
 
@@ -189,7 +189,7 @@ def popup_win_draw(win:win.Rect, event:xuc.XUEvent):
 
 @text.msg(xmlui, "popup_text")
 def popup_text(popup_text:text.Msg, event:xuc.XUEvent):
-    popup_text.finish()  # 常に一気に表示
+    popup_text.finish_count()  # 常に一気に表示
 
     if input.BTN_A in event.trg or input.BTN_B in event.trg:
         popup_text.close()

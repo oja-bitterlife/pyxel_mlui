@@ -646,10 +646,11 @@ _hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
 # *****************************************************************************
 # テキスト基底
 class XUTextBase(_XUUtilBase):
+    SEPARATE_REGEXP = r"\\n"  # 改行に変換する正規表現
+
     # クラス定数
     ROOT_TAG= "_xmlui_text_root"
     TEXT_COUNT_ATTR="_xmlui_text_count"
-    SEPARATE_REGEXP = r"\\n"  # 改行に変換する正規表現
 
     # 文字列中の半角を全角に変換する
     @classmethod
@@ -673,7 +674,6 @@ class XUTextBase(_XUUtilBase):
         # 各行に分解し、その行をさらにwrapで分解する
         lines =  sum([[line[i:i+self._wrap] for i in  range(0, len(line), self._wrap)] for line in tmp_text.splitlines()], [])
 
-        # テキストに戻して格納
         self._util_root.set_text("\n".join(lines))
 
     # アニメーション用
@@ -691,37 +691,110 @@ class XUTextBase(_XUUtilBase):
     # 表示カウンタ取得
     @property
     def text_count(self) -> float:
-        return self._util_root.attr_int(self.TEXT_COUNT_ATTR, 2**31-1)  # 一気表示を基本に
+        return self._util_root.attr_float(self.TEXT_COUNT_ATTR, 0)
+
+    # 表示カウンタのリセット
+    def reset_count(self, count=0) -> Self:
+        self._util_root.set_attr(self.TEXT_COUNT_ATTR, count)
+        return self
+
+    # 表示カウンタを進める
+    def next_count(self, add:float=1.0) -> Self:
+        self._util_root.set_attr(self.TEXT_COUNT_ATTR, self.text_count+add)
+        return self
 
     # 一気に表示
-    def finish(self) -> Self:
+    def finish_count(self) -> Self:
         self._util_root.set_attr(self.TEXT_COUNT_ATTR, 2**31-1)
         return self
 
-    # 表示カウンタのリセット
-    def reset(self) -> Self:
-        self._util_root.set_attr(self.TEXT_COUNT_ATTR, 0)
-        return self
+    # 改行を抜いた文字数
+    @property
+    def length(self) -> int:
+        return len(self.text_raw.replace("\n", ""))
 
+    # 改行を抜いた文字数よりカウントが大きくなった
+    @property
+    def is_finish(self) -> bool:
+        return self.text_count >= self.length
+
+    # テキスト取得系
     @property
     def text(self) -> str:
+        return self._limitstr(self._util_root.text, self.text_count)
+
+    @property
+    def text_raw(self) -> str:  # リミットナシで取得
         return self._util_root.text
+
+    @property
+    def lines(self) -> list[str]:
+        return self._limitstr(self._util_root.text, self.text_count).splitlines()
+
+class XUPageBase(XUTextBase):
+    PAGE_NO_ATTR="_xmlui_page_no"
+
+    def __init__(self, state:XUState, page_line_no:int, wrap:int=4096):
+        super().__init__(state, wrap)
+        self._page_line_no = page_line_no
+
+    # 現在ページ
+    @property
+    def page_no(self) -> float:
+        return self._util_root.attr_int(self.PAGE_NO_ATTR, 0)
+
+    # 次のページに進む
+    def next_page(self, add:int=1):
+        return self._util_root.set_attr(self.PAGE_NO_ATTR, self.page_no+add)
+
+    # ページの先頭までカウンタを戻す
+    def reset_page_count(self) -> Self:
+        return self.reset_count(self.page_start_count)
+
+    # ページの終了カウンタ位置
+    @property
+    def page_start_count(self):
+        end_line = self.page_no*self._page_line_no
+        return sum([len(line) for line in self.lines[:end_line]], 0)
+
+    # ページの終了カウンタ位置
+    @property
+    def page_end_count(self):
+        end_line = (self.page_no+1)*self._page_line_no
+        return sum([len(line) for line in self.lines[:end_line]], 0)
+
+    # ページの終了カウンタ位置を超えたかどうか
+    @property
+    def is_page_finish(self):
+        return self.text_count >= self.page_end_count
+
+    # ページの終了カウンタ位置まで進める
+    def finish_page(self):
+        return self.reset_count(self.page_end_count)
+
+    # テキスト取得系
+    @property
+    def page_text(self) -> str:
+        return "\n".join(self.page_lines)
+
+    @property
+    def page_lines(self) -> list[str]:
+        return self.lines[self.page_no*self._page_line_no:(self.page_no+1)*self._page_line_no]
+
 
     # イベントアクション
     # -----------------------------------------------------
     # 状況に応じたactionを返す
-    # def check_action(self) -> str:
-    #     # 表示しきっていたらメニューごと閉じる
-    #     if self.is_end_page:
-    #         return "close"
-    #     # ページ中に残りがあるなら一気に表示
-    #     if not self.is_finish:
-    #         return "finish"
-    #     # ページが残っていたら次のページへ
-    #     elif not self.is_end_page:
-    #         return "next_page"
-    #     return ""
-
+    def check_action(self) -> str:
+        # 表示しきっていたらメニューごと閉じる
+        if self.is_finish:
+            return "close"
+        # ページ中に残りがあるなら一気に表示
+        elif not self.is_page_finish:
+            return "page_finish"
+        # ページが残っているので次のページへ
+        else:
+            return "page_next"
 
 # メニュー系
 # ---------------------------------------------------------
