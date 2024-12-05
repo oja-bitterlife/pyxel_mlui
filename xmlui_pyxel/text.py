@@ -72,3 +72,24 @@ def msg(xmlui:XMLUI, tag_name:str):
         # 関数登録
         xmlui.set_drawfunc(tag_name, draw)
     return wrapper
+
+# スクロールメッセージ
+class MsgScroll(XUPageBase):
+    PAGE_LINES_ATTR = "page_lines"  # ページの行数
+    WRAP_ATTR = "wrap"  # ワードラップ文字数
+
+    # タグのテキストを処理する
+    def __init__(self, state:XUState):
+        page_lines = state.attr_int(self.PAGE_LINES_ATTR, 1)
+        wrap = state.attr_int(self.WRAP_ATTR, 4096)
+        super().__init__(state, page_lines, wrap)
+
+# デコレータを用意
+def msg_scr(xmlui:XMLUI, tag_name:str):
+    def wrapper(bind_func:Callable[[Msg,XUEvent], None]):
+        # 登録用関数をジェネレート
+        def draw(state:XUState, event:XUEvent):
+            bind_func(Msg(state), event)
+        # 関数登録
+        xmlui.set_drawfunc(tag_name, draw)
+    return wrapper

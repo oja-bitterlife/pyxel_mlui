@@ -42,13 +42,14 @@ def draw_msg_cursor(state:XUState):
 def popup_win_draw(win:win.Rect, event:XUEvent):
     clip = win.area.to_offset()
     clip.h = int(win.update_count*win.speed)
-    win.draw_buf(pyxel.screen.data_ptr(), [7,13,5], 12, clip)
+    win.draw_buf(pyxel.screen.data_ptr(), [0,7,13], 0, clip)
 
 @text.msg(xmlui, "popup_text")
 def popup_text(popup_text:text.Msg, event:XUEvent):
     popup_text.finish()  # 常に一気に表示
 
     if input.BTN_A in event.trg or input.BTN_B in event.trg:
+        print(popup_text.owner)
         popup_text.close()
 
     # テキスト描画

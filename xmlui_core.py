@@ -324,6 +324,7 @@ class XUState:
         if self.xmlui.is_open(id_alias):
             raise Exception(f"ID '{id_alias}' already exists")
 
+        # オープン
         opend = self.xmlui._templates[template_name].duplicate(id).set_attr("id", id_alias)
         self.add_child(opend)
 
@@ -524,6 +525,9 @@ class XMLUI(XUState):
 
     # 更新用
     # *************************************************************************
+    def _rec_get_draw_targets(self, element:Element):
+        pass
+
     def draw(self):
         # (入力)イベントの更新
         self.event.update()
@@ -610,7 +614,10 @@ class XMLUI(XUState):
 class _XUUtilBase(XUState):
     def __init__(self, state, root_tag:str):
         super().__init__(state.xmlui, state._element)
-        state.set_attr("event_absorber", True)  # イベント使う系Util
+
+        # 自前設定が無ければabsorberにしておく
+        if not self.event_absorber and not self.event_listener:
+            self.set_attr("event_absorber", "True")
 
         # Utilityルートの作成(状態保存先)
         try:
@@ -1135,9 +1142,9 @@ class XUWinRectFrame(_XUWinFrameBase):
                 return y if w-1-x > y else w-1-x
             case 6:
                 y = h-1-y
-                return y if x >= y else size-1-x
+                return y if x > y else size-1-x
             case 8:
                 x = w-1-x
                 y = h-1-y
-                return y if x >= y else size-1-x
+                return y if x > y else size-1-x
         return self._get13574index(size, x, y, w, h)
