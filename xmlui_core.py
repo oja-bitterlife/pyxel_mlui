@@ -427,11 +427,11 @@ class XUState:
         return self.attr_float("speed", 1.0)
 
     @property
-    def use_event(self) -> bool:  # eventを使うかどうか
-        return self.attr_bool("use_event", False)
+    def event_absorb(self) -> bool:  # eventを使うかどうか
+        return self.attr_bool("event_absorb", False)
     @property
-    def through_event(self) -> bool:  # eventを透過させるかどうか
-        return self.attr_bool("through_event", False)
+    def event_listen(self) -> bool:  # eventを検知するかどうか
+        return self.attr_bool("event_listen", False)
 
     @property
     def marker(self) -> str:  # デバッグ用
@@ -490,7 +490,6 @@ class XMLUI(XUState):
         # rootを作って自分自身に設定
         root = Element("root")
         root.attrib["id"] = "root"
-        root.attrib["use_event"] = "True"
         super().__init__(self, root)
 
         # キャッシュ
@@ -534,10 +533,10 @@ class XMLUI(XUState):
 
         # ActiveStateの取得。Active=最後、なので最後から確認
         self.active_states:list[XUState] = []
-        for event in reversed([state for state in draw_targets if state.use_event]):
+        for event in reversed([state for state in draw_targets if state.event_listen or state.event_absorb]):
             self.active_states.append(event)
-            # パススルーでなければそこまで
-            if not event.through_event:
+            # イベント通知終端
+            if event.event_absorb:
                 break
 
         # 親情報の更新
@@ -612,7 +611,7 @@ class XMLUI(XUState):
 class _XUUtilBase(XUState):
     def __init__(self, state, root_tag:str):
         super().__init__(state.xmlui, state._element)
-        state.set_attr("use_event", True)  # イベント使う系Util
+        state.set_attr("event_absorb", True)  # イベント使う系Util
 
         # Utilityルートの作成(状態保存先)
         try:
