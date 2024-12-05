@@ -115,23 +115,23 @@ class Field:
                         pyxel.rect(x*16+scroll_x, y*16+scroll_y, 15, 15, 1)
 
     npc = [
-        ["king", 8, 8, "おうさま", 2],
-        ["knight1", 8, 11, "兵士1", 3],
-        ["knight2", 10, 11, "兵士2", 3],
-        ["knighg3", 12, 9, "兵士3", 3],
+        ["king", 8, 8, 2, "おうさま"],
+        ["knight1", 8, 11, 3, "兵士1"],
+        ["knight2", 10, 11, 3, "兵士2"],
+        ["knighg3", 12, 9, 3, "兵士3"],
     ]
     def draw_npc(self, scroll_x, scroll_y):
         for npc in self.npc:
-            pyxel.circ(npc[1]*16+scroll_x+7, npc[2]*16+scroll_y+7, 6, npc[4])
+            pyxel.circ(npc[1]*16+scroll_x+7, npc[2]*16+scroll_y+7, 6, npc[3])
 
     treasure = [
-        ["tresure1", 9, 9, "やくそう", 10],
-        ["tresure2", 10, 9, "100G", 10],
-        ["tresure3", 11, 6, "10G", 10],
+        ["tresure1", 9, 9, 10, "やくそう"],
+        ["tresure2", 10, 9, 10, "100G"],
+        ["tresure3", 11, 6, 10, "10G"],
     ]
     def draw_treasure(self, scroll_x, scroll_y):
         for treasure in self.treasure:
-            pyxel.rect(treasure[1]*16+scroll_x+1, treasure[2]*16+scroll_y+2, 14, 12, treasure[4])
+            pyxel.rect(treasure[1]*16+scroll_x+1, treasure[2]*16+scroll_y+2, 14, 12, treasure[3])
 
     def draw_player(self):
         pyxel.circ(128+7, 128+7, 7, 12)
