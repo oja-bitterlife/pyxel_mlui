@@ -70,4 +70,4 @@ def popup_text(popup_text:text.Msg, event:XUEvent):
 def round_win_draw(round_win:win.Round, event:XUEvent):
     clip = round_win.area.to_offset()
     clip.h = int(round_win.update_count*round_win.speed)
-    round_win.draw_buf(pyxel.screen.data_ptr(), [7,13,5], 12, clip)
+    round_win.draw_buf(pyxel.screen.data_ptr(), [0,7,13], 0, clip)

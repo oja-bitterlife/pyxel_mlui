@@ -146,21 +146,13 @@ class Field:
 
 # 町の中
 # ---------------------------------------------------------
-# 角丸ウインドウ
-# ---------------------------------------------------------
-@win.round(xmlui, "round_win")
-def round_win_draw(round_win:win.Round, event:XUEvent):
-    clip = round_win.area.to_offset()
-    clip.h = int(round_win.update_count*round_win.speed)
-    round_win.draw_buf(pyxel.screen.data_ptr(), [7,13,5], 12, clip)
-
 # ラベル
 # ---------------------------------------------------------
 @text.label(xmlui, "title", "center", "top")
 def title_draw(label:text.Label, event:XUEvent):
-    pyxel.rect(label.area.x, label.area.y, label.area.w, label.area.h, 12)
+    pyxel.rect(label.area.x, label.area.y, label.area.w, label.area.h, 0)
     x, y = label.aligned_pos(text.default)
-    pyxel.text(x, y, label.text, 7, text.default.font)
+    pyxel.text(x, y-1, label.text, 7, text.default.font)
 
 # メニューアイテム
 # ---------------------------------------------------------
