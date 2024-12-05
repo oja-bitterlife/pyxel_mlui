@@ -643,13 +643,11 @@ _hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
 # まずは読み込み用
 # *****************************************************************************
 # テキスト基底
-class XUPageBase(_XUUtilBase):
+class XUTextBase(_XUUtilBase):
     # クラス定数
-    ROOT_TAG= "_xmlui_page_root"
-    PAGE_TAG ="_xmlui_page"
+    ROOT_TAG= "_xmlui_text_root"
+    TEXT_COUNT_ATTR="_xmlui_text_count"
     SEPARATE_REGEXP = r"\\n"  # 改行に変換する正規表現
-
-    PAGE_NO_ATTR = "page_no"  # ページ管理用
 
     # 文字列中の半角を全角に変換する
     @classmethod
@@ -658,71 +656,28 @@ class XUPageBase(_XUUtilBase):
 
     # 初期化
     # -----------------------------------------------------
-    def __init__(self, state:XUState, page_lins:int, wrap:int=4096):
+    def __init__(self, state:XUState, wrap:int=4096):
         super().__init__(state, self.ROOT_TAG)
-
-        # パラメータの保存
-        self._page_lines = page_lins
         self._wrap = max(wrap, 1)   # 0だと無限になってしまうので最低1を入れておく
 
         # page_root下(ページテキスト)の再構築
         # -----------------------------------------------------
         # 改行を\nに統一して全角化
-        strip_marge = "\n".join([line.strip() for line in self.text.splitlines()])  # XMLの改行テキストを前後を削って結合
-        tmp_text = self.convert_zenkaku(re.sub(self.SEPARATE_REGEXP, "\n", strip_marge).strip())  # \nという文字列を改行コードに
+        tmp_text = "\n".join([line.strip() for line in self.text.splitlines()])  # XMLの改行テキストを前後を削って結合
+        tmp_text = re.sub(self.SEPARATE_REGEXP, "\n", tmp_text).strip()  # \nという文字列を改行コードに
+        tmp_text = self.convert_zenkaku(tmp_text)  # 全角化
 
         # 各行に分解し、その行をさらにwrapで分解する
         lines =  sum([[line[i:i+self._wrap] for i in  range(0, len(line), self._wrap)] for line in tmp_text.splitlines()], [])
 
-        # ページごとにElementを追加
-        for i in range(0, len(lines), self._page_lines):
-            page_text = "\n".join(lines[i:i+self._page_lines])  # 改行を\nにして全部文字列に
-            page = XUState(self._util_root.xmlui, Element(self.PAGE_TAG))
-            page.set_text(page_text)
-            self._util_root.add_child(page)
-
-    # ページ関係
-    # -----------------------------------------------------
-    # 現在ページ
-    @property
-    def page_no(self) -> int:
-        return min(max(self._util_root.attr_int(self.PAGE_NO_ATTR, 0), 0), self.page_max)
-
-    # ページの最大数
-    @property
-    def page_max(self) -> int:
-        return len(self._util_root.find_by_tagall(self.PAGE_TAG))
-
-    # ページ全部表示済みかどうか
-    @property
-    def is_end_page(self) -> bool:
-        return self.page_no+1 >= self.page_max  # 1オリジンで数える
-
-    # ページタグリスト
-    @property
-    def pages(self) -> list[XUState]:
-        return self._util_root.find_by_tagall(self.PAGE_TAG)
-
-    # ページテキスト
-    @property
-    def page_text(self) -> str:
-        return self._limitstr(self.pages[self.page_no].text, self.draw_count)
-
-    # page_noの操作
-    def next_page(self, add:int=1) -> Self:
-        self.reset()  # ページが変わればまた最初から
-        self._util_root.set_attr(self.PAGE_NO_ATTR, max(0, self.page_no+add))
-        return self
-
-    # ページを0に戻す
-    def reset_page(self) -> Self:
-        return self.next_page(-self.page_no)
+        # テキストに戻して格納
+        self._util_root.set_text("\n".join(lines))
 
     # アニメーション用
     # -----------------------------------------------------
-    # draw_countまでの文字列を改行分割
-    def _limitstr(self, tmp_text, draw_count:float) -> str:
-        limit = math.ceil(draw_count)
+    # draw_countまでの文字列を改行分割。スライスじゃないのは改行を数えないため
+    def _limitstr(self, tmp_text, text_count:float) -> str:
+        limit = math.ceil(text_count)
         # まずlimitまで縮める
         for i,c in enumerate(tmp_text):
             if (limit := limit if c == "\n" else limit-1) < 0:  # 改行は数えない
@@ -732,46 +687,33 @@ class XUPageBase(_XUUtilBase):
 
     # 表示カウンタ取得
     @property
-    def draw_count(self) -> float:
-        return self.update_count * self.speed
-
-    # 現在ページを表示しきったかどうか
-    @property
-    def is_finish(self) -> bool:
-        # データ未設定時はいつでもfinish
-        if not self.pages:
-            return True
-        return math.ceil(self.draw_count) >= len(self.pages[self.page_no].text.replace("\n", ""))
-
-    # ページ送り待ち状態(ページ送りカーソルの表示が必要)
-    @property
-    def is_next_wait(self) -> bool:
-        return self.is_finish and not self.is_end_page
-
-    # 表示カウンタのリセット
-    def reset(self) -> Self:
-        self.set_attr("update_count", 1)  # update_countは1始まり
-        return self
+    def text_count(self) -> float:
+        return self._util_root.attr_int(self.TEXT_COUNT_ATTR, 2**31-1)  # 一気表示を基本に
 
     # 一気に表示
     def finish(self) -> Self:
-        self.set_attr("update_count", 2**31-1)
+        self._util_root.set_attr(self.TEXT_COUNT_ATTR, 2**31-1)
+        return self
+
+    # 表示カウンタのリセット
+    def reset(self) -> Self:
+        self._util_root.set_attr(self.TEXT_COUNT_ATTR, 0)
         return self
 
     # イベントアクション
     # -----------------------------------------------------
     # 状況に応じたactionを返す
-    def check_action(self) -> str:
-        # 表示しきっていたらメニューごと閉じる
-        if self.is_end_page:
-            return "close"
-        # ページ中に残りがあるなら一気に表示
-        if not self.is_finish:
-            return "finish"
-        # ページが残っていたら次のページへ
-        elif not self.is_end_page:
-            return "next_page"
-        return ""
+    # def check_action(self) -> str:
+    #     # 表示しきっていたらメニューごと閉じる
+    #     if self.is_end_page:
+    #         return "close"
+    #     # ページ中に残りがあるなら一気に表示
+    #     if not self.is_finish:
+    #         return "finish"
+    #     # ページが残っていたら次のページへ
+    #     elif not self.is_end_page:
+    #         return "next_page"
+    #     return ""
 
 
 # メニュー系
@@ -945,7 +887,7 @@ class XUDial(_XUUtilBase):
 
     @property
     def zenkaku_digits(self) -> str:
-        return "".join(list(reversed(XUPageBase.convert_zenkaku(self._util_root.attr_str(self.DIGIT_ATTR)))))
+        return "".join(list(reversed(XUTextBase.convert_zenkaku(self._util_root.attr_str(self.DIGIT_ATTR)))))
 
     # 回り込み付き操作位置の設定
     def set_editpos(self, edit_pos:int) -> Self:

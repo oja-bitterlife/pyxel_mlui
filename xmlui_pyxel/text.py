@@ -42,7 +42,7 @@ class Label(XUState):
         return x, y
 
 # メッセージ
-class Msg(XUPageBase):
+class Msg(XUTextBase):
     PAGE_LINES_ATTR = "page_lines"  # ページの行数
     WRAP_ATTR = "wrap"  # ワードラップ文字数
 
@@ -50,7 +50,7 @@ class Msg(XUPageBase):
     def __init__(self, state:XUState):
         page_lines = state.attr_int(self.PAGE_LINES_ATTR, 1)
         wrap = state.attr_int(self.WRAP_ATTR, 4096)
-        super().__init__(state, page_lines, wrap)
+        super().__init__(state, wrap)
 
 
 # デコレータを用意
