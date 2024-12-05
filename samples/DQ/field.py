@@ -113,15 +113,14 @@ def menu_grid(menu_grid:select.Grid, event:XUEvent):
 # ---------------------------------------------------------
 @field_text.msg("msg_text")
 def msg_text(msg_text:text.Msg, event:XUEvent):
-    # if input.BTN_A in event.trg or input.BTN_B in event.trg:
-    #     action = msg_text.check_action()
-    #     match action:
-    #         case "close":
-    #             msg_text.close_parent("command_menu_win")  # メニューごと閉じる
-    #         case "finish":
-    #             msg_text.finish()
-    #         case "next_page":
-    #             msg_text.next_page()
+    if input.BTN_A in event.trg or input.BTN_B in event.trg:
+        if msg_text.is_finish:
+            print("finish")
+            msg_text.close()  # メニューごと閉じる
+        elif msg_text.is_next_page_wait:
+            msg_text.next_page()
+        else:
+            msg_text.finish_page_count()
 
     msg_text.next_count()
 

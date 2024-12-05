@@ -693,14 +693,14 @@ class XUTextBase(_XUUtilBase):
     def text_count(self) -> float:
         return self._util_root.attr_float(self.TEXT_COUNT_ATTR, 0)
 
-    # 表示カウンタのリセット
-    def reset_count(self, count=0) -> Self:
-        self._util_root.set_attr(self.TEXT_COUNT_ATTR, count)
-        return self
-
     # 表示カウンタを進める
     def next_count(self, add:float=1.0) -> Self:
         self._util_root.set_attr(self.TEXT_COUNT_ATTR, self.text_count+add)
+        return self
+
+    # 表示カウンタのリセット
+    def reset_count(self, count=0) -> Self:
+        self._util_root.set_attr(self.TEXT_COUNT_ATTR, count)
         return self
 
     # 一気に表示
@@ -711,7 +711,7 @@ class XUTextBase(_XUUtilBase):
     # 改行を抜いた文字数
     @property
     def length(self) -> int:
-        return len(self.text_raw.replace("\n", ""))
+        return len(self._util_root.text.replace("\n", ""))
 
     # 改行を抜いた文字数よりカウントが大きくなった
     @property
@@ -724,10 +724,6 @@ class XUTextBase(_XUUtilBase):
         return self._limitstr(self._util_root.text, self.text_count)
 
     @property
-    def text_raw(self) -> str:  # リミットナシで取得
-        return self._util_root.text
-
-    @property
     def lines(self) -> list[str]:
         return self._limitstr(self._util_root.text, self.text_count).splitlines()
 
@@ -738,38 +734,49 @@ class XUPageBase(XUTextBase):
         super().__init__(state, wrap)
         self._page_lines = page_lines
 
+    # オーバーライド
+    @property
+    def is_finish(self):
+        return super().is_finish and not self.is_next_page_wait
+
     # 現在ページ
     @property
     def page_no(self) -> float:
         return self._util_root.attr_int(self.PAGE_NO_ATTR, 0)
 
     # 次のページに進む
-    def next_page(self, add:int=1):
-        return self._util_root.set_attr(self.PAGE_NO_ATTR, self.page_no+add)
+    def next_page(self, add:int=1) -> Self:
+        self._util_root.set_attr(self.PAGE_NO_ATTR, self.page_no+add)
+        self.reset_page_count()
+        return self
 
-    # ページの先頭までカウンタを戻す
-    def reset_page_count(self) -> Self:
-        return self.reset_count(self.page_start_count)
+    @property
+    def page_num(self) -> int:
+        return math.ceil(self.text_count/self._page_lines)  # 切り上げ
 
-    # ページの終了カウンタ位置
+    # ページの開始カウンタ位置
     @property
     def page_start_count(self):
         end_line = self.page_no*self._page_lines
-        return sum([len(line) for line in self.lines[:end_line]], 0)
+        return sum([len(line) for line in self._util_root.text.splitlines()[:end_line]], 0)
 
     # ページの終了カウンタ位置
     @property
     def page_end_count(self):
         end_line = (self.page_no+1)*self._page_lines
-        return sum([len(line) for line in self.lines[:end_line]], 0)
+        return sum([len(line) for line in self._util_root.text.splitlines()[:end_line]], 0)
 
     # ページの終了カウンタ位置を超えたかどうか
     @property
     def is_page_finish(self):
         return self.text_count >= self.page_end_count
 
+    # ページの先頭までカウンタを戻す
+    def reset_page_count(self) -> Self:
+        return self.reset_count(self.page_start_count)
+
     # ページの終了カウンタ位置まで進める
-    def finish_page(self):
+    def finish_page_count(self):
         return self.reset_count(self.page_end_count)
 
     # テキスト取得系
@@ -781,19 +788,10 @@ class XUPageBase(XUTextBase):
     def page_lines(self) -> list[str]:
         return self.lines[self.page_no*self._page_lines:(self.page_no+1)*self._page_lines]
 
-    # イベントアクション
-    # -----------------------------------------------------
-    # 状況に応じたactionを返す
-    def check_action(self) -> str:
-        # 表示しきっていたらメニューごと閉じる
-        if self.is_finish:
-            return "close"
-        # ページ中に残りがあるなら一気に表示
-        elif not self.is_page_finish:
-            return "page_finish"
-        # ページが残っているので次のページへ
-        else:
-            return "page_next"
+    # 次ページ待ち
+    @property
+    def is_next_page_wait(self):
+        return self.is_page_finish and self.page_no+1 < self.page_num
 
 # メニュー系
 # ---------------------------------------------------------
