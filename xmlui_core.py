@@ -783,7 +783,7 @@ class XUSelectItem(XUState):
         super().__init__(xmlui, element)
 
     def set_pos(self, x:int, y:int) -> Self:
-        self.set_attr([self.ITEM_X_ATTR, self.ITEM_Y_ATTR],  [x, y])
+        self.set_attr([self.ITEM_X_ATTR, self.ITEM_Y_ATTR], [x, y])
         return self
 
     @property

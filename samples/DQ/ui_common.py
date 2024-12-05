@@ -71,7 +71,7 @@ def popup_text(popup_text:text.Msg, event:XUEvent):
 def round_win_draw(round_win:win.Round, event:XUEvent):
     area = round_win.area
     clip = round_win.area.to_offset()
-    clip.h = int(round_win.update_count*16)
+    clip.h = int(round_win.update_count*32)
 
     # 背景
     pyxel.rect(area.x, area.y, area.w, min(area.h, clip.h+2), 0)
