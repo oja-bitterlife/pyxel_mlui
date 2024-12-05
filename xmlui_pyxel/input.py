@@ -102,6 +102,9 @@ class Decorators:
         self.xmlui = xmlui
         self.group = group
 
+    def __del__(self):
+        self.xmlui.remove_drawfunc(self.group)
+
     # デコレータを用意
     def dial(self, tag_name:str, digit_length:int, align:str="center", valign:str="center", digit_list:str="0123456789"):
         def wrapper(bind_func:Callable[[Dial,XUEvent], None]):

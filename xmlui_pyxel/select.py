@@ -23,6 +23,9 @@ class Decorators:
         self.xmlui = xmlui
         self.group = group
 
+    def __del__(self):
+        self.xmlui.remove_drawfunc(self.group)
+
     def item(self, item_tag:str):
         def wrapper(bind_func:Callable[[Item,XUEvent], None]):
             # 登録用関数をジェネレート

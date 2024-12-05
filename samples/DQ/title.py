@@ -15,6 +15,7 @@ class Title:
 
     def __del__(self):
         xmlui.remove_template(self.UI_TEMPLATE_TITLE)
+        xmlui.remove_drawfunc("title")
 
     def update(self):
         if "game_start" in xmlui.event.trg:
