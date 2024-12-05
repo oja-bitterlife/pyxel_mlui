@@ -146,9 +146,12 @@ class Field:
 
 # 町の中
 # ---------------------------------------------------------
+field_select = select.Decorators(xmlui, "field")
+field_text = text.Decorators(xmlui, "field")
+
 # ラベル
 # ---------------------------------------------------------
-@text.label(xmlui, "title", "center", "top")
+@field_text.label("title", "center", "top")
 def title_draw(label:text.Label, event:XUEvent):
     pyxel.rect(label.area.x, label.area.y, label.area.w, label.area.h, 0)
     x, y = label.aligned_pos(text.default)
@@ -156,14 +159,14 @@ def title_draw(label:text.Label, event:XUEvent):
 
 # メニューアイテム
 # ---------------------------------------------------------
-@select.item(xmlui, "menu_item")
+@field_select.item("menu_item")
 def menu_item(menu_item:select.Item, event:XUEvent):
     pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, 7, text.default.font)
 
 # メニュー
 # *****************************************************************************
 # コマンドメニュー
-@select.grid(xmlui, "menu_grid", "menu_item", "rows", "item_w", "item_h")
+@field_select.grid("menu_grid", "menu_item", "rows", "item_w", "item_h")
 def menu_grid(menu_grid:select.Grid, event:XUEvent):
     # メニュー選択
     menu_grid.select_by_event(event.trg, *input.CURSOR)

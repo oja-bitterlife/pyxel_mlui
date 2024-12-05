@@ -37,15 +37,18 @@ def draw_msg_cursor(state:XUState):
 
 # 工事中表示用
 # *****************************************************************************
+common_win = win.Decorators(xmlui, "common")
+common_text = text.Decorators(xmlui, "common")
+
 # ポップアップウインドウ
 # ---------------------------------------------------------
-@win.rect(xmlui, "popup_win", 1000)  # アニメはしない
+@common_win.rect("popup_win", 1000)  # アニメはしない
 def popup_win_draw(win:win.Rect, event:XUEvent):
     clip = win.area.to_offset()
     clip.h = int(win.update_count*win.speed)
     win.draw_frame(pyxel.screen.data_ptr(), [0,7,13], win.area, clip)
 
-@text.msg(xmlui, "popup_text")
+@common_text.msg("popup_text")
 def popup_text(popup_text:text.Msg, event:XUEvent):
     popup_text.finish()  # 常に一気に表示
 
@@ -66,7 +69,7 @@ def popup_text(popup_text:text.Msg, event:XUEvent):
 # *****************************************************************************
 # 角丸ウインドウ
 # ---------------------------------------------------------
-@win.round(xmlui, "round_win", speed=1)
+@common_win.round("round_win", speed=1)
 def round_win_draw(round_win:win.Round, event:XUEvent):
     area = round_win.area
 

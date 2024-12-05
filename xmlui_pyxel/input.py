@@ -69,8 +69,9 @@ def set_Inputlist_fromdict(xmlui:XMLUI, dict_:dict[str,list[int]]):
         xmlui.set_inputlist(key, value)
 
 
-# メッセージ
-# *****************************************************************************
+# 入力系
+# #############################################################################
+# 数値設定ダイアル
 class Dial(XUDial):
     PAGE_LINES_ATTR = "page_lines"  # ページの行数
     WRAP_ATTR = "wrap"  # ワードラップ文字数
@@ -93,12 +94,20 @@ class Dial(XUDial):
         y = area.aligned_y(font.size+h, self._valign)
         return x, y
 
+
 # デコレータを用意
-def dial(xmlui:XMLUI, tag_name:str, digit_length:int, align:str="center", valign:str="center", digit_list:str="0123456789"):
-    def wrapper(bind_func:Callable[[Dial,XUEvent], None]):
-        # 登録用関数をジェネレート
-        def draw(state:XUState, event:XUEvent):
-            bind_func(Dial(state, digit_length, align, valign, digit_list), event)
-        # 関数登録
-        xmlui.set_drawfunc(tag_name, draw)
-    return wrapper
+# *****************************************************************************
+class Decorators:
+    def __init__(self, xmlui:XMLUI, group:str):
+        self.xmlui = xmlui
+        self.group = group
+
+    # デコレータを用意
+    def dial(self, tag_name:str, digit_length:int, align:str="center", valign:str="center", digit_list:str="0123456789"):
+        def wrapper(bind_func:Callable[[Dial,XUEvent], None]):
+            # 登録用関数をジェネレート
+            def draw(state:XUState, event:XUEvent):
+                bind_func(Dial(state, digit_length, align, valign, digit_list), event)
+            # 関数登録
+            self.xmlui.set_drawfunc(tag_name, draw)
+        return wrapper

@@ -25,10 +25,11 @@ class Title:
         xmlui.check_input_on(pyxel.btn)
         xmlui.draw()
 
+title_select = select.Decorators(xmlui, "title")
 
 # タイトル画面UI
 # ---------------------------------------------------------
-@select.list(xmlui, "game_start", "menu_item", "item_w", "item_h")
+@title_select.list("game_start", "menu_item", "item_w", "item_h")
 def game_start(game_start:select.List, event:XUEvent):
     # カーソル追加
     draw_menu_cursor(game_start.selected_item, 0, 1)
@@ -42,7 +43,7 @@ def game_start(game_start:select.List, event:XUEvent):
             case "continue":
                 game_start.open("common", "under_construct")
 
-@select.list(xmlui, "game_speed", "menu_item", "item_w", "item_h")
+@title_select.list("game_speed", "menu_item", "item_w", "item_h")
 def game_speed(game_speed:select.List, event:XUEvent):
     if event.on_init:  # 初期化
         game_speed.select(1)  # デフォルトはNormal
@@ -63,7 +64,7 @@ def game_speed(game_speed:select.List, event:XUEvent):
 
 # メニューアイテム
 # ---------------------------------------------------------
-@select.item(xmlui, "menu_item")
+@title_select.item("menu_item")
 def start_item(menu_item:select.Item, event:XUEvent):
     area = menu_item.area
     pyxel.text(area.x+6, area.y, menu_item.text, 7, text.default.font)
