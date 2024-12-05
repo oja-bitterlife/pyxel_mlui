@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<xmlui>
+    <info>開発用</info>
+    <popup_win abs_x="64" abs_y="96" w="128" h="64" id="under_construct">
+        <popup_text wrap="9" page_lines="256">
+            サンプルのため\n実行できません
+        </popup_text>
+    </popup_win>
+</xmlui>
+

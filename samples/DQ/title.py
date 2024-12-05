@@ -5,15 +5,16 @@ from xmlui_core import XUState,XUEvent
 from ui_common import xmlui,draw_menu_cursor
 from xmlui_pyxel import select,text,input
 
-UI_TEMPLATE_TITLE = "ui_title"
 
 class Title:
+    UI_TEMPLATE_TITLE = "ui_title"
+
     def __init__(self):
-        xmlui.template_fromfile("assets/ui/dq.xml", UI_TEMPLATE_TITLE)
-        xmlui.open(UI_TEMPLATE_TITLE, "game_title")
+        xmlui.template_fromfile("assets/ui/title.xml", self.UI_TEMPLATE_TITLE)
+        xmlui.open(self.UI_TEMPLATE_TITLE, "game_title")
 
     def __del__(self):
-        xmlui.remove_template(UI_TEMPLATE_TITLE)
+        xmlui.remove_template(self.UI_TEMPLATE_TITLE)
 
     def update(self):
         if "game_start" in xmlui.event.trg:
@@ -39,7 +40,7 @@ def game_start(game_start:select.List, event:XUEvent):
             case "start":
                 game_start.close_on("game_start")
             case "continue":
-                game_start.open(UI_TEMPLATE_TITLE, "under_construct")
+                game_start.open("common", "under_construct")
 
 @select.list(xmlui, "game_speed", "menu_item", "item_w", "item_h")
 def game_speed(game_speed:select.List, event:XUEvent):

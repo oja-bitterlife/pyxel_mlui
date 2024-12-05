@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <xmlui>
-    <info>開発用</info>
-    <popup_win abs_x="64" abs_y="96" w="128" h="64" id="under_construct">
-        <popup_text wrap="9" page_lines="256">
-            サンプルのため\n実行できません
-        </popup_text>
-    </popup_win>
-
     <info>タイトル画面用</info>
     <game_title id="game_title">
         <game_start abs_x="100" abs_y="128" item_h="16" event_listener="True">
@@ -20,6 +13,5 @@
             <menu_item action="fast">FAST</menu_item>
         </game_speed>
     </game_title>
-
 </xmlui>
 

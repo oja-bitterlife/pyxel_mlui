@@ -6,6 +6,7 @@ import pyxel
 pyxel.init(256, 256)
 
 from title import Title
+from field import Field
 
 # 最初はタイトル
 scene = Title()
@@ -17,7 +18,11 @@ def update(): # フレームの更新処理
         # ゲームの更新コード
         next_scene = scene.update()
         if next_scene is not None:
-            scene = None
+            match next_scene:
+                case "title":
+                    scene = Title()
+                case "field":
+                    scene = Field()
 
 def draw(): # 描画処理
     global scene

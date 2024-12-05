@@ -7,6 +7,7 @@ from xmlui_core import XMLUI,XUState,XUEvent
 
 # ライブラリのインスタンス化
 xmlui = XMLUI()
+xmlui.template_fromfile("assets/ui/common.xml", "common")
 
 # 初期化セット
 xmlui_pyxel_init(xmlui,
@@ -49,7 +50,6 @@ def popup_text(popup_text:text.Msg, event:XUEvent):
     popup_text.finish()  # 常に一気に表示
 
     if input.BTN_A in event.trg or input.BTN_B in event.trg:
-        print(popup_text.owner)
         popup_text.close()
 
     # テキスト描画
