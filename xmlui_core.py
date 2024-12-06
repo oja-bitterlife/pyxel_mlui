@@ -678,11 +678,11 @@ class XUTextAnim:
     # -----------------------------------------------------
     # 現在の表示文字数
     @property
-    def draw_count(self) -> int:
-        return int(self._state.attr_float(self.TEXT_COUNT_ATTR, 0))
+    def draw_count(self) -> float:
+        return float(self._state.attr_float(self.TEXT_COUNT_ATTR, 0))
 
     @draw_count.setter
-    def draw_count(self, count:int) -> int:
+    def draw_count(self, count:float) -> float:
         self._state.set_attr(self.TEXT_COUNT_ATTR, count)
         return count
 
