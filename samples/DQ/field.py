@@ -115,18 +115,18 @@ def menu_grid(menu_grid:select.Grid, event:XUEvent):
 def msg_text(msg_text:text.Msg, event:XUEvent):
     if input.BTN_A in event.trg or input.BTN_B in event.trg:
         if msg_text.is_finish:
-            print("finish")
             msg_text.close()  # メニューごと閉じる
-        elif msg_text.is_next_page_wait:
-            msg_text.next_page()
+        elif msg_text.has_next_page:
+            msg_text.add_page()
         else:
-            msg_text.reset_count(msg_text.page_end_count)
+            # 一気に表示
+            msg_text.page_text.draw_count = msg_text.page_text.length
 
-    msg_text.next_count()
+    msg_text.page_text.add_count()
 
     # テキスト描画
     area = msg_text.area  # areaは重いので必ずキャッシュ
-    for i,page in enumerate(msg_text.lines):
+    for i,page in enumerate(msg_text.page_text.splitlines()):
         pyxel.text(area.x, area.y+i*text.default.size, page, 7, text.default.font)
 
     # # カーソル表示

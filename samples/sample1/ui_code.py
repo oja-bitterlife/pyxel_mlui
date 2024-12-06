@@ -143,7 +143,7 @@ def msg_text(msg_text:text.Msg, event:xuc.XUEvent):
             case "finish":
                 msg_text.finish_count()
             case "next_page":
-                msg_text.next_page()
+                msg_text.add_page()
 
     # テキスト描画
     area = msg_text.area  # areaは重いので必ずキャッシュ

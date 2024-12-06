@@ -645,12 +645,8 @@ _hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
 # まずは読み込み用
 # *****************************************************************************
 # テキスト基底
-class XUTextBase(_XUUtilBase):
+class XUTextBase(str):
     SEPARATE_REGEXP = r"\\n"  # 改行に変換する正規表現
-
-    # クラス定数
-    ROOT_TAG= "_xmlui_text_root"
-    TEXT_COUNT_ATTR="_xmlui_text_count"
 
     # 文字列中の半角を全角に変換する
     @classmethod
@@ -659,22 +655,55 @@ class XUTextBase(_XUUtilBase):
 
     # 初期化
     # -----------------------------------------------------
-    def __init__(self, state:XUState, wrap:int=4096):
-        super().__init__(state, self.ROOT_TAG)
-        self._wrap = max(wrap, 1)   # 0だと無限になってしまうので最低1を入れておく
+    def __new__(cls, text:str, wrap:int=4096) -> Self:
+        wrap = max(wrap, 1)   # 0だと無限になってしまうので最低1を入れておく
 
         # page_root下(ページテキスト)の再構築
         # -----------------------------------------------------
         # 改行を\nに統一して全角化
-        tmp_text = self._element.text if self._element.text else ""  # self.textは使ってはいけない(propertyで再定義)
-        tmp_text = "\n".join([line.strip() for line in tmp_text.splitlines()])  # XMLの改行テキストを前後を削って結合
-        tmp_text = re.sub(self.SEPARATE_REGEXP, "\n", tmp_text).strip()  # \nという文字列を改行コードに
-        tmp_text = self.convert_zenkaku(tmp_text)  # 全角化
+        tmp_text = "\n".join([line.strip() for line in text.splitlines()])  # XMLの改行テキストを前後を削って結合
+        tmp_text = re.sub(cls.SEPARATE_REGEXP, "\n", tmp_text).strip()  # \nという文字列を改行コードに
+        tmp_text = cls.convert_zenkaku(tmp_text)  # 全角化
 
         # 各行に分解し、その行をさらにwrapで分解する
-        lines =  sum([[line[i:i+self._wrap] for i in  range(0, len(line), self._wrap)] for line in tmp_text.splitlines()], [])
+        lines =  sum([[line[i:i+wrap] for i in  range(0, len(line), wrap)] for line in tmp_text.splitlines()], [])
 
-        self._util_root.set_text("\n".join(lines))
+        # 結合して保存
+        self:XUTextBase = super().__new__(cls, "\n".join(lines))
+        return self
+
+    # 改行を抜いた文字数取得
+    @property
+    def length(self) -> int:
+        return len(self.replace("\n", ""))
+
+class XUTextAnim(XUTextBase):
+    TEXT_COUNT_ATTR="_xmlui_text_count"
+
+    _state:XUState  # このテキストを管理するEelement
+
+    def __new__(cls, state:XUState, text:str, wrap:int=4096) -> Self:
+        self = super().__new__(cls, text, wrap)
+        self._state = state
+        return self
+
+    # 表示カウンタ操作
+    # -----------------------------------------------------
+    # 現在の表示文字数
+    @property
+    def draw_count(self) -> int:
+        return int(self._state.attr_float(self.TEXT_COUNT_ATTR, 0))
+
+    # 表示文字数設定用(リセット用)
+    @draw_count.setter
+    def draw_count(self, count:float=0) -> Self:
+        self._state.set_attr(self.TEXT_COUNT_ATTR, count)
+        return self
+
+    # 表示文字数を増やす
+    def add_count(self, add:float=1.0) -> Self:
+        self.draw_count = self.draw_count + add
+        return self
 
     # アニメーション用
     # -----------------------------------------------------
@@ -688,101 +717,59 @@ class XUTextBase(_XUUtilBase):
                 break
         return tmp_text
 
-    # 表示カウンタ取得
-    @property
-    def text_count(self) -> float:
-        return self._util_root.attr_float(self.TEXT_COUNT_ATTR, 0)
-
-    # 表示カウンタを進める
-    def next_count(self, add:float=1.0) -> Self:
-        self._util_root.set_attr(self.TEXT_COUNT_ATTR, self.text_count+add)
-        return self
-
-    # 表示カウンタのリセット
-    def reset_count(self, count=0) -> Self:
-        self._util_root.set_attr(self.TEXT_COUNT_ATTR, count)
-        return self
-
-    # 一気に表示
-    def finish_count(self) -> Self:
-        self._util_root.set_attr(self.TEXT_COUNT_ATTR, 2**31-1)
-        return self
-
-    # 改行を抜いた文字数
-    @property
-    def length(self) -> int:
-        return len(self._util_root.text.replace("\n", ""))
-
     # 改行を抜いた文字数よりカウントが大きくなった
     @property
     def is_finish(self) -> bool:
-        return self.text_count >= self.length
+        return self.draw_count >= self.length
 
-    # テキスト取得系
-    @property
-    def text(self) -> str:
-        return self._limitstr(self._util_root.text, self.text_count)
-
-    @property
-    def lines(self) -> list[str]:
-        return self._limitstr(self._util_root.text, self.text_count).splitlines()
-
-class XUPageBase(XUTextBase):
+class XUTextPage(_XUUtilBase):
+    ROOT_TAG= "_xmlui_text_root"
     PAGE_NO_ATTR="_xmlui_page_no"
 
     def __init__(self, state:XUState, page_lines:int, wrap:int=4096):
-        super().__init__(state, wrap)
-        self._page_lines = page_lines
+        super().__init__(state, self.ROOT_TAG)
 
-    # オーバーライド
-    @property
-    def is_finish(self):
-        return super().is_finish and not self.is_next_page_wait
+        # １ページ拾ってくる
+        lines = XUTextBase(state.text, wrap).splitlines()
+        self._page_num = math.ceil(len(lines)/page_lines)  # 切り上げ
+        self._page_start = self.page_no*page_lines
+        self._page_end = self._page_start + page_lines
+        self._page_text = XUTextAnim(state, "\n".join(lines[self._page_start:self._page_end]), wrap)
 
+    # ページ操作
+    # -----------------------------------------------------
     # 現在ページ
     @property
-    def page_no(self) -> float:
+    def page_no(self) -> int:
         return self._util_root.attr_int(self.PAGE_NO_ATTR, 0)
 
+    # ページ設定用(リセット用)
+    @page_no.setter
+    def page_no(self, no:int=0) -> Self:
+        self._util_root.set_attr(self.PAGE_NO_ATTR, no)
+        return self
+
     # 次のページに進む
-    def next_page(self, add:int=1) -> Self:
-        self._util_root.set_attr(self.PAGE_NO_ATTR, self.page_no+add)
-        return self.reset_count(self.page_start_count)  # ページ先頭までリセット
+    def add_page(self, add:int=1) -> Self:
+        self.page_no = self.page_no + add
+        self.draw_count = 0  # ページ先頭までリセット
+        return self
 
+    # ページテキスト
+    # -----------------------------------------------------
     @property
-    def page_num(self) -> int:
-        return math.ceil(len(self._util_root.text.splitlines())/self._page_lines)  # 切り上げ
+    def page_text(self):
+        return self._page_text
 
-    # ページの開始カウンタ位置
+    # 次ページがなくテキストは表示完了 = 完全に終了
     @property
-    def page_start_count(self):
-        end_line = self.page_no*self._page_lines
-        return sum([len(line) for line in self._util_root.text.splitlines()[:end_line]], 0)
+    def is_finish(self):
+        return not self.has_next_page and self._page_text.is_finish
 
-    # ページの終了カウンタ位置
+    # 次ページあり
     @property
-    def page_end_count(self):
-        end_line = (self.page_no+1)*self._page_lines
-        return sum([len(line) for line in self._util_root.text.splitlines()[:end_line]], 0)
-
-    # ページの終了カウンタ位置を超えたかどうか
-    @property
-    def is_page_finish(self):
-        return self.text_count >= self.page_end_count
-
-    # テキスト取得系
-    @property
-    def text(self) -> str:
-        return "\n".join(self.lines)
-
-    @property
-    def lines(self) -> list[str]:
-        return super().lines[self.page_no*self._page_lines:(self.page_no+1)*self._page_lines]
-
-    # 次ページ待ち
-    @property
-    def is_next_page_wait(self):
-        return self.is_page_finish and self.page_no+1 < self.page_num
+    def has_next_page(self):
+        return self._page_text.is_finish and self.page_no < self._page_num-1
 
 # メニュー系
 # ---------------------------------------------------------

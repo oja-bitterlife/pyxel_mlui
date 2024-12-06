@@ -42,7 +42,7 @@ class Label(XUState):
         return x, y
 
 # メッセージ
-class Msg(XUPageBase):
+class Msg(XUTextPage):
     PAGE_LINES_ATTR = "page_lines"  # ページの行数
     WRAP_ATTR = "wrap"  # ワードラップ文字数
 
