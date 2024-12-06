@@ -118,20 +118,10 @@ def msg_text(msg_text:text.Msg, event:XUEvent):
         if msg_text.update_count//15 % 2:
             draw_msg_cursor(msg_text)
 
-    # 入力アクション
-    if input.BTN_A in event.trg or input.BTN_B in event.trg:
-        if msg_text.is_finish:
-            msg_text.close()  # メニューごと閉じる
-        elif msg_text.is_next_wait:
-            msg_text.page_no += 1  # 次ページへ
-        else:
-            msg_text.anim.draw_count = msg_text.anim.length  # 一気に表示
-
-    # テキストを進める
-    msg_text.anim.draw_count += 1
+    # テキスト表示
     area = msg_text.area  # areaは重いので必ずキャッシュ
 
-    # 表示物管理
+    # Scroll
     scroll_cache = msg_text._alllines[msg_text._page_start-msg_text.page_num:msg_text._page_start]
     if msg_text.page_no <= 1:
         scroll_cache = [""] + scroll_cache
@@ -144,4 +134,14 @@ def msg_text(msg_text:text.Msg, event:XUEvent):
     for i,page in enumerate(scroll_cache):
         pyxel.text(area.x, area.y + i*text.default.size, page, 7, text.default.font)
 
-    
+    # テキストを進める
+    msg_text.anim.draw_count += 1
+
+    # 入力アクション
+    if input.BTN_A in event.trg or input.BTN_B in event.trg:
+        if msg_text.is_finish:
+            msg_text.close()  # メニューごと閉じる
+        elif msg_text.is_next_wait:
+            msg_text.page_no += 1  # 次ページへ
+        else:
+            msg_text.anim.draw_count = msg_text.anim.length  # 一気に表示
