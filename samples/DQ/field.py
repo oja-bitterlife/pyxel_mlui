@@ -116,7 +116,7 @@ def menu_grid(menu_grid:select.Grid, event:XUEvent):
 def msg_text(msg_text:text.MsgDQ, event:XUEvent):
     # テキスト表示
     # ---------------------------------------------------------
-    msg_text.anim.draw_count += 0.5
+    msg_text.anim.draw_count += 0.1
     area = msg_text.area  # areaは重いので必ずキャッシュ
 
     # お試し
@@ -125,12 +125,11 @@ def msg_text(msg_text:text.MsgDQ, event:XUEvent):
 
     # Scroll
     scroll_buf = msg_text.scroll_buf(msg_text.page_line_num + 2)
-    scroll_indents = msg_text.scroll_indents(msg_text.page_line_num + 2, "＊「", text.default.size*2)
-    print(scroll_indents)
+    scroll_indents = msg_text.scroll_indents(msg_text.page_line_num + 2, "＊「")
 
     # テキスト描画
     for i,page in enumerate(scroll_buf):
-        x = area.x + scroll_indents[i]
+        x = area.x + (text.default.size*2 if scroll_indents[i] else 0)
         pyxel.text(x, area.y + i*text.default.size, page, 7, text.default.font)
 
     # カーソル表示
@@ -148,5 +147,7 @@ def msg_text(msg_text:text.MsgDQ, event:XUEvent):
             msg_text.close()  # メニューごと閉じる
         elif msg_text.is_next_wait:
             msg_text.page_no += 1  # 次ページへ
-        else:
-            msg_text.anim.draw_count = msg_text.anim.length  # 一気に表示
+
+    if input.BTN_A in event.now or input.BTN_B in event.now:
+        if not msg_text.is_next_wait:
+            msg_text.anim.draw_count += 2  # 素早く表示

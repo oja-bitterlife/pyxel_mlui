@@ -54,7 +54,7 @@ class MsgScr(Msg):
     def __init__(self, state:XUState, page_line_num_attr:str, wrap_attr:str):
         super().__init__(state, page_line_num_attr, wrap_attr)
 
-    def scroll_buf(self:"MsgScr", scroll_line_num:int):
+    def scroll_buf(self:"MsgScr", scroll_line_num:int) -> list[str]:
         # 現在ページの挿入
         buf = self.anim.text.splitlines()
 
@@ -76,16 +76,16 @@ class MsgDQ(MsgScr):
     def __init__(self, state:XUState, page_line_num_attr:str, wrap_attr:str):
         super().__init__(state, page_line_num_attr, wrap_attr)
 
-    def scroll_indents(self:"MsgDQ", scroll_line_num:int, head_str:str, indent_size:int):
+    def scroll_indents(self:"MsgDQ", scroll_line_num:int, head_str:str) -> list[bool]:
         # 現在ページの挿入
         anim_line_num = len(self.anim.text.splitlines())
-        indents = [indent_size if not self.page_text.startswith(head_str) else 0 for i in range(anim_line_num)]
+        indents = [True if not self.pages[self.page_no][i].startswith(head_str) else False for i in range(anim_line_num)]
 
         # 行が足りるまでページを巻き戻して挿入
         for page_no in range(self.page_no-1, -1, -1):
             if len(indents) >= scroll_line_num:
                 break
-            indents =  [indent_size if not line.startswith(head_str) else 0 for line in self.pages[page_no]] + indents
+            indents =  [True if not line.startswith(head_str) else False for line in self.pages[page_no]] + indents
 
         # 最大行数に絞る。アニメーション中だけ最下行が使える。
         max_line = scroll_line_num if not self.anim.is_finish else scroll_line_num-1
