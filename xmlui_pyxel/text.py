@@ -44,10 +44,10 @@ class Label(XUState):
 # メッセージ
 class Msg(XUTextPage):
     # タグのテキストを処理する
-    def __init__(self, state:XUState, page_lines_attr:str, wrap_attr:str):
-        page_lines = state.attr_int(page_lines_attr, 1)
+    def __init__(self, state:XUState, page_line_num_attr:str, wrap_attr:str):
+        page_line_num = state.attr_int(page_line_num_attr, 1)
         wrap = state.attr_int(wrap_attr, 4096)
-        super().__init__(state, page_lines, wrap)
+        super().__init__(state, page_line_num, wrap)
 
 
 # デコレータを用意
@@ -69,11 +69,11 @@ class Decorators:
             self.xmlui.set_drawfunc(self.group, tag_name, draw)
         return wrapper
 
-    def msg(self, tag_name:str, page_lines_attr:str="page_lines", wrap_attr:str="wrap"):
+    def msg(self, tag_name:str, page_line_num_attr:str="page_line_num", wrap_attr:str="wrap"):
         def wrapper(bind_func:Callable[[Msg,XUEvent], None]):
             # 登録用関数をジェネレート
             def draw(state:XUState, event:XUEvent):
-                bind_func(Msg(state, page_lines_attr, wrap_attr), event)
+                bind_func(Msg(state, page_line_num_attr, wrap_attr), event)
             # 関数登録
             self.xmlui.set_drawfunc(self.group, tag_name, draw)
         return wrapper

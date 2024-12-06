@@ -121,16 +121,31 @@ def msg_text(msg_text:text.Msg, event:XUEvent):
 
     # テキスト表示
     # ---------------------------------------------------------
-    msg_text.anim.draw_count += 1
+    msg_text.anim.draw_count += 0.5
     area = msg_text.area  # areaは重いので必ずキャッシュ
 
     # Scroll
-    scroll_cache = msg_text.pages[msg_text.page_no-1] if msg_text.page_no > 0 else []
-    if msg_text.page_no <= 1:
-        scroll_cache = [""] + scroll_cache
-    scroll_cache += msg_text.anim.text.splitlines()
+    scroll_line_num = msg_text.page_line_num + 2  # DQタイプで上下１ライン余分に持つ
+    scroll_cache = msg_text.anim.text.splitlines()
 
-    max_line = msg_text._page_lines+2 if not msg_text.anim.is_finish else msg_text._page_lines+1
+    # 行が足りるまで巻き戻して挿入
+    for page_no in range(msg_text.page_no-1, -1, -1):
+        if len(scroll_cache) >= scroll_line_num:
+            break
+        scroll_cache = msg_text.pages[page_no] + scroll_cache
+
+    # ページの先頭が２行目に来るように空行を追加する
+    if msg_text.anim.is_finish:
+        max_empty_num = msg_text.page_line_num-len(msg_text.page_lines)
+        over_draw = (int(msg_text.anim.draw_count) - msg_text.anim.length)//3  # ちょっとずつ追加する小細工
+        scroll_cache += [""] * min(over_draw, max_empty_num)
+
+    # 行数が足りないうちは先頭に空行を入れておく
+    if len(scroll_cache) < scroll_line_num:
+        scroll_cache = [""]+scroll_cache
+
+    # 最大行数に絞る。アニメーション中だけ最下行が使える。
+    max_line = scroll_line_num if not msg_text.anim.is_finish else scroll_line_num-1
     scroll_cache = list(reversed(list(reversed(scroll_cache))[:max_line]))
 
     # テキスト描画

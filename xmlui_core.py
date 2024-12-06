@@ -719,10 +719,10 @@ class XUTextPage(_XUUtilBase):
     ROOT_TAG= "_xmlui_text_root"
     PAGE_NO_ATTR="_xmlui_page_no"
 
-    def __init__(self, state:XUState, page_lines:int, wrap:int=4096):
+    def __init__(self, state:XUState, page_line_num:int, wrap:int=4096):
         super().__init__(state, self.ROOT_TAG)
-        self._page_lines = page_lines
-        self._warp = wrap
+        self.page_line_num = page_line_num
+        self.warp = wrap
 
         # ページ分解
         manual_pages = XUTextBase(state.text, wrap).split("\0")
@@ -731,14 +731,14 @@ class XUTextPage(_XUUtilBase):
             lines:list[str] = []
             for line in manual_page.strip().splitlines():
                 lines.append(line)
-                if len(lines) >= page_lines:
+                if len(lines) >= page_line_num:
                     self.pages.append(lines)
                     lines = []
             if lines:
                 self.pages.append(lines)
 
         # １ページ拾ってアニメーション化しておく
-        self.anim = XUTextAnim(state, "\n".join(self.pages[self.page_no]), wrap)
+        self.anim = XUTextAnim(state, self.page_text, wrap)
 
     # ページ操作
     # -----------------------------------------------------
@@ -747,12 +747,7 @@ class XUTextPage(_XUUtilBase):
     def page_no(self) -> int:
         return self._util_root.attr_int(self.PAGE_NO_ATTR, 0)
 
-    # 総ページ数
-    @property
-    def page_num(self) -> int:
-        return len(self.pages)
-
-    # ページ設定用(リセット用)
+    # ページ設定
     @page_no.setter
     def page_no(self, no:int=0) -> Self:
         # ページを切り替えたときはカウンタをリセット
@@ -763,6 +758,14 @@ class XUTextPage(_XUUtilBase):
 
     # ページテキスト
     # -----------------------------------------------------
+    @property
+    def page_text(self) -> str:
+        return "\n".join(self.pages[self.page_no])
+
+    @property
+    def page_lines(self) -> list[str]:
+        return self.pages[self.page_no]
+
     # 次ページがなくテキストは表示完了 = 完全に終了
     @property
     def is_finish(self):
@@ -771,7 +774,7 @@ class XUTextPage(_XUUtilBase):
     # 次ページあり
     @property
     def is_next_wait(self):
-        return self.anim.is_finish and self.page_no < self.page_num-1
+        return self.anim.is_finish and self.page_no < len(self.pages)-1
 
 # メニュー系
 # ---------------------------------------------------------

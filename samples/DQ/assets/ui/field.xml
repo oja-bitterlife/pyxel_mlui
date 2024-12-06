@@ -18,11 +18,11 @@
 
     <info>メッセージウインドウ</info>
     <round_win abs_x="48" abs_y="160" w="160" h="80" id="message">
-        <msg_text x="8" y="8" wrap="17" page_lines="3">
+        <msg_text x="8" y="8" wrap="17" page_line_num="3">
             サンプルテキスト１\p
             サンプルテキスト１-2
             サンプルテキスト２\nサンプルテキスト３\nサンプルテキスト４
-            サンプルテキスト５
+            サンプルテキスト５\p
             サンプルテキスト６
             サンプルテキスト７
         </msg_text>
