@@ -64,10 +64,18 @@ field_text = text.Decorators(xmlui, "field")
 # ラベル
 # ---------------------------------------------------------
 @field_text.label("title", "align", "valign")
-def title_draw(label:text.Label, event:XUEvent):
-    pyxel.rect(label.area.x, label.area.y, label.area.w, label.area.h, 0)
-    x, y = label.aligned_pos(text.default)
-    pyxel.text(x+1, y-1, label.text, 7, text.default.font)
+def title(title:text.Label, event:XUEvent):
+    area = title.area
+    pyxel.rect(area.x, area.y, area.w, area.h, 0)
+    x, y = title.aligned_pos(text.default)
+    pyxel.text(x, y-1, title.text, 7, text.default.font)
+
+@field_text.label("status_title", "align", "valign")
+def status_title(status_title:text.Label, event:XUEvent):
+    area = status_title.area
+    pyxel.rect(area.x, area.y, area.w, area.h, 0)
+    x, y = status_title.aligned_pos(text.default)
+    pyxel.text(x+1, y-1, status_title.text, 7, text.default.font)
 
 # メニューアイテム
 # ---------------------------------------------------------
@@ -111,7 +119,6 @@ def menu_grid(menu_grid:select.Grid, event:XUEvent):
 
 # メッセージウインドウ
 # ---------------------------------------------------------
-
 @field_text.msg_dq("msg_text")
 def msg_text(msg_text:text.MsgDQ, event:XUEvent):
     # テキスト表示
@@ -155,3 +162,11 @@ def msg_text(msg_text:text.MsgDQ, event:XUEvent):
     if input.BTN_A in event.now or input.BTN_B in event.now:
         if not msg_text.is_next_wait:
             msg_text.anim.draw_count += 2  # 素早く表示
+
+
+# ステータスウインドウ
+# ---------------------------------------------------------
+@field_text.label("status_item")
+def status_item(status_item:text.Label, event:XUEvent):
+    x, y = status_item.aligned_pos(text.default, 5, 0)
+    pyxel.text(x, y, status_item.text, 7, text.default.font)

@@ -2,9 +2,9 @@
 
 <xmlui>
     <info>フィールド画面用</info>
-    <round_win abs_x="104" abs_y="8" w="144" h="88" id="menu">
-        <title x="48" y="0" w="52" h="12" align="center">コマンド</title>
-        <menu_grid x="12" y="16" rows="2" item_w="64" item_h="16">
+    <round_win abs_x="112" abs_y="8" w="128" h="88" id="menu">
+        <title x="36" y="0" w="52" h="12" align="center">コマンド</title>
+        <menu_grid x="8" y="14" rows="2" item_w="58" item_h="18">
             <menu_item action="speak">はなす</menu_item>
             <menu_item action="spel">じゅもん</menu_item>
             <menu_item action="status">つよさ</menu_item>
@@ -15,8 +15,22 @@
             <menu_item action="take">とる</menu_item>
         </menu_grid>
 
-        <round_win x="-96" y="16" w="80" h="112">
-            <title x="14" y="0" w="52" h="12" wrap="left">おじゃ</title>
+        <round_win abs_x="14" y="16" w="82" h="112">
+            <status_title x="18" y="0" w="50" h="12">おじゃ</status_title>
+            <status_label x="6" y="16">
+                <status_item y="0" h="16">レベル</status_item>
+                <status_item y="19" h="16">ＨＰ</status_item>
+                <status_item y="38" h="16">ＭＰ</status_item>
+                <status_item y="57" h="16">Ｇ</status_item>
+                <status_item y="76" h="16">Ｅ</status_item>
+            </status_label>
+            <status_num x="8" y="16">
+                <status_item y="0" h="16" align="right">１</status_item>
+                <status_item y="19" h="16" align="right">１２</status_item>
+                <status_item y="38" h="16" align="right">１２３</status_item>
+                <status_item y="57" h="16" align="right">１２３４</status_item>
+                <status_item y="76" h="16" align="right">１２３４５</status_item>
+            </status_num>
         </round_win>
     </round_win>
 
