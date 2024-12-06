@@ -116,7 +116,7 @@ def msg_text(msg_text:text.Msg, event:XUEvent):
     if input.BTN_A in event.trg or input.BTN_B in event.trg:
         if msg_text.is_finish:
             msg_text.close()  # メニューごと閉じる
-        elif msg_text.has_next_page:
+        elif msg_text.is_next_wait:
             msg_text.page_no += 1
         else:
             # 一気に表示

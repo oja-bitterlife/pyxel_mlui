@@ -759,11 +759,11 @@ class XUTextPage(_XUUtilBase):
     # 次ページがなくテキストは表示完了 = 完全に終了
     @property
     def is_finish(self):
-        return not self.has_next_page and self.page_text.is_finish
+        return not self.is_next_wait and self.page_text.is_finish
 
     # 次ページあり
     @property
-    def has_next_page(self):
+    def is_next_wait(self):
         return self.page_text.is_finish and self.page_no < self._page_num-1
 
 # メニュー系
