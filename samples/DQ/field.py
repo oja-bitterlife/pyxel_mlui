@@ -114,11 +114,14 @@ def menu_grid(menu_grid:select.Grid, event:XUEvent):
 @field_text.msg("msg_text")
 def msg_text(msg_text:text.Msg, event:XUEvent):
     # カーソル表示
+    # ---------------------------------------------------------
     if msg_text.is_next_wait:
         if msg_text.update_count//15 % 2:
             draw_msg_cursor(msg_text)
 
     # テキスト表示
+    # ---------------------------------------------------------
+    msg_text.anim.draw_count += 1
     area = msg_text.area  # areaは重いので必ずキャッシュ
 
     # Scroll
@@ -134,10 +137,8 @@ def msg_text(msg_text:text.Msg, event:XUEvent):
     for i,page in enumerate(scroll_cache):
         pyxel.text(area.x, area.y + i*text.default.size, page, 7, text.default.font)
 
-    # テキストを進める
-    msg_text.anim.draw_count += 1
-
     # 入力アクション
+    # ---------------------------------------------------------
     if input.BTN_A in event.trg or input.BTN_B in event.trg:
         if msg_text.is_finish:
             msg_text.close()  # メニューごと閉じる
