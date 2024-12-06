@@ -54,5 +54,5 @@ class Player:
             self.move_y -= 1
 
     def draw(self):
-        pyxel.circ(128+7, 128+7, 7, 12)
+        pyxel.circ(128+8, 127, 7, 12)
 

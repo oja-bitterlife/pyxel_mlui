@@ -2,9 +2,9 @@
 
 <xmlui>
     <info>フィールド画面用</info>
-    <round_win x="96" y="16" w="152" h="90" id="menu">
-        <title x="48" y="0" w="52" h="12">コマンド</title>
-        <menu_grid x="12" y="14" rows="2" item_w="68" item_h="18">
+    <round_win abs_x="104" abs_y="8" w="144" h="88" id="menu">
+        <title x="48" y="0" w="52" h="12" align="center">コマンド</title>
+        <menu_grid x="12" y="16" rows="2" item_w="64" item_h="16">
             <menu_item action="speak">はなす</menu_item>
             <menu_item action="spel">じゅもん</menu_item>
             <menu_item action="status">つよさ</menu_item>
@@ -14,10 +14,14 @@
             <menu_item action="door">とびら</menu_item>
             <menu_item action="take">とる</menu_item>
         </menu_grid>
+
+        <round_win x="-96" y="16" w="80" h="112">
+            <title x="14" y="0" w="52" h="12" wrap="left">おじゃ</title>
+        </round_win>
     </round_win>
 
     <info>メッセージウインドウ</info>
-    <round_win abs_x="32" abs_y="160" w="192" h="88" id="message">
+    <round_win abs_x="28" abs_y="160" w="200" h="88" id="message">
         <msg_text x="8" y="8" wrap="17" page_line_num="3">
             サンプルテキスト１\p
             サンプルテキスト１-2

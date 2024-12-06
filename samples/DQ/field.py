@@ -42,7 +42,7 @@ class Field:
 
     def draw(self):
         scroll_x = -self.player.x +160-32
-        scroll_y = -self.player.y +160-32
+        scroll_y = -self.player.y +160-32-8
 
         # 画面構築
         self.bg.draw(scroll_x, scroll_y)
@@ -63,11 +63,11 @@ field_text = text.Decorators(xmlui, "field")
 
 # ラベル
 # ---------------------------------------------------------
-@field_text.label("title", "center", "top")
+@field_text.label("title", "align", "valign")
 def title_draw(label:text.Label, event:XUEvent):
     pyxel.rect(label.area.x, label.area.y, label.area.w, label.area.h, 0)
     x, y = label.aligned_pos(text.default)
-    pyxel.text(x, y-1, label.text, 7, text.default.font)
+    pyxel.text(x+1, y-1, label.text, 7, text.default.font)
 
 # メニューアイテム
 # ---------------------------------------------------------
@@ -128,7 +128,7 @@ def msg_text(msg_text:text.MsgDQ, event:XUEvent):
     scroll_buf = msg_text.scroll_buf(scroll_size)
     scroll_indents = msg_text.scroll_indents(scroll_size, "＊「")
 
-    y = -3 if not msg_text.anim.is_finish and len(scroll_buf) >= scroll_size else 6
+    y = -3 if not msg_text.anim.is_finish and len(scroll_buf) >= scroll_size else 5
     line_height = text.default.size + 3
 
     # テキスト描画

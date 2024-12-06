@@ -30,10 +30,10 @@ class Font:
 # #############################################################################
 # ラベル
 class Label(XUState):
-    def __init__(self, state:XUState, align:str, valign:str):
+    def __init__(self, state:XUState, align_attr:str, valign_attr:str):
         super().__init__(state.xmlui, state._element)
-        self._align = align
-        self._valign = valign
+        self._align = state.attr_str(align_attr, "left")
+        self._valign = state.attr_str(valign_attr, "top")
 
     def aligned_pos(self, font:Font, w:int=0, h:int=0) -> tuple[int, int]:
         area = self.area  # 低速なので使うときは必ず一旦ローカルに
@@ -104,11 +104,11 @@ class Decorators:
     def __del__(self):
         self.xmlui.remove_drawfunc(self.group)
 
-    def label(self, tag_name:str, align:str="center", valign:str="center"):
+    def label(self, tag_name:str, align_attr:str="align", valign_attr:str="valign"):
         def wrapper(bind_func:Callable[[Label,XUEvent], None]):
             # 登録用関数をジェネレート
             def draw(state:XUState, event:XUEvent):
-                bind_func(Label(state, align, valign), event)
+                bind_func(Label(state, align_attr, valign_attr), event)
             # 関数登録
             self.xmlui.set_drawfunc(self.group, tag_name, draw)
         return wrapper
