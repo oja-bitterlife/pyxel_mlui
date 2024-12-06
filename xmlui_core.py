@@ -700,15 +700,11 @@ class XUTextAnim(XUTextBase):
         self._state.set_attr(self.TEXT_COUNT_ATTR, count)
         return self
 
-    # 表示文字数を増やす
-    def add_count(self, add:float=1.0) -> Self:
-        self.draw_count = self.draw_count + add
-        return self
-
     # アニメーション用
     # -----------------------------------------------------
     # draw_countまでの文字列を改行分割。スライスじゃないのは改行を数えないため
-    def _limitstr(self, tmp_text, text_count:float) -> str:
+    @classmethod
+    def _limitstr(cls, tmp_text, text_count:float) -> str:
         limit = math.ceil(text_count)
         # まずlimitまで縮める
         for i,c in enumerate(tmp_text):
@@ -722,6 +718,10 @@ class XUTextAnim(XUTextBase):
     def is_finish(self) -> bool:
         return self.draw_count >= self.length
 
+    @property
+    def anim_text(self):
+        return self._limitstr(self, self.draw_count)
+
 class XUTextPage(_XUUtilBase):
     ROOT_TAG= "_xmlui_text_root"
     PAGE_NO_ATTR="_xmlui_page_no"
@@ -734,7 +734,7 @@ class XUTextPage(_XUUtilBase):
         self._page_num = math.ceil(len(lines)/page_lines)  # 切り上げ
         self._page_start = self.page_no*page_lines
         self._page_end = self._page_start + page_lines
-        self._page_text = XUTextAnim(state, "\n".join(lines[self._page_start:self._page_end]), wrap)
+        self.page_text = XUTextAnim(state, "\n".join(lines[self._page_start:self._page_end]), wrap)
 
     # ページ操作
     # -----------------------------------------------------
@@ -746,30 +746,23 @@ class XUTextPage(_XUUtilBase):
     # ページ設定用(リセット用)
     @page_no.setter
     def page_no(self, no:int=0) -> Self:
+        # ページを切り替えたときはカウンタをリセット
+        if self.page_no != no:
+            self.page_text.draw_count = 0
         self._util_root.set_attr(self.PAGE_NO_ATTR, no)
-        return self
-
-    # 次のページに進む
-    def add_page(self, add:int=1) -> Self:
-        self.page_no = self.page_no + add
-        self.draw_count = 0  # ページ先頭までリセット
         return self
 
     # ページテキスト
     # -----------------------------------------------------
-    @property
-    def page_text(self):
-        return self._page_text
-
     # 次ページがなくテキストは表示完了 = 完全に終了
     @property
     def is_finish(self):
-        return not self.has_next_page and self._page_text.is_finish
+        return not self.has_next_page and self.page_text.is_finish
 
     # 次ページあり
     @property
     def has_next_page(self):
-        return self._page_text.is_finish and self.page_no < self._page_num-1
+        return self.page_text.is_finish and self.page_no < self._page_num-1
 
 # メニュー系
 # ---------------------------------------------------------

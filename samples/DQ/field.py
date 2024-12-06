@@ -117,16 +117,16 @@ def msg_text(msg_text:text.Msg, event:XUEvent):
         if msg_text.is_finish:
             msg_text.close()  # メニューごと閉じる
         elif msg_text.has_next_page:
-            msg_text.add_page()
+            msg_text.page_no += 1
         else:
             # 一気に表示
             msg_text.page_text.draw_count = msg_text.page_text.length
 
-    msg_text.page_text.add_count()
+    msg_text.page_text.draw_count += 1
 
     # テキスト描画
     area = msg_text.area  # areaは重いので必ずキャッシュ
-    for i,page in enumerate(msg_text.page_text.splitlines()):
+    for i,page in enumerate(msg_text.page_text.anim_text.splitlines()):
         pyxel.text(area.x, area.y+i*text.default.size, page, 7, text.default.font)
 
     # # カーソル表示
