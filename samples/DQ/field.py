@@ -133,18 +133,18 @@ def msg_text(msg_text:text.Msg, event:XUEvent):
 
     # 表示物管理
     if msg_text.page_no > 0:
-        scroll_cache = msg_text._alllines[msg_text._page_start-msg_text._page_num:msg_text._page_start]
+        scroll_cache = msg_text._alllines[msg_text._page_start-msg_text.page_num:msg_text._page_start]
     else:
         scroll_cache = [""]
-    scroll_text = scroll_cache + msg_text.anim.text.splitlines()
+    scroll_cache += msg_text.anim.text.splitlines()
 
-    if len(scroll_text) > msg_text._page_lines:
-        pass
+    # if msg_text.page_no < msg_text.page_num:
+    #     scroll_cache.append("")
 
-    if msg_text.page_no > 0 and msg_text.anim.draw_count < 60:
-        scroll_up = -4*msg_text.anim.draw_count//60
-    else:
-        scroll_up = 0
+    if len(scroll_cache) >= msg_text._page_lines+2:
+        scroll_text = list(reversed(list(reversed(scroll_cache))[:msg_text._page_lines+2]))
+
+    scroll_up = 0
 
     # if msg_text.page_no > 0:
     #     scroll_cache = msg_text._alllines[msg_text._page_start-1]
@@ -153,7 +153,7 @@ def msg_text(msg_text:text.Msg, event:XUEvent):
     #     pyxel.text(area.x, scroll_up + area.y, scroll_cache, 7, text.default.font)
 
     # テキスト描画
-    for i,page in enumerate(scroll_text):
+    for i,page in enumerate(scroll_cache):
         pyxel.text(area.x, scroll_up + area.y + i*text.default.size, page, 7, text.default.font)
 
     

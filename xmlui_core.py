@@ -110,20 +110,20 @@ class XUEvent:
         self._receive:set[str] = set([])  # 次の状態受付
         self._on_state:dict[str,XUState] = {}
 
-        self._now:set[str] = set([])
-        self._trg:set[str] = set([])
+        self.now:set[str] = set([])
+        self.trg:set[str] = set([])
         self._release:set[str] = set([])
 
     def clearTrg(self):
-        self._trg:set[str] = set([])
+        self.trg:set[str] = set([])
         self._release:set[str] = set([])
 
     # 更新
     def update(self):
         # 状態更新
-        self._trg = set([i for i in self._receive if i not in self._now])
-        self._relase = set([i for i in self._now if i not in self._receive])
-        self._now = self._receive
+        self.trg = set([i for i in self._receive if i not in self.now])
+        self._relase = set([i for i in self.now if i not in self._receive])
+        self.now = self._receive
 
         # 取得し直す
         self._receive = set([])
@@ -139,19 +139,6 @@ class XUEvent:
         if state:
             self._on_state[event_name] = state
         return self
-
-    # 取得
-    @property
-    def now(self) -> set[str]:
-        return self._now  # 現在押されているか
-
-    @property
-    def trg(self) -> set[str]:
-        return self._trg  # 新規追加された入力を取得
-
-    @property
-    def release(self) -> set[str]:
-        return self._release  # 解除された入力を取得
 
     def get_state(self, event_name:str, type_:type[T]) -> T|None:
         if event_name not in self._on_state:
@@ -738,7 +725,7 @@ class XUTextPage(_XUUtilBase):
         self._alllines = XUTextBase(state.text, wrap).splitlines()
 
         # １ページ拾ってくる
-        self._page_num = math.ceil(len(self._alllines)/page_lines)  # 切り上げ
+        self.page_num = math.ceil(len(self._alllines)/page_lines)  # 切り上げ
         self._page_start = self.page_no*page_lines
         self._page_end = self._page_start + page_lines
         self.anim = XUTextAnim(state, "\n".join(self._alllines[self._page_start:self._page_end]), wrap)
@@ -769,7 +756,7 @@ class XUTextPage(_XUUtilBase):
     # 次ページあり
     @property
     def is_next_wait(self):
-        return self.anim.is_finish and self.page_no < self._page_num-1
+        return self.anim.is_finish and self.page_no < self.page_num-1
 
 # メニュー系
 # ---------------------------------------------------------
