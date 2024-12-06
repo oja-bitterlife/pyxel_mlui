@@ -2,7 +2,7 @@ import pyxel
 
 # タイトル画面
 from xmlui_core import XUState,XUEvent
-from ui_common import xmlui,draw_menu_cursor
+from ui_common import xmlui,draw_menu_cursor,draw_msg_cursor
 from xmlui_pyxel import select,text,input,win
 from field_player import Player
 from field_bg import BG
@@ -117,10 +117,9 @@ def msg_text(msg_text:text.Msg, event:XUEvent):
         if msg_text.is_finish:
             msg_text.close()  # メニューごと閉じる
         elif msg_text.is_next_wait:
-            msg_text.page_no += 1
+            msg_text.page_no += 1  # 次ページへ
         else:
-            # 一気に表示
-            msg_text.page_text.draw_count = msg_text.page_text.length
+            msg_text.page_text.draw_count = msg_text.page_text.length  # 一気に表示
 
     msg_text.page_text.draw_count += 1
 
@@ -129,6 +128,6 @@ def msg_text(msg_text:text.Msg, event:XUEvent):
     for i,page in enumerate(msg_text.page_text.anim_text.splitlines()):
         pyxel.text(area.x, area.y+i*text.default.size, page, 7, text.default.font)
 
-    # # カーソル表示
-    # if msg_text.is_next_wait:
-    #     draw_msg_cursor(msg_text)
+    # カーソル表示
+    if msg_text.is_next_wait:
+        draw_msg_cursor(msg_text)

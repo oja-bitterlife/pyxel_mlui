@@ -44,12 +44,11 @@ common_text = text.Decorators(xmlui, "common")
 # ---------------------------------------------------------
 @common_win.rect("popup_win")  # アニメはしない
 def popup_win_draw(win:win.Rect, event:XUEvent):
-    win.draw_frame(pyxel.screen.data_ptr(), [0,7,13], win.area)
+    pyxel.rect(win.area.x, win.area.y, win.area.w, win.area.h, 0)
+    win.draw_frame(pyxel.screen.data_ptr(), [0,7,13], win.area.inflate(-2, -2))
 
 @common_text.msg("popup_text")
 def popup_text(popup_text:text.Msg, event:XUEvent):
-    popup_text.finish_count()  # 常に一気に表示
-
     if input.BTN_A in event.trg or input.BTN_B in event.trg:
         popup_text.close()
 
@@ -58,7 +57,7 @@ def popup_text(popup_text:text.Msg, event:XUEvent):
 
     h = len(popup_text.text.split()) * text.default.size
     y = area.aligned_y(h, "center")
-    for i,page in enumerate(popup_text.text.split()):
+    for i,page in enumerate(popup_text.page_text.split()):
         x = area.aligned_x(text.default.font.text_width(page), "center")
         pyxel.text(x, y+i*text.default.size, page, 7, text.default.font)
 
