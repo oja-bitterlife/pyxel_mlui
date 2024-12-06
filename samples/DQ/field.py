@@ -116,7 +116,7 @@ def menu_grid(menu_grid:select.Grid, event:XUEvent):
 def msg_text(msg_text:text.MsgDQ, event:XUEvent):
     # テキスト表示
     # ---------------------------------------------------------
-    msg_text.anim.draw_count += 0.1
+    msg_text.anim.draw_count += 0.5
     area = msg_text.area  # areaは重いので必ずキャッシュ
 
     # お試し
