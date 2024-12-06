@@ -677,13 +677,14 @@ class XUTextBase(str):
     def length(self) -> int:
         return len(self.replace("\n", ""))
 
+# アニメーションテキスト
 class XUTextAnim:
     TEXT_COUNT_ATTR="_xmlui_text_count"
 
     _state:XUState  # このテキストを管理するEelement
 
     def __init__(self, state:XUState, text:str, wrap:int=4096):
-        self._text = XUTextBase(text, wrap)
+        self._text_base = XUTextBase(text, wrap)
         self._state = state
 
     # 表示カウンタ操作
@@ -714,15 +715,15 @@ class XUTextAnim:
     # 改行を抜いた文字数よりカウントが大きくなった
     @property
     def is_finish(self) -> bool:
-        return self.draw_count >= self._text.length
+        return self.draw_count >= self._text_base.length
 
     @property
     def text(self) -> str:
-        return self._limitstr(self._text, self.draw_count)
+        return self._limitstr(self._text_base, self.draw_count)
 
     @property
     def length(self) -> int:
-        return self._text.length
+        return self._text_base.length
 
 class XUTextPage(_XUUtilBase):
     ROOT_TAG= "_xmlui_text_root"
@@ -730,6 +731,8 @@ class XUTextPage(_XUUtilBase):
 
     def __init__(self, state:XUState, page_lines:int, wrap:int=4096):
         super().__init__(state, self.ROOT_TAG)
+        self._page_lines = page_lines
+        self._warp = wrap
 
         # 行に分解して覚えておく
         self._alllines = XUTextBase(state.text, wrap).splitlines()

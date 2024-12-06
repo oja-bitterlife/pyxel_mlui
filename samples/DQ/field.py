@@ -136,12 +136,15 @@ def msg_text(msg_text:text.Msg, event:XUEvent):
         scroll_cache = msg_text._alllines[msg_text._page_start-msg_text._page_num:msg_text._page_start]
     else:
         scroll_cache = [""]
-    if msg_text.anim.draw_count < 60:
-        cache_lines = msg_text._page_num*msg_text.anim.draw_count/60
-
     scroll_text = scroll_cache + msg_text.anim.text.splitlines()
 
-    scroll_up = -msg_text.anim.draw_count//30
+    if len(scroll_text) > msg_text._page_lines:
+        pass
+
+    if msg_text.page_no > 0 and msg_text.anim.draw_count < 60:
+        scroll_up = -4*msg_text.anim.draw_count//60
+    else:
+        scroll_up = 0
 
     # if msg_text.page_no > 0:
     #     scroll_cache = msg_text._alllines[msg_text._page_start-1]
