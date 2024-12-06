@@ -112,7 +112,7 @@ def menu_grid(menu_grid:select.Grid, event:XUEvent):
 # メッセージウインドウ
 # ---------------------------------------------------------
 
-@field_text.msg_scr("msg_text")
+@field_text.msg_dq("msg_text")
 def msg_text(msg_text:text.MsgDQ, event:XUEvent):
     # テキスト表示
     # ---------------------------------------------------------
@@ -124,12 +124,12 @@ def msg_text(msg_text:text.MsgDQ, event:XUEvent):
         msg_text.pages[i][0] = "＊「" + page[0]
 
     # Scroll
-    scroll_cache = msg_text.scroll_buf(msg_text.page_line_num + 2)
+    scroll_buf = msg_text.scroll_buf(msg_text.page_line_num + 2)
     scroll_indents = msg_text.scroll_indents(msg_text.page_line_num + 2, "＊「", text.default.size*2)
     print(scroll_indents)
 
     # テキスト描画
-    for i,page in enumerate(scroll_cache):
+    for i,page in enumerate(scroll_buf):
         x = area.x + scroll_indents[i]
         pyxel.text(x, area.y + i*text.default.size, page, 7, text.default.font)
 
@@ -138,7 +138,7 @@ def msg_text(msg_text:text.MsgDQ, event:XUEvent):
     if msg_text.is_next_wait:
         cursor_count = msg_text.anim.draw_count-msg_text.anim.length
         if cursor_count//7 % 2 == 0:
-            draw_msg_cursor(msg_text, len(scroll_cache)*text.default.size)
+            draw_msg_cursor(msg_text, len(scroll_buf)*text.default.size)
 
 
     # 入力アクション
