@@ -134,12 +134,6 @@ def msg_text(msg_text:text.Msg, event:XUEvent):
             break
         scroll_cache = msg_text.pages[page_no] + scroll_cache
 
-    # ページの先頭が２行目に来るように空行を追加する
-    if msg_text.anim.is_finish:
-        max_empty_num = msg_text.page_line_num-len(msg_text.page_lines)
-        over_draw = (int(msg_text.anim.draw_count) - msg_text.anim.length)//3  # ちょっとずつ追加する小細工
-        scroll_cache += [""] * min(over_draw, max_empty_num)
-
     # 行数が足りないうちは先頭に空行を入れておく
     if len(scroll_cache) < scroll_line_num:
         scroll_cache = [""]+scroll_cache
