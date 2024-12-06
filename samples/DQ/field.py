@@ -125,7 +125,7 @@ def msg_text(msg_text:text.Msg, event:XUEvent):
     area = msg_text.area  # areaは重いので必ずキャッシュ
 
     # Scroll
-    scroll_cache = msg_text._alllines[msg_text._page_start-msg_text.page_num:msg_text._page_start]
+    scroll_cache = msg_text.pages[msg_text.page_no-1] if msg_text.page_no > 0 else []
     if msg_text.page_no <= 1:
         scroll_cache = [""] + scroll_cache
     scroll_cache += msg_text.anim.text.splitlines()

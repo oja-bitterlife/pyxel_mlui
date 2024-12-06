@@ -634,6 +634,7 @@ _hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
 # テキスト基底
 class XUTextBase(str):
     SEPARATE_REGEXP = r"\\n"  # 改行に変換する正規表現
+    PAGE_REGEXP = r"\\p"  # 改行に変換する正規表現
 
     # 文字列中の半角を全角に変換する
     @classmethod
@@ -649,8 +650,9 @@ class XUTextBase(str):
         # -----------------------------------------------------
         # 改行を\nに統一して全角化
         tmp_text = "\n".join([line.strip() for line in text.splitlines()])  # XMLの改行テキストを前後を削って結合
-        tmp_text = re.sub(cls.SEPARATE_REGEXP, "\n", tmp_text).strip()  # \nという文字列を改行コードに
-        tmp_text = cls.convert_zenkaku(tmp_text)  # 全角化
+        tmp_text = re.sub(cls.SEPARATE_REGEXP, "\n", tmp_text)  # \nという文字列を改行コードに
+        tmp_text = re.sub(cls.PAGE_REGEXP, "\0", tmp_text)  # \nという文字列をNullに
+        tmp_text = cls.convert_zenkaku(tmp_text.strip())  # 全角化
 
         # 各行に分解し、その行をさらにwrapで分解する
         lines =  sum([[line[i:i+wrap] for i in  range(0, len(line), wrap)] for line in tmp_text.splitlines()], [])
@@ -659,10 +661,10 @@ class XUTextBase(str):
         self:XUTextBase = super().__new__(cls, "\n".join(lines))
         return self
 
-    # 改行を抜いた文字数取得
-    @property
-    def length(self) -> int:
-        return len(self.replace("\n", ""))
+    # # 改行を抜いた文字数取得
+    # @property
+    # def length(self) -> int:
+    #     return len(re.sub("\n|\0", "", self))
 
 # アニメーションテキスト
 class XUTextAnim:
@@ -670,8 +672,8 @@ class XUTextAnim:
 
     _state:XUState  # このテキストを管理するEelement
 
-    def __init__(self, state:XUState, text:str, wrap:int=4096):
-        self._text_base = XUTextBase(text, wrap)
+    def __init__(self, state:XUState, text_base:str, wrap:int=4096):
+        self._text_base = text_base
         self._state = state
 
     # 表示カウンタ操作
@@ -694,7 +696,7 @@ class XUTextAnim:
         limit = math.ceil(text_count)
         # まずlimitまで縮める
         for i,c in enumerate(tmp_text):
-            if (limit := limit if c == "\n" else limit-1) < 0:  # 改行は数えない
+            if (limit := limit if ord(c) < 0x20 else limit-1) < 0:  # 改行は数えない
                 tmp_text = tmp_text[:i]
                 break
         return tmp_text
@@ -702,15 +704,16 @@ class XUTextAnim:
     # 改行を抜いた文字数よりカウントが大きくなった
     @property
     def is_finish(self) -> bool:
-        return self.draw_count >= self._text_base.length
+        return self.draw_count >= self.length
 
     @property
     def text(self) -> str:
         return self._limitstr(self._text_base, self.draw_count)
 
+    # 改行を抜いた文字数取得
     @property
     def length(self) -> int:
-        return self._text_base.length
+        return len(re.sub("\n|\0", "", self._text_base))
 
 class XUTextPage(_XUUtilBase):
     ROOT_TAG= "_xmlui_text_root"
@@ -721,14 +724,21 @@ class XUTextPage(_XUUtilBase):
         self._page_lines = page_lines
         self._warp = wrap
 
-        # 行に分解して覚えておく
-        self._alllines = XUTextBase(state.text, wrap).splitlines()
+        # ページ分解
+        manual_pages = XUTextBase(state.text, wrap).split("\0")
+        self.pages:list[list[str]] = []
+        for manual_page in manual_pages:
+            lines:list[str] = []
+            for line in manual_page.strip().splitlines():
+                lines.append(line)
+                if len(lines) >= page_lines:
+                    self.pages.append(lines)
+                    lines = []
+            if lines:
+                self.pages.append(lines)
 
-        # １ページ拾ってくる
-        self.page_num = math.ceil(len(self._alllines)/page_lines)  # 切り上げ
-        self._page_start = self.page_no*page_lines
-        self._page_end = self._page_start + page_lines
-        self.anim = XUTextAnim(state, "\n".join(self._alllines[self._page_start:self._page_end]), wrap)
+        # １ページ拾ってアニメーション化しておく
+        self.anim = XUTextAnim(state, "\n".join(self.pages[self.page_no]), wrap)
 
     # ページ操作
     # -----------------------------------------------------
@@ -736,6 +746,11 @@ class XUTextPage(_XUUtilBase):
     @property
     def page_no(self) -> int:
         return self._util_root.attr_int(self.PAGE_NO_ATTR, 0)
+
+    # 総ページ数
+    @property
+    def page_num(self) -> int:
+        return len(self.pages)
 
     # ページ設定用(リセット用)
     @page_no.setter
