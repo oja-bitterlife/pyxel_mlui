@@ -116,7 +116,8 @@ def msg_text(msg_text:text.Msg, event:XUEvent):
     # カーソル表示
     # ---------------------------------------------------------
     if msg_text.is_next_wait:
-        if msg_text.update_count//15 % 2:
+        cursor_count = msg_text.anim.draw_count-msg_text.anim.length
+        if cursor_count//7 % 2 == 0:
             draw_msg_cursor(msg_text)
 
     # テキスト表示
