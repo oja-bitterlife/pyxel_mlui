@@ -28,9 +28,9 @@ def draw_menu_cursor(state:XUState, x:int, y:int):
     top = state.area.y+2 + y
     pyxel.tri(left, top, left, top+tri_size, left+tri_size//2, top+tri_size//2, 7)
 
-def draw_msg_cursor(state:XUState, y:int):
+def draw_msg_cursor(state:XUState, x:int, y:int):
     tri_size = 6
-    center_x = state.area.center_x(tri_size)
+    center_x = 127-tri_size//2+x  # Xはど真ん中固定で
     y = state.area.y + tri_size - 3 + y
     pyxel.tri(center_x, y, center_x+tri_size, y, center_x+tri_size//2, y+tri_size//2, 7)
 

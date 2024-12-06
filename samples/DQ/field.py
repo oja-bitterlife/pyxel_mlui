@@ -148,7 +148,7 @@ def msg_text(msg_text:text.MsgDQ, event:XUEvent):
     if msg_text.is_next_wait:
         cursor_count = msg_text.anim.draw_count-msg_text.anim.length
         if cursor_count//7 % 2 == 0:
-            draw_msg_cursor(msg_text, len(scroll_buf)*line_height + y-3)
+            draw_msg_cursor(msg_text, 0, len(scroll_buf)*line_height + y-3)
 
 
     # 入力アクション
