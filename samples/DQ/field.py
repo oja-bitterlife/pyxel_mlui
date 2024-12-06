@@ -124,20 +124,24 @@ def msg_text(msg_text:text.MsgDQ, event:XUEvent):
         msg_text.pages[i][0] = "＊「" + page[0]
 
     # Scroll
-    scroll_buf = msg_text.scroll_buf(msg_text.page_line_num + 2)
-    scroll_indents = msg_text.scroll_indents(msg_text.page_line_num + 2, "＊「")
+    scroll_size = msg_text.page_line_num+2
+    scroll_buf = msg_text.scroll_buf(scroll_size)
+    scroll_indents = msg_text.scroll_indents(scroll_size, "＊「")
+
+    y = -3 if not msg_text.anim.is_finish and len(scroll_buf) >= scroll_size else 6
+    line_height = text.default.size + 3
 
     # テキスト描画
     for i,page in enumerate(scroll_buf):
         x = area.x + (text.default.size*2 if scroll_indents[i] else 0)
-        pyxel.text(x, area.y + i*text.default.size, page, 7, text.default.font)
+        pyxel.text(x, y + area.y + i*line_height, page, 7, text.default.font)
 
     # カーソル表示
     # ---------------------------------------------------------
     if msg_text.is_next_wait:
         cursor_count = msg_text.anim.draw_count-msg_text.anim.length
         if cursor_count//7 % 2 == 0:
-            draw_msg_cursor(msg_text, len(scroll_buf)*text.default.size)
+            draw_msg_cursor(msg_text, len(scroll_buf)*line_height + y-3)
 
 
     # 入力アクション

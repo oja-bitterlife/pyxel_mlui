@@ -31,8 +31,7 @@ def draw_menu_cursor(state:XUState, x:int, y:int):
 def draw_msg_cursor(state:XUState, y:int):
     tri_size = 6
     center_x = state.area.center_x(tri_size)
-    # y = state.area.bottom(tri_size) - 2
-    y = state.area.y + tri_size - 2 + y
+    y = state.area.y + tri_size - 3 + y
     pyxel.tri(center_x, y, center_x+tri_size, y, center_x+tri_size//2, y+tri_size//2, 7)
 
 

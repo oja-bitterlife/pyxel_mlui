@@ -17,7 +17,7 @@
     </round_win>
 
     <info>メッセージウインドウ</info>
-    <round_win abs_x="32" abs_y="160" w="192" h="80" id="message">
+    <round_win abs_x="32" abs_y="160" w="192" h="88" id="message">
         <msg_text x="8" y="8" wrap="17" page_line_num="3">
             サンプルテキスト１\p
             サンプルテキスト１-2
