@@ -729,12 +729,14 @@ class XUTextPage(_XUUtilBase):
     def __init__(self, state:XUState, page_lines:int, wrap:int=4096):
         super().__init__(state, self.ROOT_TAG)
 
+        # 行に分解して覚えておく
+        self._alllines = XUTextBase(state.text, wrap).splitlines()
+
         # １ページ拾ってくる
-        lines = XUTextBase(state.text, wrap).splitlines()
-        self._page_num = math.ceil(len(lines)/page_lines)  # 切り上げ
+        self._page_num = math.ceil(len(self._alllines)/page_lines)  # 切り上げ
         self._page_start = self.page_no*page_lines
         self._page_end = self._page_start + page_lines
-        self.page_text = XUTextAnim(state, "\n".join(lines[self._page_start:self._page_end]), wrap)
+        self.page_text = XUTextAnim(state, "\n".join(self._alllines[self._page_start:self._page_end]), wrap)
 
     # ページ操作
     # -----------------------------------------------------
