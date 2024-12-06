@@ -677,15 +677,14 @@ class XUTextBase(str):
     def length(self) -> int:
         return len(self.replace("\n", ""))
 
-class XUTextAnim(XUTextBase):
+class XUTextAnim:
     TEXT_COUNT_ATTR="_xmlui_text_count"
 
     _state:XUState  # このテキストを管理するEelement
 
-    def __new__(cls, state:XUState, text:str, wrap:int=4096) -> Self:
-        self = super().__new__(cls, text, wrap)
+    def __init__(self, state:XUState, text:str, wrap:int=4096):
+        self._text = XUTextBase(text, wrap)
         self._state = state
-        return self
 
     # 表示カウンタ操作
     # -----------------------------------------------------
@@ -694,11 +693,10 @@ class XUTextAnim(XUTextBase):
     def draw_count(self) -> int:
         return int(self._state.attr_float(self.TEXT_COUNT_ATTR, 0))
 
-    # 表示文字数設定用(リセット用)
     @draw_count.setter
-    def draw_count(self, count:float=0) -> Self:
+    def draw_count(self, count:int) -> int:
         self._state.set_attr(self.TEXT_COUNT_ATTR, count)
-        return self
+        return count
 
     # アニメーション用
     # -----------------------------------------------------
@@ -716,11 +714,15 @@ class XUTextAnim(XUTextBase):
     # 改行を抜いた文字数よりカウントが大きくなった
     @property
     def is_finish(self) -> bool:
-        return self.draw_count >= self.length
+        return self.draw_count >= self._text.length
 
     @property
-    def anim_text(self):
-        return self._limitstr(self, self.draw_count)
+    def text(self) -> str:
+        return self._limitstr(self._text, self.draw_count)
+
+    @property
+    def length(self) -> int:
+        return self._text.length
 
 class XUTextPage(_XUUtilBase):
     ROOT_TAG= "_xmlui_text_root"
@@ -736,7 +738,7 @@ class XUTextPage(_XUUtilBase):
         self._page_num = math.ceil(len(self._alllines)/page_lines)  # 切り上げ
         self._page_start = self.page_no*page_lines
         self._page_end = self._page_start + page_lines
-        self.page_text = XUTextAnim(state, "\n".join(self._alllines[self._page_start:self._page_end]), wrap)
+        self.anim = XUTextAnim(state, "\n".join(self._alllines[self._page_start:self._page_end]), wrap)
 
     # ページ操作
     # -----------------------------------------------------
@@ -750,7 +752,7 @@ class XUTextPage(_XUUtilBase):
     def page_no(self, no:int=0) -> Self:
         # ページを切り替えたときはカウンタをリセット
         if self.page_no != no:
-            self.page_text.draw_count = 0
+            self.anim.draw_count = 0
         self._util_root.set_attr(self.PAGE_NO_ATTR, no)
         return self
 
@@ -759,12 +761,12 @@ class XUTextPage(_XUUtilBase):
     # 次ページがなくテキストは表示完了 = 完全に終了
     @property
     def is_finish(self):
-        return not self.is_next_wait and self.page_text.is_finish
+        return not self.is_next_wait and self.anim.is_finish
 
     # 次ページあり
     @property
     def is_next_wait(self):
-        return self.page_text.is_finish and self.page_no < self._page_num-1
+        return self.anim.is_finish and self.page_no < self._page_num-1
 
 # メニュー系
 # ---------------------------------------------------------

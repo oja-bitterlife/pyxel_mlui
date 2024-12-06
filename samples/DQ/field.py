@@ -3,7 +3,7 @@ import pyxel
 # タイトル画面
 from xmlui_core import XUState,XUEvent
 from ui_common import xmlui,draw_menu_cursor,draw_msg_cursor
-from xmlui_pyxel import select,text,input,win
+from xmlui_pyxel import select,text,input
 from field_player import Player
 from field_bg import BG
 from field_npc import NPC
@@ -113,21 +113,44 @@ def menu_grid(menu_grid:select.Grid, event:XUEvent):
 # ---------------------------------------------------------
 @field_text.msg("msg_text")
 def msg_text(msg_text:text.Msg, event:XUEvent):
+    # カーソル表示
+    if msg_text.is_next_wait:
+        if msg_text.update_count//15 % 2:
+            draw_msg_cursor(msg_text)
+
+    # 入力アクション
     if input.BTN_A in event.trg or input.BTN_B in event.trg:
         if msg_text.is_finish:
             msg_text.close()  # メニューごと閉じる
         elif msg_text.is_next_wait:
             msg_text.page_no += 1  # 次ページへ
         else:
-            msg_text.page_text.draw_count = msg_text.page_text.length  # 一気に表示
+            msg_text.anim.draw_count = msg_text.anim.length  # 一気に表示
 
-    msg_text.page_text.draw_count += 1
+    # テキストを進める
+    msg_text.anim.draw_count += 1
+    area = msg_text.area  # areaは重いので必ずキャッシュ
+
+    # 表示物管理
+    if msg_text.page_no > 0:
+        scroll_cache = msg_text._alllines[msg_text._page_start-msg_text._page_num:msg_text._page_start]
+    else:
+        scroll_cache = [""]
+    if msg_text.anim.draw_count < 60:
+        cache_lines = msg_text._page_num*msg_text.anim.draw_count/60
+
+    scroll_text = scroll_cache + msg_text.anim.text.splitlines()
+
+    scroll_up = -msg_text.anim.draw_count//30
+
+    # if msg_text.page_no > 0:
+    #     scroll_cache = msg_text._alllines[msg_text._page_start-1]
+    # if msg_text.page_text.draw_count < 16:
+    #     scroll_up = -8*msg_text.page_text.draw_count//60
+    #     pyxel.text(area.x, scroll_up + area.y, scroll_cache, 7, text.default.font)
 
     # テキスト描画
-    area = msg_text.area  # areaは重いので必ずキャッシュ
-    for i,page in enumerate(msg_text.page_text.anim_text.splitlines()):
-        pyxel.text(area.x, area.y+i*text.default.size, page, 7, text.default.font)
+    for i,page in enumerate(scroll_text):
+        pyxel.text(area.x, scroll_up + area.y + i*text.default.size, page, 7, text.default.font)
 
-    # カーソル表示
-    if msg_text.is_next_wait:
-        draw_msg_cursor(msg_text)
+    
