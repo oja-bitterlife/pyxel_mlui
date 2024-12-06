@@ -722,7 +722,7 @@ class XUTextPage(_XUUtilBase):
     def __init__(self, state:XUState, page_line_num:int, wrap:int=4096):
         super().__init__(state, self.ROOT_TAG)
         self.page_line_num = page_line_num
-        self.warp = wrap
+        self.wrap = wrap
 
         # ページ分解
         manual_pages = XUTextBase(state.text, wrap).split("\0")
@@ -736,9 +736,6 @@ class XUTextPage(_XUUtilBase):
                     lines = []
             if lines:
                 self.pages.append(lines)
-
-        # １ページ拾ってアニメーション化しておく
-        self.anim = XUTextAnim(state, self.page_text, wrap)
 
     # ページ操作
     # -----------------------------------------------------
@@ -759,12 +756,12 @@ class XUTextPage(_XUUtilBase):
     # ページテキスト
     # -----------------------------------------------------
     @property
-    def page_text(self) -> str:
-        return "\n".join(self.pages[self.page_no])
+    def anim(self):
+        return XUTextAnim(self, self.page_text, self.wrap)
 
     @property
-    def page_lines(self) -> list[str]:
-        return self.pages[self.page_no]
+    def page_text(self) -> str:
+        return "\n".join(self.pages[self.page_no])
 
     # 次ページがなくテキストは表示完了 = 完全に終了
     @property

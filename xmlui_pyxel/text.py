@@ -49,6 +49,44 @@ class Msg(XUTextPage):
         wrap = state.attr_int(wrap_attr, 4096)
         super().__init__(state, page_line_num, wrap)
 
+class MsgDQ(Msg):
+    # タグのテキストを処理する
+    def __init__(self, state:XUState, page_line_num_attr:str, wrap_attr:str):
+        super().__init__(state, page_line_num_attr, wrap_attr)
+
+    def scroll_buf(self:"MsgDQ", scroll_line_num:int):
+        # 現在ページの挿入
+        buf = self.anim.text.splitlines()
+
+        # 行が足りるまでページを巻き戻して挿入
+        for page_no in range(self.page_no-1, -1, -1):
+            if len(buf) >= scroll_line_num:
+                break
+            buf = self.pages[page_no] + buf
+
+        # 最大行数に絞る。アニメーション中だけ最下行が使える。
+        max_line = scroll_line_num if not self.anim.is_finish else scroll_line_num-1
+        buf = list(reversed(list(reversed(buf))[:max_line]))
+
+        return buf
+
+    def scroll_indents(self:"MsgDQ", scroll_line_num:int, head_str:str, indent_size:int):
+        # 現在ページの挿入
+        anim_line_num = len(self.anim.text.splitlines())
+        indents = [indent_size if not self.page_text.startswith(head_str) else 0 for i in range(anim_line_num)]
+
+        # 行が足りるまでページを巻き戻して挿入
+        for page_no in range(self.page_no-1, -1, -1):
+            if len(indents) >= scroll_line_num:
+                break
+            indents =  [indent_size if not line.startswith(head_str) else 0 for line in self.pages[page_no]] + indents
+
+        # 最大行数に絞る。アニメーション中だけ最下行が使える。
+        max_line = scroll_line_num if not self.anim.is_finish else scroll_line_num-1
+        indents = list(reversed(list(reversed(indents))[:max_line]))
+
+        return indents
+
 
 # デコレータを用意
 # *****************************************************************************
@@ -74,6 +112,15 @@ class Decorators:
             # 登録用関数をジェネレート
             def draw(state:XUState, event:XUEvent):
                 bind_func(Msg(state, page_line_num_attr, wrap_attr), event)
+            # 関数登録
+            self.xmlui.set_drawfunc(self.group, tag_name, draw)
+        return wrapper
+
+    def msg_scr(self, tag_name:str, page_line_num_attr:str="page_line_num", wrap_attr:str="wrap"):
+        def wrapper(bind_func:Callable[[MsgDQ,XUEvent], None]):
+            # 登録用関数をジェネレート
+            def draw(state:XUState, event:XUEvent):
+                bind_func(MsgDQ(state, page_line_num_attr, wrap_attr), event)
             # 関数登録
             self.xmlui.set_drawfunc(self.group, tag_name, draw)
         return wrapper

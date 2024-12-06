@@ -111,41 +111,35 @@ def menu_grid(menu_grid:select.Grid, event:XUEvent):
 
 # メッセージウインドウ
 # ---------------------------------------------------------
-@field_text.msg("msg_text")
-def msg_text(msg_text:text.Msg, event:XUEvent):
-    # カーソル表示
-    # ---------------------------------------------------------
-    if msg_text.is_next_wait:
-        cursor_count = msg_text.anim.draw_count-msg_text.anim.length
-        if cursor_count//7 % 2 == 0:
-            draw_msg_cursor(msg_text)
 
+@field_text.msg_scr("msg_text")
+def msg_text(msg_text:text.MsgDQ, event:XUEvent):
     # テキスト表示
     # ---------------------------------------------------------
     msg_text.anim.draw_count += 0.5
     area = msg_text.area  # areaは重いので必ずキャッシュ
 
+    # お試し
+    for i,page in enumerate(msg_text.pages):
+        msg_text.pages[i][0] = "＊「" + page[0]
+
     # Scroll
-    scroll_line_num = msg_text.page_line_num + 2  # DQタイプで上下１ライン余分に持つ
-    scroll_cache = msg_text.anim.text.splitlines()
-
-    # 行が足りるまで巻き戻して挿入
-    for page_no in range(msg_text.page_no-1, -1, -1):
-        if len(scroll_cache) >= scroll_line_num:
-            break
-        scroll_cache = msg_text.pages[page_no] + scroll_cache
-
-    # 行数が足りないうちは先頭に空行を入れておく
-    if len(scroll_cache) < scroll_line_num:
-        scroll_cache = [""]+scroll_cache
-
-    # 最大行数に絞る。アニメーション中だけ最下行が使える。
-    max_line = scroll_line_num if not msg_text.anim.is_finish else scroll_line_num-1
-    scroll_cache = list(reversed(list(reversed(scroll_cache))[:max_line]))
+    scroll_cache = msg_text.scroll_buf(msg_text.page_line_num + 2)
+    scroll_indents = msg_text.scroll_indents(msg_text.page_line_num + 2, "＊「", text.default.size*2)
+    print(scroll_indents)
 
     # テキスト描画
     for i,page in enumerate(scroll_cache):
-        pyxel.text(area.x, area.y + i*text.default.size, page, 7, text.default.font)
+        x = area.x + scroll_indents[i]
+        pyxel.text(x, area.y + i*text.default.size, page, 7, text.default.font)
+
+    # カーソル表示
+    # ---------------------------------------------------------
+    if msg_text.is_next_wait:
+        cursor_count = msg_text.anim.draw_count-msg_text.anim.length
+        if cursor_count//7 % 2 == 0:
+            draw_msg_cursor(msg_text, len(scroll_cache)*text.default.size)
+
 
     # 入力アクション
     # ---------------------------------------------------------
