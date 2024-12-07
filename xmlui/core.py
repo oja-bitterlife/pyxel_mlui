@@ -233,6 +233,10 @@ class XUState:
 
     # ツリー操作用
     # *************************************************************************
+    @property
+    def children(self) -> list["XUState"]:
+        return [XUState(self.xmlui, child) for child in self._element.iter()]
+
     def find_by_ID(self, id:str) -> 'XUState':
         for element in self._element.iter():
             if element.attrib.get("id") == id:
@@ -314,15 +318,11 @@ class XUState:
         self.add_child(opend)
 
         # ownerを設定しておく
-        def _req_set_owner(element:Element, owner:str):
-            element.set("owner", owner)
-            for child in element:
-                _req_set_owner(child, owner)
-        _req_set_owner(opend._element, id_alias)
+        for child in opend.children:
+            child.set_attr("owner", id_alias)
 
         return opend
 
-    # owner以下を閉じる
     def close(self, closing_wait:int=0):
         # open/closeが連続しないようTrg入力を落とす
         self.xmlui.event.clearTrg()
@@ -333,8 +333,10 @@ class XUState:
         else:
             target = self
 
-        # 実際のclose(remove)はUpdate処理の中で行われる
+        # closing待機設定。実際のclose(remove)はUpdate処理の中で行われる
         target.set_attr("closing_wait", closing_wait)
+        for child in target.children:
+            child.set_attr("closing_wait", closing_wait)
 
     def close_parent(self, parent_id:str):
         self.find_parent(parent_id).close()
