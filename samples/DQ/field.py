@@ -172,7 +172,7 @@ def msg_text(msg_text:text.MsgDQ, event:XUEvent):
     # ---------------------------------------------------------
     if input_def.BTN_A in event.trg or input_def.BTN_B in event.trg:
         if msg_text.is_finish:
-            msg_text.close()  # メニューごと閉じる
+            msg_text.close(30)
         elif msg_text.is_next_wait:
             msg_text.page_no += 1  # 次ページへ
 
