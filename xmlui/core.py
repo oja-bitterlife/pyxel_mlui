@@ -984,6 +984,10 @@ class _XUWinFrameBase(XUState):
     def _get13574index(self, size:int, x:int, y:int, w:int, h:int) -> int:
         return [-1, y, -1, x, size-1, w-1-x, -1, h-1-y][self.get_area(size, x, y, w, h)]
 
+    @property
+    def is_closing(self) -> bool:
+        return self.has_attr("closing_event")
+
     # どのエリアに所属するかを返す
     def get_area(self, size:int, x:int, y:int, w:int, h:int) -> int:
         if x < size:
