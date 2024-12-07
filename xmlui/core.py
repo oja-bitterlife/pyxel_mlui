@@ -322,7 +322,7 @@ class XUState:
         self.xmlui.event.clearTrg()
 
         # ownerが設定されていればownerを、無ければ自身をremoveする
-        if self.owner:
+        if self.owner and self.xmlui.exists_ID(self.owner):
             target = self.xmlui.find_by_ID(self.owner)
         else:
             target = self

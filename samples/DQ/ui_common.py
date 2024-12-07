@@ -68,10 +68,13 @@ def popup_text(popup_text:text.Msg, event:XUEvent):
 def round_win_draw(round_win:win.Round, event:XUEvent):
     area = round_win.area
     clip = round_win.area.to_offset()
-    clip.h = int(round_win.update_count*32)
+    clip.h = int(round_win.update_count*ui_theme.win.open_speed)
 
     if round_win.is_closing:
-        clip.h = area.h - round_win.closing_count*8
+        clip.h = area.h - round_win.closing_count*ui_theme.win.close_speed
+        if clip.is_empty:
+            round_win.close()
+            return
 
     # 背景
     pyxel.rect(area.x, area.y, area.w, min(area.h, clip.h+2), ui_theme.win.bg_color)
