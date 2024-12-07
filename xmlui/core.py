@@ -544,6 +544,10 @@ class XMLUI(XUState):
             # active/inactiveどちらのeventを使うか決定
             event = copy.copy(self.event) if state in self.active_states else XUEvent()
 
+            # closing中ならEventを空にする
+            if state.has_attr("closing_wait"):
+                event = XUEvent()
+
             # やっぱりinitialize情報がどこかに欲しい
             event.on_init = state.update_count == 0
 
@@ -551,7 +555,7 @@ class XMLUI(XUState):
             state.set_attr("update_count", state.update_count+1)  # 1スタート(0は初期化時)
             self.draw_element(state.tag, state, event)
 
-            # close処理
+            # draw_elementの後にclose処理(waitが0の時はここで即座に削除される)
             if state.has_attr("closing_wait"):
                 if state.closing_wait-1 < 0:  # closing待機終了
                     state.remove()
