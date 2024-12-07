@@ -28,7 +28,7 @@ class Field:
 
     def update(self):
         # メニューが開いていたら他はなにもできない
-        if xmlui.exists_id("menu"):
+        if xmlui.exists_ID("menu"):
             return None
 
         # メニューオープン

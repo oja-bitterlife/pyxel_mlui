@@ -252,7 +252,7 @@ class XUState:
         raise Exception(f"{self.strtree()}\nTag '{tag}' not found in '{self.tag}' and children")
 
     # ツリーを遡って親を探す
-    def find_parent_by_id(self, id:str) -> 'XUState':
+    def find_parent_by_ID(self, id:str) -> 'XUState':
         parent = self.parent
         while parent:
             if parent.id == id:
@@ -261,10 +261,10 @@ class XUState:
         raise Exception(f"{self.strtree()}\nParent '{id}' not found in '{self.tag}' parents")
 
     def find_owner(self) -> 'XUState':
-        return self.find_parent_by_id(self.owner)
+        return self.find_parent_by_ID(self.owner)
 
     # すでにツリーに存在するか
-    def exists_id(self, id:str) -> bool:
+    def exists_ID(self, id:str) -> bool:
         for element in self._element.iter():
             if element.attrib.get("id") == id:
                 return True
@@ -297,15 +297,13 @@ class XUState:
 
     # 子に別Element一式を追加する
     def open(self, template_name:str, id:str, id_alias:str|None=None) -> "XUState":
-        # open/closeが連続しないようTrg入力を落とす
-        self.xmlui.event.clearTrg()
-
         # idがかぶらないよう別名を付けられる
         id_alias = id if id_alias is None else id_alias
 
         # IDがかぶってはいけない
-        if self.xmlui.exists_id(id_alias):
-            raise Exception(f"ID '{id_alias}' already exists")
+        if self.xmlui.exists_ID(id_alias):
+            return self.xmlui.find_by_ID(id_alias)
+            # raise Exception(f"ID '{id_alias}' already exists")
 
         # オープン
         opend = self.xmlui._templates[template_name].duplicate(id).set_attr("id", id_alias)
@@ -315,10 +313,12 @@ class XUState:
         for child in opend.children:
             child.set_attr("owner", id_alias)
 
+        # open/closeが連続しないようTrg入力を落としておく
+        self.xmlui.event.clearTrg()
         return opend
 
     def close(self, closing_wait:int=0):
-        # open/closeが連続しないようTrg入力を落とす
+        # open/closeが連続しないようTrg入力を落としておく
         self.xmlui.event.clearTrg()
 
         # ownerが設定されていればownerを、無ければ自身をremoveする
@@ -580,7 +580,7 @@ class XMLUI(XUState):
         for event_name in event_names:
             if event_name in self.event.trg:
                 id_alias = id if id_alias is None else id_alias
-                if not self.exists_id(id_alias):
+                if not self.exists_ID(id_alias):
                     super().open(template_name, id, id_alias)
                     return True
         return False
