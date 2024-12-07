@@ -102,6 +102,7 @@ class XUEvent:
     # 綴り間違いをしないようuse_eventをチェックする時は定数を使うようにする
     ABSORBER = "absorber"
     LISTENER = "listener"
+    NONE = ""  # ifでチェックしやすいようemptyで
 
     def __init__(self, init_active=False):
         self.active = init_active  # アクティブなイベントかどうか
@@ -335,7 +336,7 @@ class XUState:
 
         # closing待機設定。実際のclose(remove)はUpdate処理の中で行われる
         target.set_attr("closing_wait", closing_wait)
-        for child in target.children:  # 子も全部closing(イベントキャンセル)
+        for child in target.children:  # 子も全部closing(+イベントキャンセル)
             child.set_attr("closing_wait", closing_wait)
 
     # デバッグ用
@@ -408,7 +409,7 @@ class XUState:
 
     @property
     def use_event(self) -> str:  # eventの検知方法, listener or absorber or ""
-        return self.attr_str("use_event", "")
+        return self.attr_str("use_event", XUEvent.NONE)
 
     @property
     def marker(self) -> str:  # デバッグ用
@@ -521,7 +522,7 @@ class XMLUI(XUState):
 
         # ActiveStateの取得。Active=最後、なので最後から確認
         self.active_states:list[XUState] = []
-        for event in reversed([state for state in draw_targets if state.use_event in [XUEvent.LISTENER, XUEvent.ABSORBER]]):
+        for event in reversed([state for state in draw_targets if state.use_event]):
             self.active_states.append(event)  # イベントを使うstateを回収
             if event.use_event == XUEvent.ABSORBER:  # イベント通知終端
                 break
@@ -534,9 +535,8 @@ class XMLUI(XUState):
             # active/inactiveどちらのeventを使うか決定
             event = copy.copy(self.event) if state in self.active_states else XUEvent()
 
-            # closing中ならEventを空にする
             if state.has_attr("closing_wait"):
-                event = XUEvent()
+                event = XUEvent()  # closing中はイベント無効
 
             # やっぱりinitialize情報がどこかに欲しい
             event.on_init = state.update_count == 0
@@ -588,7 +588,7 @@ class _XUUtilBase(XUState):
         super().__init__(state.xmlui, state._element)
 
         # 自前設定が無ければabsorberにしておく
-        if not self.use_event in [XUEvent.ABSORBER, XUEvent.LISTENER]:
+        if not self.use_event:
             self.set_attr("use_event", XUEvent.ABSORBER)
 
         # Utilityルートの作成(状態保存先)
