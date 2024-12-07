@@ -5,15 +5,13 @@ from xml.etree.ElementTree import Element
 # 日本語対応
 import unicodedata
 
-
 # その他よく使う奴
 import re
 import math
 import copy
 from distutils.util import strtobool
-from typing import Callable,Any,Self,cast,TypeVar  # 型を使うよ
+from typing import Callable,Any,Self  # 型を使うよ
 
-T = TypeVar('T')
 
 # 描画領域計算用
 # #############################################################################
@@ -139,15 +137,6 @@ class XUEvent:
         if state:
             self._on_state[event_name] = state
         return self
-
-    def get_state(self, event_name:str, type_:type[T]) -> T|None:
-        if event_name not in self._on_state:
-            return None
-
-        if isinstance(self._on_state[event_name], type_):
-            return cast(T, self._on_state[event_name])
-
-        return None
 
 # UIパーツの状態取得
 # #############################################################################
