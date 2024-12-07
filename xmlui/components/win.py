@@ -1,4 +1,4 @@
-from xmlui_core import *
+from xmlui.xmlui_core import *
 
 # 角丸ウインドウ
 class Round(XUWinRoundFrame):

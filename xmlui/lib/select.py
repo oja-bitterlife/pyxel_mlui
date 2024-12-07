@@ -1,4 +1,4 @@
-from xmlui_core import *
+from xmlui.xmlui_core import *
 
 # セレクトアイテム
 class Item(XUSelectItem):

@@ -496,7 +496,6 @@ class XMLUI(XUState):
 
         # 入力
         self.event = XUEvent(True)  # 唯一のactiveとする
-        self._input_lists:dict[str, list[int]] = {}
 
         # 処理関数の登録(dict[グループ][タグ名]())
         self._draw_funcs:dict[str, dict[str, Callable[[XUState, XUEvent], None]]] = {}
@@ -582,25 +581,8 @@ class XMLUI(XUState):
 
     # イベント
     # *************************************************************************
-    # キー入力
-    def set_inputlist(self, input_type:str, list:list[int]):
-        self._input_lists[input_type] = list
-
-    def _check_input(self, check:str, check_func:Callable[[int], bool]) -> bool:
-        for button in self._input_lists[check]:
-            if check_func(button):
-                return True
-        return False
-
-    # 登録キー入力を全部調べて片っ端からイベントに登録
-    def check_input_on(self, check_func:Callable[[int], bool]):
-        for key in self._input_lists:
-            if self._check_input(key, check_func):
-                self.event._on(key, self)
-
-    def on(self, event_name:str, state:XUState):
-        self.event._on(event_name, state)
-
+    def on(self, event_name:str, state:XUState|None):
+        self.event._on(event_name, state if state else self)
 
 # ユーティリティークラス
 # #############################################################################

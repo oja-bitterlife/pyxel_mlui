@@ -1,29 +1,28 @@
-import os
-import pyxel
-
-from xmlui_core import *
+from xmlui.xmlui_core import *
 
 # フォントを扱う
 # #############################################################################
-default:"Font" = None # type: ignore
+class FontBase:
+    def __init__(self, font:Any, size:int):
+        self.font = font
+        self.size = size
 
-class Font:
-    def __init__(self, font_path:str):
-        # フォントデータ読み込み
-        self.font = pyxel.Font(font_path)
-
-        # フォントサイズ算出
-        self.size = 0
-        with open(font_path, "r") as f:
+    # フォントサイズ算出
+    @classmethod
+    def get_bdf_size(cls, bdf_font_path):
+        with open(bdf_font_path, "r") as f:
             for i, line in enumerate(f.readlines()):
                 if i > 100:  # 100行も見りゃええじゃろ...
-                    raise Exception(f"{font_path} has not PIXEL_SIZE")
+                    raise Exception(f"{bdf_font_path} has not PIXEL_SIZE")
                 if line.startswith("PIXEL_SIZE"):
-                    self.size = int(line.split()[-1])
-                    break
- 
+                    return int(line.split()[-1])
+        raise Exception(f"{bdf_font_path} has not PIXEL_SIZE")
+
     def text_width(self, text:str) -> int:
-        return self.font.text_width(text)
+        return len(text) * self.size
+
+    def text_height(self, text:str) -> int:
+        return len(text.splitlines()) * self.size
 
 
 # テキストを扱う
@@ -35,7 +34,7 @@ class Label(XUState):
         self._align = state.attr_str(align_attr, "left")
         self._valign = state.attr_str(valign_attr, "top")
 
-    def aligned_pos(self, font:Font, w:int=0, h:int=0) -> tuple[int, int]:
+    def aligned_pos(self, font:FontBase, w:int=0, h:int=0) -> tuple[int, int]:
         area = self.area  # 低速なので使うときは必ず一旦ローカルに
         x = area.aligned_x(font.text_width(self.text)+w, self._align)
         y = area.aligned_y(font.size, self._valign)
