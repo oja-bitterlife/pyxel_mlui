@@ -1,9 +1,9 @@
 import pyxel
 
 # タイトル画面
-from xmlui.xmlui_core import XUState,XUEvent
-from ui_common import xmlui,draw_menu_cursor
-from xmlui_pyxel import select,text,input
+from xmlui.core import XUState,XUEvent
+from xmlui.lib import select,text,input
+from ui_common import xmlui,ui_theme,draw_menu_cursor
 
 
 class Title:
@@ -24,7 +24,20 @@ class Title:
         return None
 
     def draw(self):
-        xmlui.check_input_on(pyxel.btn)
+        # キー入力
+        if pyxel.btnp(pyxel.KEY_LEFT):
+            xmlui.on(ui_theme.input_def.LEFT)
+        if pyxel.btnp(pyxel.KEY_RIGHT):
+            xmlui.on(ui_theme.input_def.RIGHT)
+        if pyxel.btnp(pyxel.KEY_UP):
+            xmlui.on(ui_theme.input_def.UP)
+        if pyxel.btnp(pyxel.KEY_DOWN):
+            xmlui.on(ui_theme.input_def.DOWN)
+        if pyxel.btnp(pyxel.KEY_RETURN) or pyxel.btnp(pyxel.KEY_SPACE):
+            xmlui.on(ui_theme.input_def.BTN_A)
+        if pyxel.btnp(pyxel.KEY_BACKSPACE):
+            xmlui.on(ui_theme.input_def.BTN_B)
+
         xmlui.draw()
 
 
@@ -38,8 +51,9 @@ def game_start(game_start:select.List, event:XUEvent):
     draw_menu_cursor(game_start.selected_item, 0, 1)
 
     # メニュー選択
-    game_start.select_by_event(event.trg, *input.UP_DOWN)
-    if input.BTN_A in event.trg:
+    input_def = ui_theme.input_def
+    game_start.select_by_event(event.trg, *input_def.UP_DOWN)
+    if input_def.BTN_A in event.trg:
         match game_start:
             case "start":
                 game_start.close_on("game_start")
@@ -55,7 +69,8 @@ def game_speed(game_speed:select.List, event:XUEvent):
     draw_menu_cursor(game_speed.selected_item, 0, 1)
 
     # メニュー選択。カーソルが動いたらTrueが返る
-    if game_speed.select_by_event(event.trg, *input.LEFT_RIGHT):
+    input_def = ui_theme.input_def
+    if game_speed.select_by_event(event.trg, *input_def.LEFT_RIGHT):
         # メッセージスピードを切り替える
         match game_speed:
             case "slow":
@@ -70,4 +85,4 @@ def game_speed(game_speed:select.List, event:XUEvent):
 @title_select.item("menu_item")
 def start_item(menu_item:select.Item, event:XUEvent):
     area = menu_item.area
-    pyxel.text(area.x+6, area.y, menu_item.text, 7, text.default.font)
+    pyxel.text(area.x+6, area.y, menu_item.text, 7, ui_theme.font.system.font)

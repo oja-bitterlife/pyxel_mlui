@@ -581,7 +581,7 @@ class XMLUI(XUState):
 
     # イベント
     # *************************************************************************
-    def on(self, event_name:str, state:XUState|None):
+    def on(self, event_name:str, state:XUState|None=None):
         self.event._on(event_name, state if state else self)
 
 # ユーティリティークラス

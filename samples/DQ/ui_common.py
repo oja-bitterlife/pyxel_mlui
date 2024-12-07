@@ -5,7 +5,7 @@ import pyxel
 from xmlui.lib import select,text,win,input
 from xmlui.pyxel_util.theme import Theme
 from xmlui.pyxel_util.theme import PyxelFont
-from xmlui.xmlui_core import XMLUI,XUState,XUEvent
+from xmlui.core import XMLUI,XUState,XUEvent
 
 # ライブラリのインスタンス化
 xmlui = XMLUI(pyxel.width, pyxel.height)
@@ -45,8 +45,8 @@ def popup_win_draw(win:win.Rect, event:XUEvent):
 
 @common_text.msg("popup_text")
 def popup_text(popup_text:text.Msg, event:XUEvent):
-    input = ui_theme.input
-    if input.BTN_A in event.trg or input.BTN_B in event.trg:
+    input_def = ui_theme.input_def
+    if input_def.BTN_A in event.trg or input_def.BTN_B in event.trg:
         popup_text.close()
 
     # テキスト描画

@@ -1,11 +1,5 @@
 import pyxel
 
-# タイトル画面
-from xmlui.xmlui_core import XUState,XUEvent
-from ui_common import xmlui,draw_menu_cursor
-from xmlui_pyxel import select,text,input,win
-
-
 class BG:
     # 背景
     blocks = [

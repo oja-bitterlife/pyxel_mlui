@@ -6,11 +6,11 @@ bg_color = 12
 [font]
 #system = "assets/font/b12.bdf"
 
-[input]
-LEFT = "DIR_L"
-RIGHT = "DIR_R"
-UP = "DIR_U"
-DOWN = "DIR_D"
+[input_def]
+LEFT = "CUR_L"
+RIGHT = "CUR_R"
+UP = "CUR_U"
+DOWN = "CUR_D"
 A = "BTN_A"
 B = "BTN_B"
 X = "BTN_X"
@@ -21,7 +21,7 @@ debug_level = 128
 """
 
 import tomllib
-from xmlui_core import XMLUI
+from xmlui.core import XMLUI
 from lib import input
 from pyxel_util.text import PyxelFont
 
@@ -33,7 +33,7 @@ class Theme:
         self.win = _Win(xmlui, self.toml['win'])
         self.font = _Font(xmlui, self.toml['font'], default_font)
         self.debug = _Debug(xmlui, self.toml['debug'])
-        self.input = _Input(xmlui, self.toml['input'])
+        self.input_def = _InputDef(xmlui, self.toml['input_def'])
 
 class _Win:
     def __init__(self, xmlui:XMLUI, section:dict):
@@ -50,13 +50,13 @@ class _Debug:
         self.debug_level = section.get('debug_level', 0)
         xmlui.debug.level = self.debug_level
 
-class _Input(input.InputDef):
+class _InputDef(input.InputDef):
     def __init__(self, xmlui:XMLUI, section:dict):
         super().__init__(
-            section.get('LEFT', "DIR_L"),
-            section.get('RIGHT', "DIR_R"),
-            section.get('UP', "DIR_U"),
-            section.get('DOWN', "DIR_D"),
+            section.get('LEFT', "CUR_L"),
+            section.get('RIGHT', "CUR_R"),
+            section.get('UP', "CUR_U"),
+            section.get('DOWN', "CUR_D"),
             section.get('A', "BTN_A"),
             section.get('B', "BTN_B"),
             section.get('X', "BTN_X"),

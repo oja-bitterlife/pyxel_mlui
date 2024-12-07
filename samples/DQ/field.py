@@ -1,9 +1,9 @@
 import pyxel
 
 # タイトル画面
-from xmlui.xmlui_core import XUState,XUEvent
-from ui_common import xmlui,draw_menu_cursor,draw_msg_cursor
-from xmlui_pyxel import select,text,input
+from xmlui.core import XUState,XUEvent
+from xmlui.lib import select,text,input
+from ui_common import xmlui,ui_theme,draw_menu_cursor,draw_msg_cursor
 from field_player import Player
 from field_bg import BG
 from field_npc import NPC
@@ -51,7 +51,20 @@ class Field:
         self.player.draw()
 
         # UIの描画
-        xmlui.check_input_on(pyxel.btn)
+        # キー入力
+        if pyxel.btnp(pyxel.KEY_LEFT):
+            xmlui.on(ui_theme.input_def.LEFT)
+        if pyxel.btnp(pyxel.KEY_RIGHT):
+            xmlui.on(ui_theme.input_def.RIGHT)
+        if pyxel.btnp(pyxel.KEY_UP):
+            xmlui.on(ui_theme.input_def.UP)
+        if pyxel.btnp(pyxel.KEY_DOWN):
+            xmlui.on(ui_theme.input_def.DOWN)
+        if pyxel.btnp(pyxel.KEY_RETURN) or pyxel.btnp(pyxel.KEY_SPACE):
+            xmlui.on(ui_theme.input_def.BTN_A)
+        if pyxel.btnp(pyxel.KEY_BACKSPACE):
+            xmlui.on(ui_theme.input_def.BTN_B)
+
         xmlui.draw()
 
 
@@ -67,31 +80,32 @@ field_text = text.Decorators(xmlui, "field")
 def title(title:text.Label, event:XUEvent):
     area = title.area
     pyxel.rect(area.x, area.y, area.w, area.h, 0)
-    x, y = title.aligned_pos(text.default)
-    pyxel.text(x, y-1, title.text, 7, text.default.font)
+    x, y = title.aligned_pos(ui_theme.font.system)
+    pyxel.text(x, y-1, title.text, 7, ui_theme.font.system.font)
 
 @field_text.label("status_title", "align", "valign")
 def status_title(status_title:text.Label, event:XUEvent):
     area = status_title.area
     pyxel.rect(area.x, area.y, area.w, area.h, 0)
-    x, y = status_title.aligned_pos(text.default)
-    pyxel.text(x+1, y-1, status_title.text, 7, text.default.font)
+    x, y = status_title.aligned_pos(ui_theme.font.system)
+    pyxel.text(x+1, y-1, status_title.text, 7, ui_theme.font.system.font)
 
 # メニューアイテム
 # ---------------------------------------------------------
 @field_select.item("menu_item")
 def menu_item(menu_item:select.Item, event:XUEvent):
-    pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, 7, text.default.font)
+    pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, 7, ui_theme.font.system.font)
 
 # コマンドメニュー
 # ---------------------------------------------------------
 @field_select.grid("menu_grid", "menu_item", "rows", "item_w", "item_h")
 def menu_grid(menu_grid:select.Grid, event:XUEvent):
     # メニュー選択
-    menu_grid.select_by_event(event.trg, *input.CURSOR)
+    input_def = ui_theme.input_def
+    menu_grid.select_by_event(event.trg, *input_def.CURSOR)
 
     # 選択アイテムの表示
-    if input.BTN_A in event.trg:
+    if input_def.BTN_A in event.trg:
         match menu_grid:
             case "speak":
                 menu_grid.open(Field.UI_TEMPLATE_FIELD, "message")
@@ -111,7 +125,7 @@ def menu_grid(menu_grid:select.Grid, event:XUEvent):
                 menu_grid.open("common", "under_construct")
 
     # 閉じる
-    if input.BTN_B in event.trg:
+    if input_def.BTN_B in event.trg:
         menu_grid.close()
 
     # カーソル追加
@@ -121,6 +135,9 @@ def menu_grid(menu_grid:select.Grid, event:XUEvent):
 # ---------------------------------------------------------
 @field_text.msg_dq("msg_text")
 def msg_text(msg_text:text.MsgDQ, event:XUEvent):
+    system_font = ui_theme.font.system
+    input_def = ui_theme.input_def
+
     # テキスト表示
     # ---------------------------------------------------------
     msg_text.anim.draw_count += 0.5
@@ -136,12 +153,12 @@ def msg_text(msg_text:text.MsgDQ, event:XUEvent):
     scroll_indents = msg_text.scroll_indents(scroll_size, "＊「")
 
     y = -3 if not msg_text.anim.is_finish and len(scroll_buf) >= scroll_size else 5
-    line_height = text.default.size + 3
+    line_height = system_font.size + 3
 
     # テキスト描画
     for i,page in enumerate(scroll_buf):
-        x = area.x + (text.default.size*2 if scroll_indents[i] else 0)
-        pyxel.text(x, y + area.y + i*line_height, page, 7, text.default.font)
+        x = area.x + (system_font.size*2 if scroll_indents[i] else 0)
+        pyxel.text(x, y + area.y + i*line_height, page, 7, system_font.font)
 
     # カーソル表示
     # ---------------------------------------------------------
@@ -153,13 +170,13 @@ def msg_text(msg_text:text.MsgDQ, event:XUEvent):
 
     # 入力アクション
     # ---------------------------------------------------------
-    if input.BTN_A in event.trg or input.BTN_B in event.trg:
+    if input_def.BTN_A in event.trg or input_def.BTN_B in event.trg:
         if msg_text.is_finish:
             msg_text.close()  # メニューごと閉じる
         elif msg_text.is_next_wait:
             msg_text.page_no += 1  # 次ページへ
 
-    if input.BTN_A in event.now or input.BTN_B in event.now:
+    if input_def.BTN_A in event.now or input_def.BTN_B in event.now:
         if not msg_text.is_next_wait:
             msg_text.anim.draw_count += 2  # 素早く表示
 
@@ -168,5 +185,6 @@ def msg_text(msg_text:text.MsgDQ, event:XUEvent):
 # ---------------------------------------------------------
 @field_text.label("status_item")
 def status_item(status_item:text.Label, event:XUEvent):
-    x, y = status_item.aligned_pos(text.default, 5, 0)
-    pyxel.text(x, y, status_item.text, 7, text.default.font)
+    system_font = ui_theme.font.system
+    x, y = status_item.aligned_pos(system_font, 5, 0)
+    pyxel.text(x, y, status_item.text, 7, system_font.font)
