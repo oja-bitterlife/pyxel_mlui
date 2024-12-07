@@ -26,7 +26,8 @@ class InputDef:
     
     @property
     def CURSOR(self):
-        return self.UP, self.DOWN, self.LEFT, self.RIGHT
+        return self.LEFT, self.RIGHT, self.UP, self.DOWN
+
     @property
     def LEFT_RIGHT(self):
         return self.LEFT, self.RIGHT
