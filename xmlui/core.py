@@ -335,7 +335,7 @@ class XUState:
 
         # closing待機設定。実際のclose(remove)はUpdate処理の中で行われる
         target.set_attr("closing_wait", closing_wait)
-        for child in target.children:
+        for child in target.children:  # 子も全部closing(イベントキャンセル)
             child.set_attr("closing_wait", closing_wait)
 
     # デバッグ用
