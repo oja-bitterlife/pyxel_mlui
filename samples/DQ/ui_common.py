@@ -2,7 +2,9 @@ import pyxel
 
 # xmlui_pyxelの初期化
 # *****************************************************************************
-from xmlui_pyxel import xmlui_pyxel_init,select,text,win,input
+from xmlui.lib import select,text,win,input
+from xmlui.pyxel_util.theme import Theme
+from xmlui.pyxel_util.theme import PyxelFont
 from xmlui.xmlui_core import XMLUI,XUState,XUEvent
 
 # ライブラリのインスタンス化
@@ -10,13 +12,7 @@ xmlui = XMLUI(pyxel.width, pyxel.height)
 xmlui.template_fromfile("assets/ui/common.xml", "common")
 
 # 初期化セット
-xmlui_pyxel_init(xmlui,
-    inputlist_dict = input.INPUT_LIST,
-    font_path = "assets/font/b12.bdf"
-)
-
-# (ライブラリ開発用)
-xmlui.debug.level = xmlui.debug.DEBUG_LEVEL_LIB
+ui_theme = Theme(xmlui, PyxelFont("assets/font/b12.bdf"))
 
 
 # 共通で使える関数
@@ -49,17 +45,17 @@ def popup_win_draw(win:win.Rect, event:XUEvent):
 
 @common_text.msg("popup_text")
 def popup_text(popup_text:text.Msg, event:XUEvent):
-    if input.BTN_A in event.trg or input.BTN_B in event.trg:
+    if ui_theme.input.BTN_A in event.trg or ui_theme.input.BTN_B in event.trg:
         popup_text.close()
 
     # テキスト描画
     area = popup_text.area  # areaは重いので必ずキャッシュ
 
-    h = len(popup_text.text.split()) * text.default.size
+    h = len(popup_text.text.split()) * ui_theme.font.system.size
     y = area.aligned_y(h, "center")
     for i,page in enumerate(popup_text.text.split()):
-        x = area.aligned_x(text.default.font.text_width(page), "center")
-        pyxel.text(x, y+i*text.default.size, page, 7, text.default.font)
+        x = area.aligned_x(ui_theme.font.system.text_width(page), "center")
+        pyxel.text(x, y+i*ui_theme.font.system.size, page, 7, ui_theme.font.system.font)
 
 
 # ゲーム内共通
@@ -73,7 +69,7 @@ def round_win_draw(round_win:win.Round, event:XUEvent):
     clip.h = int(round_win.update_count*32)
 
     # 背景
-    pyxel.rect(area.x, area.y, area.w, min(area.h, clip.h+2), 0)
+    pyxel.rect(area.x, area.y, area.w, min(area.h, clip.h+2), ui_theme.win.bg_color)
 
     # フレーム
-    round_win.draw_frame(pyxel.screen.data_ptr(), [7,13], area.inflate(-2, -2), clip)
+    round_win.draw_frame(pyxel.screen.data_ptr(), ui_theme.win.frame_pattern, area.inflate(-2, -2), clip)
