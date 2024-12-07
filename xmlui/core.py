@@ -99,6 +99,10 @@ class XURect:
 
 # イベント管理用
 class XUEvent:
+    # 綴り間違いをしないようuse_eventをチェックする時は定数を使うようにする
+    ABSORBER = "absorber"
+    LISTENER = "listener"
+
     def __init__(self, init_active=False):
         self.active = init_active  # アクティブなイベントかどうか
         self.on_init = False
@@ -409,11 +413,8 @@ class XUState:
         return self.attr_float("speed", 1.0)
 
     @property
-    def event_absorber(self) -> bool:  # eventを使うかどうか
-        return self.attr_bool("event_absorber", False)
-    @property
-    def event_listener(self) -> bool:  # eventを検知するかどうか
-        return self.attr_bool("event_listener", False)
+    def use_event(self) -> str:  # eventの検知方法, listener or absorber or ""
+        return self.attr_str("use_event", "")
 
     @property
     def marker(self) -> str:  # デバッグ用
@@ -526,9 +527,9 @@ class XMLUI(XUState):
 
         # ActiveStateの取得。Active=最後、なので最後から確認
         self.active_states:list[XUState] = []
-        for event in reversed([state for state in draw_targets if state.event_listener or state.event_absorber]):
+        for event in reversed([state for state in draw_targets if state.use_event in [XUEvent.LISTENER, XUEvent.ABSORBER]]):
             self.active_states.append(event)  # イベントを使うstateを回収
-            if event.event_absorber:  # イベント通知終端
+            if event.use_event == XUEvent.ABSORBER:  # イベント通知終端
                 break
 
         # 親情報の更新
@@ -582,8 +583,8 @@ class _XUUtilBase(XUState):
         super().__init__(state.xmlui, state._element)
 
         # 自前設定が無ければabsorberにしておく
-        if not self.event_absorber and not self.event_listener:
-            self.set_attr("event_absorber", "True")
+        if not self.use_event in [XUEvent.ABSORBER, XUEvent.LISTENER]:
+            self.set_attr("use_event", XUEvent.ABSORBER)
 
         # Utilityルートの作成(状態保存先)
         if state.exists_tag(root_tag):
