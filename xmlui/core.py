@@ -323,14 +323,18 @@ class XUState:
         return opend
 
     # owner以下を閉じる
-    def close(self):
+    def close(self, closing_wait:int=0):
         # open/closeが連続しないようTrg入力を落とす
         self.xmlui.event.clearTrg()
 
         # ownerが設定されていればownerを、無ければ自身をremoveする
         if self.owner:
-            return self.xmlui.find_by_ID(self.owner).remove()
-        self.remove()
+            target = self.xmlui.find_by_ID(self.owner)
+        else:
+            target = self
+
+        # 実際のclose(remove)はUpdate処理の中で行われる
+        target.set_attr("closing_wait", closing_wait)
 
     def close_parent(self, parent_id:str):
         self.find_parent(parent_id).close()
@@ -408,7 +412,9 @@ class XUState:
     def update_count(self) -> int:  # updateが行われた回数
         return self.attr_int("update_count", 0)
 
-
+    @property
+    def closing_wait(self) -> int:  # closing待ちフレーム数(カウントダウン)
+        return self.attr_int("closing_wait", 0)
 
     @property
     def use_event(self) -> str:  # eventの検知方法, listener or absorber or ""
@@ -544,6 +550,13 @@ class XMLUI(XUState):
             # 更新処理
             state.set_attr("update_count", state.update_count+1)  # 1スタート(0は初期化時)
             self.draw_element(state.tag, state, event)
+
+            # close処理
+            if state.has_attr("closing_wait"):
+                if state.closing_wait-1 < 0:  # closing待機終了
+                    state.remove()
+                else:  # カウントダウン
+                    state.set_attr("closing_wait", state.closing_wait-1)
 
         # デバッグ
         if self.debug.is_lib_debug:
