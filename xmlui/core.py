@@ -569,8 +569,24 @@ class XMLUI(XUState):
 
     # イベント
     # *************************************************************************
+    # イベントを記録する。Trg処理は内部で行っているので現在の状態を入れる
     def on(self, event_name:str):
         self.event._on(event_name)
+
+    # イベントが発生していればopenする。すでに開いているチェック付き
+    def open_by_event(self, event_names:list[str]|str, template_name:str, id:str, id_alias:str|None=None) -> bool:
+        if isinstance(event_names, str):
+            event_names = [event_names]  # 配列で統一
+        for event_name in event_names:
+            if event_name in self.event.trg:
+                id_alias = id if id_alias is None else id_alias
+                if not self.exists_id(id_alias):
+                    self.open(template_name, id, id_alias)
+                    return True
+        return False
+
+    def open(self, template_name:str, id:str, id_alias:str|None=None):
+        raise Exception("トップレベルではopen_by_eventを使ってください")
 
 # ユーティリティークラス
 # #############################################################################

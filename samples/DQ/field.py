@@ -32,8 +32,7 @@ class Field:
             return None
 
         # メニューオープン
-        if pyxel.btnp(pyxel.KEY_SPACE) or pyxel.btnp(pyxel.KEY_RETURN):
-            xmlui.open(self.UI_TEMPLATE_FIELD, "menu")
+        xmlui.open_by_event(ui_theme.input_def.BTN_A, self.UI_TEMPLATE_FIELD, "menu")
 
         # プレイヤの移動
         self.player.update(self.bg.blocks, self.npc.npc)
