@@ -25,17 +25,17 @@ class Title:
 
     def draw(self):
         # キー入力
-        if pyxel.btnp(pyxel.KEY_LEFT):
+        if pyxel.btn(pyxel.KEY_LEFT):
             xmlui.on(ui_theme.input_def.LEFT)
-        if pyxel.btnp(pyxel.KEY_RIGHT):
+        if pyxel.btn(pyxel.KEY_RIGHT):
             xmlui.on(ui_theme.input_def.RIGHT)
-        if pyxel.btnp(pyxel.KEY_UP):
+        if pyxel.btn(pyxel.KEY_UP):
             xmlui.on(ui_theme.input_def.UP)
-        if pyxel.btnp(pyxel.KEY_DOWN):
+        if pyxel.btn(pyxel.KEY_DOWN):
             xmlui.on(ui_theme.input_def.DOWN)
-        if pyxel.btnp(pyxel.KEY_RETURN) or pyxel.btnp(pyxel.KEY_SPACE):
+        if pyxel.btn(pyxel.KEY_RETURN) or pyxel.btn(pyxel.KEY_SPACE):
             xmlui.on(ui_theme.input_def.BTN_A)
-        if pyxel.btnp(pyxel.KEY_BACKSPACE):
+        if pyxel.btn(pyxel.KEY_BACKSPACE):
             xmlui.on(ui_theme.input_def.BTN_B)
 
         xmlui.draw()
@@ -54,11 +54,12 @@ def game_start(game_start:select.List, event:XUEvent):
     input_def = ui_theme.input_def
     game_start.select_by_event(event.trg, *input_def.UP_DOWN)
     if input_def.BTN_A in event.trg:
-        match game_start:
+        match game_start.action:
             case "start":
-                game_start.close_on("game_start")
+                game_start.close()
+                game_start.xmlui.on("game_start")
             case "continue":
-                game_start.open("common", "under_construct")
+                game_start.xmlui.popup("common", "under_construct")
 
 @title_select.list("game_speed", "menu_item", "item_w", "item_h")
 def game_speed(game_speed:select.List, event:XUEvent):
