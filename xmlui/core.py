@@ -581,7 +581,7 @@ class XMLUI(XUState):
             if event_name in self.event.trg:
                 id_alias = id if id_alias is None else id_alias
                 if not self.exists_id(id_alias):
-                    self.open(template_name, id, id_alias)
+                    super().open(template_name, id, id_alias)
                     return True
         return False
 
