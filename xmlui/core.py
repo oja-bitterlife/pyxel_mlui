@@ -459,18 +459,16 @@ class XMLUI(XUState):
     # 初期化。<xmlui>を持つXMLを突っ込む
     def __init__(self, screen_w:int, screen_h:int):
         # rootを作って自分自身に設定
-        root = Element("root")
-        root.attrib["id"] = "root"
-        super().__init__(self, root)
+        xmlui = Element("xmlui")
+        xmlui.attrib["id"] = "xmlui"
+        super().__init__(self, xmlui)
 
+        # ウインドウサイズを記憶
         self.screen_w = screen_w
         self.screen_h = screen_h
 
         # キャッシュ
         self._parent_cache:dict[Element, XUState] = {}  # dict[child] = parent_state
-
-        # デバッグ用
-        self.debug = XMLUI_Debug(self)
 
         # 入力
         self.event = XUEvent(True)  # 唯一のactiveとする
@@ -480,6 +478,15 @@ class XMLUI(XUState):
 
         # XMLテンプレート置き場
         self._templates:dict[str, XMLUI_Template] = {}
+
+        # デバッグ用
+        self.debug = XMLUI_Debug(self)
+
+        # root
+        self.root = XUState(self, Element("root")).set_attr("id", "root")
+        self.over = XUState(self, Element("oevr")).set_attr("id", "over")
+        self.add_child(self.root)  # 普通に使うもの
+        self.add_child(self.over)  # 上に強制で出す物
 
     # template操作
     # *************************************************************************
@@ -579,12 +586,16 @@ class XMLUI(XUState):
             event_names = [event_names]  # 配列で統一
         for event_name in event_names:
             if event_name in self.event.trg:
-                return super().open(template_name, id, id_alias)
+                return self.root.open(template_name, id, id_alias)
         return None
 
     # override
-    def open(self, template_name:str, id:str, id_alias:str|None=None):
-        raise Exception("トップレベルではopen_by_eventを使ってください")
+    def open(self, template_name:str, id:str, id_alias:str|None=None) -> XUState:
+        return self.root.open(template_name, id, id_alias)
+
+    # over側で開く
+    def popup(self, template_name:str, id:str, id_alias:str|None=None) -> XUState:
+        return self.over.open(template_name, id, id_alias)
 
 # ユーティリティークラス
 # #############################################################################
@@ -824,11 +835,10 @@ class XUSelectBase(_XUUtilBase):
 
         self.select(y*self._rows + x)
 
-    def __eq__(self, other) -> bool:
-        if isinstance(other, str):
-            return self.selected_item.action == other
-        else:
-            return super().__eq__(other)
+    # __eq__だとpylanceの方認識がおかしくなるのでactionを使う
+    @property
+    def action(self) -> str:
+        return self.selected_item.action
 
 # グリッド選択
 class XUSelectGrid(XUSelectBase):

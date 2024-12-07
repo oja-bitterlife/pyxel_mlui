@@ -105,23 +105,23 @@ def menu_grid(menu_grid:select.Grid, event:XUEvent):
 
     # 選択アイテムの表示
     if input_def.BTN_A in event.trg:
-        match menu_grid:
+        match menu_grid.action:
             case "speak":
                 menu_grid.open(Field.UI_TEMPLATE_FIELD, "message")
             case "spel":
-                menu_grid.open("common", "under_construct")
+                menu_grid.xmlui.popup("common", "under_construct")
             case "status":
-                menu_grid.open("common", "under_construct")
+                menu_grid.xmlui.popup("common", "under_construct")
             case "tools":
-                menu_grid.open("common", "under_construct")
+                menu_grid.xmlui.popup("common", "under_construct")
             case "step":
-                menu_grid.open("common", "under_construct")
+                menu_grid.xmlui.popup("common", "under_construct")
             case "check":
-                menu_grid.open("common", "under_construct")
+                menu_grid.xmlui.popup("common", "under_construct")
             case "door":
-                menu_grid.open("common", "under_construct")
+                menu_grid.xmlui.popup("common", "under_construct")
             case "take":
-                menu_grid.open("common", "under_construct")
+                menu_grid.xmlui.popup("common", "under_construct")
 
     # 閉じる
     if input_def.BTN_B in event.trg:
