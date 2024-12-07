@@ -479,11 +479,14 @@ class XMLUI(XUState):
     # 初期化
     # *************************************************************************
     # 初期化。<xmlui>を持つXMLを突っ込む
-    def __init__(self):
+    def __init__(self, screen_w:int, screen_h:int):
         # rootを作って自分自身に設定
         root = Element("root")
         root.attrib["id"] = "root"
         super().__init__(self, root)
+
+        self.screen_w = screen_w
+        self.screen_h = screen_h
 
         # キャッシュ
         self._parent_cache:dict[Element, XUState] = {}  # dict[child] = parent_state
@@ -988,9 +991,8 @@ class _XUWinFrameBase(XUState):
     # 0 1 2
     # 3 4 5
     # 6 7 8
-    def __init__(self, state:XUState, screen_w:int, screen_h:int):
+    def __init__(self, state:XUState):
         super().__init__(state.xmlui, state._element)
-        self.screen_w, self.screen_h = screen_w, screen_h
         
     # 枠外は-1を返す
     def _get_pattern_index(self, size:int, x:int, y:int, w:int, h:int) -> int:
@@ -1017,8 +1019,10 @@ class _XUWinFrameBase(XUState):
 
     # フレームだけバッファに書き込む。中央部分塗りつぶしは呼び出し側で行う
     def draw_frame(self, screen_buf:bytearray, pattern:list[int], screen_area:XURect, clip:XURect|None=None):
+        screen_buf_w = self.xmlui.screen_w  # バッファサイズは画面幅で確定(繰り返し使うのでキャッシュ)
+
         # 画面外に描画しない
-        screen_area = screen_area.intersect(XURect(0, 0, self.screen_w, self.screen_h))
+        screen_area = screen_area.intersect(XURect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h))
 
         # オフセットなので0,0～w,h
         area = screen_area.to_offset()
@@ -1037,7 +1041,7 @@ class _XUWinFrameBase(XUState):
             if clip.contains(off_x, off_y):
                 index = self._get_pattern_index(size, off_x, off_y, area.w, area.h)
                 if index >= 0:  # 枠外チェック
-                    screen_buf[(screen_area.y + off_y)*self.screen_w + (screen_area.x + off_x)] = pattern[index]
+                    screen_buf[(screen_area.y + off_y)*screen_buf_w + (screen_area.x + off_x)] = pattern[index]
 
         for y_ in range(size):
             for x_ in range(size):
@@ -1054,11 +1058,11 @@ class _XUWinFrameBase(XUState):
             for y_ in range(size):
                 # 上
                 if line_clip.contains_y(y_):
-                    offset = (screen_area.y + y_)*self.screen_w + screen_area.x
+                    offset = (screen_area.y + y_)*screen_buf_w + screen_area.x
                     screen_buf[offset+line_clip.x: offset+line_clip.right()] = pat_bytes[y_:y_+1] * line_clip.w
                 # 下
                 if line_clip.contains_y(area.h-1-y_):
-                    offset = (screen_area.bottom()-1-y_)*self.screen_w + screen_area.x
+                    offset = (screen_area.bottom()-1-y_)*screen_buf_w + screen_area.x
                     screen_buf[offset+line_clip.x: offset+line_clip.right()] = rev_butes[y_:y_+1] * line_clip.w
 
         # 左
@@ -1066,7 +1070,7 @@ class _XUWinFrameBase(XUState):
         if not left_clip.is_empty:
             for y_ in range(area.h):
                 if left_clip.contains_y(y_):
-                    offset = (screen_area.y + y_)*self.screen_w + screen_area.x
+                    offset = (screen_area.y + y_)*screen_buf_w + screen_area.x
                     screen_buf[offset:offset+left_clip.w] = pat_bytes[:left_clip.w]
 
         # 右
@@ -1074,13 +1078,13 @@ class _XUWinFrameBase(XUState):
         if not right_clip.is_empty:
             for y_ in range(area.h):
                 if right_clip.contains_y(y_):
-                    offset = (screen_area.y + y_)*self.screen_w + screen_area.x + area.w-size
+                    offset = (screen_area.y + y_)*screen_buf_w + screen_area.x + area.w-size
                     screen_buf[offset:offset+right_clip.w] = rev_butes[:right_clip.w]
 
 
 class XUWinRoundFrame(_XUWinFrameBase):
-    def __init__(self, state:XUState, screen_w:int, screen_h:int):
-        super().__init__(state, screen_w, screen_h)
+    def __init__(self, state:XUState):
+        super().__init__(state)
 
     def _get_veclen(self, x:int, y:int, org_x:int, org_y:int) -> int:
         return math.ceil(math.sqrt((x-org_x)**2 + (y-org_y)**2))
@@ -1103,8 +1107,8 @@ class XUWinRoundFrame(_XUWinFrameBase):
         return self._get13574index(size, x, y, w, h)
 
 class XUWinRectFrame(_XUWinFrameBase):
-    def __init__(self, state:XUState, screen_w:int, screen_h:int):
-        super().__init__(state, screen_w, screen_h)
+    def __init__(self, state:XUState):
+        super().__init__(state)
 
     # override
     def _get_pattern_index(self, size:int, x:int, y:int, w:int, h:int) -> int:

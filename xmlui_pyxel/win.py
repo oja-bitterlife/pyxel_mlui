@@ -1,16 +1,14 @@
-import pyxel
-
 from xmlui_core import *
 
 # 角丸ウインドウ
 class Round(XUWinRoundFrame):
     def __init__(self, state:XUState):
-        super().__init__(state, pyxel.width, pyxel.height)
+        super().__init__(state)
 
 # 四角ウインドウ
 class Rect(XUWinRectFrame):
     def __init__(self, state:XUState):
-        super().__init__(state, pyxel.width, pyxel.height)
+        super().__init__(state)
 
 
 # デコレータを用意

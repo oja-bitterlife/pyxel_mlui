@@ -6,7 +6,7 @@ from xmlui_pyxel import xmlui_pyxel_init,select,text,win,input
 from xmlui_core import XMLUI,XUState,XUEvent
 
 # ライブラリのインスタンス化
-xmlui = XMLUI()
+xmlui = XMLUI(pyxel.width, pyxel.height)
 xmlui.template_fromfile("assets/ui/common.xml", "common")
 
 # 初期化セット
