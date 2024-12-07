@@ -70,8 +70,10 @@ def round_win_draw(round_win:win.Round, event:XUEvent):
     clip = round_win.area.to_offset()
     clip.h = int(round_win.update_count*32)
 
+    print(round_win.is_closing)
     if round_win.is_closing:
-        clip.h = area.h - round_win.closing_wait
+        clip.h = area.h - round_win.closing_count*16
+        round_win.finish_closing()
 
     # 背景
     pyxel.rect(area.x, area.y, area.w, min(area.h, clip.h+2), ui_theme.win.bg_color)

@@ -126,7 +126,7 @@ def menu_grid(menu_grid:select.Grid, event:XUEvent):
 
     # 閉じる
     if input_def.BTN_B in event.trg:
-        menu_grid.close()
+        menu_grid.close(30)
 
     # カーソル追加
     draw_menu_cursor(menu_grid.selected_item, 0, 0)

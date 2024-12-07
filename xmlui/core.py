@@ -611,7 +611,7 @@ class _XUUtilBase(XUState):
 
 
 # テキスト系
-# ---------------------------------------------------------
+# *****************************************************************************
 # 半角を全角に変換
 _from_hanakaku = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 _to_zenkaku = "０１２３４５６７８９ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ"
@@ -619,8 +619,6 @@ _from_hanakaku += " !\"#$%&'()*+,-./:;<=>?@[]^_`{|}~"  # 半角記号を追加
 _to_zenkaku += "　！＂＃＄％＆＇（）＊＋，－．／：；＜＝＞？＠［］＾＿｀｛｜｝～"  # 全角記号を追加
 _hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
 
-# まずは読み込み用
-# *****************************************************************************
 # テキスト基底
 class XUTextBase(str):
     SEPARATE_REGEXP = r"\\n"  # 改行に変換する正規表現
@@ -759,7 +757,7 @@ class XUTextPage(_XUUtilBase):
         return self.anim.is_finish and self.page_no < len(self.pages)-1
 
 # メニュー系
-# ---------------------------------------------------------
+# *****************************************************************************
 # 選択クラス用アイテム
 class XUSelectItem(XUState):
     # アイテム座標保存先
@@ -865,7 +863,6 @@ class XUSelectGrid(XUSelectBase):
     def select_no_wrap(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
         return self._select_by_event(input, left_event, right_event, up_event, down_event, False, False)
 
-
 # リスト選択
 class XUSelectList(XUSelectBase):
     def __init__(self, state:XUState, item_tag:str, item_w_attr:str, item_h_attr:str):
@@ -895,7 +892,7 @@ class XUSelectList(XUSelectBase):
 
 
 # ダイアル
-# ---------------------------------------------------------
+# *****************************************************************************
 # 情報管理のみ
 class XUDial(_XUUtilBase):
     ROOT_TAG = "_xmlui_dial_root"
@@ -968,14 +965,35 @@ class XUDial(_XUUtilBase):
 
 
 # ウインドウサポート
-# ---------------------------------------------------------
+# *****************************************************************************
 class _XUWinFrameBase(XUState):
+    CLOSING_COUNT_ATTR = "_xmlui_closing_count"
+
     # 0 1 2
     # 3 4 5
     # 6 7 8
     def __init__(self, state:XUState):
         super().__init__(state.xmlui, state._element)
+
+        if self.is_closing:
+            self.set_attr(self.CLOSING_COUNT_ATTR, self.closing_count+1)
         
+    # ウインドウ閉じるよ処理用
+    # -----------------------------------------------------
+    @property
+    def is_closing(self) -> bool:
+        return self.has_attr("closing_wait")
+
+    @property
+    def closing_count(self) -> int:
+        return self.attr_int(self.CLOSING_COUNT_ATTR, 0)
+
+    # closingを終了させる
+    def finish_closing(self) -> Self:
+        return self.set_attr("closing_wait", 0)
+
+    # ウインドウ(ピクセル)描画
+    # -----------------------------------------------------
     # 枠外は-1を返す
     def _get_pattern_index(self, size:int, x:int, y:int, w:int, h:int) -> int:
         raise Exception("no implements")
@@ -983,10 +1001,6 @@ class _XUWinFrameBase(XUState):
     # 1,3,5,7,4のエリア(カド以外)は特に計算が必要ない
     def _get13574index(self, size:int, x:int, y:int, w:int, h:int) -> int:
         return [-1, y, -1, x, size-1, w-1-x, -1, h-1-y][self.get_area(size, x, y, w, h)]
-
-    @property
-    def is_closing(self) -> bool:
-        return self.has_attr("closing_event")
 
     # どのエリアに所属するかを返す
     def get_area(self, size:int, x:int, y:int, w:int, h:int) -> int:
@@ -1066,7 +1080,6 @@ class _XUWinFrameBase(XUState):
                 if right_clip.contains_y(y_):
                     offset = (screen_area.y + y_)*screen_buf_w + screen_area.x + area.w-size
                     screen_buf[offset:offset+right_clip.w] = rev_butes[:right_clip.w]
-
 
 class XUWinRoundFrame(_XUWinFrameBase):
     def __init__(self, state:XUState):
