@@ -234,6 +234,10 @@ class XUState:
     # ツリー操作用
     # *************************************************************************
     @property
+    def parent(self) -> 'XUState|None':
+        return self.xmlui._parent_cache.get(self._element, None)
+
+    @property
     def children(self) -> list["XUState"]:
         return [XUState(self.xmlui, child) for child in self._element.iter()]
 
@@ -254,7 +258,7 @@ class XUState:
         raise Exception(f"{self.strtree()}\nTag '{tag}' not found in '{self.tag}' and children")
 
     # ツリーを遡って親を探す
-    def find_parent(self, id:str) -> 'XUState':
+    def find_parent_by_id(self, id:str) -> 'XUState':
         parent = self.parent
         while parent:
             if parent.id == id:
@@ -263,11 +267,7 @@ class XUState:
         raise Exception(f"{self.strtree()}\nParent '{id}' not found in '{self.tag}' parents")
 
     def find_owner(self) -> 'XUState':
-        return self.find_parent(self.owner)
-
-    @property
-    def parent(self) -> 'XUState|None':
-        return self.xmlui._parent_cache.get(self._element, None)
+        return self.find_parent_by_id(self.owner)
 
     # すでにツリーに存在するか
     def exists_id(self, id:str) -> bool:
@@ -337,18 +337,6 @@ class XUState:
         target.set_attr("closing_wait", closing_wait)
         for child in target.children:
             child.set_attr("closing_wait", closing_wait)
-
-    def close_parent(self, parent_id:str):
-        self.find_parent(parent_id).close()
-
-    # 閉じる際に通知も送る
-    def close_on(self, event_name:str="close"):
-        self.xmlui.event._on(event_name, self)  # closeイベントを発行する
-        self.close()
-
-    def close_parent_on(self, parent_id:str,  event_name:str="close"):
-        self.xmlui.event._on(event_name, self)  # closeイベントを発行する
-        self.close_parent(parent_id)
 
     # デバッグ用
     # *************************************************************************
