@@ -215,7 +215,7 @@ class XUState:
     def area(self) -> XURect:  # 親からの相対座標
         # areaは良く呼ばれるので、一回でもparent探しのdictアクセスを軽減する
         parent = self.parent
-        parent_area = parent.area if parent else XURect(0, 0, 4096, 4096)
+        parent_area = parent.area if parent else XURect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h)
 
         # x,yはアトリビュートなのでローカルにしておく
         offset_x = self.x
@@ -406,10 +406,10 @@ class XUState:
         return self.attr_int("abs_y", 0)
     @property
     def w(self) -> int:  # elementの幅
-        return self.attr_int("w", 4096)
+        return self.attr_int("w", self.xmlui.screen_w)
     @property
     def h(self) -> int:  # elementの高さ
-        return self.attr_int("h", 4096)
+        return self.attr_int("h", self.xmlui.screen_h)
 
     @property
     def update_count(self) -> int:  # updateが行われた回数
@@ -664,18 +664,13 @@ class XUTextBase(str):
         self:XUTextBase = super().__new__(cls, "\n".join(lines))
         return self
 
-    # # 改行を抜いた文字数取得
-    # @property
-    # def length(self) -> int:
-    #     return len(re.sub("\n|\0", "", self))
-
 # アニメーションテキスト
 class XUTextAnim:
     TEXT_COUNT_ATTR="_xmlui_text_count"
 
     _state:XUState  # このテキストを管理するEelement
 
-    def __init__(self, state:XUState, text_base:str, wrap:int=4096):
+    def __init__(self, state:XUState, text_base:str):
         self._text_base = text_base
         self._state = state
 
@@ -713,7 +708,7 @@ class XUTextAnim:
     def text(self) -> str:
         return self._limitstr(self._text_base, self.draw_count)
 
-    # 改行を抜いた文字数取得
+    # 改行を抜いた文字数(＝アニメーション数)取得
     @property
     def length(self) -> int:
         return len(re.sub("\n|\0", "", self._text_base))
@@ -760,7 +755,7 @@ class XUTextPage(_XUUtilBase):
     # -----------------------------------------------------
     @property
     def anim(self):
-        return XUTextAnim(self, self.page_text, self.wrap)
+        return XUTextAnim(self, self.page_text)
 
     @property
     def page_text(self) -> str:
