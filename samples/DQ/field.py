@@ -52,19 +52,20 @@ class Field:
 
         # UIの描画
         # キー入力
-        if pyxel.btnp(pyxel.KEY_LEFT):
+        if pyxel.btn(pyxel.KEY_LEFT):
             xmlui.on(ui_theme.input_def.LEFT)
-        if pyxel.btnp(pyxel.KEY_RIGHT):
+        if pyxel.btn(pyxel.KEY_RIGHT):
             xmlui.on(ui_theme.input_def.RIGHT)
-        if pyxel.btnp(pyxel.KEY_UP):
+        if pyxel.btn(pyxel.KEY_UP):
             xmlui.on(ui_theme.input_def.UP)
-        if pyxel.btnp(pyxel.KEY_DOWN):
+        if pyxel.btn(pyxel.KEY_DOWN):
             xmlui.on(ui_theme.input_def.DOWN)
-        if pyxel.btnp(pyxel.KEY_RETURN) or pyxel.btnp(pyxel.KEY_SPACE):
+        if pyxel.btn(pyxel.KEY_RETURN) or pyxel.btn(pyxel.KEY_SPACE):
             xmlui.on(ui_theme.input_def.BTN_A)
-        if pyxel.btnp(pyxel.KEY_BACKSPACE):
+        if pyxel.btn(pyxel.KEY_BACKSPACE):
             xmlui.on(ui_theme.input_def.BTN_B)
 
+        xmlui.on(ui_theme.input_def.BTN_A)
         xmlui.draw()
 
 
@@ -105,7 +106,7 @@ def menu_grid(menu_grid:select.Grid, event:XUEvent):
     menu_grid.select_by_event(event.trg, *input_def.CURSOR)
 
     # 選択アイテムの表示
-    if input_def.BTN_A in event.trg:
+    if input_def.BTN_A in event.now:
         match menu_grid:
             case "speak":
                 menu_grid.open(Field.UI_TEMPLATE_FIELD, "message")
@@ -170,7 +171,7 @@ def msg_text(msg_text:text.MsgDQ, event:XUEvent):
 
     # 入力アクション
     # ---------------------------------------------------------
-    if input_def.BTN_A in event.trg or input_def.BTN_B in event.trg:
+    if input_def.BTN_A in event.now or input_def.BTN_B in event.now:
         if msg_text.is_finish:
             msg_text.close(30)
         elif msg_text.is_next_wait:

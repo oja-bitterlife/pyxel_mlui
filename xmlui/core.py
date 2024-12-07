@@ -111,7 +111,6 @@ class XUEvent:
 
     def clear(self):
         self._receive:set[str] = set([])  # 次の状態受付
-        self._on_state:dict[str,XUState] = {}
 
         self.now:set[str] = set([])
         self.trg:set[str] = set([])
@@ -130,18 +129,12 @@ class XUEvent:
 
         # 取得し直す
         self._receive = set([])
-        self._on_state:dict[str,XUState] = {}
 
     # 入力
-    def _on(self, event_name:str, state:"XUState") -> Self:
+    def _on(self, event_name:str):
         if event_name in self._receive:
             raise ValueError(f"event_name:{event_name} is already registered.")
         self._receive.add(event_name)
-
-        # ステートも記録
-        if state:
-            self._on_state[event_name] = state
-        return self
 
 # UIパーツの状態取得
 # #############################################################################
@@ -576,8 +569,8 @@ class XMLUI(XUState):
 
     # イベント
     # *************************************************************************
-    def on(self, event_name:str, state:XUState|None=None):
-        self.event._on(event_name, state if state else self)
+    def on(self, event_name:str):
+        self.event._on(event_name)
 
 # ユーティリティークラス
 # #############################################################################
