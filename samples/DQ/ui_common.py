@@ -4,7 +4,7 @@ import pyxel
 # *****************************************************************************
 from xmlui.lib import select,text,win,input
 from xmlui.pyxel_util.theme import Theme
-from xmlui.pyxel_util.theme import PyxelFont
+from xmlui.pyxel_util.font import PyxelFont
 from xmlui.core import XMLUI,XUState,XUEvent
 
 # ライブラリのインスタンス化

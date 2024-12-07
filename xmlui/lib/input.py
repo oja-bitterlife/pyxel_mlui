@@ -1,5 +1,5 @@
 from xmlui.core import *
-from ..lib import text
+from xmlui.lib.text import FontBase
 
 # キー入力
 # #############################################################################
@@ -53,13 +53,13 @@ class Dial(XUDial):
         self._align = align
         self._valign = valign
 
-    def aligned_pos(self, font:text.FontBase, w:int=0, h:int=0) -> tuple[int, int]:
+    def aligned_pos(self, font:FontBase, w:int=0, h:int=0) -> tuple[int, int]:
         area = self.area  # 低速なので使うときは必ず一旦ローカルに
         x = area.aligned_x(font.text_width(self.digits) + w, self._align)
         y = area.aligned_y(font.size+h, self._valign)
         return x, y
 
-    def aligned_zenkaku_pos(self, font:text.FontBase, w:int=0, h:int=0) -> tuple[int, int]:
+    def aligned_zenkaku_pos(self, font:FontBase, w:int=0, h:int=0) -> tuple[int, int]:
         area = self.area  # 低速なので使うときは必ず一旦ローカルに
         x = area.aligned_x(font.text_width(self.zenkaku_digits) + w, self._align)
         y = area.aligned_y(font.size+h, self._valign)

@@ -1,7 +1,7 @@
 default = """
 [win]
 frame_pattern = [7, 13]
-bg_color = 12
+bg_color = 0
 
 [font]
 #system = "assets/font/b12.bdf"
@@ -22,8 +22,8 @@ debug_level = 128
 
 import tomllib
 from xmlui.core import XMLUI
-from lib import input
-from pyxel_util.text import PyxelFont
+from xmlui.lib import input
+from xmlui.pyxel_util.font import PyxelFont
 
 class Theme:
     def __init__(self, xmlui:XMLUI, default_font:PyxelFont):
@@ -38,7 +38,7 @@ class Theme:
 class _Win:
     def __init__(self, xmlui:XMLUI, section:dict):
         self.frame_pattern = section.get('frame_pattern', [7, 13])
-        self.bg_color = section.get('bg_color', 12)
+        self.bg_color = section.get('bg_color', 0)
 
 class _Font:
     def __init__(self, xmlui:XMLUI, section:dict, default_font:PyxelFont):

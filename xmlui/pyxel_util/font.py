@@ -1,6 +1,6 @@
 import pyxel
 
-from lib.text import FontBase
+from xmlui.lib.text import FontBase
 
 # Pyxelのフォントを使う
 # #############################################################################
