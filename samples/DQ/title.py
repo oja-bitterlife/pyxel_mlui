@@ -46,7 +46,7 @@ class Title:
 # ---------------------------------------------------------
 from ui_common import draw_menu_cursor
 def ui_init(xmlui:XMLUI):
-    title_select = select.Decorators(xmlui, "title")
+    title_select = select.DrawDecorator(xmlui, "title")
 
     @title_select.list("game_start", "menu_item", "item_w", "item_h")
     def game_start(game_start:select.List, event:XUEvent):

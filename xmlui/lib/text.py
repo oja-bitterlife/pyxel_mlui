@@ -1,4 +1,5 @@
 from xmlui.core import *
+from xmlui.lib.decorator import DefaultDecorator
 
 # フォントを扱う
 # #############################################################################
@@ -95,9 +96,9 @@ class MsgDQ(MsgScr):
 
 # デコレータを用意
 # *****************************************************************************
-class Decorators:
+class Decorator(DefaultDecorator):
     def __init__(self, xmlui:XMLUI, group:str):
-        self.xmlui = xmlui
+        super().__init__(xmlui)
         self.group = group
 
     def __del__(self):

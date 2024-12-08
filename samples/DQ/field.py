@@ -72,8 +72,8 @@ class Field:
 from ui_common import draw_menu_cursor, draw_msg_cursor, get_winclip_h
 
 def ui_init(xmlui):
-    field_select = select.Decorators(xmlui, "field")
-    field_text = text.Decorators(xmlui, "field")
+    field_select = select.DrawDecorator(xmlui, "field")
+    field_text = text.DrawDecorator(xmlui, "field")
 
     # ラベル
     # ---------------------------------------------------------
