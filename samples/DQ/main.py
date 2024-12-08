@@ -13,6 +13,7 @@ from field import Field
 from ui_common import xmlui
 # scene = Title()
 scene = Field(xmlui)
+print(xmlui._draw_funcs)
 
 # Main
 def update(): # フレームの更新処理
