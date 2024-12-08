@@ -15,20 +15,23 @@ class Field:
     def __init__(self, xmlui:XMLUI):
         self.xmlui = xmlui
 
-        self.xmlui.template_fromfile("assets/ui/field.xml", self.UI_TEMPLATE_FIELD)
+        # ゲーム本体(仮)
         self.player = Player(10, 10)
         self.bg = BG()
         self.npc = NPC()
         self.treasure = Treasure()
 
-        ui_init(self.xmlui)
+        # UIの読み込み
+        self.xmlui.template_fromfile("assets/ui/field.xml", self.UI_TEMPLATE_FIELD)
+        ui_init(self.xmlui, "field")
 
     def __del__(self):
+        # 読みこんだUIの削除
         self.xmlui.remove_template(self.UI_TEMPLATE_FIELD)
         self.xmlui.remove_drawfunc("field")
 
     def update(self):
-        # メニューが開いていたら他はなにもできない
+        # UIメニューが開いていたらなにもしない
         if self.xmlui.exists_ID("menu"):
             return None
 
@@ -42,16 +45,16 @@ class Field:
         return None
 
     def draw(self):
+        # プレイヤを中心に世界が動く。さす勇
         scroll_x = -self.player.x +160-32
         scroll_y = -self.player.y +160-32-8
 
-        # 画面構築
+        # ゲーム画面構築
         self.bg.draw(scroll_x, scroll_y)
         self.npc.draw(scroll_x, scroll_y)
         self.treasure.draw(scroll_x, scroll_y)
         self.player.draw()
 
-        # UIの描画
         # キー入力
         if pyxel.btn(pyxel.KEY_LEFT):
             self.xmlui.on(ui_theme.input_def.LEFT)
@@ -66,45 +69,51 @@ class Field:
         if pyxel.btn(pyxel.KEY_BACKSPACE):
             self.xmlui.on(ui_theme.input_def.BTN_B)
 
+        # UIの描画(fieldとdefaultグループ)
         self.xmlui.draw(["field"])
 
 # 町の中UI
 # *****************************************************************************
 from ui_common import draw_menu_cursor, draw_msg_cursor, get_world_clip
 
-def ui_init(xmlui):
-    field_select = select.Decorator(xmlui, "field")
-    field_text = text.Decorator(xmlui, "field")
+def ui_init(xmlui, group):
+    # fieldグループ用デコレータを作る
+    field_select = select.Decorator(xmlui, group)
+    field_text = text.Decorator(xmlui, group)
 
     # ラベル
     # ---------------------------------------------------------
+    # コマンドメニューのタイトル
     @field_text.label("title", "align", "valign")
     def title(title:text.Label, event:XUEvent):
         area = title.area
-        if area.y < get_world_clip(title).bottom():
-            pyxel.rect(area.x, area.y, area.w, area.h, 0)
+        if area.y < get_world_clip(title).bottom():  # world座標で比較
+            pyxel.rect(area.x, area.y, area.w, area.h, 0)  # タイトルの下地
+
+            # テキストはセンタリング
             x, y = title.aligned_pos(ui_theme.font.system)
             pyxel.text(x, y-1, title.text, 7, ui_theme.font.system.font)
 
+    # ステータスウインドウ( ｰ`дｰ´)ｷﾘｯのタイトル
     @field_text.label("status_title", "align", "valign")
     def status_title(status_title:text.Label, event:XUEvent):
         area = status_title.area
-        if area.y < get_world_clip(status_title).bottom():
-            pyxel.rect(area.x, area.y, area.w, area.h, 0)
+        if area.y < get_world_clip(status_title).bottom():  # world座標で比較
+            pyxel.rect(area.x, area.y, area.w, area.h, 0)  # タイトルの下地
+
+            # テキストは左寄せ
             x, y = status_title.aligned_pos(ui_theme.font.system)
             pyxel.text(x+1, y-1, status_title.text, 7, ui_theme.font.system.font)
 
-    # メニューアイテム\
+    # メニューアイテム
     # ---------------------------------------------------------
     @field_select.item("menu_item")
     def menu_item(menu_item:select.Item, event:XUEvent):
         area = menu_item.area
+
+        # ウインドウのクリップ状態に合わせて表示する
         if area.y < get_world_clip(menu_item).bottom():
             pyxel.text(area.x+6, area.y, menu_item.text, 7, ui_theme.font.system.font)
-        
-        if get_world_clip(menu_item).bottom() == 8:
-            get_world_clip(menu_item).bottom()
-
 
     # コマンドメニュー
     # ---------------------------------------------------------
@@ -138,7 +147,7 @@ def ui_init(xmlui):
         if input_def.BTN_B in event.trg:
             menu_grid.wait_close(ui_theme.win.get_closing_wait(menu_grid))
 
-        # カーソル追加
+        # カーソル追加。ウインドウのクリップ状態に合わせて表示する
         if menu_grid.selected_item.area.y < get_world_clip(menu_grid).bottom():
             draw_menu_cursor(menu_grid.selected_item, 0, 0)
 
@@ -154,7 +163,7 @@ def ui_init(xmlui):
         msg_text.anim.draw_count += 0.5
         area = msg_text.area  # areaは重いので必ずキャッシュ
 
-        # お試し
+        # お試し(会話の時ページごとに挿入する)
         for i,page in enumerate(msg_text.pages):
             msg_text.pages[i][0] = "＊「" + page[0]
 
@@ -163,10 +172,11 @@ def ui_init(xmlui):
         scroll_buf = msg_text.scroll_buf(scroll_size)
         scroll_indents = msg_text.scroll_indents(scroll_size, "＊「")
 
+        # アニメーション用表示位置ずらし。スクロール時半文字ずれる
         y = -3 if not msg_text.anim.is_finish and len(scroll_buf) >= scroll_size else 5
-        line_height = system_font.size + 3
 
         # テキスト描画
+        line_height = system_font.size + 3  # 行間設定。見えない行間が見える人向けではない一般向け
         for i,page in enumerate(scroll_buf):
             x = area.x + (system_font.size*2 if scroll_indents[i] else 0)
             pyxel.text(x, y + area.y + i*line_height, page, 7, system_font.font)
@@ -178,25 +188,26 @@ def ui_init(xmlui):
             if cursor_count//7 % 2 == 0:
                 draw_msg_cursor(msg_text, 0, len(scroll_buf)*line_height + y-3)
 
-
         # 入力アクション
         # ---------------------------------------------------------
         if input_def.BTN_A in event.trg or input_def.BTN_B in event.now:
             if msg_text.is_finish:
-                msg_text.wait_close(ui_theme.win.get_closing_wait(msg_text))
+                msg_text.wait_close(ui_theme.win.get_closing_wait(msg_text))  # closingウェイトを設定する
             elif msg_text.is_next_wait:
                 msg_text.page_no += 1  # 次ページへ
 
-        if input_def.BTN_A in event.now or input_def.BTN_B in event.now:
-            if not msg_text.is_next_wait:
+        # 表示途中のアクション
+        if not msg_text.is_next_wait:
+            if input_def.BTN_A in event.now or input_def.BTN_B in event.now:
                 msg_text.anim.draw_count += 2  # 素早く表示
 
-
-    # ステータスウインドウ
+    # ステータス各種アイテム
     # ---------------------------------------------------------
     @field_text.label("status_item")
     def status_item(status_item:text.Label, event:XUEvent):
         system_font = ui_theme.font.system
+
+        # テキストは右寄せ
         x, y = status_item.aligned_pos(system_font, 5, 0)
         if y < get_world_clip(status_item).bottom():
             pyxel.text(x, y, status_item.text, 7, system_font.font)
