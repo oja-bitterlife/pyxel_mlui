@@ -129,6 +129,7 @@ def ui_init(xmlui, group):
                 case "speak":
                     menu_grid.open(Field.UI_TEMPLATE_FIELD, "message")
                 case "spel":
+                    print(menu_grid.strtree())
                     menu_grid.xmlui.popup("common", "under_construct")
                 case "status":
                     menu_grid.xmlui.popup("common", "under_construct")
