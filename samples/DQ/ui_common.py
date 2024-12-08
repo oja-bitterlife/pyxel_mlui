@@ -81,7 +81,7 @@ def round_win_draw(round_win:win.Round, event:XUEvent):
         clip.h = get_winclip_h(round_win)
         # waitが終わるのをまたないでとっとと閉じる
         if clip.is_empty:
-            round_win.close()
+            round_win.finish_closing()
             return
 
     # 背景

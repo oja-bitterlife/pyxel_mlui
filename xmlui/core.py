@@ -1012,13 +1012,9 @@ class XUWinFrameBase(XUState):
         
     # ウインドウ閉じるよ処理用
     # -----------------------------------------------------
-    @property
-    def is_closing(self) -> bool:
-        return self.has_attr("closing_wait")
-
     # closingを終了させる
     def finish_closing(self) -> Self:
-        return self.set_attr("closing_wait", 0)
+        return self.set_attr("closing_count", self.closing_wait)
 
     # ウインドウ(ピクセル)描画
     # -----------------------------------------------------
