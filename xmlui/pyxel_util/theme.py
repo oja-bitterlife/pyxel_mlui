@@ -3,8 +3,8 @@ default = """
 frame_pattern = [7, 13]
 bg_color = 0
 open_speed = 1
-close_speed = 32
-closing_wait = 15
+close_speed = 2
+closing_wait = 100
 
 [font]
 #system = "assets/font/b12.bdf"

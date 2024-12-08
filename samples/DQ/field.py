@@ -81,16 +81,20 @@ def ui_init(xmlui):
     @field_text.label("title", "align", "valign")
     def title(title:text.Label, event:XUEvent):
         area = title.area
-        pyxel.rect(area.x, area.y, area.w, area.h, 0)
-        x, y = title.aligned_pos(ui_theme.font.system)
-        pyxel.text(x, y-1, title.text, 7, ui_theme.font.system.font)
+        win = title.find_owner()
+        if area.y < win.y + calc_win_clip_h(win):
+            pyxel.rect(area.x, area.y, area.w, area.h, 0)
+            x, y = title.aligned_pos(ui_theme.font.system)
+            pyxel.text(x, y-1, title.text, 7, ui_theme.font.system.font)
 
     @field_text.label("status_title", "align", "valign")
     def status_title(status_title:text.Label, event:XUEvent):
         area = status_title.area
-        pyxel.rect(area.x, area.y, area.w, area.h, 0)
-        x, y = status_title.aligned_pos(ui_theme.font.system)
-        pyxel.text(x+1, y-1, status_title.text, 7, ui_theme.font.system.font)
+        status_win = status_title.find_parent_by_ID("status")
+        if area.y < status_win.y + calc_win_clip_h(status_win):
+            pyxel.rect(area.x, area.y, area.w, area.h, 0)
+            x, y = status_title.aligned_pos(ui_theme.font.system)
+            pyxel.text(x+1, y-1, status_title.text, 7, ui_theme.font.system.font)
 
     # メニューアイテム
     # ---------------------------------------------------------
