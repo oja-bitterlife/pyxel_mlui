@@ -139,7 +139,8 @@ def ui_init(xmlui):
             menu_grid.wait_close(ui_theme.win.get_closing_wait(menu_grid))
 
         # カーソル追加
-        draw_menu_cursor(menu_grid.selected_item, 0, 0)
+        if menu_grid.selected_item.area.y < get_world_clip(menu_grid).bottom():
+            draw_menu_cursor(menu_grid.selected_item, 0, 0)
 
     # メッセージウインドウ
     # ---------------------------------------------------------

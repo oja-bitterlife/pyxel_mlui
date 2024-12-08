@@ -33,7 +33,7 @@ def draw_msg_cursor(state:XUState, x:int, y:int):
 
 def get_world_clip(win:XUState):
     for parent in win.ancestors:
-        if parent.has_attr(CLOSING_CLIP_SIZE):  # opningかclosingのどっちか
+        if parent.has_attr(CLOSING_CLIP_SIZE) or parent.has_attr(OPENING_CLIP_SIZE):
             area = parent.area
             if parent.is_closing:
                 clip_size = parent.attr_int(CLOSING_CLIP_SIZE)
