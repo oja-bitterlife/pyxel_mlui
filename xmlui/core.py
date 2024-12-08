@@ -231,6 +231,16 @@ class XUState:
     def children(self) -> list["XUState"]:
         return [XUState(self.xmlui, child) for child in self._element.iter()]
 
+    # 親以上祖先リスト
+    @property
+    def ancestors(self) -> 'list[XUState]':
+        out:list[XUState] = []
+        parent = self.parent
+        while parent:
+            out.append(parent)
+            parent = parent.parent
+        return out
+
     def find_by_ID(self, id:str) -> 'XUState':
         for element in self._element.iter():
             if element.attrib.get("id") == id:
@@ -256,6 +266,7 @@ class XUState:
             parent = parent.parent
         raise Exception(f"{self.strtree()}\nParent '{id}' not found in '{self.tag}' parents")
 
+    # openした親
     def find_owner(self) -> 'XUState':
         return self.find_parent_by_ID(self.owner)
 
@@ -315,6 +326,7 @@ class XUState:
         self.xmlui.event.clearTrg()
         return opend
 
+    # すぐにclose
     def close(self):
         # open/closeが連続しないようTrg入力を落としておく
         self.xmlui.event.clearTrg()
@@ -325,9 +337,9 @@ class XUState:
         else:
             target = self
 
-        # すぐに削除
         target.remove()
 
+    # closing状態に移行する。子も全部closingになる(イベントを見なくなる)
     def wait_close(self, closing_wait:int):
         # ownerが設定されていればownerを、無ければ自身をremoveする
         if self.owner and self.xmlui.exists_ID(self.owner):

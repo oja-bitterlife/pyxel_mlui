@@ -96,7 +96,7 @@ def ui_init(xmlui):
             x, y = status_title.aligned_pos(ui_theme.font.system)
             pyxel.text(x+1, y-1, status_title.text, 7, ui_theme.font.system.font)
 
-    # メニューアイテム
+    # メニューアイテム\
     # ---------------------------------------------------------
     @field_select.item("menu_item")
     def menu_item(menu_item:select.Item, event:XUEvent):
