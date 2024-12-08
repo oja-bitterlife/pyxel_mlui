@@ -7,12 +7,13 @@ from xmlui.pyxel_util.theme import Theme
 from xmlui.pyxel_util.font import PyxelFont
 from xmlui.core import XMLUI,XUState,XUEvent,XUWinFrameBase
 
+ui_theme = Theme(PyxelFont("assets/font/b12.bdf"))
+
 # ライブラリのインスタンス化
 xmlui = XMLUI(pyxel.width, pyxel.height)
 xmlui.template_fromfile("assets/ui/common.xml", "common")
+xmlui.debug.level = ui_theme.debug.debug_level
 
-# 初期化セット
-ui_theme = Theme(xmlui, PyxelFont("assets/font/b12.bdf"))
 
 
 # 共通で使える関数
