@@ -14,6 +14,7 @@ class Field:
 
     def __init__(self, xmlui:XMLUI):
         self.xmlui = xmlui
+
         self.xmlui.template_fromfile("assets/ui/field.xml", self.UI_TEMPLATE_FIELD)
         self.player = Player(10, 10)
         self.bg = BG()

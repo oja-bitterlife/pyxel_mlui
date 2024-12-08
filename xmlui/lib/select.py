@@ -23,9 +23,6 @@ class Decorator(DefaultDecorator):
     def __init__(self, xmlui:XMLUI, group:str|None=None):
         super().__init__(xmlui, group)
 
-    def __del__(self):
-        self.xmlui.remove_drawfunc(self.group)
-
     def item(self, item_tag:str):
         def wrapper(bind_func:Callable[[Item,XUEvent], None]):
             # 登録用関数をジェネレート

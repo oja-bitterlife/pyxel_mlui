@@ -18,9 +18,6 @@ class Decorator(DefaultDecorator):
     def __init__(self, xmlui:XMLUI, group:str|None=None):
         super().__init__(xmlui, group)
 
-    def __del__(self):
-        self.xmlui.remove_drawfunc(self.group)
-
     def round(self, tag_name:str):
         def wrapper(bind_func:Callable[[Round,XUEvent], None]):
             # 登録用関数をジェネレート

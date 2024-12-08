@@ -39,14 +39,14 @@ class Title:
         if pyxel.btn(pyxel.KEY_BACKSPACE):
             self.xmlui.on(ui_theme.input_def.BTN_B)
 
-        self.xmlui.draw()
+        self.xmlui.draw([])
 
 
 # タイトル画面UI
 # ---------------------------------------------------------
 from ui_common import draw_menu_cursor
 def ui_init(xmlui:XMLUI):
-    title_select = select.DrawDecorator(xmlui, "title")
+    title_select = select.Decorator(xmlui, "title")
 
     @title_select.list("game_start", "menu_item", "item_w", "item_h")
     def game_start(game_start:select.List, event:XUEvent):

@@ -543,9 +543,9 @@ class XMLUI(XUState):
         for child in element:
             yield from self._rec_get_draw_targets(child)
 
-    def draw(self, draw_group:list[str]):
+    def draw(self, draw_group:str|list[str]=[]):
         # デフォルトグループを入れておく
-        draw_group = [""] + draw_group
+        draw_group = [""] + ([draw_group] if isinstance(draw_group, str) else draw_group)
 
         # (入力)イベントの更新
         self.event.update()
