@@ -31,7 +31,7 @@ def draw_msg_cursor(state:XUState, x:int, y:int):
     y = state.area.y + tri_size - 3 + y
     pyxel.tri(center_x, y, center_x+tri_size, y, center_x+tri_size//2, y+tri_size//2, 7)
 
-def get_win_clip_h(state:XUState):
+def calc_win_clip_h(state:XUState):
     is_opening = not state.is_closing
 
     count = state.update_count if is_opening else state.closing_count
@@ -82,7 +82,7 @@ def round_win_draw(round_win:win.Round, event:XUEvent):
     clip.h = int(round_win.update_count*ui_theme.win.open_speed)
 
     if round_win.is_closing:
-        clip.h = get_win_clip_h(round_win)
+        clip.h = calc_win_clip_h(round_win)
         # waitが終わるのをまたないでとっとと閉じる
         if clip.is_empty:
             round_win.finish_closing()

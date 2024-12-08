@@ -70,7 +70,7 @@ class Field:
 
 # 町の中UI
 # *****************************************************************************
-from ui_common import draw_menu_cursor, draw_msg_cursor, get_win_clip_h
+from ui_common import draw_menu_cursor, draw_msg_cursor, calc_win_clip_h
 
 def ui_init(xmlui):
     field_select = select.Decorator(xmlui, "field")
@@ -98,7 +98,7 @@ def ui_init(xmlui):
     def menu_item(menu_item:select.Item, event:XUEvent):
         win = menu_item.find_owner()
         area = menu_item.area
-        if area.y < get_win_clip_h(win):
+        if area.y < win.y + calc_win_clip_h(win):
             pyxel.text(area.x+6, area.y, menu_item.text, 7, ui_theme.font.system.font)
 
     # コマンドメニュー
@@ -192,4 +192,7 @@ def ui_init(xmlui):
     def status_item(status_item:text.Label, event:XUEvent):
         system_font = ui_theme.font.system
         x, y = status_item.aligned_pos(system_font, 5, 0)
-        pyxel.text(x, y, status_item.text, 7, system_font.font)
+
+        status_win = status_item.find_parent_by_ID("status")
+        if y < status_win.y + calc_win_clip_h(status_win):
+            pyxel.text(x, y, status_item.text, 7, system_font.font)
