@@ -4,7 +4,7 @@ frame_pattern = [7, 13]
 bg_color = 0
 open_speed = 16
 close_speed = 32
-close_wait = 15
+closing_wait = 15
 
 [font]
 #system = "assets/font/b12.bdf"
@@ -24,7 +24,7 @@ debug_level = 128
 """
 
 import tomllib
-from xmlui.core import XMLUI
+from xmlui.core import XMLUI,XUState
 from xmlui.lib import input
 from xmlui.pyxel_util.font import PyxelFont
 
@@ -44,7 +44,11 @@ class _Win:
         self.bg_color = section.get('bg_color', 0)
         self.open_speed = section.get('open_speed', 16)  # 16px
         self.close_speed = section.get('close_speed', 16)  # 32px
-        self.close_wait = section.get('close_wait', 15)  # 0.5s
+        self.closing_wait = section.get('closing_wait', 15)  # 0.5s
+    
+    def get_closing_wait(self, state:XUState):
+        owner = state.find_owner()
+        return owner.closing_wait if owner.has_attr("closing_wait") else self.closing_wait
 
 class _Font:
     def __init__(self, xmlui:XMLUI, section:dict, default_font:PyxelFont):

@@ -129,7 +129,7 @@ def menu_grid(menu_grid:select.Grid, event:XUEvent):
 
     # 閉じる
     if input_def.BTN_B in event.trg:
-        menu_grid.wait_close(ui_theme.win.close_wait)
+        menu_grid.wait_close(ui_theme.win.closing_wait)
 
     # カーソル追加
     draw_menu_cursor(menu_grid.selected_item, 0, 0)
@@ -175,7 +175,7 @@ def msg_text(msg_text:text.MsgDQ, event:XUEvent):
     # ---------------------------------------------------------
     if input_def.BTN_A in event.trg or input_def.BTN_B in event.now:
         if msg_text.is_finish:
-            msg_text.wait_close(ui_theme.win.close_wait)
+            msg_text.wait_close(ui_theme.win.closing_wait)
         elif msg_text.is_next_wait:
             msg_text.page_no += 1  # 次ページへ
 

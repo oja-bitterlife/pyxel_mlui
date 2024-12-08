@@ -58,10 +58,10 @@ def popup_text(popup_text:text.Msg, event:XUEvent):
 
     # テキスト描画
     area = popup_text.area  # areaは重いので必ずキャッシュ
-
     system_font = ui_theme.font.system
     h = len(popup_text.text.split()) * system_font.size
     y = area.aligned_y(h, "center")
+
     for i,page in enumerate(popup_text.text.split()):
         x = area.aligned_x(system_font.text_width(page), "center")
         pyxel.text(x, y+i*system_font.size, page, 7, system_font.font)
