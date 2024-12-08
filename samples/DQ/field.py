@@ -70,7 +70,7 @@ class Field:
 
 # 町の中UI
 # *****************************************************************************
-from ui_common import draw_menu_cursor, draw_msg_cursor, calc_win_clip_h
+from ui_common import draw_menu_cursor, draw_msg_cursor, get_world_clip
 
 def ui_init(xmlui):
     field_select = select.Decorator(xmlui, "field")
@@ -81,8 +81,7 @@ def ui_init(xmlui):
     @field_text.label("title", "align", "valign")
     def title(title:text.Label, event:XUEvent):
         area = title.area
-        win = title.find_owner()
-        if area.y < win.y + calc_win_clip_h(win):
+        if area.y < get_world_clip(title).bottom():
             pyxel.rect(area.x, area.y, area.w, area.h, 0)
             x, y = title.aligned_pos(ui_theme.font.system)
             pyxel.text(x, y-1, title.text, 7, ui_theme.font.system.font)
@@ -90,8 +89,7 @@ def ui_init(xmlui):
     @field_text.label("status_title", "align", "valign")
     def status_title(status_title:text.Label, event:XUEvent):
         area = status_title.area
-        status_win = status_title.find_parent_by_ID("status")
-        if area.y < status_win.y + calc_win_clip_h(status_win):
+        if area.y < get_world_clip(status_title).bottom():
             pyxel.rect(area.x, area.y, area.w, area.h, 0)
             x, y = status_title.aligned_pos(ui_theme.font.system)
             pyxel.text(x+1, y-1, status_title.text, 7, ui_theme.font.system.font)
@@ -100,9 +98,8 @@ def ui_init(xmlui):
     # ---------------------------------------------------------
     @field_select.item("menu_item")
     def menu_item(menu_item:select.Item, event:XUEvent):
-        win = menu_item.find_owner()
         area = menu_item.area
-        if area.y < win.y + calc_win_clip_h(win):
+        if area.y < get_world_clip(menu_item).bottom():
             pyxel.text(area.x+6, area.y, menu_item.text, 7, ui_theme.font.system.font)
 
     # コマンドメニュー
@@ -196,7 +193,5 @@ def ui_init(xmlui):
     def status_item(status_item:text.Label, event:XUEvent):
         system_font = ui_theme.font.system
         x, y = status_item.aligned_pos(system_font, 5, 0)
-
-        status_win = status_item.find_parent_by_ID("status")
-        if y < status_win.y + calc_win_clip_h(status_win):
+        if y < get_world_clip(status_item).bottom():
             pyxel.text(x, y, status_item.text, 7, system_font.font)

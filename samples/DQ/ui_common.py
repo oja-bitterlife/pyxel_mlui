@@ -31,16 +31,14 @@ def draw_msg_cursor(state:XUState, x:int, y:int):
     y = state.area.y + tri_size - 3 + y
     pyxel.tri(center_x, y, center_x+tri_size, y, center_x+tri_size//2, y+tri_size//2, 7)
 
-def calc_win_clip_h(state:XUState):
-    is_opening = not state.is_closing
-
-    count = state.update_count if is_opening else state.closing_count
-    size = count * (ui_theme.win.open_speed if is_opening else ui_theme.win.close_speed)
-
-    if is_opening:
-        return min(state.area.h, size)
-    else:
-        return max(0, state.area.h - size)
+def get_world_clip(win:XUState):
+    for parent in win.ancestors:
+        if parent.has_attr(WINDOW_CLIP_SIZE):
+            clip_size = parent.attr_int(WINDOW_CLIP_SIZE)
+            area = parent.area
+            area.h = area.h - clip_size if parent.is_closing else clip_size
+            return area
+    return win.area
 
 common_win = win.Decorator(xmlui)
 common_text = text.Decorator(xmlui)
@@ -75,18 +73,27 @@ def popup_text(popup_text:text.Msg, event:XUEvent):
 # *****************************************************************************
 # 角丸ウインドウ
 # ---------------------------------------------------------
+WINDOW_CLIP_SIZE="_xmlui_clip_h"
+
 @common_win.round("round_win")
 def round_win_draw(round_win:win.Round, event:XUEvent):
     area = round_win.area
-    clip = round_win.area.to_offset()
-    clip.h = int(round_win.update_count*ui_theme.win.open_speed)
 
+    # ウインドウにはクリップサイズを入れておく
     if round_win.is_closing:
-        clip.h = calc_win_clip_h(round_win)
-        # waitが終わるのをまたないでとっとと閉じる
-        if clip.is_empty:
-            round_win.finish_closing()
-            return
+        clip_size = max(int(round_win.closing_count*ui_theme.win.close_speed), 0)
+    else:  # opening
+        clip_size = min(int(round_win.update_count*ui_theme.win.open_speed), area.h)
+    round_win.set_attr(WINDOW_CLIP_SIZE, clip_size)  # 子から見えるようアトリビュートに保存
+
+    # クリップエリアの設定
+    clip = area.to_offset()
+    clip.h = area.h - clip_size if round_win.is_closing else clip_size
+
+    # waitが終わるのをまたないでとっとと閉じる
+    if round_win.is_closing and clip.is_empty:
+        round_win.finish_closing()
+        return
 
     # 背景
     pyxel.rect(area.x, area.y, area.w, min(area.h, clip.h+2), ui_theme.win.bg_color)
