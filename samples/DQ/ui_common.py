@@ -39,8 +39,8 @@ def get_winclip_h(state:XUState):
         return min(state.area.h, size)
 
 
-common_win = win.DrawDecorator(xmlui, "common")
-common_text = text.DrawDecorator(xmlui, "common")
+common_win = win.Decorator(xmlui)
+common_text = text.Decorator(xmlui)
 
 # 工事中表示用
 # *****************************************************************************

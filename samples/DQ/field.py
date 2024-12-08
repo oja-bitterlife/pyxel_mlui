@@ -65,15 +65,15 @@ class Field:
         if pyxel.btn(pyxel.KEY_BACKSPACE):
             self.xmlui.on(ui_theme.input_def.BTN_B)
 
-        self.xmlui.draw()
+        self.xmlui.draw(["field"])
 
 # 町の中UI
 # *****************************************************************************
 from ui_common import draw_menu_cursor, draw_msg_cursor, get_winclip_h
 
 def ui_init(xmlui):
-    field_select = select.DrawDecorator(xmlui, "field")
-    field_text = text.DrawDecorator(xmlui, "field")
+    field_select = select.Decorator(xmlui, "field")
+    field_text = text.Decorator(xmlui, "field")
 
     # ラベル
     # ---------------------------------------------------------

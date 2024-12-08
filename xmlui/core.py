@@ -543,7 +543,10 @@ class XMLUI(XUState):
         for child in element:
             yield from self._rec_get_draw_targets(child)
 
-    def draw(self):
+    def draw(self, draw_group:list[str]):
+        # デフォルトグループを入れておく
+        draw_group = [""] + draw_group
+
         # (入力)イベントの更新
         self.event.update()
 
@@ -573,7 +576,7 @@ class XMLUI(XUState):
 
             # 更新処理
             state.set_attr("update_count", state.update_count+1)  # 1スタート(0は初期化時)
-            self.draw_element(state.tag, state, event)
+            self.draw_element(draw_group, state.tag, state, event)
 
             # draw_elementの後にclose処理(waitが0の時はここで即座に削除される)
             if state.is_closing:
@@ -587,15 +590,15 @@ class XMLUI(XUState):
             self.debug.update()
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
-    def draw_element(self, tag_name:str, state:XUState, event:XUEvent):
+    def draw_element(self, draw_group:list[str], tag_name:str, state:XUState, event:XUEvent):
         # 登録済みの関数だけ実行
-        for group_name in self._draw_funcs:
+        for group_name in draw_group:  # 指定したグループのみ描画
             if tag_name in self._draw_funcs[group_name]:
                 self._draw_funcs[group_name][tag_name](state, event)
 
     # 処理登録
     # *************************************************************************
-    def set_drawfunc(self, group_name:str, tag_name:str, func:Callable[[XUState,XUEvent], None]):
+    def set_drawfunc(self, tag_name:str, func:Callable[[XUState,XUEvent], None], group_name:str=""):
         # 初回は辞書を作成
         if group_name not in self._draw_funcs:
             self._draw_funcs[group_name] = {}

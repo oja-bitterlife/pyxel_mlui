@@ -15,9 +15,8 @@ class Rect(XUWinRectFrame):
 # デコレータを用意
 # *****************************************************************************
 class Decorator(DefaultDecorator):
-    def __init__(self, xmlui:XMLUI, group:str):
-        super().__init__(xmlui)
-        self.group = group
+    def __init__(self, xmlui:XMLUI, group:str|None=None):
+        super().__init__(xmlui, group)
 
     def __del__(self):
         self.xmlui.remove_drawfunc(self.group)
@@ -28,7 +27,7 @@ class Decorator(DefaultDecorator):
             def draw(state:XUState, event:XUEvent):
                 bind_func(Round(state), event)
             # 関数登録
-            self.xmlui.set_drawfunc(self.group, tag_name, draw)
+            self.xmlui.set_drawfunc(tag_name, draw, self.group)
         return wrapper
 
     def rect(self, tag_name:str):
@@ -37,5 +36,5 @@ class Decorator(DefaultDecorator):
             def draw(state:XUState, event:XUEvent):
                 bind_func(Rect(state), event)
             # 関数登録
-            self.xmlui.set_drawfunc(self.group, tag_name, draw)
+            self.xmlui.set_drawfunc(tag_name, draw, self.group)
         return wrapper
