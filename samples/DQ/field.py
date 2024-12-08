@@ -127,9 +127,8 @@ def ui_init(xmlui, group):
         if input_def.BTN_A in event.trg:
             match menu_grid.action:
                 case "speak":
-                    menu_grid.open(Field.UI_TEMPLATE_FIELD, "message")
+                    menu_grid.open(Field.UI_TEMPLATE_FIELD, "speak_dir")
                 case "spel":
-                    print(menu_grid.strtree())
                     menu_grid.xmlui.popup("common", "under_construct")
                 case "status":
                     menu_grid.xmlui.popup("common", "under_construct")
