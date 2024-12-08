@@ -98,7 +98,7 @@ def ui_init(xmlui):
     def menu_item(menu_item:select.Item, event:XUEvent):
         win = menu_item.find_owner()
         area = menu_item.area
-        if area.y < get_win_clip_h(win, True):
+        if area.y < get_win_clip_h(win, not win.is_closing):
             pyxel.text(area.x+6, area.y, menu_item.text, 7, ui_theme.font.system.font)
 
     # コマンドメニュー
