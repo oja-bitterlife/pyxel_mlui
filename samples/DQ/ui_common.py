@@ -33,10 +33,14 @@ def draw_msg_cursor(state:XUState, x:int, y:int):
 
 def get_world_clip(win:XUState):
     for parent in win.ancestors:
-        if parent.has_attr(WINDOW_CLIP_SIZE):
-            clip_size = parent.attr_int(WINDOW_CLIP_SIZE)
+        if parent.has_attr(CLOSING_CLIP_SIZE):  # opningかclosingのどっちか
             area = parent.area
-            area.h = area.h - clip_size if parent.is_closing else clip_size
+            if parent.is_closing:
+                clip_size = parent.attr_int(CLOSING_CLIP_SIZE)
+                area.h -= clip_size
+            else:
+                clip_size = parent.attr_int(OPENING_CLIP_SIZE)
+                area.h = clip_size
             return area
     return win.area
 
@@ -73,7 +77,9 @@ def popup_text(popup_text:text.Msg, event:XUEvent):
 # *****************************************************************************
 # 角丸ウインドウ
 # ---------------------------------------------------------
-WINDOW_CLIP_SIZE="_xmlui_clip_h"
+# openで値をセットをした後closeされる、closingなのに値はopningになっちゃうので別々に保存する
+CLOSING_CLIP_SIZE="_xmlui_closing_clip_size"
+OPENING_CLIP_SIZE="_xmlui_opening_clip_size"
 
 @common_win.round("round_win")
 def round_win_draw(round_win:win.Round, event:XUEvent):
@@ -82,9 +88,10 @@ def round_win_draw(round_win:win.Round, event:XUEvent):
     # ウインドウにはクリップサイズを入れておく
     if round_win.is_closing:
         clip_size = max(int(round_win.closing_count*ui_theme.win.close_speed), 0)
+        round_win.set_attr(CLOSING_CLIP_SIZE, clip_size)  # 子から見えるようアトリビュートに保存
     else:  # opening
         clip_size = min(int(round_win.update_count*ui_theme.win.open_speed), area.h)
-    round_win.set_attr(WINDOW_CLIP_SIZE, clip_size)  # 子から見えるようアトリビュートに保存
+        round_win.set_attr(OPENING_CLIP_SIZE, clip_size)  # 子から見えるようアトリビュートに保存
 
     # クリップエリアの設定
     clip = area.to_offset()

@@ -101,6 +101,10 @@ def ui_init(xmlui):
         area = menu_item.area
         if area.y < get_world_clip(menu_item).bottom():
             pyxel.text(area.x+6, area.y, menu_item.text, 7, ui_theme.font.system.font)
+        
+        if get_world_clip(menu_item).bottom() == 8:
+            get_world_clip(menu_item).bottom()
+
 
     # コマンドメニュー
     # ---------------------------------------------------------
