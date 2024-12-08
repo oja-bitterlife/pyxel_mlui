@@ -69,26 +69,26 @@ class XURect:
         return self.y + self.h - bottom_space
 
     # 座標取得
-    def aligned_x(self, w:int, align="center") -> int:
+    def aligned_x(self, w:int=0, align="center") -> int:
         match align:
             case "left":
                 x =  self.x
             case "center":
                 x = self.center_x(w)
             case "right":
-                x = self.right() - w
+                x = self.right(w)
             case _:
                 raise ValueError(f"align:{align} is not supported.")
         return x
 
-    def aligned_y(self, h:int, valign="center") -> int:
+    def aligned_y(self, h:int=0, valign="center") -> int:
         match valign:
             case "top":
                 y =  self.y
             case "center":
                 y = self.center_y(h)
             case "bottom":
-                y = self.bottom() - h
+                y = self.bottom(h)
             case _:
                 raise ValueError(f"align:{valign} is not supported.")
         return y
@@ -291,6 +291,8 @@ class XUState:
             raise Exception(f"{self.strtree()}\nCan't remove {self.tag}")
         self.parent._element.remove(self._element)
 
+    # open/close
+    # *************************************************************************
     # 子に別Element一式を追加する
     def open(self, template_name:str, id:str, id_alias:str|None=None) -> "XUState":
         # idがかぶらないよう別名を付けられる
@@ -313,7 +315,7 @@ class XUState:
         self.xmlui.event.clearTrg()
         return opend
 
-    def close(self, closing_wait:int=0):
+    def close(self):
         # open/closeが連続しないようTrg入力を落としておく
         self.xmlui.event.clearTrg()
 
@@ -323,10 +325,36 @@ class XUState:
         else:
             target = self
 
+        # すぐに削除
+        target.remove()
+
+    def wait_close(self, closing_wait:int):
+        # ownerが設定されていればownerを、無ければ自身をremoveする
+        if self.owner and self.xmlui.exists_ID(self.owner):
+            target = self.xmlui.find_by_ID(self.owner)
+        else:
+            target = self
+
         # closing待機設定。実際のclose(remove)はUpdate処理の中で行われる
-        target.set_attr("closing_wait", closing_wait)
-        for child in target.children:  # 子も全部closing(+イベントキャンセル)
-            child.set_attr("closing_wait", closing_wait)
+        if not target.has_attr("closing_wait"):
+            target.set_attr("closing_wait", closing_wait)
+        if not target.has_attr("closing_count"):
+            target.set_attr("closing_count", 0)
+
+        # 子も全部closing(+イベントキャンセル)
+        for child in target.children:
+            if not child.has_attr("closing_wait"):
+                child.set_attr("closing_wait", closing_wait)
+            if not child.has_attr("closing_count"):
+                child.set_attr("closing_count", 0)
+
+    @property
+    def is_closing(self) -> bool:
+        return self.has_attr("closing_count")
+
+    @property
+    def is_closing_end(self) -> bool:
+        return self.is_closing and self.closing_count >= self.closing_wait
 
     # デバッグ用
     # *************************************************************************
@@ -393,8 +421,12 @@ class XUState:
         return self.attr_int("update_count", 0)
 
     @property
-    def closing_wait(self) -> int:  # closing待ちフレーム数(カウントダウン)
+    def closing_wait(self) -> int:  # closing待ちフレーム数
         return self.attr_int("closing_wait", 0)
+
+    @property
+    def closing_count(self) -> int:  # closingカウント
+        return self.attr_int("closing_count", 0)
 
     @property
     def use_event(self) -> str:  # eventの検知方法, listener or absorber or ""
@@ -535,7 +567,7 @@ class XMLUI(XUState):
             # active/inactiveどちらのeventを使うか決定
             event = copy.copy(self.event) if state in self.active_states else XUEvent()
 
-            if state.has_attr("closing_wait"):
+            if state.is_closing:
                 event = XUEvent()  # closing中はイベント無効
 
             # やっぱりinitialize情報がどこかに欲しい
@@ -546,11 +578,11 @@ class XMLUI(XUState):
             self.draw_element(state.tag, state, event)
 
             # draw_elementの後にclose処理(waitが0の時はここで即座に削除される)
-            if state.has_attr("closing_wait"):
-                if state.closing_wait-1 < 0:  # closing待機終了
-                    state.remove()
-                else:  # カウントダウン
-                    state.set_attr("closing_wait", state.closing_wait-1)
+            if state.is_closing:
+                if state.is_closing_end:  # closing待機終了
+                    state.close()
+                else:  # カウントアップ
+                    state.set_attr("closing_count", state.closing_count+1)
 
         # デバッグ
         if self.debug.is_lib_debug:
@@ -974,26 +1006,17 @@ class XUDial(_XUUtilBase):
 # ウインドウサポート
 # *****************************************************************************
 class XUWinFrameBase(XUState):
-    CLOSING_COUNT_ATTR = "_xmlui_closing_count"
-
     # 0 1 2
     # 3 4 5
     # 6 7 8
     def __init__(self, state:XUState):
         super().__init__(state.xmlui, state._element)
-
-        if self.is_closing:
-            self.set_attr(self.CLOSING_COUNT_ATTR, self.closing_count+1)
         
     # ウインドウ閉じるよ処理用
     # -----------------------------------------------------
     @property
     def is_closing(self) -> bool:
         return self.has_attr("closing_wait")
-
-    @property
-    def closing_count(self) -> int:
-        return self.attr_int(self.CLOSING_COUNT_ATTR, 0)
 
     # closingを終了させる
     def finish_closing(self) -> Self:

@@ -30,12 +30,12 @@ def draw_msg_cursor(state:XUState, x:int, y:int):
     y = state.area.y + tri_size - 3 + y
     pyxel.tri(center_x, y, center_x+tri_size, y, center_x+tri_size//2, y+tri_size//2, 7)
 
-def get_winclip_h(win:XUWinFrameBase):
-    size = win.closing_count*ui_theme.win.close_speed
-    if win.is_closing:
-        return max(0, win.area.h - size)
+def get_winclip_h(state:XUState):
+    size = state.closing_count*ui_theme.win.close_speed
+    if state.is_closing:
+        return max(0, state.area.h - size)
     else:  # opening
-        return min(win.area.h, size)
+        return min(state.area.h, size)
 
 
 common_win = win.Decorators(xmlui, "common")

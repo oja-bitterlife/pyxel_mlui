@@ -1,9 +1,9 @@
 import pyxel
 
 # タイトル画面
-from xmlui.core import XUState,XUEvent
-from xmlui.lib import select,text,input
-from ui_common import xmlui,ui_theme,draw_menu_cursor,draw_msg_cursor
+from xmlui.core import XUEvent
+from xmlui.lib import select,text
+from ui_common import *
 from field_player import Player
 from field_bg import BG
 from field_npc import NPC
@@ -94,7 +94,10 @@ def status_title(status_title:text.Label, event:XUEvent):
 # ---------------------------------------------------------
 @field_select.item("menu_item")
 def menu_item(menu_item:select.Item, event:XUEvent):
-    pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, 7, ui_theme.font.system.font)
+    win = menu_item.find_owner()
+    area = menu_item.area
+    if area.bottom() < get_winclip_h(XUWinFrameBase(win)):
+        pyxel.text(area.x+6, area.y, menu_item.text, 7, ui_theme.font.system.font)
 
 # コマンドメニュー
 # ---------------------------------------------------------
@@ -126,7 +129,7 @@ def menu_grid(menu_grid:select.Grid, event:XUEvent):
 
     # 閉じる
     if input_def.BTN_B in event.trg:
-        menu_grid.close(ui_theme.win.close_wait)
+        menu_grid.wait_close(ui_theme.win.close_wait)
 
     # カーソル追加
     draw_menu_cursor(menu_grid.selected_item, 0, 0)
@@ -172,7 +175,7 @@ def msg_text(msg_text:text.MsgDQ, event:XUEvent):
     # ---------------------------------------------------------
     if input_def.BTN_A in event.trg or input_def.BTN_B in event.now:
         if msg_text.is_finish:
-            msg_text.close(ui_theme.win.close_wait)
+            msg_text.wait_close(ui_theme.win.close_wait)
         elif msg_text.is_next_wait:
             msg_text.page_no += 1  # 次ページへ
 
