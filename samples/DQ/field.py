@@ -70,7 +70,7 @@ class Field:
 
 # 町の中UI
 # *****************************************************************************
-from ui_common import draw_menu_cursor, draw_msg_cursor, get_winclip_h
+from ui_common import draw_menu_cursor, draw_msg_cursor, get_win_clip_h
 
 def ui_init(xmlui):
     field_select = select.Decorator(xmlui, "field")
@@ -98,8 +98,8 @@ def ui_init(xmlui):
     def menu_item(menu_item:select.Item, event:XUEvent):
         win = menu_item.find_owner()
         area = menu_item.area
-        # if area.bottom() < get_winclip_h(XUWinFrameBase(win)):
-        pyxel.text(area.x+6, area.y, menu_item.text, 7, ui_theme.font.system.font)
+        if area.y < get_win_clip_h(win, True):
+            pyxel.text(area.x+6, area.y, menu_item.text, 7, ui_theme.font.system.font)
 
     # コマンドメニュー
     # ---------------------------------------------------------

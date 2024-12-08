@@ -31,13 +31,13 @@ def draw_msg_cursor(state:XUState, x:int, y:int):
     y = state.area.y + tri_size - 3 + y
     pyxel.tri(center_x, y, center_x+tri_size, y, center_x+tri_size//2, y+tri_size//2, 7)
 
-def get_winclip_h(state:XUState):
-    size = state.closing_count*ui_theme.win.close_speed
-    if state.is_closing:
-        return max(0, state.area.h - size)
-    else:  # opening
+def get_win_clip_h(state:XUState, is_opening:bool):
+    count = state.update_count if is_opening else state.closing_count
+    size = count * (ui_theme.win.open_speed if is_opening else ui_theme.win.close_speed)
+    if is_opening:
         return min(state.area.h, size)
-
+    else:
+        return max(0, state.area.h - size)
 
 common_win = win.Decorator(xmlui)
 common_text = text.Decorator(xmlui)
@@ -79,7 +79,7 @@ def round_win_draw(round_win:win.Round, event:XUEvent):
     clip.h = int(round_win.update_count*ui_theme.win.open_speed)
 
     if round_win.is_closing:
-        clip.h = get_winclip_h(round_win)
+        clip.h = get_win_clip_h(round_win, False)
         # waitが終わるのをまたないでとっとと閉じる
         if clip.is_empty:
             round_win.finish_closing()
