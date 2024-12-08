@@ -19,7 +19,7 @@ class Player:
             return True
 
         # キー入力チェック
-        if self.move_x == 0 and self.move_y == 0:
+        if not self.is_moving:
             if pyxel.btn(pyxel.KEY_UP):
                 if _hitcheck(self.x, self.y-16):
                     self.move_y = -16
@@ -46,6 +46,10 @@ class Player:
         if self.move_y > 0:
             self.y += 1
             self.move_y -= 1
+
+    @property
+    def is_moving(self) -> bool:
+        return self.move_x != 0 or self.move_y != 0
 
     def draw(self):
         pyxel.circ(128+8, 127, 7, 12)

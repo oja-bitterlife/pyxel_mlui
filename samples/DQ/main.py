@@ -10,8 +10,8 @@ from title import Title
 from field import Field
 
 # 最初はタイトル
-scene = Title()
-# scene = Field()
+# scene = Title()
+scene = Field()
 
 # Main
 def update(): # フレームの更新処理

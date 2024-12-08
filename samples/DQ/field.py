@@ -32,7 +32,8 @@ class Field:
             return None
 
         # メニューオープン
-        xmlui.open_by_event(ui_theme.input_def.BTN_A, self.UI_TEMPLATE_FIELD, "menu")
+        if not self.player.is_moving:
+            xmlui.open_by_event(ui_theme.input_def.BTN_A, self.UI_TEMPLATE_FIELD, "menu")
 
         # プレイヤの移動
         self.player.update(self.bg.blocks, self.npc.npc)

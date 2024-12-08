@@ -5,7 +5,7 @@ import pyxel
 from xmlui.lib import select,text,win,input
 from xmlui.pyxel_util.theme import Theme
 from xmlui.pyxel_util.font import PyxelFont
-from xmlui.core import XMLUI,XUState,XUEvent
+from xmlui.core import XMLUI,XUState,XUEvent,XUWinFrameBase
 
 # ライブラリのインスタンス化
 xmlui = XMLUI(pyxel.width, pyxel.height)
@@ -29,6 +29,13 @@ def draw_msg_cursor(state:XUState, x:int, y:int):
     center_x = 127-tri_size//2+x  # Xはど真ん中固定で
     y = state.area.y + tri_size - 3 + y
     pyxel.tri(center_x, y, center_x+tri_size, y, center_x+tri_size//2, y+tri_size//2, 7)
+
+def get_winclip_h(win:XUWinFrameBase):
+    size = win.closing_count*ui_theme.win.close_speed
+    if win.is_closing:
+        return max(0, win.area.h - size)
+    else:  # opening
+        return min(win.area.h, size)
 
 
 common_win = win.Decorators(xmlui, "common")
@@ -71,7 +78,8 @@ def round_win_draw(round_win:win.Round, event:XUEvent):
     clip.h = int(round_win.update_count*ui_theme.win.open_speed)
 
     if round_win.is_closing:
-        clip.h = area.h - round_win.closing_count*ui_theme.win.close_speed
+        clip.h = get_winclip_h(round_win)
+        # waitが終わるのをまたないでとっとと閉じる
         if clip.is_empty:
             round_win.close()
             return

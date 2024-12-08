@@ -197,7 +197,6 @@ class XUState:
 
     # その他
      # *************************************************************************
-
     @property
     def area(self) -> XURect:  # 親からの相対座標
         # areaは良く呼ばれるので、一回でもparent探しのdictアクセスを軽減する
@@ -221,9 +220,6 @@ class XUState:
 
     def set_abspos(self, x:int, y:int) -> Self:
         return self.set_attr(["abs_x", "abs_y"], [x, y])
-
-    def set_enable(self, enable:bool) -> Self:
-        return self.set_attr("enable", enable)
 
     # ツリー操作用
     # *************************************************************************
@@ -289,11 +285,11 @@ class XUState:
         self._element.attrib = attr
 
     # 自分を親から外す
-    def remove(self):  # removeの後なにかすることはないのでNone
-        # 処理対象から外れるように
-        self.set_enable(False)
-        if self.parent:  # 親から外す
-            self.parent._element.remove(self._element)
+    def remove(self):
+        if self.parent is None:
+            self.marker = "<--- can't remove"
+            raise Exception(f"{self.strtree()}\nCan't remove {self.tag}")
+        self.parent._element.remove(self._element)
 
     # 子に別Element一式を追加する
     def open(self, template_name:str, id:str, id_alias:str|None=None) -> "XUState":
@@ -334,16 +330,12 @@ class XUState:
 
     # デバッグ用
     # *************************************************************************
-    def strtree(self, force:bool=False, indent:str="  ", pre:str="") -> str:
-        # forceでなければdisableの時点で止める
-        if not force and not self.enable:
-            return pre + self.tag + "<disable>"
-        # 以下forceかenable
+    def strtree(self, indent:str="  ", pre:str="") -> str:
         out = pre + self.tag
         out += f": {self.id}" if self.id else ""
         out += f" {self.marker}"
         for element in self._element:
-            out += "\n" + XUState(self.xmlui, element).strtree(force, indent, pre+indent)
+            out += "\n" + XUState(self.xmlui, element).strtree(indent, pre+indent)
         return out
 
     # xmluiで特別な意味を持つアトリビュート一覧
@@ -358,7 +350,7 @@ class XUState:
     def value(self) -> str:  # 汎用値取得
         return self.attr_str("value", "")
     @value.setter
-    def set_value(self, val:str):  # state間汎用値持ち運び用
+    def value(self, val:str):  # state間汎用値持ち運び用
         self.set_attr("value", val)
 
     @property
@@ -368,6 +360,10 @@ class XUState:
     @property
     def enable(self) -> bool:  # 有効フラグ
         return self.attr_bool("enable", True)
+    @enable.setter
+    def enable(self, enable_:str) -> str:
+        self.set_attr("enable", enable_)
+        return enable_
 
     @property
     def owner(self) -> str:  # close時のidを設定
@@ -407,6 +403,10 @@ class XUState:
     @property
     def marker(self) -> str:  # デバッグ用
         return self.attr_str("marker", "")
+    @marker.setter
+    def marker(self, marker_:str) -> str:
+        self.set_attr("marker", marker_)
+        return marker_
 
 
 # XMLでUIライブラリ本体
@@ -973,7 +973,7 @@ class XUDial(_XUUtilBase):
 
 # ウインドウサポート
 # *****************************************************************************
-class _XUWinFrameBase(XUState):
+class XUWinFrameBase(XUState):
     CLOSING_COUNT_ATTR = "_xmlui_closing_count"
 
     # 0 1 2
@@ -1088,7 +1088,7 @@ class _XUWinFrameBase(XUState):
                     offset = (screen_area.y + y_)*screen_buf_w + screen_area.x + area.w-size
                     screen_buf[offset:offset+right_clip.w] = rev_butes[:right_clip.w]
 
-class XUWinRoundFrame(_XUWinFrameBase):
+class XUWinRoundFrame(XUWinFrameBase):
     def __init__(self, state:XUState):
         super().__init__(state)
 
@@ -1112,7 +1112,7 @@ class XUWinRoundFrame(_XUWinFrameBase):
                 return l if l < size else -1
         return self._get13574index(size, x, y, w, h)
 
-class XUWinRectFrame(_XUWinFrameBase):
+class XUWinRectFrame(XUWinFrameBase):
     def __init__(self, state:XUState):
         super().__init__(state)
 
