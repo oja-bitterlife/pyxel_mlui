@@ -237,7 +237,7 @@ class XUState:
 
     @property
     def children(self) -> list["XUState"]:
-        return [XUState(self.xmlui, child) for child in self._element.iter()]
+        return [XUState(self.xmlui, child) for child in self._element.iter()][1:]  # 最初は自分なので外す
 
     # 親以上祖先リスト
     @property
@@ -1050,10 +1050,19 @@ class XUWinBase(XUState):
     @classmethod
     def find_win(cls, state:XUState) -> "XUWinBase":
         for parent in state.ancestors:
-            if cls.is_win(parent):
+            if XUWinBase.is_win(parent):
                 return XUWinBase(parent)
         raise Exception("no window found")
 
+    # 子も含めてclosingにする
+    def start_close(self):
+        self.win_state = self.STATE_CLOSING
+        for child in self.children:
+            if XUWinBase.is_win(child):
+                print(child.id)
+                XUWinBase(child).start_close()
+
+class XUWinFrame(XUWinBase):
     # ウインドウ(ピクセル)描画
     # 0 1 2
     # 3 4 5
@@ -1146,10 +1155,7 @@ class XUWinBase(XUState):
                     offset = (screen_area.y + y_)*screen_buf_w + screen_area.x + area.w-size
                     screen_buf[offset:offset+right_clip.w] = rev_butes[:right_clip.w]
 
-class XUWinRound(XUWinBase):
-    def __init__(self, state:XUState):
-        super().__init__(state)
-
+class XUWinRound(XUWinFrame):
     def _get_veclen(self, x:int, y:int, org_x:int, org_y:int) -> int:
         return math.ceil(math.sqrt((x-org_x)**2 + (y-org_y)**2))
 
@@ -1170,10 +1176,7 @@ class XUWinRound(XUWinBase):
                 return l if l < size else -1
         return self._get13574index(size, x, y, w, h)
 
-class XUWinRect(XUWinBase):
-    def __init__(self, state:XUState):
-        super().__init__(state)
-
+class XUWinRect(XUWinFrame):
     # override
     def _get_pattern_index(self, size:int, x:int, y:int, w:int, h:int) -> int:
         match self.get_area(size, x, y, w, h):

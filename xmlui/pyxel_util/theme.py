@@ -2,7 +2,7 @@ default = """
 [win]
 frame_pattern = [7, 13]
 bg_color = 0
-open_speed = 1
+open_speed = 16
 close_speed = 2
 closing_wait = 100
 

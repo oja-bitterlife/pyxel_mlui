@@ -145,7 +145,7 @@ def ui_init(xmlui, group):
 
         # 閉じる
         if input_def.BTN_B in event.trg:
-            XUWinBase.find_win(menu_grid).win_state = XUWinBase.STATE_CLOSING
+            XUWinBase.find_win(menu_grid).start_close()
 
         # カーソル追加。ウインドウのクリップ状態に合わせて表示する
         if menu_grid.selected_item.area.y < get_world_clip(XUWinBase.find_win(menu_grid)).bottom():
@@ -192,7 +192,7 @@ def ui_init(xmlui, group):
         # ---------------------------------------------------------
         if input_def.BTN_A in event.trg or input_def.BTN_B in event.now:
             if msg_text.is_finish:
-                XUWinBase.find_win(msg_text).win_state = XUWinBase.STATE_CLOSING
+                XUWinBase.find_win(msg_text).start_close()
             elif msg_text.is_next_wait:
                 msg_text.page_no += 1  # 次ページへ
 

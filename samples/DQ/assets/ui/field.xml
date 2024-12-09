@@ -14,7 +14,7 @@
             <menu_item action="door">とびら</menu_item>
             <menu_item action="take">とる</menu_item>
         </menu_grid>
-        <round_win abs_x="14" y="16" w="82" h="100">
+        <round_win abs_x="14" y="16" w="82" h="100" id="status">
             <status_title x="18" y="0" w="50" h="12">おじゃ</status_title>
             <status_label x="6" y="16">
                 <status_item y="0" h="16">レベル</status_item>
