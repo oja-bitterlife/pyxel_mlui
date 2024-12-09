@@ -211,3 +211,40 @@ def ui_init(xmlui, group):
         x, y = status_item.aligned_pos(system_font, 5, 0)
         if y < get_world_clip(XUWinBase.find_win(status_item)).bottom():
             pyxel.text(x, y, status_item.text, 7, system_font.font)
+
+
+    # 会話方向
+    # ---------------------------------------------------------
+    @field_select.list("dir_select", "dir_item", "item_w", "item_h")
+    def dir_select(dir_select:select.List, event:XUEvent):
+        # メニュー選択
+        input_def = ui_theme.input_def
+        # menu_grid.select_by_event(event.trg, *input_def.CURSOR)
+
+        # 会話ウインドウは特別な配置
+        if input_def.UP in event.trg:
+            dir_select.select(0)
+        if input_def.DOWN in event.trg:
+            dir_select.select(3)
+        if input_def.LEFT in event.trg:
+            dir_select.select(1)
+        if input_def.RIGHT in event.trg:
+            dir_select.select(2)
+
+        # 閉じる
+        if input_def.BTN_B in event.trg:
+            XUWinBase.find_win(dir_select).start_close()
+
+        # カーソル追加。ウインドウのクリップ状態に合わせて表示する
+        if dir_select.selected_item.area.y < get_world_clip(XUWinBase.find_win(dir_select)).bottom():
+            draw_menu_cursor(dir_select.selected_item, -5, 0)
+
+    # 会話方向アイテム
+    # ---------------------------------------------------------
+    @field_select.item("dir_item")
+    def dir_item(dir_item:select.Item, event:XUEvent):
+        area = dir_item.area
+
+        # ウインドウのクリップ状態に合わせて表示する
+        if area.y < get_world_clip(XUWinBase.find_win(dir_item)).bottom():
+            pyxel.text(area.x, area.y, dir_item.text, 7, ui_theme.font.system.font)
