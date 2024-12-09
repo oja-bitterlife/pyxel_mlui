@@ -16,6 +16,12 @@ from typing import Callable,Any,Self  # 型を使うよ
 # 描画領域計算用
 # #############################################################################
 class XURect:
+    ALIGN_CENTER = "center"
+    ALIGN_LEFT = "left"
+    ALIGN_RIGHT = "right"
+    ALIGN_TOP = "top"
+    ALIGN_BOTTOM = "bottom"
+
     def __init__(self, x:int, y:int, w:int, h:int):
         self.x = x
         self.y = y
@@ -69,25 +75,25 @@ class XURect:
         return self.y + self.h - bottom_space
 
     # 座標取得
-    def aligned_x(self, w:int=0, align="center") -> int:
+    def aligned_x(self, w:int=0, align=ALIGN_CENTER) -> int:
         match align:
-            case "left":
+            case self.ALIGN_LEFT:
                 x =  self.x
-            case "center":
+            case self.ALIGN_CENTER:
                 x = self.center_x(w)
-            case "right":
+            case self.ALIGN_RIGHT:
                 x = self.right(w)
             case _:
                 raise ValueError(f"align:{align} is not supported.")
         return x
 
-    def aligned_y(self, h:int=0, valign="center") -> int:
+    def aligned_y(self, h:int=0, valign=ALIGN_CENTER) -> int:
         match valign:
-            case "top":
+            case self.ALIGN_TOP:
                 y =  self.y
-            case "center":
+            case self.ALIGN_CENTER:
                 y = self.center_y(h)
-            case "bottom":
+            case self.ALIGN_BOTTOM:
                 y = self.bottom(h)
             case _:
                 raise ValueError(f"align:{valign} is not supported.")
@@ -203,16 +209,15 @@ class XUState:
         parent = self.parent
         parent_area = parent.area if parent else XURect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h)
 
-        # x,yはアトリビュートなのでローカルにしておく
-        offset_x = self.x
-        offset_y = self.y
+        # x,yはアトリビュートなので何度もアクセスしないように
+        offset_x, offset_y = self.x, self.y
 
         # absがあれば絶対座標、なければ親からのオフセット
         return XURect(
             self.abs_x if self.has_attr("abs_x") else offset_x + parent_area.x,
             self.abs_y if self.has_attr("abs_y") else offset_y + parent_area.y,
-            self.attr_int("w", parent_area.w-offset_x),
-            self.attr_int("h", parent_area.h-offset_y)
+            self.attr_int("w", parent_area.w - offset_x),
+            self.attr_int("h", parent_area.h - offset_y)
         )
 
     def set_pos(self, x:int, y:int) -> Self:
@@ -220,6 +225,9 @@ class XUState:
 
     def set_abspos(self, x:int, y:int) -> Self:
         return self.set_attr(["abs_x", "abs_y"], [x, y])
+
+    def set_wh(self, w:int, h:int) -> Self:
+        return self.set_attr(["w", "h"], [w, h])
 
     # ツリー操作用
     # *************************************************************************
@@ -339,33 +347,6 @@ class XUState:
 
         target.remove()
 
-    # closing状態に移行する。子も全部closingになる(イベントを見なくなる)
-    def wait_close(self, closing_wait:int):
-        # ownerが設定されていればownerを、無ければ自身をremoveする
-        if self.owner and self.xmlui.exists_ID(self.owner):
-            target = self.xmlui.find_by_ID(self.owner)
-        else:
-            target = self
-
-        # closing待機設定。実際のclose(remove)はUpdate処理の中で行われる
-        target.set_attr("closing_wait", closing_wait)
-        if not target.has_attr("closing_count"):
-            target.set_attr("closing_count", 0)
-
-        # 子も全部closing(+イベントキャンセル)
-        for child in target.children:
-            child.set_attr("closing_wait", closing_wait)
-            if not child.has_attr("closing_count"):
-                child.set_attr("closing_count", 0)
-
-    @property
-    def is_closing(self) -> bool:
-        return self.has_attr("closing_count")
-
-    @property
-    def is_closing_end(self) -> bool:
-        return self.is_closing and self.closing_count >= self.closing_wait
-
     # デバッグ用
     # *************************************************************************
     def strtree(self, indent:str="  ", pre:str="") -> str:
@@ -429,14 +410,6 @@ class XUState:
     @property
     def update_count(self) -> int:  # updateが行われた回数
         return self.attr_int("update_count", 0)
-
-    @property
-    def closing_wait(self) -> int:  # closing待ちフレーム数
-        return self.attr_int("closing_wait", 0)
-
-    @property
-    def closing_count(self) -> int:  # closingカウント
-        return self.attr_int("closing_count", 0)
 
     @property
     def use_event(self) -> str:  # eventの検知方法, listener or absorber or ""
@@ -580,22 +553,12 @@ class XMLUI(XUState):
             # active/inactiveどちらのeventを使うか決定
             event = copy.copy(self.event) if state in self.active_states else XUEvent()
 
-            if state.is_closing:
-                event = XUEvent()  # closing中はイベント無効
-
             # やっぱりinitialize情報がどこかに欲しい
             event.on_init = state.update_count == 0
 
             # 更新処理
             state.set_attr("update_count", state.update_count+1)  # 1スタート(0は初期化時)
             self.draw_element(draw_group, state.tag, state, event)
-
-            # draw_elementの後にclose処理(waitが0の時はここで即座に削除される)
-            if state.is_closing:
-                if state.is_closing_end:  # closing待機終了
-                    state.close()
-                else:  # カウントアップ
-                    state.set_attr("closing_count", state.closing_count+1)
 
         # デバッグ
         if self.debug.is_lib_debug:
@@ -651,10 +614,10 @@ class _XUUtilBase(XUState):
         super().__init__(state.xmlui, state._element)
 
         # 自前設定が無ければabsorberにしておく
-        if not self.use_event:
+        if self.use_event == XUEvent.NONE:
             self.set_attr("use_event", XUEvent.ABSORBER)
 
-        # Utilityルートの作成(状態保存先)
+        # UtilBase用ルートの作成(状態保存先)
         if state.exists_tag(root_tag):
             self._util_root = state.find_by_tag(root_tag)
             self._util_root.clear_children()  # 綺麗にして構築し直す
@@ -1025,12 +988,6 @@ class XUWinFrameBase(XUState):
     def __init__(self, state:XUState):
         super().__init__(state.xmlui, state._element)
         
-    # ウインドウ閉じるよ処理用
-    # -----------------------------------------------------
-    # closingを終了させる
-    def finish_closing(self) -> Self:
-        return self.set_attr("closing_count", self.closing_wait)
-
     # ウインドウ(ピクセル)描画
     # -----------------------------------------------------
     # 枠外は-1を返す
