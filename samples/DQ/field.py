@@ -164,13 +164,16 @@ def ui_init(xmlui, group):
         area = msg_text.area  # areaは重いので必ずキャッシュ
 
         # お試し(会話の時ページごとに挿入する)
-        for i,page in enumerate(msg_text.pages):
-            msg_text.pages[i][0] = "＊「" + page[0]
+        # for i,page in enumerate(msg_text.pages):
+        #     msg_text.pages[i][0] = "＊「" + page[0]
 
         # Scroll
         scroll_size = msg_text.page_line_num+2
         scroll_buf = msg_text.scroll_buf(scroll_size)
-        scroll_indents = msg_text.scroll_indents(scroll_size, "＊「")
+        if msg_text.page_text.startswith("＊「"):
+            scroll_indents = msg_text.scroll_indents(scroll_size, "＊「")
+        else:
+            scroll_indents = msg_text.scroll_indents(scroll_size, "")
 
         # アニメーション用表示位置ずらし。スクロール時半文字ずれる
         y = -3 if not msg_text.anim.is_finish and len(scroll_buf) >= scroll_size else 5
@@ -232,17 +235,17 @@ def ui_init(xmlui, group):
             dir_select.select(3)
 
         if input_def.BTN_A in event.trg:
-            msg = dir_select.xmlui.find_by_id("message")
+            msg_win = dir_select.open(Field.UI_TEMPLATE_FIELD, "message")
+            msg_text = msg_win.find_by_tag("msg_text")
             match dir_select.action:
                 case "north":
-                    print("きた")
+                    msg_text.text = dir_select.selected_item.text + " を せんたくした"
                 case "west":
-                    print("にし")
+                    msg_text.text = dir_select.selected_item.text + " を せんたくした"
                 case "east":
-                    print("ひがし")
+                    msg_text.text = dir_select.selected_item.text + " を せんたくした"
                 case "south":
-                    print("みなみ")
-
+                    msg_text.text = dir_select.selected_item.text + " を せんたくした"
 
         # 閉じる
         if input_def.BTN_B in event.trg:

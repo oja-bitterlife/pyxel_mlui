@@ -196,10 +196,10 @@ class XUState:
     @property
     def text(self) -> str:
         return self._element.text.strip() if self._element.text else ""
-
-    def set_text(self, text:str) -> Self:
-        self._element.text = text
-        return self
+    @text.setter
+    def text(self, text_:str) -> str:
+        self._element.text = text_
+        return text_
 
     # その他
      # *************************************************************************
