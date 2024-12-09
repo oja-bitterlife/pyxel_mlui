@@ -41,6 +41,12 @@ class Label(XUState):
         y = area.aligned_y(font.size, self._valign)
         return x, y
 
+    def aligned_area(self, font:FontBase, w:int=0, h:int=0) -> XURect:
+        area = self.area  # 低速なので使うときは必ず一旦ローカルに
+        area.x = area.aligned_x(font.text_width(self.text)+w, self._align)
+        area.y = area.aligned_y(font.size, self._valign)
+        return area
+
 # メッセージ
 class Msg(XUTextPage):
     # タグのテキストを処理する
