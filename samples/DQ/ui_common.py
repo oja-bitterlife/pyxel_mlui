@@ -5,7 +5,7 @@ import pyxel
 from xmlui.lib import select,text,win,input
 from xmlui.pyxel_util.theme import Theme
 from xmlui.pyxel_util.font import PyxelFont
-from xmlui.core import XMLUI,XUState,XUEvent,XUWinFrameBase
+from xmlui.core import XMLUI,XUState,XUEvent,XUWinBase
 
 ui_theme = Theme(PyxelFont("assets/font/b12.bdf"))
 

@@ -981,14 +981,68 @@ class XUDial(_XUUtilBase):
 
 # ウインドウサポート
 # *****************************************************************************
-class XUWinFrameBase(XUState):
+class XUWinBase(XUState):
+    # ウインドウの状態定義
+    STATE_OPENING = "opening"
+    STATE_OPENED = "opened"
+    STATE_CLOSING = "closing"
+    STATE_CLOSED = "closed"
+
+    # 状態を保存するアトリビュート
+    WINDOW_STATE_ATTR = "_xmlui_win_state"
+    OPENING_COUNT_ATTR = "_xmlui_opening_count"
+    CLOSING_COUNT_ATTR = "_xmlui_closing_count"
+
+    # 状態管理
+    # -----------------------------------------------------
+    def __init__(self, state:XUState):
+        super().__init__(state.xmlui, state._element)
+
+        # ステートがなければ用意しておく
+        if not self.has_attr(self.WINDOW_STATE_ATTR):
+            self.set_attr(self.WINDOW_STATE_ATTR, self.STATE_OPENING)
+
+    @classmethod
+    def cast(cls, state:XUState) -> "XUWinBase":
+        if not cls.is_win(state):
+            raise Exception(f"{state.tag} not window")
+        return XUWinBase(state)
+
+    # ウインドウの状態に応じてアニメーション用カウンタを更新する
+    def update(self, opening_max:int, closing_max:int):
+        win_state = self.attr_str(self.WINDOW_STATE_ATTR)
+        match win_state:
+            case self.STATE_OPENING:
+                count = self.attr_int(self.OPENING_COUNT_ATTR) + 1
+                self.set_attr(self.OPENING_COUNT_ATTR, count)
+                if count >= opening_max:
+                    self.set_attr(self.WINDOW_STATE_ATTR, self.STATE_OPENED)
+            case self.STATE_CLOSING:
+                count = self.attr_int(self.CLOSING_COUNT_ATTR) + 1
+                self.set_attr(self.CLOSING_COUNT_ATTR, count)
+                if count >= closing_max:
+                    self.set_attr(self.WINDOW_STATE_ATTR, self.STATE_CLOSED)
+
+    @classmethod
+    def is_win(cls, state:XUState) -> bool:
+        return state.has_attr(cls.WINDOW_STATE_ATTR)
+
+    @property
+    def win_state(self) -> str:
+        return self.attr_str(self.WINDOW_STATE_ATTR)
+
+    @property
+    def opening_count(self) -> int:
+        return self.attr_int(self.OPENING_COUNT_ATTR)
+
+    @property
+    def closing_count(self) -> int:
+        return self.attr_int(self.CLOSING_COUNT_ATTR)
+
+    # ウインドウ(ピクセル)描画
     # 0 1 2
     # 3 4 5
     # 6 7 8
-    def __init__(self, state:XUState):
-        super().__init__(state.xmlui, state._element)
-        
-    # ウインドウ(ピクセル)描画
     # -----------------------------------------------------
     # 枠外は-1を返す
     def _get_pattern_index(self, size:int, x:int, y:int, w:int, h:int) -> int:
@@ -1077,7 +1131,7 @@ class XUWinFrameBase(XUState):
                     offset = (screen_area.y + y_)*screen_buf_w + screen_area.x + area.w-size
                     screen_buf[offset:offset+right_clip.w] = rev_butes[:right_clip.w]
 
-class XUWinRoundFrame(XUWinFrameBase):
+class XUWinRound(XUWinBase):
     def __init__(self, state:XUState):
         super().__init__(state)
 
@@ -1101,7 +1155,7 @@ class XUWinRoundFrame(XUWinFrameBase):
                 return l if l < size else -1
         return self._get13574index(size, x, y, w, h)
 
-class XUWinRectFrame(XUWinFrameBase):
+class XUWinRect(XUWinBase):
     def __init__(self, state:XUState):
         super().__init__(state)
 

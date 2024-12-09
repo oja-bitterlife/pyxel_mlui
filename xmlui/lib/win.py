@@ -2,12 +2,12 @@ from xmlui.core import *
 from xmlui.lib.decorator import DefaultDecorator
 
 # 角丸ウインドウ
-class Round(XUWinRoundFrame):
+class Round(XUWinRound):
     def __init__(self, state:XUState):
         super().__init__(state)
 
 # 四角ウインドウ
-class Rect(XUWinRectFrame):
+class Rect(XUWinRect):
     def __init__(self, state:XUState):
         super().__init__(state)
 
