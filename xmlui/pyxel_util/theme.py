@@ -10,6 +10,7 @@ closing_wait = 15
 #system = "assets/font/b12.bdf"
 
 [input_def]
+# それぞれのボタンに対するイベント名の定義
 LEFT = "CUR_L"
 RIGHT = "CUR_R"
 UP = "CUR_U"
