@@ -32,7 +32,7 @@ class Field:
 
     def update(self):
         # UIメニューが開いていたらなにもしない
-        if self.xmlui.exists_ID("menu"):
+        if self.xmlui.exists_id("menu"):
             return None
 
         # メニューオープン
@@ -224,12 +224,25 @@ def ui_init(xmlui, group):
         # 会話ウインドウは特別な配置
         if input_def.UP in event.trg:
             dir_select.select(0)
-        if input_def.DOWN in event.trg:
-            dir_select.select(3)
         if input_def.LEFT in event.trg:
             dir_select.select(1)
         if input_def.RIGHT in event.trg:
             dir_select.select(2)
+        if input_def.DOWN in event.trg:
+            dir_select.select(3)
+
+        if input_def.BTN_A in event.trg:
+            msg = dir_select.xmlui.find_by_id("message")
+            match dir_select.action:
+                case "north":
+                    print("きた")
+                case "west":
+                    print("にし")
+                case "east":
+                    print("ひがし")
+                case "south":
+                    print("みなみ")
+
 
         # 閉じる
         if input_def.BTN_B in event.trg:

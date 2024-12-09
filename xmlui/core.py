@@ -122,7 +122,7 @@ class XUEvent:
         self.trg:set[str] = set([])
         self._release:set[str] = set([])
 
-    def clearTrg(self):
+    def clear_trg(self):
         self.trg:set[str] = set([])
         self._release:set[str] = set([])
 
@@ -249,7 +249,7 @@ class XUState:
             parent = parent.parent
         return out
 
-    def find_by_ID(self, id:str) -> 'XUState':
+    def find_by_id(self, id:str) -> 'XUState':
         for element in self._element.iter():
             if element.attrib.get("id") == id:
                 return XUState(self.xmlui, element)
@@ -265,7 +265,7 @@ class XUState:
         raise Exception(f"{self.strtree()}\nTag '{tag}' not found in '{self.tag}' and children")
 
     # ツリーを遡って親を探す
-    def find_parent_by_ID(self, id:str) -> 'XUState':
+    def find_parent_by_id(self, id:str) -> 'XUState':
         parent = self.parent
         while parent:
             if parent.id == id:
@@ -275,10 +275,10 @@ class XUState:
 
     # openした親
     def find_owner(self) -> 'XUState':
-        return self.find_parent_by_ID(self.owner)
+        return self.find_parent_by_id(self.owner)
 
     # すでにツリーに存在するか
-    def exists_ID(self, id:str) -> bool:
+    def exists_id(self, id:str) -> bool:
         for element in self._element.iter():
             if element.attrib.get("id") == id:
                 return True
@@ -317,8 +317,8 @@ class XUState:
         id_alias = id if id_alias is None else id_alias
 
         # IDがかぶってはいけない
-        if self.xmlui.exists_ID(id_alias):
-            return self.xmlui.find_by_ID(id_alias)
+        if self.xmlui.exists_id(id_alias):
+            return self.xmlui.find_by_id(id_alias)
             # raise Exception(f"ID '{id_alias}' already exists")
 
         # オープン
@@ -330,17 +330,17 @@ class XUState:
             child.set_attr("owner", id_alias)
 
         # open/closeが連続しないようTrg入力を落としておく
-        self.xmlui.event.clearTrg()
+        self.xmlui.event.clear_trg()
         return opend
 
     # すぐにclose
     def close(self):
         # open/closeが連続しないようTrg入力を落としておく
-        self.xmlui.event.clearTrg()
+        self.xmlui.event.clear_trg()
 
         # ownerが設定されていればownerを、無ければ自身をremoveする
-        if self.owner and self.xmlui.exists_ID(self.owner):
-            target = self.xmlui.find_by_ID(self.owner)
+        if self.owner and self.xmlui.exists_id(self.owner):
+            target = self.xmlui.find_by_id(self.owner)
         else:
             target = self
 
@@ -447,7 +447,7 @@ class XMLUI_Template(XUState):
     # *************************************************************************
     # Elmentを複製して取り出す
     def duplicate(self, id:str) -> XUState:
-        return XUState(self.xmlui, copy.deepcopy(self.find_by_ID(id)._element))
+        return XUState(self.xmlui, copy.deepcopy(self.find_by_id(id)._element))
 
 # デバッグ用
 class XMLUI_Debug:
