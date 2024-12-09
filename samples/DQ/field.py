@@ -205,7 +205,7 @@ def ui_init(xmlui, group):
             if input_def.BTN_A in event.now or input_def.BTN_B in event.now:
                 msg_text.anim.draw_count += 2  # 素早く表示
 
-        print(XUWinBase.find_win(msg_text).win_state)
+        # print(XUWinBase.find_win(msg_text).win_state)
 
 
     # ステータス各種アイテム

@@ -33,13 +33,12 @@ def draw_msg_cursor(state:XUState, x:int, y:int):
 
 def get_world_clip(win:XUWinBase) -> XURect:
     area = win.area
-    match win.win_state:
-        case XUWinBase.STATE_OPENING:
-            clip_size = min(int(win.opening_count * ui_theme.win.open_speed), area.h)
-            area.h = clip_size
-        case XUWinBase.STATE_CLOSING:
-            clip_size = max(int(win.closing_count * ui_theme.win.close_speed), 0)
-            area.h -= clip_size
+    if win.is_opening:
+        clip_size = min(int(win.opening_count * ui_theme.win.open_speed), area.h)
+        area.h = clip_size
+    else:
+        clip_size = max(int(win.closing_count * ui_theme.win.close_speed), 0)
+        area.h -= clip_size
     return area
 
 common_win = win.Decorator(xmlui)
@@ -84,11 +83,12 @@ def round_win(round_win:win.RoundAnim, event:XUEvent):
     area = round_win.area
     clip = get_world_clip(round_win).to_offset()  # クリップエリアの設定
 
-    # waitが終わるのをまたないでとっとと閉じる
+    # 表示領域が無ければwaitが終わるのをまたないでとっとと閉じる
+    if clip.is_empty:
+        if round_win.win_state == XUWinBase.STATE_CLOSING:
+            round_win.win_state = XUWinBase.STATE_CLOSED
     if round_win.win_state == XUWinBase.STATE_CLOSED:
         round_win.close()
-    elif round_win.win_state == XUWinBase.STATE_CLOSING and clip.is_empty:
-        round_win.win_state = XUWinBase.STATE_CLOSED
 
     # 背景
     pyxel.rect(area.x, area.y, area.w, min(area.h, clip.h+2), ui_theme.win.bg_color)
