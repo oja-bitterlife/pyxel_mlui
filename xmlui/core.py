@@ -255,12 +255,11 @@ class XUState:
                 return XUState(self.xmlui, element)
         raise Exception(f"{self.strtree()}\nID '{id}' not found in '{self.tag}' and children")
 
-    def find_by_tagall(self, tag:str, force:bool=False) -> list['XUState']:
-        tags = [XUState(self.xmlui, element) for element in self._element.iter() if element.tag == tag]
-        return tags if force else [state for state in tags if state.enable]
+    def find_by_tagall(self, tag:str) -> list['XUState']:
+        return [XUState(self.xmlui, element) for element in self._element.iter() if element.tag == tag]
 
-    def find_by_tag(self, tag:str, force:bool=False) -> 'XUState':
-        elements:list[XUState] = self.find_by_tagall(tag, force)
+    def find_by_tag(self, tag:str) -> 'XUState':
+        elements:list[XUState] = self.find_by_tagall(tag)
         if elements:
             return elements[0]
         raise Exception(f"{self.strtree()}\nTag '{tag}' not found in '{self.tag}' and children")
@@ -285,8 +284,8 @@ class XUState:
                 return True
         return False
 
-    def exists_tag(self, tag:str, force:bool=False) -> bool:
-        elements:list[XUState] = self.find_by_tagall(tag, force)
+    def exists_tag(self, tag:str) -> bool:
+        elements:list[XUState] = self.find_by_tagall(tag)
         if elements:
             return True
         return False
@@ -377,14 +376,6 @@ class XUState:
         return self.attr_str("action", "")
 
     @property
-    def enable(self) -> bool:  # 有効フラグ
-        return self.attr_bool("enable", True)
-    @enable.setter
-    def enable(self, enable_:str) -> str:
-        self.set_attr("enable", enable_)
-        return enable_
-
-    @property
     def owner(self) -> str:  # close時のidを設定
         return self.attr_str("owner", "")
 
@@ -414,6 +405,14 @@ class XUState:
     @property
     def use_event(self) -> str:  # eventの検知方法, listener or absorber or ""
         return self.attr_str("use_event", XUEvent.NONE)
+
+    @property
+    def enable(self) -> bool:  # イベント有効フラグ(表示は使う側でどうするか決める)
+        return self.attr_bool("enable", True)
+    @enable.setter
+    def enable(self, enable_:bool) -> bool:
+        self.set_attr("enable", enable_)
+        return enable_
 
     @property
     def marker(self) -> str:  # デバッグ用
@@ -535,12 +534,12 @@ class XMLUI(XUState):
         # (入力)イベントの更新
         self.event.update()
 
-        # 描画対象を取得
-        draw_targets:list[XUState] = list(filter(lambda state: state.enable, self._rec_get_draw_targets(self._element)))
+        # 描画対象を取得(子を先に処理する)
+        draw_targets:list[XUState] = list(self._rec_get_draw_targets(self._element))
 
         # ActiveStateの取得。Active=最後、なので最後から確認
         self.active_states:list[XUState] = []
-        for event in reversed([state for state in draw_targets if state.use_event]):
+        for event in reversed([state for state in draw_targets if state.use_event and state.enable]):
             self.active_states.append(event)  # イベントを使うstateを回収
             if event.use_event == XUEvent.ABSORBER:  # イベント通知終端
                 break
@@ -852,7 +851,7 @@ class XUSelectBase(_XUUtilBase):
 class XUSelectGrid(XUSelectBase):
     def __init__(self, state:XUState, item_tag:str, rows_attr:str, item_w_attr:str, item_h_attr:str):
         # 自分の直下のitemだけ回収する
-        items = list(filter(lambda state: state.enable and state.tag==item_tag, [XUSelectItem(state.xmlui, element) for element in state._element]))
+        items = [XUSelectItem(state.xmlui, element) for element in state._element if element.tag == item_tag]
         item_w = state.attr_int(item_w_attr, 0)
         item_h = state.attr_int(item_h_attr, 0)
         super().__init__(state, items, state.attr_int(rows_attr, 1), item_w, item_h)
@@ -882,7 +881,7 @@ class XUSelectGrid(XUSelectBase):
 class XUSelectList(XUSelectBase):
     def __init__(self, state:XUState, item_tag:str, item_w_attr:str, item_h_attr:str):
         # 自分の直下のitemだけ回収する
-        items = list(filter(lambda state: state.enable and state.tag==item_tag, [XUSelectItem(state.xmlui, element) for element in state._element]))
+        items = [XUSelectItem(state.xmlui, element) for element in state._element if element.tag == item_tag]
         item_w = state.attr_int(item_w_attr, 0)
         item_h = state.attr_int(item_h_attr, 0)
         rows = len(items) if item_w > item_h else 1
@@ -1057,9 +1056,11 @@ class XUWinBase(XUState):
     # 子も含めてclosingにする
     def start_close(self):
         self.win_state = self.STATE_CLOSING
+        self.enable = False  # closingは実質closeなのでイベントは見ない
+
+        # 子も順次closing
         for child in self.children:
             if XUWinBase.is_win(child):
-                print(child.id)
                 XUWinBase(child).start_close()
 
 class XUWinFrame(XUWinBase):
