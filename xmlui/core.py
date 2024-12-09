@@ -1055,13 +1055,14 @@ class XUWinBase(XUState):
 
     # 子も含めてclosingにする
     def start_close(self):
-        self.win_state = self.STATE_CLOSING
         self.enable = False  # closingは実質closeなのでイベントは見ない
+        self.win_state = self.STATE_CLOSING
 
         # 子も順次closing
         for child in self.children:
-            if XUWinBase.is_win(child):
-                XUWinBase(child).start_close()
+            child.enable = False  # 全ての子のイベント通知をoffに
+            if XUWinBase.is_win(child):  # 子ウインドウも一緒にクローズ
+                XUWinBase(child).win_state = self.STATE_CLOSING
 
 class XUWinFrame(XUWinBase):
     # ウインドウ(ピクセル)描画
