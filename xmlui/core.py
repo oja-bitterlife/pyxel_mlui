@@ -1001,7 +1001,7 @@ class XUWinBase(XUState):
         if not self.has_attr(self.WIN_STATE_ATTR):
             self.win_state = self.STATE_OPENING
 
-    # closeするときに状態をCLOSEDにする
+    # override。closeするときに状態をCLOSEDにする
     def close(self):
         self.win_state = self.STATE_CLOSED
         super().close()
