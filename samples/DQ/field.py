@@ -87,10 +87,11 @@ def ui_init(xmlui, group):
     @field_text.label("title", "align", "valign")
     def title(title:text.Label, event:XUEvent):
         area = title.area
-        if area.y < get_world_clip(XUWinBase.find_win(title)).bottom():  # world座標で比較
-            pyxel.rect(area.x, area.y, area.w, area.h, 0)  # タイトルの下地
+        clip = get_world_clip(XUWinBase.find_win(title))
+        pyxel.rect(area.x, area.y, area.w, clip.h, 0)  # タイトルの下地
 
-            # テキストはセンタリング
+        # テキストはセンタリング
+        if area.y < clip.bottom():  # world座標で比較
             x, y = title.aligned_pos(ui_theme.font.system)
             pyxel.text(x, y-1, title.text, 7, ui_theme.font.system.font)
 
@@ -98,10 +99,11 @@ def ui_init(xmlui, group):
     @field_text.label("status_title", "align", "valign")
     def status_title(status_title:text.Label, event:XUEvent):
         area = status_title.area
-        if area.y < get_world_clip(XUWinBase.find_win(status_title)).bottom():  # world座標で比較
-            pyxel.rect(area.x, area.y, area.w, area.h, 0)  # タイトルの下地
+        clip = get_world_clip(XUWinBase.find_win(status_title))
+        pyxel.rect(area.x, area.y, area.w, clip.h, 0)  # タイトルの下地
 
-            # テキストは左寄せ
+        # テキストは左寄せ
+        if area.y < clip.bottom():  # world座標で比較
             x, y = status_title.aligned_pos(ui_theme.font.system)
             pyxel.text(x+1, y-1, status_title.text, 7, ui_theme.font.system.font)
 
