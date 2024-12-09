@@ -111,7 +111,7 @@ class XUEvent:
     NONE = ""  # ifでチェックしやすいようemptyで
 
     def __init__(self, init_active=False):
-        self.active = init_active  # アクティブなイベントかどうか
+        self.is_active = init_active  # アクティブなイベントかどうか
         self.on_init = False
         self.clear()
 
@@ -1029,14 +1029,6 @@ class XUWinBase(XUState):
     def win_state(self, win_state:str) -> str:
         self.set_attr(self.WIN_STATE_ATTR, win_state)
         return win_state
-
-    # opning/closingの状態取得
-    @property
-    def is_opening(self):
-        return self.win_state == XUWinRound.STATE_OPENING
-    @property
-    def is_closing(self):
-        return self.win_state == XUWinRound.STATE_CLOSING
 
     @property
     def opening_count(self) -> int:

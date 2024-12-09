@@ -149,7 +149,8 @@ def ui_init(xmlui, group):
 
         # カーソル追加。ウインドウのクリップ状態に合わせて表示する
         if menu_grid.selected_item.area.y < get_world_clip(XUWinBase.find_win(menu_grid)).bottom():
-            draw_menu_cursor(menu_grid.selected_item, 0, 0)
+            if event.is_active:
+                draw_menu_cursor(menu_grid.selected_item, 0, 0)
 
     # メッセージウインドウ
     # ---------------------------------------------------------
@@ -204,6 +205,9 @@ def ui_init(xmlui, group):
             if input_def.BTN_A in event.now or input_def.BTN_B in event.now:
                 msg_text.anim.draw_count += 2  # 素早く表示
 
+        print(XUWinBase.find_win(msg_text).win_state)
+
+
     # ステータス各種アイテム
     # ---------------------------------------------------------
     @field_text.label("status_item")
@@ -235,7 +239,14 @@ def ui_init(xmlui, group):
             dir_select.select(3)
 
         if input_def.BTN_A in event.trg:
-            msg_win = dir_select.open(Field.UI_TEMPLATE_FIELD, "message")
+            dir_win = XUWinBase.find_win(dir_select)
+            dir_win.start_close()
+            win_parent = dir_win.parent
+
+            if win_parent is None:
+                return
+
+            msg_win = win_parent.open(Field.UI_TEMPLATE_FIELD, "message")
             msg_text = msg_win.find_by_tag("msg_text")
             match dir_select.action:
                 case "north":
@@ -247,13 +258,15 @@ def ui_init(xmlui, group):
                 case "south":
                     msg_text.text = dir_select.selected_item.text + " を せんたくした"
 
+
         # 閉じる
         if input_def.BTN_B in event.trg:
             XUWinBase.find_win(dir_select).start_close()
 
         # カーソル追加。ウインドウのクリップ状態に合わせて表示する
         if dir_select.selected_item.area.y < get_world_clip(XUWinBase.find_win(dir_select)).bottom():
-            draw_menu_cursor(dir_select.selected_item, -5, 0)
+            if event.is_active:
+                draw_menu_cursor(dir_select.selected_item, -5, 0)
 
     # 会話方向アイテム
     # ---------------------------------------------------------

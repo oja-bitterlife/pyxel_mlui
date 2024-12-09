@@ -85,9 +85,10 @@ def round_win(round_win:win.RoundAnim, event:XUEvent):
     clip = get_world_clip(round_win).to_offset()  # クリップエリアの設定
 
     # waitが終わるのをまたないでとっとと閉じる
-    if round_win.is_closing and clip.is_empty:
+    if round_win.win_state == XUWinBase.STATE_CLOSED:
         round_win.close()
-        return
+    elif round_win.win_state == XUWinBase.STATE_CLOSING and clip.is_empty:
+        round_win.win_state = XUWinBase.STATE_CLOSED
 
     # 背景
     pyxel.rect(area.x, area.y, area.w, min(area.h, clip.h+2), ui_theme.win.bg_color)
