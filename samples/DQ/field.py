@@ -145,7 +145,8 @@ def ui_init(xmlui, group):
 
         # 閉じる
         if input_def.BTN_B in event.trg:
-            menu_grid.wait_close(ui_theme.win.get_closing_wait(menu_grid))
+            menu_grid.xmlui.on("closing")
+            # menu_grid.wait_close(ui_theme.win.get_closing_wait(menu_grid))
 
         # カーソル追加。ウインドウのクリップ状態に合わせて表示する
         if menu_grid.selected_item.area.y < get_world_clip(menu_grid).bottom():
@@ -192,7 +193,8 @@ def ui_init(xmlui, group):
         # ---------------------------------------------------------
         if input_def.BTN_A in event.trg or input_def.BTN_B in event.now:
             if msg_text.is_finish:
-                msg_text.wait_close(ui_theme.win.get_closing_wait(msg_text))  # closingウェイトを設定する
+                msg_text.xmlui.on("closing")
+                # msg_text.wait_close(ui_theme.win.get_closing_wait(msg_text))  # closingウェイトを設定する
             elif msg_text.is_next_wait:
                 msg_text.page_no += 1  # 次ページへ
 

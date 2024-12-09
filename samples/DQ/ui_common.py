@@ -31,18 +31,18 @@ def draw_msg_cursor(state:XUState, x:int, y:int):
     y = state.area.y + tri_size - 3 + y
     pyxel.tri(center_x, y, center_x+tri_size, y, center_x+tri_size//2, y+tri_size//2, 7)
 
-def get_world_clip(win:XUState):
-    for parent in win.ancestors:
-        if parent.has_attr(CLOSING_CLIP_SIZE) or parent.has_attr(OPENING_CLIP_SIZE):
-            area = parent.area
-            if parent.is_closing:
-                clip_size = parent.attr_int(CLOSING_CLIP_SIZE)
-                area.h -= clip_size
-            else:
-                clip_size = parent.attr_int(OPENING_CLIP_SIZE)
-                area.h = clip_size
+def get_world_clip(state:XUState):
+    for parent in state.ancestors:
+        if XUWinBase.is_win(parent):
+            win = XUWinBase.cast(parent)
+            area = win.area
+            match win.win_state:
+                case win.STATE_OPENING:
+                    area.h = parent.attr_int(OPENING_CLIP_SIZE)
+                case win.STATE_CLOSING:
+                    area.h -= parent.attr_int(CLOSING_CLIP_SIZE)
             return area
-    return win.area
+    return state.area
 
 common_win = win.Decorator(xmlui)
 common_text = text.Decorator(xmlui)
@@ -81,17 +81,19 @@ def popup_text(popup_text:text.Msg, event:XUEvent):
 CLOSING_CLIP_SIZE="_xmlui_closing_clip_size"
 OPENING_CLIP_SIZE="_xmlui_opening_clip_size"
 
-@common_win.round("round_win")
-def round_win_draw(round_win:win.Round, event:XUEvent):
+@common_win.round_anim("round_win", ui_theme.win.closing_wait, ui_theme.win.closing_wait)
+def round_win(round_win:win.RoundAnim, event:XUEvent):
     area = round_win.area
+    clip_size = area.h
 
     # ウインドウにはクリップサイズを入れておく
-    if round_win.is_closing:
-        clip_size = max(int(round_win.closing_count*ui_theme.win.close_speed), 0)
-        round_win.set_attr(CLOSING_CLIP_SIZE, clip_size)  # 子から見えるようアトリビュートに保存
-    else:  # opening
-        clip_size = min(int(round_win.update_count*ui_theme.win.open_speed), area.h)
-        round_win.set_attr(OPENING_CLIP_SIZE, clip_size)  # 子から見えるようアトリビュートに保存
+    match round_win.win_state:
+        case XUWinBase.STATE_OPENING:
+            clip_size = min(int(round_win.opening_count * ui_theme.win.open_speed), area.h)
+            round_win.set_attr(OPENING_CLIP_SIZE, clip_size)  # 子から見えるようアトリビュートに保存
+        case XUWinBase.STATE_CLOSING:
+            clip_size = max(int(round_win.closing_count * ui_theme.win.close_speed), 0)
+            round_win.set_attr(CLOSING_CLIP_SIZE, clip_size)  # 子から見えるようアトリビュートに保存
 
     # クリップエリアの設定
     clip = area.to_offset()
@@ -99,7 +101,7 @@ def round_win_draw(round_win:win.Round, event:XUEvent):
 
     # waitが終わるのをまたないでとっとと閉じる
     if round_win.is_closing and clip.is_empty:
-        round_win.finish_closing()
+        round_win.close()
         return
 
     # 背景

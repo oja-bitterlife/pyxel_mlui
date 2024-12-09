@@ -1009,18 +1009,18 @@ class XUWinBase(XUState):
         return XUWinBase(state)
 
     # ウインドウの状態に応じてアニメーション用カウンタを更新する
-    def update(self, opening_max:int, closing_max:int):
+    def update(self, opening_wait:int, closing_wait:int):
         win_state = self.attr_str(self.WINDOW_STATE_ATTR)
         match win_state:
             case self.STATE_OPENING:
                 count = self.attr_int(self.OPENING_COUNT_ATTR) + 1
                 self.set_attr(self.OPENING_COUNT_ATTR, count)
-                if count >= opening_max:
+                if count >= opening_wait:
                     self.set_attr(self.WINDOW_STATE_ATTR, self.STATE_OPENED)
             case self.STATE_CLOSING:
                 count = self.attr_int(self.CLOSING_COUNT_ATTR) + 1
                 self.set_attr(self.CLOSING_COUNT_ATTR, count)
-                if count >= closing_max:
+                if count >= closing_wait:
                     self.set_attr(self.WINDOW_STATE_ATTR, self.STATE_CLOSED)
 
     @classmethod
@@ -1030,6 +1030,14 @@ class XUWinBase(XUState):
     @property
     def win_state(self) -> str:
         return self.attr_str(self.WINDOW_STATE_ATTR)
+
+    @property
+    def is_opening(self):
+        return self.win_state == XUWinRound.STATE_OPENING
+
+    @property
+    def is_closing(self):
+        return self.win_state == XUWinRound.STATE_CLOSING
 
     @property
     def opening_count(self) -> int:
