@@ -1017,10 +1017,12 @@ class XUWinBase(XUState):
                 if count >= closing_wait:
                     self.set_attr(self.WIN_STATE_ATTR, self.STATE_CLOSED)
 
+    # XUWinBaseを使ったElementかどうか。attributeの有無でチェック
     @classmethod
     def is_win(cls, state:XUState) -> bool:
         return state.has_attr(cls.WIN_STATE_ATTR)
 
+    # ウインドウの状態のset/get
     @property
     def win_state(self) -> str:
         return self.attr_str(self.WIN_STATE_ATTR)
@@ -1029,6 +1031,7 @@ class XUWinBase(XUState):
         self.set_attr(self.WIN_STATE_ATTR, win_state)
         return win_state
 
+    # opning/closingの状態取得
     @property
     def is_opening(self):
         return self.win_state == XUWinRound.STATE_OPENING
@@ -1043,6 +1046,7 @@ class XUWinBase(XUState):
     def closing_count(self) -> int:
         return self.attr_int(self.CLOSING_COUNT_ATTR)
 
+    # 一番近いXUWinBaseを持つ親を取得する
     @classmethod
     def find_win(cls, state:XUState) -> "XUWinBase":
         for parent in state.ancestors:
