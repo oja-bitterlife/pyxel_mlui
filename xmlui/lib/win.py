@@ -23,6 +23,7 @@ class RectAnim(XUWinRect):
         super().__init__(state)
         self.update(opening_wait, closing_wait)
 
+
 # デコレータを用意
 # *****************************************************************************
 class Decorator(DefaultDecorator):

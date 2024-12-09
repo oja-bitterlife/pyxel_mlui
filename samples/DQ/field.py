@@ -87,7 +87,7 @@ def ui_init(xmlui, group):
     @field_text.label("title", "align", "valign")
     def title(title:text.Label, event:XUEvent):
         area = title.area
-        if area.y < get_world_clip(title).bottom():  # world座標で比較
+        if area.y < get_world_clip(XUWinBase.find_win(title)).bottom():  # world座標で比較
             pyxel.rect(area.x, area.y, area.w, area.h, 0)  # タイトルの下地
 
             # テキストはセンタリング
@@ -98,7 +98,7 @@ def ui_init(xmlui, group):
     @field_text.label("status_title", "align", "valign")
     def status_title(status_title:text.Label, event:XUEvent):
         area = status_title.area
-        if area.y < get_world_clip(status_title).bottom():  # world座標で比較
+        if area.y < get_world_clip(XUWinBase.find_win(status_title)).bottom():  # world座標で比較
             pyxel.rect(area.x, area.y, area.w, area.h, 0)  # タイトルの下地
 
             # テキストは左寄せ
@@ -112,7 +112,7 @@ def ui_init(xmlui, group):
         area = menu_item.area
 
         # ウインドウのクリップ状態に合わせて表示する
-        if area.y < get_world_clip(menu_item).bottom():
+        if area.y < get_world_clip(XUWinBase.find_win(menu_item)).bottom():
             pyxel.text(area.x+6, area.y, menu_item.text, 7, ui_theme.font.system.font)
 
     # コマンドメニュー
@@ -149,7 +149,7 @@ def ui_init(xmlui, group):
             # menu_grid.wait_close(ui_theme.win.get_closing_wait(menu_grid))
 
         # カーソル追加。ウインドウのクリップ状態に合わせて表示する
-        if menu_grid.selected_item.area.y < get_world_clip(menu_grid).bottom():
+        if menu_grid.selected_item.area.y < get_world_clip(XUWinBase.find_win(menu_grid)).bottom():
             draw_menu_cursor(menu_grid.selected_item, 0, 0)
 
     # メッセージウインドウ
@@ -211,5 +211,5 @@ def ui_init(xmlui, group):
 
         # テキストは右寄せ
         x, y = status_item.aligned_pos(system_font, 5, 0)
-        if y < get_world_clip(status_item).bottom():
+        if y < get_world_clip(XUWinBase.find_win(status_item)).bottom():
             pyxel.text(x, y, status_item.text, 7, system_font.font)

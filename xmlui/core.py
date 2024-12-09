@@ -989,7 +989,7 @@ class XUWinBase(XUState):
     STATE_CLOSED = "closed"
 
     # 状態を保存するアトリビュート
-    WINDOW_STATE_ATTR = "_xmlui_win_state"
+    WIN_STATE_ATTR = "_xmlui_win_state"
     OPENING_COUNT_ATTR = "_xmlui_opening_count"
     CLOSING_COUNT_ATTR = "_xmlui_closing_count"
 
@@ -999,42 +999,39 @@ class XUWinBase(XUState):
         super().__init__(state.xmlui, state._element)
 
         # ステートがなければ用意しておく
-        if not self.has_attr(self.WINDOW_STATE_ATTR):
-            self.set_attr(self.WINDOW_STATE_ATTR, self.STATE_OPENING)
-
-    @classmethod
-    def cast(cls, state:XUState) -> "XUWinBase":
-        if not cls.is_win(state):
-            raise Exception(f"{state.tag} not window")
-        return XUWinBase(state)
+        if not self.has_attr(self.WIN_STATE_ATTR):
+            self.win_state = self.STATE_OPENING
 
     # ウインドウの状態に応じてアニメーション用カウンタを更新する
     def update(self, opening_wait:int, closing_wait:int):
-        win_state = self.attr_str(self.WINDOW_STATE_ATTR)
+        win_state = self.attr_str(self.WIN_STATE_ATTR)
         match win_state:
             case self.STATE_OPENING:
                 count = self.attr_int(self.OPENING_COUNT_ATTR) + 1
                 self.set_attr(self.OPENING_COUNT_ATTR, count)
                 if count >= opening_wait:
-                    self.set_attr(self.WINDOW_STATE_ATTR, self.STATE_OPENED)
+                    self.set_attr(self.WIN_STATE_ATTR, self.STATE_OPENED)
             case self.STATE_CLOSING:
                 count = self.attr_int(self.CLOSING_COUNT_ATTR) + 1
                 self.set_attr(self.CLOSING_COUNT_ATTR, count)
                 if count >= closing_wait:
-                    self.set_attr(self.WINDOW_STATE_ATTR, self.STATE_CLOSED)
+                    self.set_attr(self.WIN_STATE_ATTR, self.STATE_CLOSED)
 
     @classmethod
     def is_win(cls, state:XUState) -> bool:
-        return state.has_attr(cls.WINDOW_STATE_ATTR)
+        return state.has_attr(cls.WIN_STATE_ATTR)
 
     @property
     def win_state(self) -> str:
-        return self.attr_str(self.WINDOW_STATE_ATTR)
+        return self.attr_str(self.WIN_STATE_ATTR)
+    @win_state.setter
+    def win_state(self, win_state:str) -> str:
+        self.set_attr(self.WIN_STATE_ATTR, win_state)
+        return win_state
 
     @property
     def is_opening(self):
         return self.win_state == XUWinRound.STATE_OPENING
-
     @property
     def is_closing(self):
         return self.win_state == XUWinRound.STATE_CLOSING
@@ -1042,10 +1039,16 @@ class XUWinBase(XUState):
     @property
     def opening_count(self) -> int:
         return self.attr_int(self.OPENING_COUNT_ATTR)
-
     @property
     def closing_count(self) -> int:
         return self.attr_int(self.CLOSING_COUNT_ATTR)
+
+    @classmethod
+    def find_win(cls, state:XUState) -> "XUWinBase":
+        for parent in state.ancestors:
+            if cls.is_win(parent):
+                return XUWinBase(parent)
+        raise Exception("no window found")
 
     # ウインドウ(ピクセル)描画
     # 0 1 2

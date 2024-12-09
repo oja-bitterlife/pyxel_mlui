@@ -2,9 +2,9 @@ default = """
 [win]
 frame_pattern = [7, 13]
 bg_color = 0
-open_speed = 16
-close_speed = 32
-closing_wait = 15
+open_speed = 1
+close_speed = 2
+closing_wait = 100
 
 [font]
 #system = "assets/font/b12.bdf"
@@ -43,10 +43,6 @@ class _Win:
         self.open_speed = section.get('open_speed', 16)  # 16px
         self.close_speed = section.get('close_speed', 16)  # 32px
         self.closing_wait = section.get('closing_wait', 15)  # 0.5s
-    
-    def get_closing_wait(self, state:XUState):
-        owner = state.find_owner()
-        return owner.closing_wait if owner.has_attr("closing_wait") else self.closing_wait
 
 class _Font:
     def __init__(self, section:dict, default_font:PyxelFont):

@@ -2,10 +2,10 @@ import pyxel
 
 # xmlui_pyxelの初期化
 # *****************************************************************************
-from xmlui.lib import select,text,win,input
+from xmlui.lib import text,win
 from xmlui.pyxel_util.theme import Theme
 from xmlui.pyxel_util.font import PyxelFont
-from xmlui.core import XMLUI,XUState,XUEvent,XUWinBase
+from xmlui.core import XMLUI,XUState,XUEvent,XUWinBase,XURect
 
 ui_theme = Theme(PyxelFont("assets/font/b12.bdf"))
 
@@ -31,18 +31,16 @@ def draw_msg_cursor(state:XUState, x:int, y:int):
     y = state.area.y + tri_size - 3 + y
     pyxel.tri(center_x, y, center_x+tri_size, y, center_x+tri_size//2, y+tri_size//2, 7)
 
-def get_world_clip(state:XUState):
-    for parent in state.ancestors:
-        if XUWinBase.is_win(parent):
-            win = XUWinBase.cast(parent)
-            area = win.area
-            match win.win_state:
-                case win.STATE_OPENING:
-                    area.h = parent.attr_int(OPENING_CLIP_SIZE)
-                case win.STATE_CLOSING:
-                    area.h -= parent.attr_int(CLOSING_CLIP_SIZE)
-            return area
-    return state.area
+def get_world_clip(win:XUWinBase) -> XURect:
+    area = win.area
+    match win.win_state:
+        case XUWinBase.STATE_OPENING:
+            clip_size = min(int(win.opening_count * ui_theme.win.open_speed), area.h)
+            area.h = clip_size
+        case XUWinBase.STATE_CLOSING:
+            clip_size = max(int(win.closing_count * ui_theme.win.close_speed), 0)
+            area.h -= clip_size
+    return area
 
 common_win = win.Decorator(xmlui)
 common_text = text.Decorator(xmlui)
@@ -84,20 +82,7 @@ OPENING_CLIP_SIZE="_xmlui_opening_clip_size"
 @common_win.round_anim("round_win", ui_theme.win.closing_wait, ui_theme.win.closing_wait)
 def round_win(round_win:win.RoundAnim, event:XUEvent):
     area = round_win.area
-    clip_size = area.h
-
-    # ウインドウにはクリップサイズを入れておく
-    match round_win.win_state:
-        case XUWinBase.STATE_OPENING:
-            clip_size = min(int(round_win.opening_count * ui_theme.win.open_speed), area.h)
-            round_win.set_attr(OPENING_CLIP_SIZE, clip_size)  # 子から見えるようアトリビュートに保存
-        case XUWinBase.STATE_CLOSING:
-            clip_size = max(int(round_win.closing_count * ui_theme.win.close_speed), 0)
-            round_win.set_attr(CLOSING_CLIP_SIZE, clip_size)  # 子から見えるようアトリビュートに保存
-
-    # クリップエリアの設定
-    clip = area.to_offset()
-    clip.h = area.h - clip_size if round_win.is_closing else clip_size
+    clip = get_world_clip(round_win).to_offset()  # クリップエリアの設定
 
     # waitが終わるのをまたないでとっとと閉じる
     if round_win.is_closing and clip.is_empty:
