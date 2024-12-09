@@ -86,10 +86,8 @@ def round_win(round_win:win.RoundAnim, event:XUEvent):
     # 表示領域が無ければwaitが終わるのをまたないでとっとと閉じる
     if clip.is_empty:
         if round_win.win_state == XUWinBase.STATE_CLOSING:
-            round_win.win_state = XUWinBase.STATE_CLOSED
-    if round_win.win_state == XUWinBase.STATE_CLOSED:
-        round_win.close()
-
+            round_win.close()  # 即座にclose
+    
     # 背景
     pyxel.rect(area.x, area.y, area.w, min(area.h, clip.h+2), ui_theme.win.bg_color)
 

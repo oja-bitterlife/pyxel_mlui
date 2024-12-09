@@ -34,7 +34,7 @@
     </round_win>
 
     <round_win x="-24" y="1" w="96" id="speak_dir">
-        <title x="22" y="0" w="52" h="12" align="center">はなす</title>
+        <menu_item_title x="22" y="0" w="52" h="12" align="center">はなす</menu_item_title>
         <dir_select x="12" y="16">
             <dir_item x="22" action="north">きた</dir_item>
             <dir_item x="1" y="16" action="west">にし</dir_item>

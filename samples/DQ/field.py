@@ -105,6 +105,18 @@ def ui_init(xmlui, group):
             x, y = status_title.aligned_pos(ui_theme.font.system)
             pyxel.text(x+1, y-1, status_title.text, 7, ui_theme.font.system.font)
 
+
+    # コマンドメニューのタイトル
+    @field_text.label("menu_item_title", "align", "valign")
+    def menu_item_title(title:text.Label, event:XUEvent):
+        area = title.area
+        if area.y < get_world_clip(XUWinBase.find_win(title)).bottom():  # world座標で比較
+            pyxel.rect(area.x, area.y, area.w, area.h, 0)  # タイトルの下地
+
+        # テキストはセンタリングで常に表示
+        x, y = title.aligned_pos(ui_theme.font.system)
+        pyxel.text(x, y-1, title.text, 7, ui_theme.font.system.font)
+
     # メニューアイテム
     # ---------------------------------------------------------
     @field_select.item("menu_item")
@@ -205,8 +217,9 @@ def ui_init(xmlui, group):
             if input_def.BTN_A in event.now or input_def.BTN_B in event.now:
                 msg_text.anim.draw_count += 2  # 素早く表示
 
-        # print(XUWinBase.find_win(msg_text).win_state)
-
+        # 自分が閉じたらメニューごと閉じる
+        if XUWinBase.find_win(msg_text).win_state == XUWinBase.STATE_CLOSED:
+            XUWinBase(msg_text.xmlui.find_by_id("menu")).start_close()
 
     # ステータス各種アイテム
     # ---------------------------------------------------------

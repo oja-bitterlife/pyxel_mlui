@@ -1001,6 +1001,11 @@ class XUWinBase(XUState):
         if not self.has_attr(self.WIN_STATE_ATTR):
             self.win_state = self.STATE_OPENING
 
+    # closeするときに状態をCLOSEDにする
+    def close(self):
+        self.win_state = self.STATE_CLOSED
+        super().close()
+
     # ウインドウの状態に応じてアニメーション用カウンタを更新する
     def update(self, opening_wait:int, closing_wait:int):
         win_state = self.attr_str(self.WIN_STATE_ATTR)

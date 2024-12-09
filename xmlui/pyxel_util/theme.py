@@ -4,7 +4,7 @@ frame_pattern = [7, 13]
 bg_color = 0
 open_speed = 16
 close_speed = 32
-closing_wait = 15
+closing_wait = 150
 
 [font]
 #system = "assets/font/b12.bdf"
