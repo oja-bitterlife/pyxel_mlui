@@ -87,7 +87,7 @@ def ui_init(xmlui, group):
     @field_text.label("title", "align", "valign")
     def title(title:text.Label, event:XUEvent):
         area = title.area
-        clip = get_world_clip(XUWinBase.find_win(title))
+        clip = get_world_clip(XUWinBase.find_win(title)).intersect(area)
         pyxel.rect(area.x, area.y, area.w, clip.h, 0)  # タイトルの下地
 
         # テキストはセンタリング
@@ -99,7 +99,7 @@ def ui_init(xmlui, group):
     @field_text.label("status_title", "align", "valign")
     def status_title(status_title:text.Label, event:XUEvent):
         area = status_title.area
-        clip = get_world_clip(XUWinBase.find_win(status_title))
+        clip = get_world_clip(XUWinBase.find_win(status_title)).intersect(area)
         pyxel.rect(area.x, area.y, area.w, clip.h, 0)  # タイトルの下地
 
         # テキストは左寄せ
@@ -110,14 +110,15 @@ def ui_init(xmlui, group):
 
     # コマンドメニューのタイトル
     @field_text.label("menu_item_title", "align", "valign")
-    def menu_item_title(title:text.Label, event:XUEvent):
-        area = title.area
-        if area.y < get_world_clip(XUWinBase.find_win(title)).bottom():  # world座標で比較
-            pyxel.rect(area.x, area.y, area.w, area.h, 0)  # タイトルの下地
+    def menu_item_title(menu_item_title:text.Label, event:XUEvent):
+        area = menu_item_title.area
+        clip = get_world_clip(XUWinBase.find_win(menu_item_title)).intersect(area)
+        clip.h = max(clip.h, 4)  # フレームを隠すように
+        pyxel.rect(area.x, area.y, area.w, clip.h, 0)  # タイトルの下地
 
         # テキストはセンタリングで常に表示
-        x, y = title.aligned_pos(ui_theme.font.system)
-        pyxel.text(x, y-1, title.text, 7, ui_theme.font.system.font)
+        x, y = menu_item_title.aligned_pos(ui_theme.font.system)
+        pyxel.text(x, y-1, menu_item_title.text, 7, ui_theme.font.system.font)
 
     # メニューアイテム
     # ---------------------------------------------------------
