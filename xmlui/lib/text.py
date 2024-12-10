@@ -113,6 +113,11 @@ class MsgDQ(MsgScr):
         state.text = text
         state.set_attr(cls.IS_TALK_ATTR, True)
 
+    @classmethod
+    def start_system(cls, state:XUState, text:str):
+        state.text = text
+        state.set_attr(cls.IS_TALK_ATTR, False)
+
     @property
     def is_talk(self):
         return self.attr_bool(self.IS_TALK_ATTR, False)

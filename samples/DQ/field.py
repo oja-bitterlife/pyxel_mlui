@@ -56,7 +56,10 @@ class Field:
             if talk is not None:
                 msg_win = self.xmlui.find_by_id("menu").open(Field.UI_TEMPLATE_FIELD, "message")
                 msg_text = msg_win.find_by_tag("msg_text")
-                text.MsgDQ.start_talk(msg_text, talk)
+                if talk:
+                    text.MsgDQ.start_talk(msg_text, talk)
+                else:
+                    text.MsgDQ.start_system(msg_text, "だれもいません")
 
     def draw(self):
         # プレイヤを中心に世界が動く。さす勇
