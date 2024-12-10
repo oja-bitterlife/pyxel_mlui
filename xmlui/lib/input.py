@@ -76,10 +76,10 @@ class Decorator(DefaultDecorator):
 
     # デコレータを用意
     def dial(self, tag_name:str, digit_length:int, align:str="center", valign:str="center", digit_list:str="0123456789"):
-        def wrapper(bind_func:Callable[[Dial,XUEvent], None]):
+        def wrapper(bind_func:Callable[[Dial,XUEvent], str|None]):
             # 登録用関数をジェネレート
             def draw(state:XUState, event:XUEvent):
-                bind_func(Dial(state, digit_length, align, valign, digit_list), event)
+                return bind_func(Dial(state, digit_length, align, valign, digit_list), event)
             # 関数登録
             self.xmlui.set_drawfunc(tag_name, draw, self.group)
         return wrapper

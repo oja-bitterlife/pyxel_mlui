@@ -2,6 +2,7 @@ import pyxel
 
 class Treasure:
     treasure = [
+        # typ,        x, y, color, detai
         ["tresure1", 9, 9, 10, "やくそう"],
         ["tresure2", 10, 9, 10, "100G"],
         ["tresure3", 11, 6, 10, "10G"],

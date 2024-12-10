@@ -5,7 +5,7 @@
     <round_win abs_x="112" abs_y="8" w="128" h="82" id="menu">
         <title x="36" y="0" w="52" h="12" align="center">コマンド</title>
         <menu_grid x="8" y="14" rows="2" item_w="58" item_h="16">
-            <menu_item action="speak">はなす</menu_item>
+            <menu_item action="talk">はなす</menu_item>
             <menu_item action="spel">じゅもん</menu_item>
             <menu_item action="status">つよさ</menu_item>
             <menu_item action="tools">どうぐ</menu_item>
@@ -33,7 +33,7 @@
         </round_win>
     </round_win>
 
-    <round_win x="-24" y="1" w="96" id="speak_dir">
+    <round_win x="-24" y="1" w="96" id="talk_dir">
         <menu_item_title x="22" y="0" w="52" h="12" align="center">はなす</menu_item_title>
         <dir_select x="12" y="16">
             <dir_item x="22" action="north">きた</dir_item>

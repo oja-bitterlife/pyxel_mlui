@@ -3,7 +3,7 @@ default = """
 frame_pattern = [7, 13]
 bg_color = 0
 open_speed = 16
-close_speed = 3
+close_speed = 32
 
 [font]
 #system = "assets/font/b12.bdf"
@@ -20,7 +20,7 @@ X = "BTN_X"
 Y = "BTN_Y"
 
 [debug]
-debug_level = 128
+debug_level = 100
 """
 
 import tomllib

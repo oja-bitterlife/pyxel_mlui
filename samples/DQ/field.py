@@ -42,6 +42,23 @@ class Field:
         # プレイヤの移動
         self.player.update(self.bg.blocks, self.npc.npc)
 
+        talk = None
+        if "talk_east" in self.xmlui.event.trg:
+            talk = self.npc.check(self.player.x+1, self.player.y)
+        if "talk_west" in self.xmlui.event.trg:
+            talk = self.npc.check(self.player.x-1, self.player.y)
+        if "talk_south" in self.xmlui.event.trg:
+            talk = self.npc.check(self.player.x, self.player.y+1)
+        if "talk_north" in self.xmlui.event.trg:
+            talk = self.npc.check(self.player.x, self.player.y-1)
+            print(talk ,self.player.x, self.player.y-1)
+
+        if talk is not None:
+            msg_win = self.xmlui.find_by_id("menu").open(Field.UI_TEMPLATE_FIELD, "message")
+            msg_text = msg_win.find_by_tag("msg_text")
+            # msg_text.text = dir_select.selected_item.text + " を せんたくした"
+        
+
         return None
 
     def draw(self):
@@ -141,8 +158,8 @@ def ui_init(xmlui, group):
         # 選択アイテムの表示
         if input_def.BTN_A in event.trg:
             match menu_grid.action:
-                case "speak":
-                    menu_grid.open(Field.UI_TEMPLATE_FIELD, "speak_dir")
+                case "talk":
+                    menu_grid.open(Field.UI_TEMPLATE_FIELD, "talk_dir")
                 case "spel":
                     menu_grid.xmlui.popup("common", "under_construct")
                 case "status":
@@ -257,23 +274,7 @@ def ui_init(xmlui, group):
         if input_def.BTN_A in event.trg:
             dir_win = XUWinBase.find_win(dir_select)
             dir_win.start_close()
-            win_parent = dir_win.parent
-
-            if win_parent is None:
-                return
-
-            msg_win = win_parent.open(Field.UI_TEMPLATE_FIELD, "message")
-            msg_text = msg_win.find_by_tag("msg_text")
-            match dir_select.action:
-                case "north":
-                    msg_text.text = dir_select.selected_item.text + " を せんたくした"
-                case "west":
-                    msg_text.text = dir_select.selected_item.text + " を せんたくした"
-                case "east":
-                    msg_text.text = dir_select.selected_item.text + " を せんたくした"
-                case "south":
-                    msg_text.text = dir_select.selected_item.text + " を せんたくした"
-
+            return f"talk_{dir_select.action}"
 
         # 閉じる
         if input_def.BTN_B in event.trg:

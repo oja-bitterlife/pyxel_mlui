@@ -9,10 +9,10 @@ class DefaultDecorator:
         self.group = group if group is not None else self.DEFAULT_GROUP
 
     def tag_draw(self, tag_name:str):
-        def wrapper(bind_func:Callable[[XUState,XUEvent], None]):
+        def wrapper(bind_func:Callable[[XUState,XUEvent], str|None]):
             # 登録用関数をジェネレート
             def draw(state:XUState, event:XUEvent):
-                bind_func(state, event)
+                return bind_func(state, event)
             # 関数登録
             self.xmlui.set_drawfunc(tag_name, draw, self.group)
         return wrapper

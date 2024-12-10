@@ -488,7 +488,7 @@ class XMLUI(XUState):
         self.event = XUEvent(True)  # 唯一のactiveとする
 
         # 処理関数の登録(dict[グループ][タグ名]())
-        self._draw_funcs:dict[str, dict[str, Callable[[XUState, XUEvent], None]]] = {}
+        self._draw_funcs:dict[str, dict[str, Callable[[XUState, XUEvent], str|None]]] = {}
 
         # XMLテンプレート置き場
         self._templates:dict[str, XMLUI_Template] = {}
@@ -567,12 +567,18 @@ class XMLUI(XUState):
     def draw_element(self, draw_group:list[str], tag_name:str, state:XUState, event:XUEvent):
         # 登録済みの関数だけ実行
         for group_name in draw_group:  # 指定したグループのみ描画
+
+            # 登録タグごとに関数呼び出し
             if tag_name in self._draw_funcs[group_name]:
-                self._draw_funcs[group_name][tag_name](state, event)
+
+                # 登録されている関数を実行。戻り値はイベント
+                result = self._draw_funcs[group_name][tag_name](state, event)
+                if result is not None:
+                    self.on(result)
 
     # 処理登録
     # *************************************************************************
-    def set_drawfunc(self, tag_name:str, func:Callable[[XUState,XUEvent], None], group_name:str=""):
+    def set_drawfunc(self, tag_name:str, func:Callable[[XUState,XUEvent], str|None], group_name:str=""):
         # 初回は辞書を作成
         if group_name not in self._draw_funcs:
             self._draw_funcs[group_name] = {}
