@@ -33,6 +33,7 @@
         </round_win>
     </round_win>
 
+    <info>はなす の方向</info>
     <round_win x="-24" y="1" w="96" id="talk_dir">
         <menu_item_title x="22" y="0" w="52" h="12" align="center">はなす</menu_item_title>
         <dir_select x="12" y="16">

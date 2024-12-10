@@ -145,7 +145,7 @@ def ui_init(xmlui, group):
             pyxel.text(area.x+6, area.y, menu_item.text, 7, ui_theme.font.system.font)
 
             # カーソル表示
-            if menu_item.selected:
+            if menu_item.selected and menu_item.enable:
                 draw_menu_cursor(menu_item, 0, 0)
 
     # コマンドメニュー
@@ -175,6 +175,11 @@ def ui_init(xmlui, group):
                     return "open_door"
                 case "take":
                     menu_grid.xmlui.popup("common", "under_construct")
+
+        # アイテムの無効化(アイテムカーソル用)
+        is_message_oepn = menu_grid.xmlui.exists_id("message")
+        for item in menu_grid._items:
+            item.enable = event.is_active and not is_message_oepn
 
         # 閉じる
         if input_def.BTN_B in event.trg:
