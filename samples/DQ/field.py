@@ -56,7 +56,7 @@ class Field:
             if talk is not None:
                 msg_win = self.xmlui.find_by_id("menu").open(Field.UI_TEMPLATE_FIELD, "message")
                 msg_text = msg_win.find_by_tag("msg_text")
-                msg_text.text = talk
+                msg_text.text = XUPageText(talk)
         
 
     def draw(self):

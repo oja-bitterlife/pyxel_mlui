@@ -643,7 +643,6 @@ _hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
 # テキスト基底
 class XUTextBase(str):
     SEPARATE_REGEXP = r"\\n"  # 改行に変換する正規表現
-    PAGE_REGEXP = r"\\p"  # 改行に変換する正規表現
 
     # 文字列中の半角を全角に変換する
     @classmethod
@@ -655,12 +654,11 @@ class XUTextBase(str):
     def __new__(cls, text:str, wrap:int=4096) -> Self:
         wrap = max(wrap, 1)   # 0だと無限になってしまうので最低1を入れておく
 
-        # page_root下(ページテキスト)の再構築
+        # 改行,wrap区切りにする(\n)
         # -----------------------------------------------------
         # 改行を\nに統一して全角化
         tmp_text = "\n".join([line.strip() for line in text.splitlines()])  # XMLの改行テキストを前後を削って結合
         tmp_text = re.sub(cls.SEPARATE_REGEXP, "\n", tmp_text)  # \nという文字列を改行コードに
-        tmp_text = re.sub(cls.PAGE_REGEXP, "\0", tmp_text)  # \nという文字列をNullに
         tmp_text = cls.convert_zenkaku(tmp_text.strip())  # 全角化
 
         # 各行に分解し、その行をさらにwrapで分解する
@@ -720,6 +718,8 @@ class XUTextAnim:
         return len(re.sub("\n|\0", "", self._text_base))
 
 class XUTextPage(_XUUtilBase):
+    PAGE_REGEXP = r"\\p"  # 改行に変換する正規表現
+
     ROOT_TAG= "_xmlui_text_root"
     PAGE_NO_ATTR="_xmlui_page_no"
 
@@ -727,13 +727,16 @@ class XUTextPage(_XUUtilBase):
         super().__init__(state, self.ROOT_TAG)
         self.page_line_num = page_line_num
         self.wrap = wrap
-
-        # ページ分解
-        manual_pages = XUTextBase(state.text, wrap).split("\0")
         self.pages:list[list[str]] = []
-        for manual_page in manual_pages:
+
+        # 手動ページ分解。文字列中の\pをページ区切りとして扱う
+        tmp_text = re.sub(self.PAGE_REGEXP, "\0", state.text)  # \nという文字列をNullに
+        manual_pages = [XUTextBase(page_text, wrap) for page_text in tmp_text.split("\0")]  # ページごとにXUTextBase
+
+        # 行数で自動ページ分解
+        for text_base in manual_pages:
             lines:list[str] = []
-            for line in manual_page.strip().splitlines():
+            for line in text_base.strip().splitlines():
                 lines.append(line)
                 if len(lines) >= page_line_num:
                     self.pages.append(lines)
