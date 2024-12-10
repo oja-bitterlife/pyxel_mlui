@@ -195,7 +195,7 @@ class XUState:
     # textアクセス用
     @property
     def text(self) -> str:
-        return "".join([line.strip() for line in self._element.text.splitlines()]) if self._element.text else ""
+        return "\n".join([line.strip() for line in self._element.text.splitlines()]) if self._element.text else ""
     @text.setter
     def text(self, text_:str) -> str:
         self._element.text = text_
