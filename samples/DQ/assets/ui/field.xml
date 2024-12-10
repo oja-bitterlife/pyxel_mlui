@@ -46,7 +46,7 @@
 
     <info>メッセージウインドウ</info>
     <round_win abs_x="28" abs_y="160" w="200" h="88" id="message">
-        <msg_text x="10" y="8" w="184" wrap="14" page_line_num="3">
+        <msg_text x="10" y="8" w="184" wrap="12" page_line_num="3">
             サンプルテキスト
         </msg_text>
         <test_text>

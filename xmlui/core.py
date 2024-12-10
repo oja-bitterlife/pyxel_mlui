@@ -195,7 +195,7 @@ class XUState:
     # textアクセス用
     @property
     def text(self) -> str:
-        return self._element.text.strip() if self._element.text else ""
+        return "".join([line.strip() for line in self._element.text.splitlines()]) if self._element.text else ""
     @text.setter
     def text(self, text_:str) -> str:
         self._element.text = text_
@@ -657,9 +657,9 @@ class XUTextBase(str):
         # 改行,wrap区切りにする(\n)
         # -----------------------------------------------------
         # 改行を\nに統一して全角化
-        tmp_text = "\n".join([line.strip() for line in text.splitlines()])  # XMLの改行テキストを前後を削って結合
+        tmp_text = "\n".join([line for line in text.splitlines()])  # XMLの改行テキストを前後を削って結合
         tmp_text = re.sub(cls.SEPARATE_REGEXP, "\n", tmp_text)  # \nという文字列を改行コードに
-        tmp_text = cls.convert_zenkaku(tmp_text.strip())  # 全角化
+        tmp_text = cls.convert_zenkaku(tmp_text)  # 全角化
 
         # 各行に分解し、その行をさらにwrapで分解する
         lines =  sum([[line[i:i+wrap] for i in  range(0, len(line), wrap)] for line in tmp_text.splitlines()], [])
@@ -741,7 +741,7 @@ class XUTextPage(_XUUtilBase):
         out:list[list[str]] = []
         for text_base in manual_pages:
             lines:list[str] = []
-            for line in text_base.strip().splitlines():
+            for line in text_base.splitlines():
                 lines.append(line)
                 if len(lines) >= page_line_num:
                     out.append(lines)
