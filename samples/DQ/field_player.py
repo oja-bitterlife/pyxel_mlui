@@ -12,8 +12,11 @@ class Player:
         def _hitcheck(x, y):
             block_x = x // 16
             block_y = y // 16
-            if blocks[block_y][block_x] != 2:
-                return False
+            match blocks[block_y][block_x]:
+                case 2 | 6:
+                    pass
+                case _:
+                    return False
             for npc in npcs:
                 if npc.x == block_x and npc.y == block_y:
                     return False

@@ -43,8 +43,7 @@ class Field:
         else:
             # 会話イベントチェック
             self.npc.check_talk(self.xmlui, self.player)
-            if "open_door" in self.xmlui.event.trg:
-                print("door")
+            self.bg.check_door(self.xmlui, self.player)
             
 
 

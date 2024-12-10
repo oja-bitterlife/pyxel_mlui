@@ -17,7 +17,7 @@ class NPC:
         # typ,   x, y, color, talk
         NPC_Data("king", 8, 8, 2, "おうさままままままままままままままままままままままままままままままままままままままままままままままままままままままままままままま"),
         NPC_Data("knight1", 8, 11, 3, "とびらのまえで　とびら　をせんたくしてね"),
-        NPC_Data("knight2", 10, 11, 3, "へいし　だよ\nげんじ　じゃないよ"),
+        NPC_Data("knight2", 10, 11, 3, "とびらのさきに　かいだんがある"),
         NPC_Data("knighg3", 12, 9, 3, "たからばこ？\nみじっそ…とっちゃだめだからね？"),
     ]
     def draw(self, scroll_x, scroll_y):
