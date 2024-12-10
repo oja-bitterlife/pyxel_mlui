@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<xmlui>
+    <info>タイトル画面用</info>
+    <game_title id="game_title">
+        <game_start abs_x="100" abs_y="128" item_h="16" use_event="listener">
+            <menu_item action="start">START</menu_item>
+            <menu_item action="continue">CONTINUE</menu_item>
+        </game_start>
+        <game_speed abs_x="48" abs_y="200" item_w="64" use_event="listener">
+            <menu_item action="slow">SLOW</menu_item>
+            <menu_item x="-5" action="normal" selected="True">NORMAL</menu_item>
+            <menu_item action="fast">FAST</menu_item>
+        </game_speed>
+    </game_title>
+</xmlui>
+

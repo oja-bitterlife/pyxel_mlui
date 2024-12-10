@@ -73,11 +73,12 @@ class BG:
             else:
                 msg_win = xmlui.find_by_id("menu").open(field.Field.UI_TEMPLATE_FIELD, "message")
                 msg_text = msg_win.find_by_tag("msg_text")
-                text.MsgDQ.start_system(msg_text, "とびら　がない")  # systemメッセージ
+                text.MsgDQ.start_system(msg_text, "とびらがない")  # systemメッセージ
 
     # 階段チェック
     def check_stairs(self, xmlui, player):
         if "down_stairs" in xmlui.event.trg:
             block_x, block_y = player.x//16, player.y//16
             if self.blocks[block_y][block_x] == self.STAIRS:
+                XUWinBase(xmlui.find_by_id("menu")).start_close()
                 xmlui.on("start_battle")

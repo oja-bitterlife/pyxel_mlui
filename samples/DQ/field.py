@@ -1,7 +1,7 @@
 import pyxel
 
 # タイトル画面
-from xmlui.core import XMLUI,XUEvent,XUWinBase,XUTextPage
+from xmlui.core import XMLUI,XUEvent,XUWinBase
 from xmlui.lib import select,text
 from ui_common import ui_theme
 from field_player import Player
@@ -21,14 +21,17 @@ class Field:
         self.npc = NPC()
         self.treasure = Treasure()
 
+        self.goto_battle = False
+
         # UIの読み込み
         self.xmlui.template_fromfile("assets/ui/field.xml", self.UI_TEMPLATE_FIELD)
-        ui_init(self.xmlui, "field")
+        ui_init(self.xmlui, self.UI_TEMPLATE_FIELD)
 
     def __del__(self):
         # 読みこんだUIの削除
         self.xmlui.remove_template(self.UI_TEMPLATE_FIELD)
-        self.xmlui.remove_drawfunc("field")
+        self.xmlui.remove_drawfunc(self.UI_TEMPLATE_FIELD)
+        print("remove field")
 
     def update(self):
         # UIメニューが開いていたらキャラが動かないように
@@ -45,7 +48,15 @@ class Field:
             self.npc.check_talk(self.xmlui, self.player)
             self.bg.check_door(self.xmlui, self.player)
             self.bg.check_stairs(self.xmlui, self.player)
-            
+
+        # バトル開始
+        if "start_battle" in self.xmlui.event.trg:
+            self.goto_battle = True
+        if self.goto_battle:
+            # メニューが開いていない状態まで待つ
+            if not self.xmlui.exists_id("menu") or XUWinBase(self.xmlui.find_by_id("menu")).win_state == XUWinBase.STATE_CLOSED:
+                return "battle"
+
     def draw(self):
         # プレイヤを中心に世界が動く。さす勇
         scroll_x = -self.player.x +160-32
@@ -72,7 +83,8 @@ class Field:
             self.xmlui.on(ui_theme.input_def.BTN_B)
 
         # UIの描画(fieldとdefaultグループ)
-        self.xmlui.draw(["field"])
+        self.xmlui.draw([self.UI_TEMPLATE_FIELD])
+
 
 # 町の中UI
 # *****************************************************************************
