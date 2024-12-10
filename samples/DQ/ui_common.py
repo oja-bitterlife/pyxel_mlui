@@ -78,15 +78,14 @@ def popup_text(popup_text:text.Msg, event:XUEvent):
 CLOSING_CLIP_SIZE="_xmlui_closing_clip_size"
 OPENING_CLIP_SIZE="_xmlui_opening_clip_size"
 
-@common_win.round_anim("round_win", ui_theme.win.closing_wait, ui_theme.win.closing_wait)
+@common_win.round_anim("round_win")
 def round_win(round_win:win.RoundAnim, event:XUEvent):
     area = round_win.area
     clip = get_world_clip(round_win).to_offset()  # クリップエリアの設定
 
-    # 表示領域が無ければwaitが終わるのをまたないでとっとと閉じる
-    if clip.is_empty:
-        if round_win.win_state == XUWinBase.STATE_CLOSING:
-            round_win.close()  # 即座にclose
+    # 表示領域が無ければ完了なので閉じる
+    if round_win.is_closing and clip.is_empty:
+        round_win.close()  # 即座にclose
     
     # 背景
     pyxel.rect(area.x, area.y, area.w, min(area.h, clip.h+2), ui_theme.win.bg_color)

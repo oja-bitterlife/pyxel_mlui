@@ -3,8 +3,8 @@ default = """
 frame_pattern = [7, 13]
 bg_color = 0
 open_speed = 16
-close_speed = 32
-closing_wait = 15
+close_speed = 3
+closing_wait = 150
 
 [font]
 #system = "assets/font/b12.bdf"
@@ -43,7 +43,6 @@ class _Win:
         self.bg_color = section.get('bg_color', 0)
         self.open_speed = section.get('open_speed', 16)  # 16px
         self.close_speed = section.get('close_speed', 16)  # 32px
-        self.closing_wait = section.get('closing_wait', 15)  # 0.5s
 
 class _Font:
     def __init__(self, section:dict, default_font:PyxelFont):
