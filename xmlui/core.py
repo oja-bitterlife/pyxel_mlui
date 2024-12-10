@@ -727,22 +727,33 @@ class XUTextPage(_XUUtilBase):
         super().__init__(state, self.ROOT_TAG)
         self.page_line_num = page_line_num
         self.wrap = wrap
-        self.pages:list[list[str]] = []
 
+        self.pages:list[list[str]] = self.split_page_lines(state.text, page_line_num, wrap)
+
+    # ページ分解。行ごと
+    @classmethod
+    def split_page_lines(cls, text, page_line_num:int, wrap:int) -> list[list[str]]:
         # 手動ページ分解。文字列中の\pをページ区切りとして扱う
-        tmp_text = re.sub(self.PAGE_REGEXP, "\0", state.text)  # \nという文字列をNullに
+        tmp_text = re.sub(cls.PAGE_REGEXP, "\0", text)  # \nという文字列をNullに
         manual_pages = [XUTextBase(page_text, wrap) for page_text in tmp_text.split("\0")]  # ページごとにXUTextBase
 
         # 行数で自動ページ分解
+        out:list[list[str]] = []
         for text_base in manual_pages:
             lines:list[str] = []
             for line in text_base.strip().splitlines():
                 lines.append(line)
                 if len(lines) >= page_line_num:
-                    self.pages.append(lines)
+                    out.append(lines)
                     lines = []
-            if lines:
-                self.pages.append(lines)
+            if lines:  # 最後の残り
+                out.append(lines)
+        return out
+
+    # ページ分解。1ページ分のテキストごと
+    @classmethod
+    def split_page_texts(cls, text, page_line_num:int, wrap:int) -> list[str]:
+        return ["\n".join(page_lines) for page_lines in cls.split_page_lines(text, page_line_num, wrap)]
 
     # ページ操作
     # -----------------------------------------------------

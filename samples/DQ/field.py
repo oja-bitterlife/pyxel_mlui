@@ -1,7 +1,7 @@
 import pyxel
 
 # タイトル画面
-from xmlui.core import XMLUI,XUEvent,XUWinBase
+from xmlui.core import XMLUI,XUEvent,XUWinBase,XUTextPage
 from xmlui.lib import select,text
 from ui_common import ui_theme
 from field_player import Player
@@ -56,7 +56,7 @@ class Field:
             if talk is not None:
                 msg_win = self.xmlui.find_by_id("menu").open(Field.UI_TEMPLATE_FIELD, "message")
                 msg_text = msg_win.find_by_tag("msg_text")
-                msg_text.text = XUPageText(talk)
+                msg_text.text = "".join(["＊「" + page + "」" for page in XUTextPage.split_page_texts(talk, 3, 4096)])
         
 
     def draw(self):
