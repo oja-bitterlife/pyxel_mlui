@@ -184,26 +184,27 @@ def ui_init(xmlui, group):
     # ---------------------------------------------------------
     @field_text.msg_dq("msg_text")
     def msg_text(msg_text:text.MsgDQ, event:XUEvent):
-        system_font = ui_theme.font.system
-        input_def = ui_theme.input_def
+        # テーマ情報取得
+        system_font = ui_theme.font.system  # フォント
+        input_def = ui_theme.input_def  # 入力イベント情報
 
         # テキスト表示
         # ---------------------------------------------------------
         msg_text.anim.draw_count += 0.5
         area = msg_text.area  # areaは重いので必ずキャッシュ
 
-        # お試し(会話の時ページごとに挿入する)
+        # talkの時は各ページ先頭にマーク
         if msg_text.is_talk:
             for i,page in enumerate(msg_text.pages):
-                msg_text.pages[i][0] = "＊「" + page[0]
+                msg_text.pages[i][0] = text.MsgDQ.TALK_MARK + page[0]
 
         # Scroll
         scroll_size = msg_text.page_line_num+2
         scroll_buf = msg_text.scroll_buf(scroll_size)
         if msg_text.page_text.startswith("＊「"):
-            scroll_indents = msg_text.scroll_indents(scroll_size, "＊「")
+            scroll_indents = msg_text.scroll_indents(scroll_size)
         else:
-            scroll_indents = msg_text.scroll_indents(scroll_size, "")
+            scroll_indents = [False for _ in range(scroll_size)]
 
         # アニメーション用表示位置ずらし。スクロール時半文字ずれる
         y = -3 if not msg_text.anim.is_finish and len(scroll_buf) >= scroll_size else 5

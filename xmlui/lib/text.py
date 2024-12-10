@@ -86,16 +86,16 @@ class MsgDQ(MsgScr):
         super().__init__(state, page_line_num_attr, wrap_attr)
 
     # 各行に会話用インデントが必要かを返す
-    def scroll_indents(self, scroll_line_num:int, head_str:str) -> list[bool]:
+    def scroll_indents(self, scroll_line_num:int) -> list[bool]:
         # 現在ページの挿入
         anim_line_num = len(self.anim.text.splitlines())
-        indents = [True if not self.pages[self.page_no][i].startswith(head_str) else False for i in range(anim_line_num)]
+        indents = [True if not self.pages[self.page_no][i].startswith(self.TALK_MARK) else False for i in range(anim_line_num)]
 
         # 行が足りるまでページを巻き戻して挿入
         for page_no in range(self.page_no-1, -1, -1):
             if len(indents) >= scroll_line_num:
                 break
-            indents =  [True if not line.startswith(head_str) else False for line in self.pages[page_no]] + indents
+            indents =  [True if not line.startswith(self.TALK_MARK) else False for line in self.pages[page_no]] + indents
 
         # 最大行数に絞る。アニメーション中だけ最下行が使える。
         max_line = scroll_line_num if not self.anim.is_finish else scroll_line_num-1
