@@ -9,7 +9,7 @@
         </game_start>
         <game_speed abs_x="48" abs_y="200" item_w="64" use_event="listener">
             <menu_item action="slow">SLOW</menu_item>
-            <menu_item x="-5" action="normal">NORMAL</menu_item>
+            <menu_item x="-5" action="normal" selected="True">NORMAL</menu_item>
             <menu_item action="fast">FAST</menu_item>
         </game_speed>
     </game_title>

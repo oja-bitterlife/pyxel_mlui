@@ -13,7 +13,7 @@ class Title:
         self.xmlui.template_fromfile("assets/ui/title.xml", self.UI_TEMPLATE_TITLE)
         self.xmlui.open(self.UI_TEMPLATE_TITLE, "game_title")
 
-        ui_init(self.xmlui)
+        ui_init(self.xmlui, "title")
 
     def __del__(self):
         self.xmlui.remove_template(self.UI_TEMPLATE_TITLE)
@@ -39,14 +39,14 @@ class Title:
         if pyxel.btn(pyxel.KEY_BACKSPACE):
             self.xmlui.on(ui_theme.input_def.BTN_B)
 
-        self.xmlui.draw([])
+        self.xmlui.draw(["title"])
 
 
 # タイトル画面UI
 # ---------------------------------------------------------
 from ui_common import draw_menu_cursor
-def ui_init(xmlui:XMLUI):
-    title_select = select.Decorator(xmlui, "title")
+def ui_init(xmlui:XMLUI, group:str):
+    title_select = select.Decorator(xmlui, group)
 
     @title_select.list("game_start", "menu_item", "item_w", "item_h")
     def game_start(game_start:select.List, event:XUEvent):
@@ -66,9 +66,6 @@ def ui_init(xmlui:XMLUI):
 
     @title_select.list("game_speed", "menu_item", "item_w", "item_h")
     def game_speed(game_speed:select.List, event:XUEvent):
-        if event.on_init:  # 初期化
-            game_speed.select(1)  # デフォルトはNormal
-
         # カーソル追加
         draw_menu_cursor(game_speed.selected_item, 0, 1)
 

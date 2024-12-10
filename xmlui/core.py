@@ -374,6 +374,9 @@ class XUState:
     @property
     def action(self) -> str:  # イベント情報取得
         return self.attr_str("action", "")
+    @property
+    def selected(self) -> bool:  # 選択アイテムの選択状態
+        return self.attr_bool("selected", False)
 
     @property
     def owner(self) -> str:  # close時のidを設定
@@ -820,17 +823,32 @@ class XUSelectBase(_XUUtilBase):
     SELECTED_NO_ATTR = "_xmlui_selected_no"
 
     def __init__(self, state:XUState, items:list[XUSelectItem], rows:int, item_w:int, item_h:int):
+        need_init = not state.exists_tag(self.ROOT_TAG)
+
         super().__init__(state, self.ROOT_TAG)
         self._rows = rows
         self._items = items
 
-        # 座標設定
+        # 最初だけの初期化
+        if need_init:
+            # タグに付いてるselected取得
+            for i,item in enumerate(items):
+                if item.selected:
+                    self.selected_no = i
+                    break
+
+        # アイテム設定
         for i,item in enumerate(self._items):
             item.set_pos(i % rows * item_w, i // rows * item_h)
+            item.set_attr("selected", i == self.selected_no)
 
     @property
     def selected_no(self) -> int:
         return self.attr_int(self.SELECTED_NO_ATTR, 0)
+    @selected_no.setter
+    def selected_no(self, no:int) -> int:
+        self.set_attr(self.SELECTED_NO_ATTR, no)
+        return no
 
     @property
     def selected_item(self) -> XUState:
