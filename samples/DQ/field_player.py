@@ -1,4 +1,5 @@
 import pyxel
+import field_npc
 
 class Player:
     def __init__(self, x, y):
@@ -7,14 +8,14 @@ class Player:
         self.move_x = 0
         self.move_y = 0
 
-    def update(self, blocks, npcs):
+    def update(self, blocks:list[list[int]], npcs:list[field_npc.NPC_Data]):
         def _hitcheck(x, y):
             block_x = x // 16
             block_y = y // 16
             if blocks[block_y][block_x] != 2:
                 return False
             for npc in npcs:
-                if npc[1] == block_x and npc[2] == block_y:
+                if npc.x == block_x and npc.y == block_y:
                     return False
             return True
 

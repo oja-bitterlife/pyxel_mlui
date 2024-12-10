@@ -34,7 +34,7 @@ class Field:
         # UIメニューが開いていたらキャラが動かないように
         if not self.xmlui.exists_id("menu"):
             # プレイヤの移動
-            self.player.update(self.bg.blocks, self.npc.npc)
+            self.player.update(self.bg.blocks, self.npc.npc_data)
 
             # キャラが動いていなければメニューオープン可能
             if not self.player.is_moving:
@@ -43,7 +43,8 @@ class Field:
         else:
             # 会話イベントチェック
             self.npc.check_talk(self.xmlui, self.player)
-
+            if "open_door" in self.xmlui.event.trg:
+                print("door")
             
 
 

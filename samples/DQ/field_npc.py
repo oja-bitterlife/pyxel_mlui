@@ -1,25 +1,34 @@
+import dataclasses
 import pyxel
 
 from xmlui.lib import text
 import field
 
+@dataclasses.dataclass
+class NPC_Data:
+    name: str
+    x: int
+    y: int
+    color: int
+    talk: str
+
 class NPC:
-    npc = [
+    npc_data = [
         # typ,   x, y, color, talk
-        ["king", 8, 8, 2, "おうさままままままままままままままままままままままままままままままままままままままままままままままままままままままままままままま"],
-        ["knight1", 8, 11, 3, "とびらのまえで　とびら　をせんたくしてね"],
-        ["knight2", 10, 11, 3, "へいし　だよ\nげんじ　じゃないよ"],
-        ["knighg3", 12, 9, 3, "たからばこ？\nみじっそ…とっちゃだめだからね？"],
+        NPC_Data("king", 8, 8, 2, "おうさままままままままままままままままままままままままままままままままままままままままままままままままままままままままままままま"),
+        NPC_Data("knight1", 8, 11, 3, "とびらのまえで　とびら　をせんたくしてね"),
+        NPC_Data("knight2", 10, 11, 3, "へいし　だよ\nげんじ　じゃないよ"),
+        NPC_Data("knighg3", 12, 9, 3, "たからばこ？\nみじっそ…とっちゃだめだからね？"),
     ]
     def draw(self, scroll_x, scroll_y):
-        for npc in self.npc:
-            pyxel.circ(npc[1]*16+scroll_x+7, npc[2]*16+scroll_y+7, 6, npc[3])
+        for data in self.npc_data:
+            pyxel.circ(data.x*16+scroll_x+7, data.y*16+scroll_y+7, 6, data.color)
 
     # 会話チェック
     def _check(self, block_x, block_y) -> str:
-        for npc in self.npc:
-            if npc[1] == block_x and npc[2] == block_y:
-                return npc[4]
+        for data in self.npc_data:
+            if data.x == block_x and data.y == block_y:
+                return data.talk
         return ""
 
     # 会話イベントチェック
