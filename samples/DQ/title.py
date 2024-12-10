@@ -50,9 +50,6 @@ def ui_init(xmlui:XMLUI, group:str):
 
     @title_select.list("game_start", "menu_item", "item_w", "item_h")
     def game_start(game_start:select.List, event:XUEvent):
-        # カーソル追加
-        draw_menu_cursor(game_start.selected_item, 0, 1)
-
         # メニュー選択
         input_def = ui_theme.input_def
         game_start.select_by_event(event.trg, *input_def.UP_DOWN)
@@ -66,9 +63,6 @@ def ui_init(xmlui:XMLUI, group:str):
 
     @title_select.list("game_speed", "menu_item", "item_w", "item_h")
     def game_speed(game_speed:select.List, event:XUEvent):
-        # カーソル追加
-        draw_menu_cursor(game_speed.selected_item, 0, 1)
-
         # メニュー選択。カーソルが動いたらTrueが返る
         input_def = ui_theme.input_def
         if game_speed.select_by_event(event.trg, *input_def.LEFT_RIGHT):
@@ -87,3 +81,7 @@ def ui_init(xmlui:XMLUI, group:str):
     def start_item(menu_item:select.Item, event:XUEvent):
         area = menu_item.area
         pyxel.text(area.x+6, area.y, menu_item.text, 7, ui_theme.font.system.font)
+    
+        # カーソル追加
+        if menu_item.selected:
+            draw_menu_cursor(menu_item, 0, 1)

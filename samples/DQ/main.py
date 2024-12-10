@@ -11,8 +11,8 @@ from field import Field
 
 # 最初はタイトル
 from ui_common import xmlui
-scene = Title(xmlui)
-#scene = Field(xmlui)
+#scene = Title(xmlui)
+scene = Field(xmlui)
 
 # Main
 def update(): # フレームの更新処理

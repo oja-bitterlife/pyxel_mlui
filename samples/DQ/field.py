@@ -143,7 +143,8 @@ def ui_init(xmlui, group):
         # ウインドウのクリップ状態に合わせて表示する
         if area.y < get_world_clip(XUWinBase.find_win(menu_item)).bottom():
             pyxel.text(area.x+6, area.y, menu_item.text, 7, ui_theme.font.system.font)
-            draw_menu_cursor(menu_item, 0, 0)
+            if menu_item.selected:
+                draw_menu_cursor(menu_item, 0, 0)
 
     # コマンドメニュー
     # ---------------------------------------------------------
