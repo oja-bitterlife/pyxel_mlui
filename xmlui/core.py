@@ -473,9 +473,9 @@ class XMLUI(XUState):
     # 初期化。<xmlui>を持つXMLを突っ込む
     def __init__(self, screen_w:int, screen_h:int):
         # rootを作って自分自身に設定
-        xmlui = Element("xmlui")
-        xmlui.attrib["id"] = "xmlui"
-        super().__init__(self, xmlui)
+        root = Element("root")
+        root.attrib["id"] = "root"
+        super().__init__(self, root)
 
         # ウインドウサイズを記憶
         self.screen_w = screen_w
@@ -497,9 +497,9 @@ class XMLUI(XUState):
         self.debug = XMLUI_Debug(self)
 
         # root
-        self.root = XUState(self, Element("root")).set_attr("id", "root")
+        self.base = XUState(self, Element("base")).set_attr("id", "base")
         self.over = XUState(self, Element("oevr")).set_attr("id", "over")
-        self.add_child(self.root)  # 普通に使うもの
+        self.add_child(self.base)  # 普通に使うもの
         self.add_child(self.over)  # 上に強制で出す物
 
     # template操作
@@ -593,12 +593,12 @@ class XMLUI(XUState):
             event_names = [event_names]  # 配列で統一
         for event_name in event_names:
             if event_name in self.event.trg:
-                return self.root.open(template_name, id, id_alias)
+                return self.base.open(template_name, id, id_alias)
         return None
 
     # override
     def open(self, template_name:str, id:str, id_alias:str|None=None) -> XUState:
-        return self.root.open(template_name, id, id_alias)
+        return self.base.open(template_name, id, id_alias)
 
     # over側で開く
     def popup(self, template_name:str, id:str, id_alias:str|None=None) -> XUState:
