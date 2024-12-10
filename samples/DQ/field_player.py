@@ -1,5 +1,6 @@
 import pyxel
 import field_npc
+import field_bg
 
 class Player:
     def __init__(self, x, y):
@@ -13,7 +14,7 @@ class Player:
             block_x = x // 16
             block_y = y // 16
             match blocks[block_y][block_x]:
-                case 2 | 6:
+                case field_bg.BG.FLOOR | field_bg.BG.STAIRS:
                     pass
                 case _:
                     return False

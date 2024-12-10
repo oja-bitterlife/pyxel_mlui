@@ -5,7 +5,9 @@ from xmlui.lib import text
 import field
 
 class BG:
+    FLOOR = 2
     DOOR = 5
+    STAIRS = 6
 
     # 背景
     blocks = [
@@ -72,3 +74,10 @@ class BG:
                 msg_win = xmlui.find_by_id("menu").open(field.Field.UI_TEMPLATE_FIELD, "message")
                 msg_text = msg_win.find_by_tag("msg_text")
                 text.MsgDQ.start_system(msg_text, "とびら　がない")  # systemメッセージ
+
+    # 階段チェック
+    def check_stairs(self, xmlui, player):
+        if "down_stairs" in xmlui.event.trg:
+            block_x, block_y = player.x//16, player.y//16
+            if self.blocks[block_y][block_x] == self.STAIRS:
+                xmlui.on("start_battle")

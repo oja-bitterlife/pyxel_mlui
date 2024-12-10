@@ -44,9 +44,8 @@ class Field:
             # 会話イベントチェック
             self.npc.check_talk(self.xmlui, self.player)
             self.bg.check_door(self.xmlui, self.player)
+            self.bg.check_stairs(self.xmlui, self.player)
             
-
-
     def draw(self):
         # プレイヤを中心に世界が動く。さす勇
         scroll_x = -self.player.x +160-32
@@ -156,8 +155,8 @@ def ui_init(xmlui, group):
                     menu_grid.xmlui.popup("common", "under_construct")
                 case "tools":
                     menu_grid.xmlui.popup("common", "under_construct")
-                case "step":
-                    menu_grid.xmlui.popup("common", "under_construct")
+                case "stairs":
+                    return "down_stairs"
                 case "check":
                     menu_grid.xmlui.popup("common", "under_construct")
                 case "door":

@@ -9,7 +9,7 @@
             <menu_item action="spel">じゅもん</menu_item>
             <menu_item action="status">つよさ</menu_item>
             <menu_item action="tools">どうぐ</menu_item>
-            <menu_item action="step">かいだん</menu_item>
+            <menu_item action="stairs">かいだん</menu_item>
             <menu_item action="check">しらべる</menu_item>
             <menu_item action="door">とびら</menu_item>
             <menu_item action="take">とる</menu_item>
