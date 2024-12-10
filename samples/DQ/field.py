@@ -56,7 +56,7 @@ class Field:
             if talk is not None:
                 msg_win = self.xmlui.find_by_id("menu").open(Field.UI_TEMPLATE_FIELD, "message")
                 msg_text = msg_win.find_by_tag("msg_text")
-                msg_text.text = "＊「" + talk
+                text.MsgDQ.start_talk(msg_text, talk)
 
     def draw(self):
         # プレイヤを中心に世界が動く。さす勇
@@ -193,10 +193,9 @@ def ui_init(xmlui, group):
         area = msg_text.area  # areaは重いので必ずキャッシュ
 
         # お試し(会話の時ページごとに挿入する)
-        if msg_text.pages[0][0].startswith("＊「"):
+        if msg_text.is_talk:
             for i,page in enumerate(msg_text.pages):
-                if i > 0:
-                    msg_text.pages[i][0] = "＊「" + page[0]
+                msg_text.pages[i][0] = "＊「" + page[0]
 
         # Scroll
         scroll_size = msg_text.page_line_num+2

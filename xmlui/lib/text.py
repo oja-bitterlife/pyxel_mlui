@@ -78,11 +78,15 @@ class MsgScr(Msg):
 
 # おまけ
 class MsgDQ(MsgScr):
+    TALK_MARK = "＊「"
+    IS_TALK_ATTR = "_xmlui_talk_mark"
+
     # タグのテキストを処理する
     def __init__(self, state:XUState, page_line_num_attr:str, wrap_attr:str):
         super().__init__(state, page_line_num_attr, wrap_attr)
 
-    def scroll_indents(self:"MsgDQ", scroll_line_num:int, head_str:str) -> list[bool]:
+    # 各行に会話用インデントが必要かを返す
+    def scroll_indents(self, scroll_line_num:int, head_str:str) -> list[bool]:
         # 現在ページの挿入
         anim_line_num = len(self.anim.text.splitlines())
         indents = [True if not self.pages[self.page_no][i].startswith(head_str) else False for i in range(anim_line_num)]
@@ -99,6 +103,19 @@ class MsgDQ(MsgScr):
 
         return indents
 
+    # テキストの先頭に会話マークを付ける
+    @classmethod
+    def convert_talk(cls, text:str) -> str:
+        return cls.TALK_MARK + text
+
+    @classmethod
+    def start_talk(cls, state:XUState, text:str):
+        state.text = text
+        state.set_attr(cls.IS_TALK_ATTR, True)
+
+    @property
+    def is_talk(self):
+        return self.attr_bool(self.IS_TALK_ATTR, False)
 
 # デコレータを用意
 # *****************************************************************************
