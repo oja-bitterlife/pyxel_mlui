@@ -24,7 +24,7 @@ class Decorator(DefaultDecorator):
         super().__init__(xmlui, group)
 
     def item(self, item_tag:str):
-        def wrapper(bind_func:Callable[[Item,XUEvent], None]):
+        def wrapper(bind_func:Callable[[Item,XUEvent], str|None]):
             # 登録用関数をジェネレート
             def draw(state:XUState, event:XUEvent):
                 return bind_func(Item(state), event)
@@ -33,7 +33,7 @@ class Decorator(DefaultDecorator):
         return wrapper
 
     def grid(self, tag_name:str, item_tag:str, rows_attr:str, item_w_attr:str, item_h_attr:str):
-        def wrapper(bind_func:Callable[[Grid,XUEvent], None]):
+        def wrapper(bind_func:Callable[[Grid,XUEvent], str|None]):
             # 登録用関数をジェネレート
             def draw(state:XUState, event:XUEvent):
                 return bind_func(Grid(state, item_tag, rows_attr, item_w_attr, item_h_attr), event)

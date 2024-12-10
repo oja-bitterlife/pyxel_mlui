@@ -44,6 +44,8 @@ class Field:
             # 会話イベントチェック
             self.npc.check_talk(self.xmlui, self.player)
 
+            
+
 
     def draw(self):
         # プレイヤを中心に世界が動く。さす勇
@@ -159,7 +161,7 @@ def ui_init(xmlui, group):
                 case "check":
                     menu_grid.xmlui.popup("common", "under_construct")
                 case "door":
-                    menu_grid.xmlui.popup("common", "under_construct")
+                    return "open_door"
                 case "take":
                     menu_grid.xmlui.popup("common", "under_construct")
 
