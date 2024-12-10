@@ -31,35 +31,33 @@ class Field:
         self.xmlui.remove_drawfunc("field")
 
     def update(self):
-        # UIメニューが開いていたらなにもしない
-        if self.xmlui.exists_id("menu"):
-            return None
+        # UIメニューが開いていたらキャラが動かないように
+        if not self.xmlui.exists_id("menu"):
+            # プレイヤの移動
+            self.player.update(self.bg.blocks, self.npc.npc)
 
-        # メニューオープン
-        if not self.player.is_moving:
-            self.xmlui.open_by_event(ui_theme.input_def.BTN_A, self.UI_TEMPLATE_FIELD, "menu")
+            # キャラが動いていなければメニューオープン可能
+            if not self.player.is_moving:
+                self.xmlui.open_by_event(ui_theme.input_def.BTN_A, self.UI_TEMPLATE_FIELD, "menu")
 
-        # プレイヤの移動
-        self.player.update(self.bg.blocks, self.npc.npc)
+        else:
+            # 会話イベント発生
+            talk = None
+            if "start_talk_east" in self.xmlui.event.trg:
+                talk = self.npc.check(self.player.block_x+1, self.player.block_y)
+            if "start_talk_west" in self.xmlui.event.trg:
+                talk = self.npc.check(self.player.block_x-1, self.player.block_y)
+            if "start_talk_south" in self.xmlui.event.trg:
+                talk = self.npc.check(self.player.block_x, self.player.block_y+1)
+            if "start_talk_north" in self.xmlui.event.trg:
+                talk = self.npc.check(self.player.block_x, self.player.block_y-1)
 
-        talk = None
-        if "talk_east" in self.xmlui.event.trg:
-            talk = self.npc.check(self.player.x+1, self.player.y)
-        if "talk_west" in self.xmlui.event.trg:
-            talk = self.npc.check(self.player.x-1, self.player.y)
-        if "talk_south" in self.xmlui.event.trg:
-            talk = self.npc.check(self.player.x, self.player.y+1)
-        if "talk_north" in self.xmlui.event.trg:
-            talk = self.npc.check(self.player.x, self.player.y-1)
-            print(talk ,self.player.x, self.player.y-1)
-
-        if talk is not None:
-            msg_win = self.xmlui.find_by_id("menu").open(Field.UI_TEMPLATE_FIELD, "message")
-            msg_text = msg_win.find_by_tag("msg_text")
-            # msg_text.text = dir_select.selected_item.text + " を せんたくした"
+            # 会話が発生した
+            if talk is not None:
+                msg_win = self.xmlui.find_by_id("menu").open(Field.UI_TEMPLATE_FIELD, "message")
+                msg_text = msg_win.find_by_tag("msg_text")
+                msg_text.text = talk
         
-
-        return None
 
     def draw(self):
         # プレイヤを中心に世界が動く。さす勇
@@ -274,7 +272,7 @@ def ui_init(xmlui, group):
         if input_def.BTN_A in event.trg:
             dir_win = XUWinBase.find_win(dir_select)
             dir_win.start_close()
-            return f"talk_{dir_select.action}"
+            return f"start_talk_{dir_select.action}"
 
         # 閉じる
         if input_def.BTN_B in event.trg:

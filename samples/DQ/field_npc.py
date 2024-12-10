@@ -13,8 +13,8 @@ class NPC:
             pyxel.circ(npc[1]*16+scroll_x+7, npc[2]*16+scroll_y+7, 6, npc[3])
 
 
-    def check(self, x, y) -> str | None:
+    def check(self, block_x, block_y) -> str | None:
         for npc in self.npc:
-            if npc[1] == x and npc[2] == y:
+            if npc[1] == block_x and npc[2] == block_y:
                 return npc[4]
         return None

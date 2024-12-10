@@ -51,6 +51,14 @@ class Player:
     def is_moving(self) -> bool:
         return self.move_x != 0 or self.move_y != 0
 
+    @property
+    def block_x(self) -> int:
+        return self.x // 16
+
+    @property
+    def block_y(self) -> int:
+        return self.y // 16
+
     def draw(self):
         pyxel.circ(128+8, 127, 7, 12)
 
