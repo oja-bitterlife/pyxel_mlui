@@ -41,25 +41,32 @@ class Field:
                 self.xmlui.open_by_event(ui_theme.input_def.BTN_A, self.UI_TEMPLATE_FIELD, "menu")
 
         else:
-            # 会話イベント発生
-            talk = None
-            if "start_talk_east" in self.xmlui.event.trg:
-                talk = self.npc.check(self.player.block_x+1, self.player.block_y)
-            if "start_talk_west" in self.xmlui.event.trg:
-                talk = self.npc.check(self.player.block_x-1, self.player.block_y)
-            if "start_talk_south" in self.xmlui.event.trg:
-                talk = self.npc.check(self.player.block_x, self.player.block_y+1)
-            if "start_talk_north" in self.xmlui.event.trg:
-                talk = self.npc.check(self.player.block_x, self.player.block_y-1)
+            # 会話イベントチェック
+            self.check_npc_talk()
 
-            # 会話が発生した
-            if talk is not None:
-                msg_win = self.xmlui.find_by_id("menu").open(Field.UI_TEMPLATE_FIELD, "message")
-                msg_text = msg_win.find_by_tag("msg_text")
-                if talk:
-                    text.MsgDQ.start_talk(msg_text, talk)
-                else:
-                    text.MsgDQ.start_system(msg_text, "だれもいません")
+    # 会話イベントチェック
+    def check_npc_talk(self):
+        talk = None
+        if "start_talk_east" in self.xmlui.event.trg:
+            talk = self.npc.check(self.player.block_x+1, self.player.block_y)
+        if "start_talk_west" in self.xmlui.event.trg:
+            talk = self.npc.check(self.player.block_x-1, self.player.block_y)
+        if "start_talk_south" in self.xmlui.event.trg:
+            talk = self.npc.check(self.player.block_x, self.player.block_y+1)
+        if "start_talk_north" in self.xmlui.event.trg:
+            talk = self.npc.check(self.player.block_x, self.player.block_y-1)
+
+        # 会話が発生した
+        if talk is not None:
+            # メッセージウインドウを開く
+            msg_win = self.xmlui.find_by_id("menu").open(Field.UI_TEMPLATE_FIELD, "message")
+            msg_text = msg_win.find_by_tag("msg_text")
+            if talk:
+                text.MsgDQ.start_talk(msg_text, talk)  # talkでテキスト開始
+            else:
+                text.MsgDQ.start_system(msg_text, "だれもいません")  # systemメッセージ
+
+
 
     def draw(self):
         # プレイヤを中心に世界が動く。さす勇
