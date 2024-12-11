@@ -263,7 +263,7 @@ def ui_init(xmlui, group):
         # テキストは右寄せ
         area = status_item.area
         x, y = XURect.align_offset(area.w, area.h, system_font.text_width(text) + 5, 0, status_item.align, status_item.valign)
-        if y < get_world_clip(XUWinBase.find_win(status_item)).bottom():
+        if area.y+y < get_world_clip(XUWinBase.find_win(status_item)).bottom():
             pyxel.text(area.x + x, area.y + y, text, 7, system_font.font)
 
 
