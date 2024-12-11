@@ -99,7 +99,7 @@ class WinFrame(XUWinBase):
                     offset = (screen_area.y + y_)*screen_buf_w + screen_area.x + area.w-size
                     screen_buf[offset:offset+right_clip.w] = rev_butes[:right_clip.w]
 
-class RoundWin(WinFrame):
+class RoundFrame(WinFrame):
     def _get_veclen(self, x:int, y:int, org_x:int, org_y:int) -> int:
         return math.ceil(math.sqrt((x-org_x)**2 + (y-org_y)**2))
 
@@ -120,7 +120,7 @@ class RoundWin(WinFrame):
                 return l if l < size else -1
         return self._get13574index(size, x, y, w, h)
 
-class RectWin(WinFrame):
+class RectFrame(WinFrame):
     # override
     def _get_pattern_index(self, size:int, x:int, y:int, w:int, h:int) -> int:
         match self.get_area(size, x, y, w, h):
@@ -144,20 +144,20 @@ class Decorator(DefaultDecorator):
     def __init__(self, xmlui:XMLUI, group:str|None=None):
         super().__init__(xmlui, group)
 
-    def round_win(self, tag_name:str):
-        def wrapper(bind_func:Callable[[RoundWin,XUEvent], str|None]):
+    def round_frame(self, tag_name:str):
+        def wrapper(bind_func:Callable[[RoundFrame,XUEvent], str|None]):
             # 登録用関数をジェネレート
             def draw(state:XUState, event:XUEvent):
-                return bind_func(RoundWin(state), event)
+                return bind_func(RoundFrame(state), event)
             # 関数登録
             self.xmlui.set_drawfunc(tag_name, draw, self.group)
         return wrapper
 
-    def rect_win(self, tag_name:str):
-        def wrapper(bind_func:Callable[[RectWin,XUEvent], str|None]):
+    def rect_frame(self, tag_name:str):
+        def wrapper(bind_func:Callable[[RectFrame,XUEvent], str|None]):
             # 登録用関数をジェネレート
             def draw(state:XUState, event:XUEvent):
-                return bind_func(RectWin(state), event)
+                return bind_func(RectFrame(state), event)
             # 関数登録
             self.xmlui.set_drawfunc(tag_name, draw, self.group)
         return wrapper
