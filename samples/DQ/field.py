@@ -219,20 +219,22 @@ def ui_init(xmlui, group):
             scroll_indents = [False for _ in range(scroll_size)]
 
         # アニメーション用表示位置ずらし。スクロール時半文字ずれる
-        y = -3 if not msg_text.anim.is_finish and len(scroll_buf) >= scroll_size else 5
+        shift_y = -3 if not msg_text.anim.is_finish and len(scroll_buf) >= scroll_size else 5
 
         # テキスト描画
         line_height = system_font.size + 3  # 行間設定。見えない行間が見える人向けではない一般向け
         for i,page in enumerate(scroll_buf):
             x = area.x + (system_font.size*2 if scroll_indents[i] else 0)
-            pyxel.text(x, y + area.y + i*line_height, page, 7, system_font.font)
+            y = shift_y + area.y + i*line_height
+            if y < get_world_clip(XUWinBase.find_win(msg_text)).bottom():
+                pyxel.text(x, y, page, 7, system_font.font)
 
         # カーソル表示
         # ---------------------------------------------------------
         if msg_text.is_next_wait:
             cursor_count = msg_text.anim.draw_count-msg_text.anim.length
             if cursor_count//7 % 2 == 0:
-                draw_msg_cursor(msg_text, 0, len(scroll_buf)*line_height + y-3)
+                draw_msg_cursor(msg_text, 0, len(scroll_buf)*line_height + shift_y-3)
 
         # 入力アクション
         # ---------------------------------------------------------
