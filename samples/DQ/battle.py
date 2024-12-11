@@ -28,7 +28,6 @@ class Battle:
         pass
             
     def draw(self):
-
         # UIの描画(fieldとdefaultグループ)
         self.xmlui.draw([])
 

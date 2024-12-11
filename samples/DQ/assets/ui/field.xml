@@ -45,17 +45,11 @@
     </round_win>
 
     <info>どうぐ</info>
-    <round_win x="34" y="17" w="96" h="192" id="tools">
-        <menu_item_title x="22" y="0" w="52" h="12" align="center">どうぐ</menu_item_title>
-        <tools_list x="8" y="14" item_h="16">
-            <tools_item action="talk">はなす</tools_item>
-            <tools_item action="spel">じゅもん</tools_item>
-            <tools_item action="status">つよさ</tools_item>
-            <tools_item action="tools">どうぐ</tools_item>
-            <tools_item action="stairs">かいだん</tools_item>
-            <tools_item action="check">しらべる</tools_item>
-            <tools_item action="door">とびら</tools_item>
-            <tools_item action="take">とる</tools_item>
+    <round_win x="22" y="17" w="108" h="192" id="tools">
+        <menu_item_title x="34" y="0" w="52" h="12" align="center">どうぐ</menu_item_title>
+        <tools_list x="10" y="14" item_h="16">
+            <tools_item action="talk">やくそう</tools_item>
+            <tools_item action="spel">きめらのつばさ</tools_item>
         </tools_list>
     </round_win>
 

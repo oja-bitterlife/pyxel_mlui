@@ -301,19 +301,20 @@ def ui_init(xmlui, group):
     # ---------------------------------------------------------
     @field_select.list("tools_list", "tools_item", "item_w", "item_h")
     def tools_list(tools_list:select.List, event:XUEvent):
-        area = tools_list.area
         input_def = ui_theme.input_def
+
+        tools_list.select_by_event(event.trg, *input_def.UP_DOWN)
         
         # 閉じる
         if input_def.BTN_B in event.trg:
             XUWinBase.find_win(tools_list).start_close()
 
 
-    @field_text.label("tools_item")
-    def tools_item(tools_item:text.Label, event:XUEvent):
+    @field_select.item("tools_item")
+    def tools_item(tools_item:select.Item, event:XUEvent):
         # ウインドウのクリップ状態に合わせて表示する
         if tools_item.area.y < get_world_clip(XUWinBase.find_win(tools_item)).bottom():
-            pyxel.text(tools_item.area.x, tools_item.area.y, tools_item.text, 7, ui_theme.font.system.font)
+            pyxel.text(6+tools_item.area.x, tools_item.area.y, tools_item.text, 7, ui_theme.font.system.font)
 
         # カーソル表示
         if tools_item.selected and tools_item.enable:
