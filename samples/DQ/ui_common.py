@@ -63,11 +63,11 @@ def popup_text(popup_text:text.Msg, event:XUEvent):
     area = popup_text.area  # areaは重いので必ずキャッシュ
     system_font = ui_theme.font.system
     h = len(popup_text.text.split()) * system_font.size
-    y = area.aligned_y(h, "center")
 
     for i,page in enumerate(popup_text.text.split()):
-        x = area.aligned_x(system_font.text_width(page), "center")
-        pyxel.text(x, y+i*system_font.size, page, 7, system_font.font)
+        area = popup_text.area
+        x, y = area.aligned_pos(system_font.text_width(page), h, XURect.ALIGN_CENTER, XURect.ALIGN_CENTER)
+        pyxel.text(x, y + i*system_font.size, page, 7, system_font.font)
 
 
 # ゲーム内共通

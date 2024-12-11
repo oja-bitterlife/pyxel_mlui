@@ -32,20 +32,12 @@ class FontBase:
 class Label(XUState):
     def __init__(self, state:XUState, align_attr:str, valign_attr:str):
         super().__init__(state.xmlui, state._element)
-        self._align = state.attr_str(align_attr, "left")
-        self._valign = state.attr_str(valign_attr, "top")
+        self.align = state.attr_str(align_attr, "left")
+        self.valign = state.attr_str(valign_attr, "top")
 
-    def aligned_pos(self, font:FontBase, w:int=0, h:int=0) -> tuple[int, int]:
-        area = self.area  # 低速なので使うときは必ず一旦ローカルに
-        x = area.aligned_x(font.text_width(self.text)+w, self._align)
-        y = area.aligned_y(font.size, self._valign)
-        return x, y
-
-    def aligned_area(self, font:FontBase, w:int=0, h:int=0) -> XURect:
-        area = self.area  # 低速なので使うときは必ず一旦ローカルに
-        area.x = area.aligned_x(font.text_width(self.text)+w, self._align)
-        area.y = area.aligned_y(font.size, self._valign)
-        return area
+    def aligned_pos(self, font:FontBase) -> tuple[int, int]:
+        area = self.area
+        return area.aligned_pos(font.text_width(self.text), font.size, self.align, self.valign)
 
 # メッセージ
 class Msg(XUTextPage):

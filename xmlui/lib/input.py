@@ -52,20 +52,12 @@ class Dial(XUDial):
     # タグのテキストを処理する
     def __init__(self, state:XUState, digit_length:int, align:str, valign:str, digit_list:str):
         super().__init__(state, digit_length, digit_list)
-        self._align = align
-        self._valign = valign
+        self.align = align
+        self.valign = valign
 
-    def aligned_pos(self, font:FontBase, w:int=0, h:int=0) -> tuple[int, int]:
+    def aligned_pos(self, font:FontBase) -> tuple[int, int]:
         area = self.area  # 低速なので使うときは必ず一旦ローカルに
-        x = area.aligned_x(font.text_width(self.digits) + w, self._align)
-        y = area.aligned_y(font.size+h, self._valign)
-        return x, y
-
-    def aligned_zenkaku_pos(self, font:FontBase, w:int=0, h:int=0) -> tuple[int, int]:
-        area = self.area  # 低速なので使うときは必ず一旦ローカルに
-        x = area.aligned_x(font.text_width(self.zenkaku_digits) + w, self._align)
-        y = area.aligned_y(font.size+h, self._valign)
-        return x, y
+        return area.aligned_pos(font.text_width(self.digits), font.size, self.align, self.valign)
 
 
 # デコレータを用意

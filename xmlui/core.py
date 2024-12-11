@@ -75,29 +75,33 @@ class XURect:
         return self.y + self.h - bottom_space
 
     # 座標取得
-    def aligned_x(self, w:int=0, align=ALIGN_CENTER) -> int:
+    @classmethod
+    def align_offset(cls, area_w:int, area_h:int, w:int=0, h:int=0, align:str=ALIGN_CENTER, valign:str=ALIGN_CENTER) -> tuple[int, int]:
+        area = XURect(0, 0, area_w, area_h)
         match align:
-            case self.ALIGN_LEFT:
-                x =  self.x
-            case self.ALIGN_CENTER:
-                x = self.center_x(w)
-            case self.ALIGN_RIGHT:
-                x = self.right(w)
+            case cls.ALIGN_LEFT:
+                x = 0
+            case cls.ALIGN_CENTER:
+                x = area.center_x(w)
+            case cls.ALIGN_RIGHT:
+                x = area.right(w)
             case _:
                 raise ValueError(f"align:{align} is not supported.")
-        return x
 
-    def aligned_y(self, h:int=0, valign=ALIGN_CENTER) -> int:
         match valign:
-            case self.ALIGN_TOP:
-                y =  self.y
-            case self.ALIGN_CENTER:
-                y = self.center_y(h)
-            case self.ALIGN_BOTTOM:
-                y = self.bottom(h)
+            case cls.ALIGN_TOP:
+                y = 0
+            case cls.ALIGN_CENTER:
+                y = area.center_y(h)
+            case cls.ALIGN_BOTTOM:
+                y = area.bottom(h)
             case _:
                 raise ValueError(f"align:{valign} is not supported.")
-        return y
+        return x,y
+
+    def aligned_pos(self, w:int=0, h:int=0, align=ALIGN_CENTER, valign=ALIGN_CENTER) -> tuple[int, int]:
+        offset_x, offset_y = self.align_offset(self.w, self.h, w, h, align, valign)
+        return self.x + offset_x, self.y + offset_y
 
     def __repr__(self) -> str:
         return f"RECT({self.x}, {self.y}, {self.w}, {self.h})"

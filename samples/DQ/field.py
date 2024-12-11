@@ -1,7 +1,7 @@
 import pyxel
 
 # タイトル画面
-from xmlui.core import XMLUI,XUEvent,XUWinBase,XUTextBase
+from xmlui.core import XMLUI,XUEvent,XUWinBase,XUTextBase,XURect
 from xmlui.lib import select,text
 from ui_common import ui_theme
 from field_player import Player
@@ -256,13 +256,15 @@ def ui_init(xmlui, group):
     @field_text.label("status_item")
     def status_item(status_item:text.Label, event:XUEvent):
         system_font = ui_theme.font.system
+
         # 値の取得
         text = XUTextBase.dict_new(status_item.text, param_db)
 
         # テキストは右寄せ
-        x, y = status_item.aligned_pos(system_font, 5, 0)
+        area = status_item.area
+        x, y = XURect.align_offset(area.w, area.h, system_font.text_width(text) + 5, 0, status_item.align, status_item.valign)
         if y < get_world_clip(XUWinBase.find_win(status_item)).bottom():
-            pyxel.text(x, y, text, 7, system_font.font)
+            pyxel.text(area.x + x, area.y + y, text, 7, system_font.font)
 
 
     # 会話方向
