@@ -668,8 +668,12 @@ class XUTextBase(str):
         lines =  sum([[line[i:i+wrap] for i in  range(0, len(line), wrap)] for line in tmp_text.splitlines()], [])
 
         # 結合して保存
-        self:XUTextBase = super().__new__(cls, "\n".join(lines))
-        return self
+        return super().__new__(cls, "\n".join(lines))
+
+    # 置き換えパラメータの抜き出し
+    @classmethod
+    def find_params(cls, text) -> set[str]:
+        return set(re.findall(r"{(\S+?)}", text))
 
 # アニメーションテキスト
 class XUTextAnim:

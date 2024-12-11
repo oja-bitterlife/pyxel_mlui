@@ -1,6 +1,7 @@
 import dataclasses
 import pyxel
 
+from xmlui.core import XUTextBase
 from xmlui.lib import text
 import field
 
@@ -15,7 +16,7 @@ class NPC_Data:
 class NPC:
     npc_data = [
         # typ,   x, y, color, talk
-        NPC_Data("king", 8, 8, 2, "おうさままままままままままままままままままままままままままままままままままままままままままままままままままままままままままままま"),
+        NPC_Data("king", 8, 8, 2, "おお{name}よ　しんでしまうとはなさけない"),
         NPC_Data("knight1", 8, 11, 3, "とびらのまえで　とびら　をせんたくしてね"),
         NPC_Data("knight2", 10, 11, 3, "とびらのさきに　かいだんがある"),
         NPC_Data("knighg3", 12, 9, 3, "たからばこ？\nとっちゃだめだだよ？"),
