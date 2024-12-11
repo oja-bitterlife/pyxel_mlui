@@ -24,11 +24,11 @@
                 <status_item y="64" h="16">Ｅ</status_item>
             </status_label>
             <status_num x="8" y="16">
-                <status_item y="0" h="16" align="right">１</status_item>
-                <status_item y="16" h="16" align="right">１２</status_item>
-                <status_item y="32" h="16" align="right">１２３</status_item>
-                <status_item y="48" h="16" align="right">１２３４</status_item>
-                <status_item y="64" h="16" align="right">１２３４５</status_item>
+                <status_item y="0" h="16" align="right">{lv}</status_item>
+                <status_item y="16" h="16" align="right">{hp}</status_item>
+                <status_item y="32" h="16" align="right">{mp}</status_item>
+                <status_item y="48" h="16" align="right">{gold}</status_item>
+                <status_item y="64" h="16" align="right">{exp}</status_item>
             </status_num>
         </round_win>
     </round_win>

@@ -16,7 +16,7 @@ class NPC_Data:
 class NPC:
     npc_data = [
         # typ,   x, y, color, talk
-        NPC_Data("king", 8, 8, 2, "{name}が　つぎのれべるになるには\nあと　{exp}ポイントの\nけいけんが　ひつようじゃ"),
+        NPC_Data("king", 8, 8, 2, "{name}が　つぎのれべるになるには\nあと　{rem_exp}ポイントの\nけいけんが　ひつようじゃ"),
         NPC_Data("knight1", 8, 11, 3, "とびらのまえで　とびら　をせんたくしてね"),
         NPC_Data("knight2", 10, 11, 3, "とびらのさきに　かいだんがある"),
         NPC_Data("knighg3", 12, 9, 3, "たからばこ？\nとっちゃだめだだよ？"),
@@ -50,6 +50,6 @@ class NPC:
             msg_win = xmlui.find_by_id("menu").open(field.Field.UI_TEMPLATE_FIELD, "message")
             msg_text = msg_win.find_by_tag("msg_text")
             if talk:
-                text.MsgDQ.start_talk(msg_text, XUTextBase.format_dict(talk, field.param_db))  # talkでテキスト開始
+                text.MsgDQ.start_talk(msg_text, XUTextBase.dict_format(talk, field.param_db))  # talkでテキスト開始
             else:
                 text.MsgDQ.start_system(msg_text, "だれもいません")  # systemメッセージ

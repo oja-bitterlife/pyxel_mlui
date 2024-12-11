@@ -670,21 +670,25 @@ class XUTextBase(str):
         # 結合して保存
         return super().__new__(cls, "\n".join(lines))
 
+    @classmethod
+    def dict_new(cls, text:str, all_params:dict[str,Any], wrap=4096) -> Self:
+        return cls(XUTextBase.dict_format(text, cls.find_params_dict(text, all_params)), wrap)
+
     # 置き換えパラメータの抜き出し
     @classmethod
     def find_params(cls, text) -> set[str]:
         return set(re.findall(r"{(\S+?)}", text))
 
     @classmethod
-    def mkdict_params(cls, text, all_params:dict[str,Any]) -> dict[str,Any]:
+    def find_params_dict(cls, text:str, all_params:dict[str,Any]) -> dict[str,Any]:
         out:dict[str,Any] = {}
-        for param in set(re.findall(r"{(\S+?)}", text)):
+        for param in cls.find_params(text):
             out[param] = all_params[param]
         return out
 
     @classmethod
-    def format_dict(cls, text, all_params:dict[str,Any]) -> str:
-        return text.format(**cls.mkdict_params(text, all_params))
+    def dict_format(cls, text:str, all_params:dict[str,Any]) -> str:
+        return text.format(**cls.find_params_dict(text, all_params))
 
 # アニメーションテキスト
 class XUTextAnim:

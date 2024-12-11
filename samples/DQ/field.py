@@ -1,7 +1,7 @@
 import pyxel
 
 # タイトル画面
-from xmlui.core import XMLUI,XUEvent,XUWinBase
+from xmlui.core import XMLUI,XUEvent,XUWinBase,XUTextBase
 from xmlui.lib import select,text
 from ui_common import ui_theme
 from field_player import Player
@@ -12,8 +12,12 @@ from field_treasure import Treasure
 # 実際はDB等で運用
 param_db = {
     "name": "おじゃ　",
-    "exp": 1234,
+    "rem_exp": 1234,
+    "lv": 1,
+    "hp": 12,
+    "mp": 123,
     "gold": 1234,
+    "exp": 12345,
     "test": "てすと",
 }
 
@@ -252,6 +256,8 @@ def ui_init(xmlui, group):
     @field_text.label("status_item")
     def status_item(status_item:text.Label, event:XUEvent):
         system_font = ui_theme.font.system
+        # 値の取得
+        status_item.text = XUTextBase.dict_new(status_item.text, param_db)
 
         # テキストは右寄せ
         x, y = status_item.aligned_pos(system_font, 5, 0)
