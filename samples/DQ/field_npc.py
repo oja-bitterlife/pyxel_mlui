@@ -5,6 +5,13 @@ from xmlui.core import XUTextBase
 from xmlui.lib import text
 import field
 
+parameters = {
+    "name": "おじゃ　",
+    "exp": 1234,
+    "gold": 1234,
+    "test": "てすと",
+}
+
 @dataclasses.dataclass
 class NPC_Data:
     name: str
@@ -16,12 +23,14 @@ class NPC_Data:
 class NPC:
     npc_data = [
         # typ,   x, y, color, talk
-        NPC_Data("king", 8, 8, 2, "おお{name}よ　しんでしまうとはなさけない"),
+        NPC_Data("king", 8, 8, 2, "{name}はつぎのれべるまであと　{exp}　のけいけんちがひつようじゃ"),
         NPC_Data("knight1", 8, 11, 3, "とびらのまえで　とびら　をせんたくしてね"),
         NPC_Data("knight2", 10, 11, 3, "とびらのさきに　かいだんがある"),
         NPC_Data("knighg3", 12, 9, 3, "たからばこ？\nとっちゃだめだだよ？"),
     ]
     def draw(self, scroll_x, scroll_y):
+        print(XUTextBase.format_text(self.npc_data[0].talk, parameters))
+
         for data in self.npc_data:
             pyxel.circ(data.x*16+scroll_x+7, data.y*16+scroll_y+7, 6, data.color)
 

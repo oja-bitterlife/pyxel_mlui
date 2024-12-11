@@ -675,6 +675,17 @@ class XUTextBase(str):
     def find_params(cls, text) -> set[str]:
         return set(re.findall(r"{(\S+?)}", text))
 
+    @classmethod
+    def mkdict_params(cls, text, all_params:dict[str,Any]) -> dict[str,Any]:
+        out:dict[str,Any] = {}
+        for param in set(re.findall(r"{(\S+?)}", text)):
+            out[param] = all_params[param]
+        return out
+
+    @classmethod
+    def format_text(cls, text, all_params:dict[str,Any]) -> str:
+        return text.format(**cls.mkdict_params(text, all_params))
+
 # アニメーションテキスト
 class XUTextAnim:
     TEXT_COUNT_ATTR="_xmlui_text_count"
