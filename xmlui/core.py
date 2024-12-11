@@ -349,7 +349,7 @@ class XUState:
     # *************************************************************************
     def _rec_strtree(self, indent:str, pre:str) -> str:
         out = pre + self.tag
-        out += f"@{self.id}" if self.id else ""
+        out += f": {self.id}" if self.id else ""
         out += " " + str(self._element.attrib)
         for element in self._element:
             out += "\n" + XUState(self.xmlui, element)._rec_strtree(indent, pre+indent)
