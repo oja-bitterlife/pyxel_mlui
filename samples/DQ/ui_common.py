@@ -48,8 +48,8 @@ common_text = text.Decorator(xmlui)
 # *****************************************************************************
 # ポップアップウインドウ
 # ---------------------------------------------------------
-@common_win.rect("popup_win")  # アニメはしない
-def popup_win_draw(win:win.Rect, event:XUEvent):
+@common_win.rect_win("popup_win")  # アニメはしない
+def popup_win_draw(win:win.RectWin, event:XUEvent):
     pyxel.rect(win.area.x, win.area.y, win.area.w, win.area.h, 0)
     win.draw_frame(pyxel.screen.data_ptr(), [0,7,13], win.area.inflate(-2, -2))
 
@@ -78,8 +78,8 @@ def popup_text(popup_text:text.Msg, event:XUEvent):
 CLOSING_CLIP_SIZE="_xmlui_closing_clip_size"
 OPENING_CLIP_SIZE="_xmlui_opening_clip_size"
 
-@common_win.round_anim("round_win")
-def round_win(round_win:win.RoundAnim, event:XUEvent):
+@common_win.round_win("round_win")
+def round_win(round_win:win.RoundWin, event:XUEvent):
     area = round_win.area
     clip = get_world_clip(round_win).to_offset()  # クリップエリアの設定
 
