@@ -174,7 +174,7 @@ def ui_init(xmlui, group):
                 case "status":
                     menu_grid.xmlui.popup("common", "under_construct")
                 case "tools":
-                    menu_grid.xmlui.popup("common", "under_construct")
+                    menu_grid.open(Field.UI_TEMPLATE_FIELD, "tools")
                 case "stairs":
                     return "down_stairs"
                 case "check":
@@ -305,3 +305,11 @@ def ui_init(xmlui, group):
         # ウインドウのクリップ状態に合わせて表示する
         if area.y < get_world_clip(XUWinBase.find_win(dir_item)).bottom():
             pyxel.text(area.x, area.y, dir_item.text, 7, ui_theme.font.system.font)
+
+
+    # どうぐメニュー
+    # ---------------------------------------------------------
+    @field_select.list("tools_list", "tools_item", "item_w", "item_h")
+    def tools_list(tools_list:select.List, event:XUEvent):
+        area = tools_list.area
+        

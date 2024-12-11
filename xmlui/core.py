@@ -941,21 +941,21 @@ class XUSelectList(XUSelectBase):
         super().__init__(state, items, rows, item_w, item_h)
   
     # 入力に応じた挙動一括。変更があった場合はTrue
-    def _select_by_event(self, input:set[str], up_event:str, down_event:str, wrap:bool) -> bool:
+    def _select_by_event(self, input:set[str], prev_event:str, next_event:str, wrap:bool) -> bool:
         old_no = self.selected_no
 
-        if up_event in input:
+        if prev_event in input:
             self.next(-1, wrap, wrap)
-        elif down_event in input:
+        elif next_event in input:
             self.next(1, wrap, wrap)
 
         return self.selected_no != old_no
 
-    def select_by_event(self, input:set[str], up_event:str, down_event:str) -> bool:
-        return self._select_by_event(input, up_event, down_event, True)
+    def select_by_event(self, input:set[str], prev_event:str, next_event:str) -> bool:
+        return self._select_by_event(input, prev_event, next_event, True)
 
-    def select_no_wrap(self, input:set[str], up_event:str, down_event:str) -> bool:
-        return self._select_by_event(input, up_event, down_event, False)
+    def select_no_wrap(self, input:set[str], prev_event:str, next_event:str) -> bool:
+        return self._select_by_event(input, prev_event, next_event, False)
 
 
 # ダイアル
