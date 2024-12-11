@@ -305,7 +305,6 @@ class XUState:
     # 自分を親から外す
     def remove(self):
         if self.parent is None:
-            self.marker = "<--- can't remove"
             raise Exception(f"{self.strtree()}\nCan't remove {self.tag}")
         self.parent._element.remove(self._element)
 
@@ -348,13 +347,16 @@ class XUState:
 
     # デバッグ用
     # *************************************************************************
-    def strtree(self, indent:str="  ", pre:str="") -> str:
+    def _rec_strtree(self, indent:str, pre:str) -> str:
         out = pre + self.tag
-        out += f": {self.id}" if self.id else ""
-        out += f" {self.marker}"
+        out += f"@{self.id}" if self.id else ""
+        out += " " + str(self._element.attrib)
         for element in self._element:
-            out += "\n" + XUState(self.xmlui, element).strtree(indent, pre+indent)
+            out += "\n" + XUState(self.xmlui, element)._rec_strtree(indent, pre+indent)
         return out
+
+    def strtree(self) -> str:
+        return self._rec_strtree("  ", "")
 
     # xmluiで特別な意味を持つアトリビュート一覧
     # わかりやすく全てプロパティを用意しておく(デフォルト値も省略せず書く)
@@ -417,14 +419,6 @@ class XUState:
         self.set_attr("enable", enable_)
         return enable_
 
-    @property
-    def marker(self) -> str:  # デバッグ用
-        return self.attr_str("marker", "")
-    @marker.setter
-    def marker(self, marker_:str) -> str:
-        self.set_attr("marker", marker_)
-        return marker_
-
 
 # XMLでUIライブラリ本体
 # #############################################################################
@@ -457,13 +451,14 @@ class XMLUI_Debug:
     # デバッグ用フラグ
     DEBUG_LEVEL_LIB:int = 100  # ライブラリ作成用
     DEBUG_LEVEL_DEFAULT:int = 0
+    DEBUG_PRINT_TREE = "DEBUG_PRINT_TREE"
 
     def __init__(self, xmlui:"XMLUI"):
         self.xmlui = xmlui
         self.level = self.DEBUG_LEVEL_DEFAULT
 
     def update(self):
-        if "DEBUG_PRINT_TREE" in self.xmlui.event.trg:
+        if self.DEBUG_PRINT_TREE in self.xmlui.event.trg:
             print(self.xmlui.strtree())
 
     @property

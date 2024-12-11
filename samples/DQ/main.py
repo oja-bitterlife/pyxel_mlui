@@ -31,6 +31,10 @@ def update(): # フレームの更新処理
                 case "battle":
                     scene = Battle(xmlui)
 
+    # デバッグ用
+    if pyxel.btnp(pyxel.KEY_TAB):
+        print(xmlui.strtree())
+
 def draw(): # 描画処理
     global scene
     # ゲームの描画コード
