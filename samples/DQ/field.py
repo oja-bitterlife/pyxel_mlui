@@ -108,24 +108,22 @@ def ui_init(xmlui, group):
     # コマンドメニューのタイトル
     @field_text.label("title", "align", "valign")
     def title(title:text.Label, event:XUEvent):
-        area = title.area
-        clip = get_world_clip(XUWinBase.find_win(title)).intersect(area)
-        pyxel.rect(area.x, area.y, area.w, clip.h, 0)  # タイトルの下地
+        clip = get_world_clip(XUWinBase.find_win(title)).intersect(title.area)
+        pyxel.rect(title.area.x, title.area.y, title.area.w, clip.h, 0)  # タイトルの下地
 
         # テキストはセンタリング
-        if area.y < clip.bottom():  # world座標で比較
+        if title.area.y < clip.bottom():  # world座標で比較
             x, y = title.aligned_pos(ui_theme.font.system)
             pyxel.text(x, y-1, title.text, 7, ui_theme.font.system.font)
 
     # ステータスウインドウ( ｰ`дｰ´)ｷﾘｯのタイトル
     @field_text.label("status_title", "align", "valign")
     def status_title(status_title:text.Label, event:XUEvent):
-        area = status_title.area
-        clip = get_world_clip(XUWinBase.find_win(status_title)).intersect(area)
-        pyxel.rect(area.x, area.y, area.w, clip.h, 0)  # タイトルの下地
+        clip = get_world_clip(XUWinBase.find_win(status_title)).intersect(status_title.area)
+        pyxel.rect(status_title.area.x, status_title.area.y, status_title.area.w, clip.h, 0)  # タイトルの下地
 
         # テキストは左寄せ
-        if area.y < clip.bottom():  # world座標で比較
+        if status_title.area.y < clip.bottom():  # world座標で比較
             x, y = status_title.aligned_pos(ui_theme.font.system)
             pyxel.text(x+1, y-1, param_db["name"], 7, ui_theme.font.system.font)
 
@@ -133,10 +131,9 @@ def ui_init(xmlui, group):
     # コマンドメニューのタイトル
     @field_text.label("menu_item_title", "align", "valign")
     def menu_item_title(menu_item_title:text.Label, event:XUEvent):
-        area = menu_item_title.area
-        clip = get_world_clip(XUWinBase.find_win(menu_item_title)).intersect(area)
+        clip = get_world_clip(XUWinBase.find_win(menu_item_title)).intersect(menu_item_title.area)
         clip.h = max(clip.h, 4)  # フレームを隠すように
-        pyxel.rect(area.x, area.y, area.w, clip.h, 0)  # タイトルの下地
+        pyxel.rect(menu_item_title.area.x, menu_item_title.area.y, menu_item_title.area.w, clip.h, 0)  # タイトルの下地
 
         # テキストはセンタリングで常に表示
         x, y = menu_item_title.aligned_pos(ui_theme.font.system)
@@ -146,11 +143,9 @@ def ui_init(xmlui, group):
     # ---------------------------------------------------------
     @field_select.item("menu_item")
     def menu_item(menu_item:select.Item, event:XUEvent):
-        area = menu_item.area
-
         # ウインドウのクリップ状態に合わせて表示する
-        if area.y < get_world_clip(XUWinBase.find_win(menu_item)).bottom():
-            pyxel.text(area.x+6, area.y, menu_item.text, 7, ui_theme.font.system.font)
+        if menu_item.area.y < get_world_clip(XUWinBase.find_win(menu_item)).bottom():
+            pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, 7, ui_theme.font.system.font)
 
             # カーソル表示
             if menu_item.selected and menu_item.enable:
@@ -268,9 +263,7 @@ def ui_init(xmlui, group):
     # ---------------------------------------------------------
     @field_select.list("dir_select", "dir_item", "item_w", "item_h")
     def dir_select(dir_select:select.List, event:XUEvent):
-        # メニュー選択
         input_def = ui_theme.input_def
-        # menu_grid.select_by_event(event.trg, *input_def.CURSOR)
 
         # 会話ウインドウは特別な配置
         if input_def.UP in event.trg:
@@ -291,20 +284,17 @@ def ui_init(xmlui, group):
         if input_def.BTN_B in event.trg:
             XUWinBase.find_win(dir_select).start_close()
 
-        # カーソル追加。ウインドウのクリップ状態に合わせて表示する
-        if dir_select.selected_item.area.y < get_world_clip(XUWinBase.find_win(dir_select)).bottom():
-            if event.is_active:
-                draw_menu_cursor(dir_select.selected_item, -5, 0)
-
     # 会話方向アイテム
     # ---------------------------------------------------------
     @field_select.item("dir_item")
     def dir_item(dir_item:select.Item, event:XUEvent):
-        area = dir_item.area
-
         # ウインドウのクリップ状態に合わせて表示する
-        if area.y < get_world_clip(XUWinBase.find_win(dir_item)).bottom():
-            pyxel.text(area.x, area.y, dir_item.text, 7, ui_theme.font.system.font)
+        if dir_item.area.y < get_world_clip(XUWinBase.find_win(dir_item)).bottom():
+            pyxel.text(dir_item.area.x, dir_item.area.y, dir_item.text, 7, ui_theme.font.system.font)
+
+        # カーソル表示
+        if dir_item.selected and dir_item.enable:
+            draw_menu_cursor(dir_item, -5, 0)
 
 
     # どうぐメニュー
@@ -312,4 +302,19 @@ def ui_init(xmlui, group):
     @field_select.list("tools_list", "tools_item", "item_w", "item_h")
     def tools_list(tools_list:select.List, event:XUEvent):
         area = tools_list.area
+        input_def = ui_theme.input_def
         
+        # 閉じる
+        if input_def.BTN_B in event.trg:
+            XUWinBase.find_win(tools_list).start_close()
+
+
+    @field_text.label("tools_item")
+    def tools_item(tools_item:text.Label, event:XUEvent):
+        # ウインドウのクリップ状態に合わせて表示する
+        if tools_item.area.y < get_world_clip(XUWinBase.find_win(tools_item)).bottom():
+            pyxel.text(tools_item.area.x, tools_item.area.y, tools_item.text, 7, ui_theme.font.system.font)
+
+        # カーソル表示
+        if tools_item.selected and tools_item.enable:
+            draw_menu_cursor(tools_item, 0, 0)
