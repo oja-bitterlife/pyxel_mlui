@@ -310,6 +310,12 @@ def ui_init(xmlui, group):
         input_def = ui_theme.input_def
 
         tools_list.select_by_event(event.trg, *input_def.UP_DOWN)
+
+        if input_def.BTN_A in event.trg:
+            if tools_list.action == "herbs":
+                param_db["hp"] += 10
+            else:
+                tools_list.xmlui.popup("common", "under_construct")
         
         # 閉じる
         if input_def.BTN_B in event.trg:
