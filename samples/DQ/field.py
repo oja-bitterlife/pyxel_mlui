@@ -256,13 +256,14 @@ def ui_init(xmlui, group):
     @field_text.label("status_item")
     def status_item(status_item:text.Label, event:XUEvent):
         system_font = ui_theme.font.system
+        print("test")
         # 値の取得
-        status_item.text = XUTextBase.dict_new(status_item.text, param_db)
+        text = XUTextBase.dict_new(status_item.text, param_db)
 
         # テキストは右寄せ
         x, y = status_item.aligned_pos(system_font, 5, 0)
         if y < get_world_clip(XUWinBase.find_win(status_item)).bottom():
-            pyxel.text(x, y, status_item.text, 7, system_font.font)
+            pyxel.text(x, y, text, 7, system_font.font)
 
 
     # 会話方向
