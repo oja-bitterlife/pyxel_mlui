@@ -9,6 +9,14 @@ from field_bg import BG
 from field_npc import NPC
 from field_treasure import Treasure
 
+# 実際はDB等で運用
+param_db = {
+    "name": "おじゃ　",
+    "exp": 1234,
+    "gold": 1234,
+    "test": "てすと",
+}
+
 class Field:
     UI_TEMPLATE_FIELD = "ui_field"
 
@@ -119,7 +127,7 @@ def ui_init(xmlui, group):
         # テキストは左寄せ
         if area.y < clip.bottom():  # world座標で比較
             x, y = status_title.aligned_pos(ui_theme.font.system)
-            pyxel.text(x+1, y-1, status_title.text, 7, ui_theme.font.system.font)
+            pyxel.text(x+1, y-1, param_db["name"], 7, ui_theme.font.system.font)
 
 
     # コマンドメニューのタイトル
