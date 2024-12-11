@@ -29,7 +29,7 @@ class NPC:
         NPC_Data("knighg3", 12, 9, 3, "たからばこ？\nとっちゃだめだだよ？"),
     ]
     def draw(self, scroll_x, scroll_y):
-        print(XUTextBase.format_text(self.npc_data[0].talk, parameters))
+        print(XUTextBase.format_dict(self.npc_data[0].talk, parameters))
 
         for data in self.npc_data:
             pyxel.circ(data.x*16+scroll_x+7, data.y*16+scroll_y+7, 6, data.color)

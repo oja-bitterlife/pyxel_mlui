@@ -683,7 +683,7 @@ class XUTextBase(str):
         return out
 
     @classmethod
-    def format_text(cls, text, all_params:dict[str,Any]) -> str:
+    def format_dict(cls, text, all_params:dict[str,Any]) -> str:
         return text.format(**cls.mkdict_params(text, all_params))
 
 # アニメーションテキスト
