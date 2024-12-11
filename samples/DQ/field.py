@@ -318,6 +318,12 @@ def ui_init(xmlui, group):
         if input_def.BTN_A in event.trg:
             if tools_list.action == "herbs":
                 param_db["hp"] += 10
+                XUWinBase.find_win(tools_list).start_close()
+
+                # メッセージウインドウを開く
+                msg_win = xmlui.find_by_id("menu").open(Field.UI_TEMPLATE_FIELD, "message")
+                msg_text = msg_win.find_by_tag("msg_text")
+                text.MsgDQ.start_system(msg_text, "ＨＰが　１０かいふくした")  # systemメッセージ
             else:
                 tools_list.xmlui.popup("common", "under_construct")
         
