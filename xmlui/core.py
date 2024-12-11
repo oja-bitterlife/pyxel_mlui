@@ -192,14 +192,10 @@ class XUState:
     def tag(self) -> str:
         return self._element.tag
 
-    # textアクセス用
+    # textアクセス用(基本はROで運用)
     @property
     def text(self) -> str:
         return "\n".join([line.strip() for line in self._element.text.splitlines()]) if self._element.text else ""
-    @text.setter
-    def text(self, text_:str) -> str:
-        self._element.text = text_
-        return text_
 
     # その他
     # *************************************************************************
