@@ -250,13 +250,13 @@ class XUState:
         return out
 
     def find_by_id(self, id:str) -> 'XUState':
-        for element in self._element.iter():
-            if element.attrib.get("id") == id:
-                return XUState(self.xmlui, element)
+        for child in self.children:
+            if child.id == id:
+                return child
         raise Exception(f"{self.strtree()}\nID '{id}' not found in '{self.tag}' and children")
 
     def find_by_tagall(self, tag:str) -> list['XUState']:
-        return [XUState(self.xmlui, element) for element in self._element.iter() if element.tag == tag]
+        return [child for child in self.children if child.tag == tag]
 
     def find_by_tag(self, tag:str) -> 'XUState':
         elements:list[XUState] = self.find_by_tagall(tag)
@@ -279,15 +279,15 @@ class XUState:
 
     # すでにツリーに存在するか
     def exists_id(self, id:str) -> bool:
-        for element in self._element.iter():
-            if element.attrib.get("id") == id:
+        for child in self.children:
+            if child.id == id:
                 return True
         return False
 
     def exists_tag(self, tag:str) -> bool:
-        elements:list[XUState] = self.find_by_tagall(tag)
-        if elements:
-            return True
+        for child in self.children:
+            if child.tag == tag:
+                return True
         return False
 
     # 子を追加する
