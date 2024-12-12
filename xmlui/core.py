@@ -9,7 +9,6 @@ import unicodedata
 import re
 import math
 import copy
-from distutils.util import strtobool
 from typing import Callable,Any,Self  # 型を使うよ
 
 
@@ -177,7 +176,7 @@ class XUState:
 
     def attr_bool(self, key:str, default:bool=False) -> bool:
         attr = self._element.attrib.get(key)
-        return default if attr is None else bool(strtobool(attr))
+        return default if attr is None else attr.lower() == "true"
 
     def has_attr(self, key: str) -> bool:
         return key in self._element.attrib
@@ -235,7 +234,8 @@ class XUState:
     def parent(self) -> 'XUState|None':
         return self.xmlui._parent_cache.get(self._element, None)
 
-    # 兄弟を先に取得するイテレータ、なんだけとタブンElement.iter()も同じ挙動
+    # 兄弟を先に取得するイテレータ
+    # タブンElement.iter()も同じ挙動なんだけど、確証がないので手動
     def _rec_iter(self):
         # 兄弟を先に取得する
         for child in self._element:
