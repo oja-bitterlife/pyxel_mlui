@@ -235,7 +235,7 @@ class XUState:
     def parent(self) -> 'XUState|None':
         return self.xmlui._parent_cache.get(self._element, None)
 
-    # 兄弟を先に取得するイテレータ
+    # 兄弟を先に取得するイテレータ、なんだけとタブンElement.iter()も同じ挙動
     def _rec_iter(self):
         # 兄弟を先に取得する
         for child in self._element:
@@ -356,8 +356,10 @@ class XUState:
 
     # デバッグ用
     # *************************************************************************
+    _strtree_count = 0
     def _rec_strtree(self, indent:str, pre:str) -> str:
-        out = pre + self.tag
+        XUState._strtree_count += 1
+        out = pre + f"[{XUState._strtree_count}] {self.tag}"
         out += f": {self.id}" if self.id else ""
         out += " " + str(self._element.attrib)
         for element in self._element:
@@ -365,6 +367,7 @@ class XUState:
         return out
 
     def strtree(self) -> str:
+        XUState._strtree_count = 0
         return self._rec_strtree("  ", "")
 
     # xmluiで特別な意味を持つアトリビュート一覧
@@ -379,7 +382,7 @@ class XUState:
     def value(self) -> str:  # 汎用値取得
         return self.attr_str("value", "")
     @value.setter
-    def value(self, val:str):  # state間汎用値持ち運び用
+    def value(self, val:Any):  # state間汎用値持ち運び用
         self.set_attr("value", val)
 
     @property
@@ -529,15 +532,12 @@ class XMLUI(XUState):
         # デフォルトグループを入れておく
         draw_group = [""] + ([draw_group] if isinstance(draw_group, str) else draw_group)
 
-        # (入力)イベントの更新
+        # イベントの更新
         self.event.update()
-
-        # 描画対象を取得(子を先に処理する)
-        draw_targets:list[XUState] = self.children
 
         # ActiveStateの取得。Active=最後、なので最後から確認
         self.active_states:list[XUState] = []
-        for event in reversed([state for state in draw_targets if state.use_event and state.enable]):
+        for event in reversed([state for state in self._rec_iter() if state.use_event and state.enable]):
             self.active_states.append(event)  # イベントを使うstateを回収
             if event.use_event == XUEvent.ABSORBER:  # イベント通知終端
                 break
@@ -546,7 +546,7 @@ class XMLUI(XUState):
         self._parent_cache = {c:XUState(self, p) for p in self._element.iter() for c in p}
 
         # 更新処理
-        for state in draw_targets:
+        for state in self.children:  # 中でTreeを変えたいのでイテレータではなくリストで
             # active/inactiveどちらのeventを使うか決定
             event = copy.copy(self.event) if state in self.active_states else XUEvent()
 
