@@ -235,9 +235,18 @@ class XUState:
     def parent(self) -> 'XUState|None':
         return self.xmlui._parent_cache.get(self._element, None)
 
+    # 兄弟を先に取得するイテレータ
+    def _rec_iter(self):
+        # 兄弟を先に取得する
+        for child in self._element:
+            yield XUState(self.xmlui, child)
+        # 兄弟の後に子
+        for child in self._element:
+            yield from XUState(self.xmlui, child)._rec_iter()
+
     @property
     def children(self) -> list["XUState"]:
-        return [XUState(self.xmlui, child) for child in self._element.iter()][1:]  # 最初は自分なので外す
+        return list(self._rec_iter())
 
     # 親以上祖先リスト
     @property
@@ -250,13 +259,13 @@ class XUState:
         return out
 
     def find_by_id(self, id:str) -> 'XUState':
-        for child in self.children:
+        for child in self._rec_iter():
             if child.id == id:
                 return child
         raise Exception(f"{self.strtree()}\nID '{id}' not found in '{self.tag}' and children")
 
     def find_by_tagall(self, tag:str) -> list['XUState']:
-        return [child for child in self.children if child.tag == tag]
+        return [child for child in self._rec_iter() if child.tag == tag]
 
     def find_by_tag(self, tag:str) -> 'XUState':
         elements:list[XUState] = self.find_by_tagall(tag)
@@ -279,13 +288,13 @@ class XUState:
 
     # すでにツリーに存在するか
     def exists_id(self, id:str) -> bool:
-        for child in self.children:
+        for child in self._rec_iter():
             if child.id == id:
                 return True
         return False
 
     def exists_tag(self, tag:str) -> bool:
-        for child in self.children:
+        for child in self._rec_iter():
             if child.tag == tag:
                 return True
         return False
@@ -325,7 +334,7 @@ class XUState:
         self.add_child(opend)
 
         # ownerを設定しておく
-        for child in opend.children:
+        for child in opend._rec_iter():
             child.set_attr("owner", id_alias)
 
         # open/closeが連続しないようTrg入力を落としておく
@@ -516,15 +525,6 @@ class XMLUI(XUState):
 
     # 更新用
     # *************************************************************************
-    # 兄弟を先に取得するイテレータ
-    def _rec_get_draw_targets(self, element:Element):
-        # 兄弟を先に取得する
-        for child in element:
-            yield XUState(self, child)
-        # 兄弟の後に子
-        for child in element:
-            yield from self._rec_get_draw_targets(child)
-
     def draw(self, draw_group:str|list[str]=[]):
         # デフォルトグループを入れておく
         draw_group = [""] + ([draw_group] if isinstance(draw_group, str) else draw_group)
@@ -533,7 +533,7 @@ class XMLUI(XUState):
         self.event.update()
 
         # 描画対象を取得(子を先に処理する)
-        draw_targets:list[XUState] = list(self._rec_get_draw_targets(self._element))
+        draw_targets:list[XUState] = self.children
 
         # ActiveStateの取得。Active=最後、なので最後から確認
         self.active_states:list[XUState] = []
@@ -1113,8 +1113,7 @@ class XUWinBase(XUState):
         self.win_state = self.STATE_CLOSING
 
         # 子も順次closing
-        for child in self.children:
+        for child in self._rec_iter():
             child.enable = False  # 全ての子のイベント通知をoffに
             if XUWinBase.is_win(child):  # 子ウインドウも一緒にクローズ
                 XUWinBase(child).win_state = self.STATE_CLOSING
-
