@@ -796,6 +796,8 @@ class XUTextPage(_XUUtilBase):
 
     @property
     def page_text(self) -> str:
+        if not len(self.pages):  # データがまだない
+            return ""
         return "\n".join(self.pages[self.page_no])
 
     # 次ページがなくテキストは表示完了 = 完全に終了

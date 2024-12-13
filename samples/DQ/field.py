@@ -8,18 +8,8 @@ from field_player import Player
 from field_bg import BG
 from field_npc import NPC
 from field_treasure import Treasure
+from params import param_db
 
-# 実際はDB等で運用
-param_db = {
-    "name": "おじゃ　",
-    "rem_exp": 1234,
-    "lv": 1,
-    "hp": 12,
-    "mp": 123,
-    "gold": 1234,
-    "exp": 12345,
-    "test": "てすと",
-}
 
 class Field:
     UI_TEMPLATE_FIELD = "ui_field"
@@ -178,66 +168,6 @@ def ui_init(xmlui, group):
         if input_def.BTN_B in event.trg:
             XUWinBase.find_win(menu_grid).start_close()
 
-    # メッセージウインドウ
-    # ---------------------------------------------------------
-    @field_text.msg_dq("msg_text")
-    def msg_text(msg_text:text.MsgDQ, event:XUEvent):
-        # テーマ情報取得
-        system_font = ui_theme.font.system  # フォント
-        input_def = ui_theme.input_def  # 入力イベント情報
-
-        # テキスト表示
-        # ---------------------------------------------------------
-        msg_text.anim.draw_count += 0.5
-        area = msg_text.area  # areaは重いので必ずキャッシュ
-
-        # talkの時は各ページ先頭にマーク
-        if msg_text.is_talk:
-            for i,page in enumerate(msg_text.pages):
-                msg_text.pages[i][0] = text.MsgDQ.TALK_MARK + page[0]
-
-        # Scroll
-        scroll_size = msg_text.page_line_num+2
-        scroll_buf = msg_text.scroll_buf(scroll_size)
-        if msg_text.page_text.startswith("＊「"):
-            scroll_indents = msg_text.scroll_indents(scroll_size)
-        else:
-            scroll_indents = [False for _ in range(scroll_size)]
-
-        # アニメーション用表示位置ずらし。スクロール時半文字ずれる
-        shift_y = -3 if not msg_text.anim.is_finish and len(scroll_buf) >= scroll_size else 5
-
-        # テキスト描画
-        line_height = system_font.size + 3  # 行間設定。見えない行間が見える人向けではない一般向け
-        for i,page in enumerate(scroll_buf):
-            x = area.x + (system_font.size*2 if scroll_indents[i] else 0)
-            y = shift_y + area.y + i*line_height
-            if y < get_world_clip(XUWinBase.find_win(msg_text)).bottom():
-                pyxel.text(x, y, page, 7, system_font.font)
-
-        # カーソル表示
-        # ---------------------------------------------------------
-        if msg_text.is_next_wait:
-            cursor_count = msg_text.anim.draw_count-msg_text.anim.length
-            if cursor_count//7 % 2 == 0:
-                draw_msg_cursor(msg_text, 0, len(scroll_buf)*line_height + shift_y-3)
-
-        # 入力アクション
-        # ---------------------------------------------------------
-        if input_def.BTN_A in event.trg or input_def.BTN_B in event.now:
-            if msg_text.is_finish:
-                XUWinBase.find_win(msg_text).start_close()
-            elif msg_text.is_next_wait:
-                msg_text.page_no += 1  # 次ページへ
-
-        # 表示途中のアクション
-        if not msg_text.is_next_wait:
-            if input_def.BTN_A in event.now or input_def.BTN_B in event.now:
-                msg_text.anim.draw_count += 2  # 素早く表示
-
-        # 自分が閉じたらメニューごと閉じる
-        if XUWinBase.find_win(msg_text).win_state == XUWinBase.STATE_CLOSED:
-            XUWinBase(msg_text.xmlui.find_by_id("menu")).start_close()
 
     # ステータス各種アイテム
     # ---------------------------------------------------------

@@ -20,21 +20,6 @@ scene = Battle(xmlui)
 
 # Main
 def update(): # フレームの更新処理
-    # キー入力
-    if pyxel.btn(pyxel.KEY_LEFT) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_LEFT):
-        xmlui.on(ui_theme.input_def.LEFT)
-    if pyxel.btn(pyxel.KEY_RIGHT) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_RIGHT):
-        xmlui.on(ui_theme.input_def.RIGHT)
-    if pyxel.btn(pyxel.KEY_UP) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_UP):
-        xmlui.on(ui_theme.input_def.UP)
-    if pyxel.btn(pyxel.KEY_DOWN) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN):
-        xmlui.on(ui_theme.input_def.DOWN)
-    if pyxel.btn(pyxel.KEY_RETURN) or pyxel.btn(pyxel.KEY_SPACE)  or pyxel.btn(pyxel.GAMEPAD1_BUTTON_A):
-        xmlui.on(ui_theme.input_def.BTN_A)
-    if pyxel.btn(pyxel.KEY_BACKSPACE) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_B):
-        xmlui.on(ui_theme.input_def.BTN_B)
-
-
     global scene
     if scene:
         # ゲームの更新コード
@@ -57,6 +42,21 @@ def draw(): # 描画処理
     # ゲームの描画コード
     pyxel.cls(0)
 
+    # UI用キー入力
+    if pyxel.btn(pyxel.KEY_LEFT) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_LEFT):
+        xmlui.on(ui_theme.input_def.LEFT)
+    if pyxel.btn(pyxel.KEY_RIGHT) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_RIGHT):
+        xmlui.on(ui_theme.input_def.RIGHT)
+    if pyxel.btn(pyxel.KEY_UP) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_UP):
+        xmlui.on(ui_theme.input_def.UP)
+    if pyxel.btn(pyxel.KEY_DOWN) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN):
+        xmlui.on(ui_theme.input_def.DOWN)
+    if pyxel.btn(pyxel.KEY_RETURN) or pyxel.btn(pyxel.KEY_SPACE)  or pyxel.btn(pyxel.GAMEPAD1_BUTTON_A):
+        xmlui.on(ui_theme.input_def.BTN_A)
+    if pyxel.btn(pyxel.KEY_BACKSPACE) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_B):
+        xmlui.on(ui_theme.input_def.BTN_B)
+
+    # UI描画
     if scene:
         scene.draw()
 
