@@ -4,7 +4,7 @@ from xmlui.lib.decorator import DefaultDecorator
 # セレクトアイテム
 class Item(XUSelectItem):
     def __init__(self, state:XUState):
-        super().__init__(state.xmlui, state._element)
+        super().__init__(state)
 
 # グリッドメニュー付きウインドウ
 class Grid(XUSelectGrid):
