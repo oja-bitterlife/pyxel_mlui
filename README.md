@@ -89,14 +89,13 @@ from xmlui import XUState,XUEvent
 xmlui = XMLUI()
 # XMLファイルの読み込み。第二引数はテンプレート名
 xmlui.template_fromfile("test.xml", "test_template")
+# テンプレート名とタグのidをもとにopen(表示開始)
+xmlui.open("test_template", "test_ui")
 
 def update():
     pass
 
 def draw():
-    # テンプレート名とタグのidをもとにopen(表示開始)
-    xmlui.open("test_template", "test_ui")
-
     xmlui.draw([])
 
 # 描画用関数を用意する(デコレータ方式)
