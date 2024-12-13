@@ -3,10 +3,6 @@ from xmlui.lib.decorator import DefaultDecorator
 
 # コレは外だし
 class WinFrame(XUWinBase):
-    def __init__(self, state:XUState):
-        super().__init__(state)
-        self.update()
-
     # ウインドウ(ピクセル)描画
     # 0 1 2
     # 3 4 5
@@ -148,7 +144,9 @@ class Decorator(DefaultDecorator):
         def wrapper(bind_func:Callable[[RoundFrame,XUEvent], str|None]):
             # 登録用関数をジェネレート
             def draw(state:XUState, event:XUEvent):
-                return bind_func(RoundFrame(state), event)
+                frame = RoundFrame(state)
+                frame.update()
+                return bind_func(frame, event)
             # 関数登録
             self.xmlui.set_drawfunc(tag_name, draw, self.group)
         return wrapper
@@ -157,7 +155,9 @@ class Decorator(DefaultDecorator):
         def wrapper(bind_func:Callable[[RectFrame,XUEvent], str|None]):
             # 登録用関数をジェネレート
             def draw(state:XUState, event:XUEvent):
-                return bind_func(RectFrame(state), event)
+                frame = RectFrame(state)
+                frame.update()
+                return bind_func(frame, event)
             # 関数登録
             self.xmlui.set_drawfunc(tag_name, draw, self.group)
         return wrapper
