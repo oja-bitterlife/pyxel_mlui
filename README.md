@@ -75,7 +75,7 @@ XMLベースということで、UIを記述したXMLファイルが必要です
 <xmlui id="test_ui">
     <window x="16" y="16", w="64" h="32">
     </window>
-</smlui>
+</xmlui>
 ```
 
 これを`test.xml`という名前で保存した場合、次のように読み込んで使います。
@@ -107,7 +107,7 @@ def window(window:XUState, event:XUEvent):
     # 第一パラメータのareaにUIのスクリーン座標
     area = window.area
     # pyxelで好きに描画
-    pyxel.box(area.x, area.y, area.w, area.h, 7)
+    pyxel.boxb(area.x, area.y, area.w, area.h, 7)
 
 pyxel.run(update, draw)
 ```
@@ -127,7 +127,7 @@ XMLに新しいウインドウ情報を追加します。
     <info>新しいウインドウ</info>
     <window x="16" y="100", w="64" h="32" id="test_win">
     </window>
-</smlui>
+</xmlui>
 ```
 
 以下工事中
