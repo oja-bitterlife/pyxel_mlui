@@ -692,8 +692,9 @@ class XUTextBase(str):
 class XUTextAnim(XUState):
     TEXT_COUNT_ATTR="_xmlui_text_count"
 
-    def __init__(self, state:XUState):
+    def __init__(self, state:XUState, text:str):
         super().__init__(state.xmlui, state._element)
+        self._text = text
 
     # 表示カウンタ操作
     # -----------------------------------------------------
@@ -727,12 +728,12 @@ class XUTextAnim(XUState):
 
     @property
     def text(self) -> str:
-        return self._limitstr(super().text, self.draw_count)
+        return self._limitstr(self._text, self.draw_count)
 
     # 改行を抜いた文字数(＝アニメーション数)取得
     @property
     def length(self) -> int:
-        return len(re.sub("\n|\0", "", super().text))
+        return len(re.sub("\n|\0", "", self._text))
 
 class XUTextPage(_XUUtilBase):
     PAGE_REGEXP = r"\\p"  # 改行に変換する正規表現
@@ -745,7 +746,6 @@ class XUTextPage(_XUUtilBase):
         self.page_line_num = page_line_num
         self.wrap = wrap
 
-        self.anim = XUTextAnim(self)
         self.pages:list[list[str]] = self.split_page_lines(state.text, page_line_num, wrap)
 
     # ページ分解。行ごと
@@ -791,6 +791,10 @@ class XUTextPage(_XUUtilBase):
 
     # ページテキスト
     # -----------------------------------------------------
+    @property
+    def anim(self):
+        return XUTextAnim(self, self.page_text)
+
     @property
     def page_text(self) -> str:
         if not len(self.pages):  # データがまだない
