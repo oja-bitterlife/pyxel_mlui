@@ -732,7 +732,7 @@ class XUTextAnim(XUState):
     # 改行を抜いた文字数(＝アニメーション数)取得
     @property
     def length(self) -> int:
-        return len(re.sub("\n|\0", "", self.text))
+        return len(re.sub("\n|\0", "", super().text))
 
 class XUTextPage(_XUUtilBase):
     PAGE_REGEXP = r"\\p"  # 改行に変換する正規表現
