@@ -689,25 +689,22 @@ class XUTextBase(str):
         return text.format(**cls.find_params_dict(text, all_params))
 
 # アニメーションテキスト
-class XUTextAnim:
+class XUTextAnim(XUState):
     TEXT_COUNT_ATTR="_xmlui_text_count"
 
-    _state:XUState  # このテキストを管理するEelement
-
-    def __init__(self, state:XUState, text_base:str):
-        self._text_base = text_base
-        self._state = state
+    def __init__(self, state:XUState):
+        super().__init__(state.xmlui, state._element)
 
     # 表示カウンタ操作
     # -----------------------------------------------------
     # 現在の表示文字数
     @property
     def draw_count(self) -> float:
-        return float(self._state.attr_float(self.TEXT_COUNT_ATTR, 0))
+        return float(self.attr_float(self.TEXT_COUNT_ATTR, 0))
 
     @draw_count.setter
     def draw_count(self, count:float) -> float:
-        self._state.set_attr(self.TEXT_COUNT_ATTR, count)
+        self.set_attr(self.TEXT_COUNT_ATTR, count)
         return count
 
     # アニメーション用
@@ -730,12 +727,12 @@ class XUTextAnim:
 
     @property
     def text(self) -> str:
-        return self._limitstr(self._text_base, self.draw_count)
+        return self._limitstr(super().text, self.draw_count)
 
     # 改行を抜いた文字数(＝アニメーション数)取得
     @property
     def length(self) -> int:
-        return len(re.sub("\n|\0", "", self._text_base))
+        return len(re.sub("\n|\0", "", self.text))
 
 class XUTextPage(_XUUtilBase):
     PAGE_REGEXP = r"\\p"  # 改行に変換する正規表現
@@ -748,6 +745,7 @@ class XUTextPage(_XUUtilBase):
         self.page_line_num = page_line_num
         self.wrap = wrap
 
+        self.anim = XUTextAnim(self)
         self.pages:list[list[str]] = self.split_page_lines(state.text, page_line_num, wrap)
 
     # ページ分解。行ごと
@@ -793,10 +791,6 @@ class XUTextPage(_XUUtilBase):
 
     # ページテキスト
     # -----------------------------------------------------
-    @property
-    def anim(self):
-        return XUTextAnim(self, self.page_text)
-
     @property
     def page_text(self) -> str:
         if not len(self.pages):  # データがまだない
