@@ -50,6 +50,6 @@ class NPC:
             msg_win = xmlui.find_by_id("menu").open(field.Field.UI_TEMPLATE_FIELD, "message")
             msg_text = msg_win.find_by_tag("msg_text")
             if talk:
-                text.MsgDQ.start_talk(msg_text, XUTextBase.dict_format(talk, field.param_db))  # talkでテキスト開始
+                msg_text.start_talk(msg_text, XUTextBase.dict_format(talk, field.param_db))  # talkでテキスト開始
             else:
-                text.MsgDQ.start_system(msg_text, "だれもいません")  # systemメッセージ
+                msg_text.start_system(msg_text, "だれもいません")  # systemメッセージ

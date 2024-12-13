@@ -200,6 +200,10 @@ class XUState:
     def text(self) -> str:
         return "\n".join([line.strip() for line in self._element.text.splitlines()]) if self._element.text else ""
 
+    def set_text(self, text:str) -> Self:
+        self._element.text = text
+        return self
+
     # その他
     # *************************************************************************
     @property

@@ -4,12 +4,12 @@
     <info>バトル画面用</info>
     <battle id="battle">
         <info>バトルメッセージウインドウ</info>
-        <round_fast abs_x="48" abs_y="160" w="160" h="88" id="message">
-            <msg_text x="10" y="8" w="184" wrap="12" page_line_num="3"/>
-        </round_fast>
+        <round_win abs_x="48" abs_y="160" w="160" h="88" id="message">
+            <msg_text x="10" y="8" w="184" wrap="10" page_line_num="3"/>
+        </round_win>
 
         <info>ステータスウインドウ</info>
-        <round_fast abs_x="14" y="16" w="82" h="100" id="status">
+        <round_win abs_x="14" y="16" w="82" h="100" id="status">
             <status_title x="18" y="0" w="50" h="12"></status_title>
             <status_label x="6" y="16">
                 <status_item y="0" h="16">レベル</status_item>
@@ -25,7 +25,7 @@
                 <status_item y="48" h="16" align="right">{gold}</status_item>
                 <status_item y="64" h="16" align="right">{exp}</status_item>
             </status_num>
-        </round_fast>
+        </round_win>
     </battle>
 
 </xmlui>

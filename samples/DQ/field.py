@@ -96,18 +96,6 @@ def ui_init(xmlui, group):
             x, y = title.aligned_pos(ui_theme.font.system)
             pyxel.text(x, y-1, title.text, 7, ui_theme.font.system.font)
 
-    # ステータスウインドウ( ｰ`дｰ´)ｷﾘｯのタイトル
-    @field_text.label("status_title", "align", "valign")
-    def status_title(status_title:text.Label, event:XUEvent):
-        clip = get_world_clip(XUWinBase.find_win(status_title)).intersect(status_title.area)
-        pyxel.rect(status_title.area.x, status_title.area.y, status_title.area.w, clip.h, 0)  # タイトルの下地
-
-        # テキストは左寄せ
-        if status_title.area.y < clip.bottom():  # world座標で比較
-            x, y = status_title.aligned_pos(ui_theme.font.system)
-            pyxel.text(x+1, y-1, param_db["name"], 7, ui_theme.font.system.font)
-
-
     # コマンドメニューのタイトル
     @field_text.label("menu_item_title", "align", "valign")
     def menu_item_title(menu_item_title:text.Label, event:XUEvent):
@@ -168,23 +156,6 @@ def ui_init(xmlui, group):
         if input_def.BTN_B in event.trg:
             XUWinBase.find_win(menu_grid).start_close()
 
-
-    # ステータス各種アイテム
-    # ---------------------------------------------------------
-    @field_text.label("status_item")
-    def status_item(status_item:text.Label, event:XUEvent):
-        system_font = ui_theme.font.system
-
-        # 値の取得
-        text = XUTextBase.dict_new(status_item.text, param_db)
-
-        # テキストは右寄せ
-        area = status_item.area
-        x, y = XURect.align_offset(area.w, area.h, system_font.text_width(text) + 5, 0, status_item.align, status_item.valign)
-        if area.y+y < get_world_clip(XUWinBase.find_win(status_item)).bottom():
-            pyxel.text(area.x + x, area.y + y, text, 7, system_font.font)
-
-
     # 会話方向
     # ---------------------------------------------------------
     @field_select.list("dir_select", "dir_item", "item_w", "item_h")
@@ -239,7 +210,7 @@ def ui_init(xmlui, group):
                 # メッセージウインドウを開く
                 msg_win = xmlui.find_by_id("menu").open(Field.UI_TEMPLATE_FIELD, "message")
                 msg_text = msg_win.find_by_tag("msg_text")
-                text.MsgDQ.start_system(msg_text, "ＨＰが　１０かいふくした")  # systemメッセージ
+                msg_text.start_system(msg_text, "ＨＰが　１０かいふくした")  # systemメッセージ
             else:
                 tools_list.xmlui.popup("common", "under_construct")
         

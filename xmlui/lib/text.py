@@ -95,20 +95,13 @@ class MsgDQ(MsgScr):
 
         return indents
 
-    # テキストの先頭に会話マークを付ける
-    @classmethod
-    def convert_talk(cls, text:str) -> str:
-        return cls.TALK_MARK + text
+    def start_talk(self, text:str):
+        self._element.text = text
+        self.set_attr(self.IS_TALK_ATTR, True)
 
-    @classmethod
-    def start_talk(cls, state:XUState, text:str):
-        state._element.text = text
-        state.set_attr(cls.IS_TALK_ATTR, True)
-
-    @classmethod
-    def start_system(cls, state:XUState, text:str):
-        state._element.text = text
-        state.set_attr(cls.IS_TALK_ATTR, False)
+    def start_system(self, text:str):
+        self._element.text = text
+        self.set_attr(self.IS_TALK_ATTR, False)
 
     @property
     def is_talk(self):

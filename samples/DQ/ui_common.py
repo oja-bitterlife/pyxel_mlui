@@ -5,7 +5,8 @@ import pyxel
 from xmlui.lib import text,win
 from xmlui.pyxel_util.theme import Theme
 from xmlui.pyxel_util.font import PyxelFont
-from xmlui.core import XMLUI,XUState,XUEvent,XUWinBase,XURect
+from xmlui.core import XMLUI,XUState,XUEvent,XUWinBase,XURect,XUTextBase
+from params import param_db
 
 ui_theme = Theme(PyxelFont("assets/font/b12.bdf"))
 
@@ -93,17 +94,6 @@ def round_win(round_win:win.RoundFrame, event:XUEvent):
     # フレーム
     round_win.draw_frame(pyxel.screen.data_ptr(), ui_theme.win.frame_pattern, area.inflate(-2, -2), clip)
 
-@common_win.round_frame("round_fast")
-def round_fast(round_win:win.RoundFrame, event:XUEvent):
-    area = round_win.area
-
-    # 背景
-    pyxel.rect(area.x, area.y, area.w, min(area.h, area.h), ui_theme.win.bg_color)
-
-    # フレーム
-    round_win.draw_frame(pyxel.screen.data_ptr(), ui_theme.win.frame_pattern, area.inflate(-2, -2))
-
-
 # メッセージウインドウ
 # ---------------------------------------------------------
 @common_text.msg_dq("msg_text")
@@ -164,3 +154,31 @@ def msg_text(msg_text:text.MsgDQ, event:XUEvent):
     # 自分が閉じたらメニューごと閉じる
     if XUWinBase.find_win(msg_text).win_state == XUWinBase.STATE_CLOSED:
         XUWinBase(msg_text.xmlui.find_by_id("menu")).start_close()
+
+
+# ステータスウインドウ( ｰ`дｰ´)ｷﾘｯ
+# ---------------------------------------------------------
+# ステータス各種アイテム
+@common_text.label("status_item")
+def status_item(status_item:text.Label, event:XUEvent):
+    system_font = ui_theme.font.system
+
+    # 値の取得
+    text = XUTextBase.dict_new(status_item.text, param_db)
+
+    # テキストは右寄せ
+    area = status_item.area
+    x, y = XURect.align_offset(area.w, area.h, system_font.text_width(text) + 5, 0, status_item.align, status_item.valign)
+    if area.y+y < get_world_clip(XUWinBase.find_win(status_item)).bottom():
+        pyxel.text(area.x + x, area.y + y, text, 7, system_font.font)
+
+# ステータスタイトル(名前)
+@common_text.label("status_title", "align", "valign")
+def status_title(status_title:text.Label, event:XUEvent):
+    clip = get_world_clip(XUWinBase.find_win(status_title)).intersect(status_title.area)
+    pyxel.rect(status_title.area.x, status_title.area.y, status_title.area.w, clip.h, 0)  # タイトルの下地
+
+    # テキストは左寄せ
+    if status_title.area.y < clip.bottom():  # world座標で比較
+        x, y = status_title.aligned_pos(ui_theme.font.system)
+        pyxel.text(x+1, y-1, param_db["name"], 7, ui_theme.font.system.font)
