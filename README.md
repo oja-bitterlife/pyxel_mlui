@@ -101,7 +101,7 @@ def draw():
 
 # 描画用関数を用意する(デコレータ方式)
 # デコレータの引数にタグ名を書く
-# 関数名はなんでもいい。デコレータ内でラップされる
+# 関数名はかぶらなければなんでもいい
 @xmlui.tag_bind("window")
 def window(window:XUState, event:XUEvent):  
     # 第一パラメータのareaにUIのスクリーン座標
