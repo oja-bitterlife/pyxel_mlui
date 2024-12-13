@@ -28,9 +28,7 @@ class Battle:
     def update(self):
         msg_dq = text.MsgDQ(self.xmlui.find_by_tag("msg_text"), "page_line_num", "wrap")
         if msg_dq.anim.is_finish:
-            msg_dq.start_system("コマンド？")
-
-        pass
+            msg_dq.start_system(msg_dq.text + "\n" + "コマンド？")
             
     def draw(self):
         # UIの描画(fieldとdefaultグループ)
