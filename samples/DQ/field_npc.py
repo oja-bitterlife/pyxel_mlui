@@ -48,8 +48,8 @@ class NPC:
         if talk is not None:
             # メッセージウインドウを開く
             msg_win = xmlui.find_by_id("menu").open(field.Field.UI_TEMPLATE_FIELD, "message")
-            msg_text = msg_win.find_by_tag("msg_text")
+            msg_text = text.MsgDQ(msg_win.find_by_tag("msg_text"), "page_line_num", "wrap")
             if talk:
-                msg_text.start_talk(msg_text, XUTextBase.dict_format(talk, field.param_db))  # talkでテキスト開始
+                msg_text.start_talk(XUTextBase.dict_format(talk, field.param_db))  # talkでテキスト開始
             else:
-                msg_text.start_system(msg_text, "だれもいません")  # systemメッセージ
+                msg_text.start_system("だれもいません")  # systemメッセージ

@@ -617,7 +617,7 @@ class XMLUI(XUState):
 # 基本は必要な情報をツリーでぶら下げる
 # Treeが不要ならたぶんXUStateで事足りる
 class _XUUtilBase(XUState):
-    def __init__(self, state, root_tag:str):
+    def __init__(self, state:XUState, root_tag:str):
         super().__init__(state.xmlui, state._element)
 
         # 自前設定が無ければabsorberにしておく
@@ -631,7 +631,6 @@ class _XUUtilBase(XUState):
         else:
             self._util_root = XUState(state.xmlui, Element(root_tag))
             state.add_child(self._util_root)
-
 
 # テキスト系
 # *****************************************************************************
