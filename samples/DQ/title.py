@@ -25,20 +25,6 @@ class Title:
         return None
 
     def draw(self):
-        # キー入力
-        if pyxel.btn(pyxel.KEY_LEFT):
-            self.xmlui.on(ui_theme.input_def.LEFT)
-        if pyxel.btn(pyxel.KEY_RIGHT):
-            self.xmlui.on(ui_theme.input_def.RIGHT)
-        if pyxel.btn(pyxel.KEY_UP):
-            self.xmlui.on(ui_theme.input_def.UP)
-        if pyxel.btn(pyxel.KEY_DOWN):
-            self.xmlui.on(ui_theme.input_def.DOWN)
-        if pyxel.btn(pyxel.KEY_RETURN) or pyxel.btn(pyxel.KEY_SPACE):
-            self.xmlui.on(ui_theme.input_def.BTN_A)
-        if pyxel.btn(pyxel.KEY_BACKSPACE):
-            self.xmlui.on(ui_theme.input_def.BTN_B)
-
         self.xmlui.draw(["title"])
 
 

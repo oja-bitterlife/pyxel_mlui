@@ -40,3 +40,7 @@ def ui_init(xmlui, group):
     # fieldグループ用デコレータを作る
     field_select = select.Decorator(xmlui, group)
     field_text = text.Decorator(xmlui, group)
+
+    @field_text.msg_dq("rournd_win")
+    def battle_message(battle_message:text.MsgDQ, event:XUEvent):
+        pass
