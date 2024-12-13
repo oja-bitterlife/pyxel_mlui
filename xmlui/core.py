@@ -846,17 +846,23 @@ class XUSelectBase(_XUUtilBase):
 
         # タグに付いてるselected取得
         for i,item in enumerate(items):
-            item.set_pos(i % rows * item_w, i // rows * item_h)
             if item.selected:
                 self.selected_no = i
                 break
 
-        # 子の選択状態更新
-        self.select(self.selected_no)
+        # 子の状態更新
+        for i,item in enumerate(items):
+            # 座標が設定されていなければ初期座標で設定
+            if not item.has_attr(XUSelectItem.ITEM_X_ATTR):
+                item.set_pos(i % rows * item_w, i // rows * item_h)
+
+            # 選択状態の更新
+            self.select(self.selected_no)
 
     @property
     def selected_no(self) -> int:
         return self.attr_int(self.SELECTED_NO_ATTR, 0)
+
     @selected_no.setter
     def selected_no(self, no:int) -> int:
         self.set_attr(self.SELECTED_NO_ATTR, no)
@@ -905,7 +911,7 @@ class XUSelectBase(_XUUtilBase):
 class XUSelectGrid(XUSelectBase):
     def __init__(self, state:XUState, item_tag:str, rows_attr:str, item_w_attr:str, item_h_attr:str):
         # 自分の直下のitemだけ回収する
-        items = [XUSelectItem(state) for element in state._element if element.tag == item_tag]
+        items = [XUSelectItem(XUState(state.xmlui, element)) for element in state._element if element.tag == item_tag]
         item_w = state.attr_int(item_w_attr, 0)
         item_h = state.attr_int(item_h_attr, 0)
         super().__init__(state, items, state.attr_int(rows_attr, 1), item_w, item_h)
@@ -935,7 +941,7 @@ class XUSelectGrid(XUSelectBase):
 class XUSelectList(XUSelectBase):
     def __init__(self, state:XUState, item_tag:str, item_w_attr:str, item_h_attr:str):
         # 自分の直下のitemだけ回収する
-        items = [XUSelectItem(state) for element in state._element if element.tag == item_tag]
+        items = [XUSelectItem(XUState(state.xmlui, element)) for element in state._element if element.tag == item_tag]
         item_w = state.attr_int(item_w_attr, 0)
         item_h = state.attr_int(item_h_attr, 0)
         rows = len(items) if item_w > item_h else 1
