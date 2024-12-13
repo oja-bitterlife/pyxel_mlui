@@ -819,9 +819,6 @@ class XUSelectItem(XUState):
     ITEM_X_ATTR = "_xmlui_sel_item_x"
     ITEM_Y_ATTR = "_xmlui_sel_item_y"
 
-    def __init__(self, xmlui:XMLUI, element:Element):
-        super().__init__(xmlui, element)
-
     def set_pos(self, x:int, y:int) -> Self:
         self.set_attr([self.ITEM_X_ATTR, self.ITEM_Y_ATTR], [x, y])
         return self
@@ -840,24 +837,19 @@ class XUSelectBase(_XUUtilBase):
     SELECTED_NO_ATTR = "_xmlui_selected_no"
 
     def __init__(self, state:XUState, items:list[XUSelectItem], rows:int, item_w:int, item_h:int):
-        need_init = not state.exists_tag(self.ROOT_TAG)
-
         super().__init__(state, self.ROOT_TAG)
         self._rows = rows
         self._items = items
 
-        # 最初だけの初期化
-        if need_init:
-            # タグに付いてるselected取得
-            for i,item in enumerate(items):
-                if item.selected:
-                    self.selected_no = i
-                    break
-
-        # アイテム設定
-        for i,item in enumerate(self._items):
+        # タグに付いてるselected取得
+        for i,item in enumerate(items):
             item.set_pos(i % rows * item_w, i // rows * item_h)
-            item.set_attr("selected", i == self.selected_no)
+            if item.selected:
+                self.selected_no = i
+                break
+
+        # 子の選択状態更新
+        self.select(self.selected_no)
 
     @property
     def selected_no(self) -> int:
@@ -878,7 +870,11 @@ class XUSelectBase(_XUUtilBase):
     # 値設定用
     # -----------------------------------------------------
     def select(self, no:int):
-        self.set_attr(self.SELECTED_NO_ATTR, min(max(0, no), self.length))
+        self.selected_no = min(max(0, no), self.length)
+
+        # アイテム設定
+        for i,item in enumerate(self._items):
+            item.set_attr("selected", i == no)
 
     def next(self, add:int=1, x_wrap=False, y_wrap=False):
         # キャッシュ
