@@ -120,12 +120,12 @@ XMLに新しいウインドウ情報を追加します。
 
 ```XML
 <?xml version="1.0" encoding="utf-8"?>
-<xmlui>
-    <window x="16" y="16", w="64" h="32" id="test_win">
+<xmlui id="test_win">
+    <window x="16" y="16", w="64" h="32">
     </window>
 
     <info>新しいウインドウ</info>
-    <window x="16" y="100", w="64" h="32" id="test_win">
+    <window x="16" y="100", w="64" h="32">
     </window>
 </xmlui>
 ```
