@@ -61,7 +61,7 @@ class Dial(XUDial):
 
 # デコレータを用意
 # *****************************************************************************
-class Decorator(XUTemplate.DecoratorBase):
+class Decorator(XUTemplate.HasRef):
     # デコレータを用意
     def dial(self, tag_name:str, digit_length:int, align:str="center", valign:str="center", digit_list:str="0123456789"):
         def wrapper(bind_func:Callable[[Dial,XUEvent], str|None]):

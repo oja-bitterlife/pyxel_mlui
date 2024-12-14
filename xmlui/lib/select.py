@@ -18,7 +18,7 @@ class List(XUSelectList):
 
 # デコレータを用意
 # *****************************************************************************
-class Decorator(XUTemplate.DecoratorBase):
+class Decorator(XUTemplate.HasRef):
     def item(self, item_tag:str):
         def wrapper(bind_func:Callable[[Item,XUEvent], str|None]):
             # 登録用関数をジェネレート

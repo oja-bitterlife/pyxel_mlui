@@ -135,7 +135,7 @@ class RectFrame(WinFrame):
 
 # デコレータを用意
 # *****************************************************************************
-class Decorator(XUTemplate.DecoratorBase):
+class Decorator(XUTemplate.HasRef):
     def round_frame(self, tag_name:str):
         def wrapper(bind_func:Callable[[RoundFrame,XUEvent], str|None]):
             # 登録用関数をジェネレート

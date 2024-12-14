@@ -108,7 +108,7 @@ class MsgDQ(MsgScr):
 
 # デコレータを用意
 # *****************************************************************************
-class Decorator(XUTemplate.DecoratorBase):
+class Decorator(XUTemplate.HasRef):
     def label(self, tag_name:str, align_attr:str="align", valign_attr:str="valign"):
         def wrapper(bind_func:Callable[[Label,XUEvent], str|None]):
             # 登録用関数をジェネレート

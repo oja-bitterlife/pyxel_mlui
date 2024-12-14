@@ -515,19 +515,15 @@ class XUTemplate(XUState):
         self._draw_funcs[tag_name] = func
 
     # デコレータも用意
-    class DecoratorBase:
-        def __init__(self, template:"XUTemplate"):
-            self.template = template
-
-        def tag_draw(self, tag_name:str):
-            def wrapper(bind_func:Callable[[XUState,XUEvent], str|None]):
-                self.template.set_drawfunc(tag_name, bind_func)
-            return wrapper
-
     def tag_draw(self, tag_name:str):
         def wrapper(bind_func:Callable[[XUState,XUEvent], str|None]):
             self.set_drawfunc(tag_name, bind_func)
         return wrapper
+
+    # ライブラリ用
+    class HasRef:
+        def __init__(self, template:"XUTemplate"):
+            self.template = template
 
     # 描画関係
     # *************************************************************************
