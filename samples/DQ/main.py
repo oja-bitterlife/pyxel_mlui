@@ -15,8 +15,8 @@ from ui_common import xmlui
 from ui_common import ui_theme
 
 #scene = Title(xmlui)
-scene = Field(xmlui)
-#scene = Battle(xmlui)
+#scene = Field(xmlui)
+scene = Battle(xmlui)
 
 # Main
 def update(): # フレームの更新処理

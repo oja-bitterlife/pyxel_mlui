@@ -14,7 +14,7 @@ class Battle:
 
         # UIの読み込み
         self.template = self.xmlui.load_template("assets/ui/battle.xml")
-        ui_init(self.xmlui, self.UI_TEMPLATE_BATTLE)
+        ui_init(self.template)
 
         # バトル開始UI初期化
         battle = self.xmlui.open("battle")
@@ -23,26 +23,24 @@ class Battle:
     def __del__(self):
         # 読みこんだUIの削除
         self.template.remove()
-        self.xmlui.remove_drawfunc(self.UI_TEMPLATE_BATTLE)
 
     def update(self):
-        msg_dq = text.MsgDQ(self.xmlui.find_by_tag("msg_text"), "page_line_num", "wrap")
-        if msg_dq.anim.is_finish:
-            msg_dq.start_system(msg_dq.text + "\n" + "コマンド？")
+        msg_text = self.xmlui.find_by_tag("msg_text")
+        # if msg_text.anim.is_finish:
+        #     text.MsgDQ.start_system(msg_text, msg_text.text + "\n" + "コマンド？")
             
     def draw(self):
         # UIの描画(fieldとdefaultグループ)
-        self.xmlui.draw([])
-#        self.xmlui.draw([self.UI_TEMPLATE_BATTLE])
+        self.xmlui.draw()
 
 # バトルUI
 # *****************************************************************************
 from ui_common import draw_menu_cursor, draw_msg_cursor
 
-def ui_init(xmlui, group):
+def ui_init(template):
     # fieldグループ用デコレータを作る
-    field_select = select.Decorator(xmlui, group)
-    field_text = text.Decorator(xmlui, group)
+    field_select = select.Decorator(template)
+    field_text = text.Decorator(template)
 
 
     # バトルステータスタイトル
