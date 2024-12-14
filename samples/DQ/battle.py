@@ -29,6 +29,7 @@ class Battle:
             msg_text = self.xmlui.find_by_tag("msg_text")
             text.MsgDQ.start_system(msg_text, msg_text.text + "\n" + "コマンド？")
 
+            # コマンド待ち開始
             self.xmlui.open("menu")
             
     def draw(self):
