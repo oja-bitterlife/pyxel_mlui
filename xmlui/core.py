@@ -446,12 +446,7 @@ class XMLUI_Template(XUState):
     @classmethod
     def _fromfile(cls, xmlui:'XMLUI', fileName:str, root_tag:str|None=None) -> "XMLUI_Template":
         with open(fileName, "r", encoding="utf8") as f:
-            return cls._fromstring(xmlui, f.read())
-
-    # リソースから読み込み
-    @classmethod
-    def _fromstring(cls, xmlui:'XMLUI', xml_data:str) -> "XMLUI_Template":
-        return XMLUI_Template(XUState(xmlui, xml.etree.ElementTree.fromstring(xml_data)))
+            return XMLUI_Template(XUState(xmlui, xml.etree.ElementTree.fromstring(f.read())))
 
     def __init__(self, root:XUState):
         super().__init__(root.xmlui, root._element)
@@ -518,14 +513,8 @@ class XMLUI(XUState):
 
     # template操作
     # *************************************************************************
-    def set_template(self, template:XMLUI_Template, template_name:str):
-        self._templates[template_name] = template
-
-    def template_fromfile(self, template_filename:str, template_name:str):
-        self.set_template(XMLUI_Template._fromfile(self, template_filename), template_name)
-
-    def template_fromstring(self, template_str:str, template_name:str):
-        self.set_template(XMLUI_Template._fromstring(self, template_str), template_name)
+    def template_fromfile(self, template_filename:str, template_name:str="default"):
+        self._templates[template_name] = XMLUI_Template._fromfile(self, template_filename)
 
     def remove_template(self, template_name:str):
         del self._templates[template_name]
