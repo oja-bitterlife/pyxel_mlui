@@ -44,30 +44,28 @@ class InputDef:
 # 入力系
 # #############################################################################
 # 数値設定ダイアル
-class Dial(XUDial):
-    PAGE_LINES_ATTR = "page_lines"  # ページの行数
-    WRAP_ATTR = "wrap"  # ワードラップ文字数
+class Dial(XUSelectNum):
+    # PAGE_LINES_ATTR = "page_lines"  # ページの行数
+    # WRAP_ATTR = "wrap"  # ワードラップ文字数
 
     # タグのテキストを処理する
-    def __init__(self, state:XUState, digit_length:int, align:str, valign:str, digit_list:str):
-        super().__init__(state, digit_length, digit_list)
-        self.align = align
-        self.valign = valign
+    def __init__(self, state:XUState, item_tag:str, item_w_attr:str):
+        super().__init__(state, item_tag, item_w_attr)
 
-    def aligned_pos(self, font:FontBase) -> tuple[int, int]:
-        area = self.area  # 低速なので使うときは必ず一旦ローカルに
-        return area.aligned_pos(font.text_width(self.digits), font.size, self.align, self.valign)
+    # def aligned_pos(self, font:FontBase) -> tuple[int, int]:
+    #     area = self.area  # 低速なので使うときは必ず一旦ローカルに
+    #     return area.aligned_pos(font.text_width(self.digits), font.size, self.align, self.valign)
 
 
 # デコレータを用意
 # *****************************************************************************
 class Decorator(XUTemplate.HasRef):
     # デコレータを用意
-    def dial(self, tag_name:str, digit_length:int, align:str="center", valign:str="center", digit_list:str="0123456789"):
+    def dial(self, tag_name:str, item_tag:str, item_w_attr:str):
         def wrapper(bind_func:Callable[[Dial,XUEvent], str|None]):
             # 登録用関数をジェネレート
             def draw(state:XUState, event:XUEvent):
-                return bind_func(Dial(state, digit_length, align, valign, digit_list), event)
+                return bind_func(Dial(state, item_tag, item_w_attr), event)
             # 関数登録
             self.template.set_drawfunc(tag_name, draw)
         return wrapper

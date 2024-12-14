@@ -2,7 +2,7 @@ import pyxel
 
 # タイトル画面
 from xmlui.core import XMLUI,XUEvent,XUWinBase,XUTextBase,XURect
-from xmlui.lib import select,text
+from xmlui.lib import select,text,input
 from ui_common import ui_theme
 from params import param_db
 
@@ -25,7 +25,8 @@ class Battle:
         self.template.remove()
 
     def update(self):
-        msg_text = self.xmlui.find_by_tag("msg_text")
+        pass
+        # msg_text = self.xmlui.find_by_tag("msg_text")
         # if msg_text.anim.is_finish:
         #     text.MsgDQ.start_system(msg_text, msg_text.text + "\n" + "コマンド？")
             
@@ -41,6 +42,7 @@ def ui_init(template):
     # fieldグループ用デコレータを作る
     field_select = select.Decorator(template)
     field_text = text.Decorator(template)
+    field_input = input.Decorator(template)
 
 
     # バトルステータスタイトル
@@ -52,3 +54,22 @@ def ui_init(template):
     #     x, y = status_title.aligned_pos(ui_theme.font.system)
     #     pyxel.text(x+1, y-1, param_db["name"], 7, ui_theme.font.system.font)
 
+
+    @field_input.dial("dial", "dial_item", "item_w")
+    def dial(dial:input.Dial, event:XUEvent):
+        input_def = ui_theme.input_def
+        dial.change_by_event(event.trg, *input_def.CURSOR)
+
+        # print(dial.number)
+        for item in dial.digits:
+            area = item.area
+            pyxel.text(area.x, area.y, item.text, 7, ui_theme.font.system.font)
+
+        # 確定
+        if input_def.BTN_A in event.trg:
+            yesno= dial.open("yes_no", "dial_yes_no")
+            yesno.set_attr("value", dial.digits)
+
+        # # 閉じる
+        # if input_def.BTN_B in event.trg:
+        #     dial.close_on()

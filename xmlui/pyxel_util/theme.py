@@ -45,7 +45,7 @@ class _Win:
 
 class _Font:
     def __init__(self, section:dict, default_font:PyxelFont):
-        self.default = default
+        self.default = default_font
         self.system = PyxelFont(section["system"]) if "system" in section else default_font
 
 class _Debug:

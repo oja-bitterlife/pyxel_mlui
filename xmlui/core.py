@@ -933,7 +933,7 @@ class XUSelect(XUSelectBase):
     def next(self, add:int=1, x_wrap=False, y_wrap=False):
         # キャッシュ
         no = self.selected_no
-        cols = self.length//self._rows
+        cols = max(self.length//self._rows, 1)
 
         x = no % self._rows
         y = no // self._rows
@@ -1000,78 +1000,43 @@ class XUSelectList(XUSelect):
     def select_no_wrap(self, input:set[str], prev_event:str, next_event:str) -> bool:
         return self._select_by_event(input, prev_event, next_event, False)
 
-
-# ダイアル
-# *****************************************************************************
-# 情報管理のみ(後でSelectListベースで作り直す)
-class XUDial(_XUUtilBase):
-    ROOT_TAG = "_xmlui_dial_root"
-    EDIT_POS_ATTR = "edit_pos"  # 操作位置
-    DIGIT_ATTR = "digits"  # 操作位置
-
-    def __init__(self, state:XUState, digit_length:int, digit_list:str="0123456789"):
-        super().__init__(state, self.ROOT_TAG)
-        self.digit_length = digit_length
-        self._digit_list = digit_list
-
-        # Digitのデータを引き継ぐ
-        old_digit = self._util_root.attr_str(self.DIGIT_ATTR)
-        new_digit = [old_digit[i] if i < len(old_digit) else "0" for i in range(digit_length)]
-        self._util_root.set_attr(self.DIGIT_ATTR, "".join(new_digit))
-
+# ダイアル選択用
+class XUSelectNum(XUSelectList):
+    def __init__(self, state:XUState, item_tag:str, item_w_attr:str):
+        super().__init__(state, item_tag, item_w_attr, "")
 
     @property
-    def edit_pos_raw(self) -> int:
-        return self._util_root.attr_int(self.EDIT_POS_ATTR)
-    @property
-    def edit_pos(self) -> int:
-        return self.digit_length-1 - self._util_root.attr_int(self.EDIT_POS_ATTR)
+    def digits(self) -> list[XUSelectItem]:
+        return self._items
 
-    @property
-    def digits(self) -> str:
-        return "".join(list(reversed(self._util_root.attr_str(self.DIGIT_ATTR))))
-
-    @property
-    def zenkaku_digits(self) -> str:
-        return "".join(list(reversed(XUTextBase.convert_zenkaku(self._util_root.attr_str(self.DIGIT_ATTR)))))
-
-    # 回り込み付き操作位置の設定
-    def set_editpos(self, edit_pos:int) -> Self:
-        self._util_root.set_attr(self.EDIT_POS_ATTR, (edit_pos + self.digit_length) % self.digit_length)
+    def set_digits(self, num:int) -> Self:
+        num = min(max(0, num), self.max)
+        for item in self._items:
+            item.set_text(str(num % 10))
+            num //= 10
         return self
 
-    # 操作位置の移動
-    def move_editpos(self, add:int) -> Self:
-        return self.set_editpos(self.edit_pos_raw+add)
-
-    # 指定位置のdigitを変更する
-    def set_digit(self, edit_pos:int, digit:str) -> Self:
-        digits = [c for c in self._util_root.attr_str(self.DIGIT_ATTR)]
-        digits[edit_pos] = digit
-        self._util_root.set_attr(self.DIGIT_ATTR, "".join(digits))
-        return self
-
-    # 回り込み付きdigit増減
-    def add_digit(self, edit_pos:int, add:int) -> Self:
-        old_digit = self._util_root.attr_str(self.DIGIT_ATTR)[edit_pos]
-        new_digit = self._digit_list[(self._digit_list.find(old_digit) + len(self._digit_list) + add) % len(self._digit_list)]
-        return self.set_digit(edit_pos, new_digit)
+    @property
+    def number(self) -> int:
+        return int("".join([item.text for item in self._items]))
+    
+    @property
+    def max(self) -> int:
+        return pow(10, self.length)-1
 
     # 入力に応じた挙動一括。変更があった場合はTrue
-    def change_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
-        old_digits = self.digits
-        old_edit_pos = self.edit_pos_raw
+    def change_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str):
+        self.select_by_event(input, left_event, right_event)
 
-        if left_event in input:
-            self.move_editpos(1)
-        if right_event in input:
-            self.move_editpos(-1)
+        # 数値の変更
+        number = self.number
+        new_num = number
         if up_event in input:
-            self.add_digit(self.edit_pos_raw, +1)  # digitを増やす
+            new_num = number + pow(10, self.selected_no)
         if down_event in input:
-            self.add_digit(self.edit_pos_raw, -1)  # digitを減らす
-
-        return self.digits != old_digits or self.edit_pos_raw != old_edit_pos
+            new_num = number - pow(10, self.selected_no)
+        if number != new_num:
+            self.set_digits(new_num)
 
 
 # ウインドウサポート

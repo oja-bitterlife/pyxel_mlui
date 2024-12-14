@@ -139,11 +139,11 @@ def msg_text(msg_text:text.MsgDQ, event:XUEvent):
 
     # 入力アクション
     # ---------------------------------------------------------
-    if input_def.BTN_A in event.trg or input_def.BTN_B in event.now:
-        if msg_text.is_finish:
-            XUWinBase.find_parent_win(msg_text).start_close()
-        elif msg_text.is_next_wait:
-            msg_text.page_no += 1  # 次ページへ
+    # if input_def.BTN_A in event.trg or input_def.BTN_B in event.now:
+    #     if msg_text.is_finish:
+    #         XUWinBase.find_parent_win(msg_text).start_close()
+    #     elif msg_text.is_next_wait:
+    #         msg_text.page_no += 1  # 次ページへ
 
     # 表示途中のアクション
     if not msg_text.is_next_wait:
@@ -151,8 +151,8 @@ def msg_text(msg_text:text.MsgDQ, event:XUEvent):
             msg_text.anim.draw_count += 2  # 素早く表示
 
     # 自分が閉じたらメニューごと閉じる
-    if XUWinBase.find_parent_win(msg_text).win_state == XUWinBase.STATE_CLOSED:
-        XUWinBase(msg_text.xmlui.find_by_id("menu")).start_close()
+    # if XUWinBase.find_parent_win(msg_text).win_state == XUWinBase.STATE_CLOSED:
+    #     XUWinBase(msg_text.xmlui.find_by_id("menu")).start_close()
 
 
 # ステータスウインドウ( ｰ`дｰ´)ｷﾘｯ
