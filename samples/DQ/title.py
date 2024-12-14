@@ -10,7 +10,7 @@ class Title:
 
     def __init__(self, xmlui:XMLUI):
         self.xmlui = xmlui
-        self.xmlui.template_fromfile("assets/ui/title.xml", self.UI_TEMPLATE_TITLE)
+        self.xmlui.load_template("assets/ui/title.xml", self.UI_TEMPLATE_TITLE)
         self.xmlui.open(self.UI_TEMPLATE_TITLE, "game_title")
 
         ui_init(self.xmlui, "title")

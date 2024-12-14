@@ -13,7 +13,7 @@ class Battle:
         self.xmlui = xmlui
 
         # UIの読み込み
-        self.xmlui.template_fromfile("assets/ui/battle.xml", self.UI_TEMPLATE_BATTLE)
+        self.xmlui.load_template("assets/ui/battle.xml", self.UI_TEMPLATE_BATTLE)
         ui_init(self.xmlui, self.UI_TEMPLATE_BATTLE)
 
         # バトル開始UI初期化

@@ -47,7 +47,7 @@ class NPC:
         # 会話が発生した
         if talk is not None:
             # メッセージウインドウを開く
-            msg_win = xmlui.find_by_id("menu").open(field.Field.UI_TEMPLATE_FIELD, "message")
+            msg_win = xmlui.find_by_id("menu").open("message")
             msg_text = text.MsgDQ(msg_win.find_by_tag("msg_text"), "page_line_num", "wrap")
             if talk:
                 msg_text.start_talk(XUTextBase.dict_format(talk, field.param_db))  # talkでテキスト開始

@@ -26,14 +26,13 @@ class Field:
         self.goto_battle = False
 
         # UIの読み込み
-        self.xmlui.template_fromfile("assets/ui/field.xml", self.UI_TEMPLATE_FIELD)
+        self.template = self.xmlui.load_template("assets/ui/field.xml")
         ui_init(self.xmlui, self.UI_TEMPLATE_FIELD)
 
     def __del__(self):
         # 読みこんだUIの削除
-        self.xmlui.remove_template(self.UI_TEMPLATE_FIELD)
+        self.template.remove()
         self.xmlui.remove_drawfunc(self.UI_TEMPLATE_FIELD)
-        print("remove field")
 
     def update(self):
         # UIメニューが開いていたらキャラが動かないように
@@ -43,7 +42,7 @@ class Field:
 
             # キャラが動いていなければメニューオープン可能
             if not self.player.is_moving:
-                self.xmlui.open_by_event(ui_theme.input_def.BTN_A, self.UI_TEMPLATE_FIELD, "menu")
+                self.xmlui.open_by_event(ui_theme.input_def.BTN_A, "menu")
 
         else:
             # 会話イベントチェック
@@ -131,13 +130,13 @@ def ui_init(xmlui, group):
         if input_def.BTN_A in event.trg:
             match menu_grid.action:
                 case "talk":
-                    menu_grid.open(Field.UI_TEMPLATE_FIELD, "talk_dir")
+                    menu_grid.open("talk_dir")
                 case "spel":
                     menu_grid.xmlui.popup("common", "under_construct")
                 case "status":
                     menu_grid.xmlui.popup("common", "under_construct")
                 case "tools":
-                    menu_grid.open(Field.UI_TEMPLATE_FIELD, "tools")
+                    menu_grid.open("tools")
                 case "stairs":
                     return "down_stairs"
                 case "check":
@@ -208,7 +207,7 @@ def ui_init(xmlui, group):
                 XUWinBase.find_win(tools_list).start_close()
 
                 # メッセージウインドウを開く
-                msg_win = xmlui.find_by_id("menu").open(Field.UI_TEMPLATE_FIELD, "message")
+                msg_win = xmlui.find_by_id("menu").open("message")
                 msg_text = msg_win.find_by_tag("msg_text")
                 msg_text.start_system(msg_text, "ＨＰが　１０かいふくした")  # systemメッセージ
             else:

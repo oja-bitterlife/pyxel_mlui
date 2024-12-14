@@ -12,7 +12,7 @@ ui_theme = Theme(PyxelFont("assets/font/b12.bdf"))
 
 # ライブラリのインスタンス化
 xmlui = XMLUI(pyxel.width, pyxel.height)
-xmlui.template_fromfile("assets/ui/common.xml", "common")
+xmlui.load_template("assets/ui/common.xml")
 xmlui.debug.level = ui_theme.debug.debug_level
 
 

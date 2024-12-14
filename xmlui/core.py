@@ -324,7 +324,7 @@ class XUState:
     # open/close
     # *************************************************************************
     # 子に別Element一式を追加する
-    def open(self, template_name:str, id:str, id_alias:str|None=None) -> "XUState":
+    def open(self, id:str, id_alias:str|None=None) -> "XUState":
         # idがかぶらないよう別名を付けられる
         id_alias = id if id_alias is None else id_alias
 
@@ -334,16 +334,21 @@ class XUState:
             # raise Exception(f"ID '{id_alias}' already exists")
 
         # オープン
-        opend = self.xmlui._templates[template_name].duplicate(id).set_attr("id", id_alias)
-        self.add_child(opend)
+        opened:XUState|None = None
+        for template in self.xmlui._templates:
+            if template.exists_id(id):
+                opened = template.duplicate(id).set_attr("id", id_alias)
+                self.add_child(opened)
+        if opened == None:
+            raise Exception(f"ID '{id}' not found")
 
         # ownerを設定しておく
-        for child in opend._rec_iter():
+        for child in opened._rec_iter():
             child.set_attr("owner", id_alias)
 
         # open/closeが連続しないようTrg入力を落としておく
         self.xmlui.event.clear_trg()
-        return opend
+        return opened
 
     # すぐにclose
     def close(self):
@@ -442,14 +447,19 @@ class XUState:
 class XMLUI_Template(XUState):
     # 初期化
     # *************************************************************************
-    # ファイルから読み込み
-    @classmethod
-    def _fromfile(cls, xmlui:'XMLUI', fileName:str, root_tag:str|None=None) -> "XMLUI_Template":
-        with open(fileName, "r", encoding="utf8") as f:
-            return XMLUI_Template(XUState(xmlui, xml.etree.ElementTree.fromstring(f.read())))
+    # ファイルから読み込み(ファイル読み込み失敗処理は外に任せる)
+    def __init__(self, root:XUState, xml_filename:str):
+        f= open(xml_filename, "r", encoding="utf8")
+        super().__init__(root.xmlui, xml.etree.ElementTree.fromstring(f.read()))
+        self.filename = xml_filename
 
-    def __init__(self, root:XUState):
-        super().__init__(root.xmlui, root._element)
+    def __del__(self):
+        print(f"template removed: {self.filename}")
+
+
+    # 登録を削除する
+    def remove(self):
+        self.xmlui._templates.remove(self)
 
     # XML操作
     # *************************************************************************
@@ -500,7 +510,7 @@ class XMLUI(XUState):
         self._draw_funcs:dict[str, dict[str, Callable[[XUState, XUEvent], str|None]]] = {}
 
         # XMLテンプレート置き場
-        self._templates:dict[str, XMLUI_Template] = {}
+        self._templates:list[XMLUI_Template] = []
 
         # デバッグ用
         self.debug = XMLUI_Debug(self)
@@ -513,11 +523,10 @@ class XMLUI(XUState):
 
     # template操作
     # *************************************************************************
-    def template_fromfile(self, template_filename:str, template_name:str="default"):
-        self._templates[template_name] = XMLUI_Template._fromfile(self, template_filename)
-
-    def remove_template(self, template_name:str):
-        del self._templates[template_name]
+    def load_template(self, template_filename:str) -> XMLUI_Template:
+        template = XMLUI_Template(self, template_filename)
+        self._templates.append(template)
+        return template
 
     # 更新用
     # *************************************************************************
@@ -585,21 +594,21 @@ class XMLUI(XUState):
         self.event._on(event_name)
 
     # イベントが発生していればopenする。すでに開いているチェック付き
-    def open_by_event(self, event_names:list[str]|str, template_name:str, id:str, id_alias:str|None=None) -> XUState|None:
+    def open_by_event(self, event_names:list[str]|str, id:str, id_alias:str|None=None) -> XUState|None:
         if isinstance(event_names, str):
             event_names = [event_names]  # 配列で統一
         for event_name in event_names:
             if event_name in self.event.trg:
-                return self.base.open(template_name, id, id_alias)
+                return self.base.open(id, id_alias)
         return None
 
     # override
-    def open(self, template_name:str, id:str, id_alias:str|None=None) -> XUState:
-        return self.base.open(template_name, id, id_alias)
+    def open(self, id:str, id_alias:str|None=None) -> XUState:
+        return self.base.open(id, id_alias)
 
     # over側で開く
-    def popup(self, template_name:str, id:str, id_alias:str|None=None) -> XUState:
-        return self.over.open(template_name, id, id_alias)
+    def popup(self, id:str, id_alias:str|None=None) -> XUState:
+        return self.over.open(id, id_alias)
 
 # ユーティリティークラス
 # #############################################################################
