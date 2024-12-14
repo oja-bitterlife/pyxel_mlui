@@ -29,17 +29,13 @@
     </battle>
 
     <info>バトル画面用</info>
-    <round_win abs_x="112" abs_y="8" w="128" h="82" id="menu">
+    <round_win abs_x="112" abs_y="8" w="128" h="50" id="menu">
         <title x="36" y="0" w="52" h="12" align="center">コマンド</title>
         <menu_grid x="8" y="14" rows="2" item_w="58" item_h="16">
-            <menu_item action="talk">はなす</menu_item>
+            <menu_item action="atack">たたかう</menu_item>
             <menu_item action="spel">じゅもん</menu_item>
-            <menu_item action="status">つよさ</menu_item>
+            <menu_item action="run">にげる</menu_item>
             <menu_item action="tools">どうぐ</menu_item>
-            <menu_item action="stairs">かいだん</menu_item>
-            <menu_item action="check">しらべる</menu_item>
-            <menu_item action="door">とびら</menu_item>
-            <menu_item action="take">とる</menu_item>
         </menu_grid>
     </round_win>
 
