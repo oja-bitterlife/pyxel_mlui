@@ -51,6 +51,7 @@ class MsgScr(Msg):
     def __init__(self, state:XUState, page_line_num_attr:str, wrap_attr:str):
         super().__init__(state, page_line_num_attr, wrap_attr)
 
+    # 最後尾までスクロールした結果文字列を返す
     def scroll_buf(self:"MsgScr", scroll_line_num:int) -> list[str]:
         # 現在ページの挿入
         buf = self.anim.text.splitlines()

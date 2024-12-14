@@ -862,25 +862,49 @@ class XUSelectItem(XUState):
         area.y += self.attr_int(self.ITEM_Y_ATTR)
         return area
 
-# グリッド情報
+# 選択ベース
 class XUSelectBase(_XUUtilBase):
     # クラス定数
     ROOT_TAG = "_xmlui_select_root"
     SELECTED_NO_ATTR = "_xmlui_selected_no"
 
-    def __init__(self, state:XUState, items:list[XUSelectItem], rows:int, item_w:int, item_h:int):
+    def __init__(self, state:XUState, item_tag:str):
         super().__init__(state, self.ROOT_TAG)
+
+        # 自分の直下のitemだけ回収する
+        self._items = [XUSelectItem(XUState(state.xmlui, element)) for element in state._element if element.tag == item_tag]
+
+    @property
+    def selected_no(self) -> int:
+        return self.attr_int(self.SELECTED_NO_ATTR, 0)
+
+    @property
+    def selected_item(self) -> XUSelectItem:
+        return self._items[self.selected_no]
+
+    @property
+    def length(self) -> int:
+        return len(self._items)
+
+    # __eq__だとpylanceの方認識がおかしくなるのでactionを使う
+    @property
+    def action(self) -> str:
+        return self.selected_item.action
+
+# XUSelectBase更新用
+class XUSelect(XUSelectBase):
+    def __init__(self, state:XUState, item_tag:str, rows:int, item_w:int, item_h:int):
+        super().__init__(state, item_tag)
         self._rows = rows
-        self._items = items
 
         # タグに付いてるselected取得
-        for i,item in enumerate(items):
+        for i,item in enumerate(self._items):
             if item.selected:
                 self.selected_no = i
                 break
 
         # 子の状態更新
-        for i,item in enumerate(items):
+        for i,item in enumerate(self._items):
             # 座標が設定されていなければ初期座標で設定
             if not item.has_attr(XUSelectItem.ITEM_X_ATTR):
                 item.set_pos(i % rows * item_w, i // rows * item_h)
@@ -896,14 +920,6 @@ class XUSelectBase(_XUUtilBase):
     def selected_no(self, no:int) -> int:
         self.set_attr(self.SELECTED_NO_ATTR, no)
         return no
-
-    @property
-    def selected_item(self) -> XUSelectItem:
-        return self._items[self.selected_no]
-
-    @property
-    def length(self) -> int:
-        return len(self._items)
 
     # 値設定用
     # -----------------------------------------------------
@@ -931,19 +947,12 @@ class XUSelectBase(_XUUtilBase):
 
         self.select(y*self._rows + x)
 
-    # __eq__だとpylanceの方認識がおかしくなるのでactionを使う
-    @property
-    def action(self) -> str:
-        return self.selected_item.action
-
 # グリッド選択
-class XUSelectGrid(XUSelectBase):
+class XUSelectGrid(XUSelect):
     def __init__(self, state:XUState, item_tag:str, rows_attr:str, item_w_attr:str, item_h_attr:str):
-        # 自分の直下のitemだけ回収する
-        items = [XUSelectItem(XUState(state.xmlui, element)) for element in state._element if element.tag == item_tag]
         item_w = state.attr_int(item_w_attr, 0)
         item_h = state.attr_int(item_h_attr, 0)
-        super().__init__(state, items, state.attr_int(rows_attr, 1), item_w, item_h)
+        super().__init__(state, item_tag, state.attr_int(rows_attr, 1), item_w, item_h)
 
     # 入力に応じた挙動一括。変更があった場合はTrue
     def _select_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str, x_wrap:bool, y_wrap:bool) -> bool:
@@ -967,14 +976,12 @@ class XUSelectGrid(XUSelectBase):
         return self._select_by_event(input, left_event, right_event, up_event, down_event, False, False)
 
 # リスト選択
-class XUSelectList(XUSelectBase):
+class XUSelectList(XUSelect):
     def __init__(self, state:XUState, item_tag:str, item_w_attr:str, item_h_attr:str):
-        # 自分の直下のitemだけ回収する
-        items = [XUSelectItem(XUState(state.xmlui, element)) for element in state._element if element.tag == item_tag]
         item_w = state.attr_int(item_w_attr, 0)
         item_h = state.attr_int(item_h_attr, 0)
-        rows = len(items) if item_w > item_h else 1
-        super().__init__(state, items, rows, item_w, item_h)
+        rows = 1024 if item_w > item_h else 1  # 横並びかどうか
+        super().__init__(state, item_tag, rows, item_w, item_h)
   
     # 入力に応じた挙動一括。変更があった場合はTrue
     def _select_by_event(self, input:set[str], prev_event:str, next_event:str, wrap:bool) -> bool:
