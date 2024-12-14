@@ -53,7 +53,7 @@ def popup_win(win:win.RectFrame, event:XUEvent):
     pyxel.rect(win.area.x, win.area.y, win.area.w, win.area.h, 0)
     win.draw_frame(pyxel.screen.data_ptr(), [0,7,13], win.area.inflate(-2, -2))
 
-@common_text.msg("popup_text")
+@common_text.msg("popup_text", "popup_text")
 def popup_text(popup_text:text.Msg, event:XUEvent):
     input_def = ui_theme.input_def
     if input_def.BTN_A in event.trg or input_def.BTN_B in event.trg:
@@ -95,7 +95,6 @@ def round_win(round_win:win.RoundFrame, event:XUEvent):
 
 # メッセージウインドウ
 # ---------------------------------------------------------
-# @common_text.msg_dq("msg_text")
 def common_msg_text(msg_text:text.MsgDQ, event:XUEvent):
     area = msg_text.area  # areaは重いので必ずキャッシュ
 
@@ -108,34 +107,34 @@ def common_msg_text(msg_text:text.MsgDQ, event:XUEvent):
     msg_text.anim.draw_count += 0.5
 
     # talkの時は各ページ先頭にマーク
-    if msg_text.is_talk:
-        for i,page in enumerate(msg_text.pages):
-            msg_text.pages[i][0] = text.MsgDQ.TALK_MARK + page[0]
+    # if msg_text.is_talk:
+    #     for i,page in enumerate(msg_text.anim.all_text.splitlines()):
+    #         msg_text.pages[i][0] = text.MsgDQ.TALK_MARK + page[0]
 
-    # Scroll
-    scroll_size = msg_text.page_line_num+2
-    scroll_buf = msg_text.scroll_buf(scroll_size)
-    if msg_text.page_text.startswith("＊「"):
-        scroll_indents = msg_text.scroll_indents(scroll_size)
-    else:
-        scroll_indents = [False for _ in range(scroll_size)]
+    # # Scroll
+    # scroll_size = msg_text.page_line_num+2
+    # scroll_buf = msg_text.scroll_buf(scroll_size)
+    # if msg_text.page_text.startswith("＊「"):
+    #     scroll_indents = msg_text.scroll_indents(scroll_size)
+    # else:
+    #     scroll_indents = [False for _ in range(scroll_size)]
 
-    # アニメーション用表示位置ずらし。スクロール時半文字ずれる
-    shift_y = -3 if not msg_text.anim.is_finish and len(scroll_buf) >= scroll_size else 5
+    # # アニメーション用表示位置ずらし。スクロール時半文字ずれる
+    # shift_y = -3 if not msg_text.anim.is_finish and len(scroll_buf) >= scroll_size else 5
 
-    # テキスト描画
-    line_height = system_font.size + 3  # 行間設定
-    for i,page in enumerate(scroll_buf):
-        x = area.x + (system_font.size*2 if scroll_indents[i] else 0)
-        y = shift_y + area.y + i*line_height
-        pyxel.text(x, y, page, 7, system_font.font)
+    # # テキスト描画
+    # line_height = system_font.size + 3  # 行間設定
+    # for i,page in enumerate(scroll_buf):
+    #     x = area.x + (system_font.size*2 if scroll_indents[i] else 0)
+    #     y = shift_y + area.y + i*line_height
+    #     pyxel.text(x, y, page, 7, system_font.font)
 
     # カーソル表示
     # ---------------------------------------------------------
-    if msg_text.is_next_wait:
-        cursor_count = msg_text.anim.draw_count-msg_text.anim.length
-        if cursor_count//7 % 2 == 0:
-            draw_msg_cursor(msg_text, 0, len(scroll_buf)*line_height + shift_y-3)
+    # if msg_text.is_next_wait:
+    #     cursor_count = msg_text.anim.draw_count-msg_text.anim.length
+    #     if cursor_count//7 % 2 == 0:
+    #         draw_msg_cursor(msg_text, 0, len(scroll_buf)*line_height + shift_y-3)
 
     # 入力アクション
     # ---------------------------------------------------------
@@ -157,7 +156,7 @@ def status_item(status_item:text.Label, event:XUEvent):
     system_font = ui_theme.font.system
 
     # 値の取得
-    text = XUTextConv.dict_new(status_item.text, param_db)
+    text = XUTextConv.format_dict(status_item.text, param_db)
 
     # テキストは右寄せ
     area = status_item.area

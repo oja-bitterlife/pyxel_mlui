@@ -960,6 +960,11 @@ class XUTextAnim(XUSelectItem):
     def text(self) -> str:
         return self._limitstr(super().text, self.draw_count)
 
+    # 全体テキストを受け取る
+    @property
+    def all_text(self) -> str:
+        return super().text
+
     # draw_countまでのテキストを全角で受け取る
     @property
     def zenkaku(self) -> str:
@@ -970,10 +975,9 @@ class XUTextPage(XUSelectList):
     PAGE_REGEXP = r"\\p"  # 改ページに変換する正規表現(\0へ)
 
     ROOT_TAG= "_xmlui_text_root"
-    PAGE_TAG = "_xmlui_page"
 
-    def __init__(self, state:XUState, page_item_tag:str):
-        super().__init__(state, page_item_tag, "", "")
+    def __init__(self, state:XUState, item_tag:str):
+        super().__init__(state, item_tag, "", "")
 
     # ページごとに行・ワードラップ分割
     @classmethod
@@ -1026,6 +1030,10 @@ class XUTextPage(XUSelectList):
     @property
     def anim(self):
         return XUTextAnim(self._items[self.page_no])
+
+    @property
+    def anims(self) -> list[XUTextAnim]:
+        return [XUTextAnim(item) for item in self._items]
 
     # 次ページがなくテキストは表示完了 = 完全に終了
     @property

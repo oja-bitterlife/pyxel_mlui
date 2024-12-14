@@ -42,7 +42,7 @@ def ui_init(template:XUTemplate):
                     game_start.close()
                     game_start.xmlui.on("game_start")
                 case "continue":
-                    game_start.xmlui.popup("common", "under_construct")
+                    game_start.xmlui.popup("under_construct")
 
     @title_select.list("game_speed", "menu_item", "item_w", "item_h")
     def game_speed(game_speed:select.List, event:XUEvent):
