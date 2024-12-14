@@ -703,7 +703,11 @@ class XUSelectBase(_XUUtilBase):
         self._item_tag = item_tag
 
         # 自分の直下のitemだけ回収する
-        self._items = [XUSelectItem(XUState(state.xmlui, element)) for element in state._element if element.tag == item_tag]
+        self._items = [XUSelectItem(XUState(state.xmlui, child)) for child in self._element if child.tag == item_tag]
+        if state.tag == "msg_text":
+            print([child.tag for child in self._element])
+            print(self._items)
+            print(item_tag)
 
     # 選択中のitemの番号(Treeの並び順)
     @property
@@ -808,8 +812,8 @@ class XUSelectGrid(XUSelector):
 # リスト選択
 class XUSelectList(XUSelector):
     def __init__(self, state:XUState, item_tag:str, item_w_attr:str, item_h_attr:str):
-        item_w = state.attr_int(item_w_attr, 0)
-        item_h = state.attr_int(item_h_attr, 0)
+        item_w = state.attr_int(item_w_attr, 0) if item_w_attr else 0
+        item_h = state.attr_int(item_h_attr, 0) if item_h_attr else 0
         rows = len(state.find_by_tagall(item_tag)) if item_w > item_h else 1  # 横並びかどうか
         super().__init__(state, item_tag, rows, item_w, item_h)
   
@@ -979,6 +983,7 @@ class XUTextPage(XUSelectList):
 
     def __init__(self, state:XUState, item_tag:str):
         super().__init__(state, item_tag, "", "")
+        print(state.strtree())
 
     # ページごとに行・ワードラップ分割
     @classmethod

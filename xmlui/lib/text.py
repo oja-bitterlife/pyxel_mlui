@@ -52,12 +52,12 @@ class Msg(XUTextPage):
     @classmethod
     def append_msg(cls, state:XUState, item_tag:str, text:str, all_params:dict[str,Any], page_line_num_attr:str, wrap_attr:str):
         page = XUTextPage(state, item_tag)
-        page.append_pages(text, all_params, state.attr_int(page_line_num_attr, 1024), state.attr_int(wrap_attr, 4096))
+        page.append_pages(text, all_params, page_line_num_attr, wrap_attr)
 
     @classmethod
-    def start_msg(cls, state:XUState, item_tag:str, text:str, all_params:dict[str,Any], page_line_num_attr:str=1024, wrap_attr=4096):
+    def start_msg(cls, state:XUState, item_tag:str, text:str, all_params:dict[str,Any], page_line_num_attr:str, wrap_attr:str):
         page = XUTextPage(state, item_tag)
-        page.set_pages(text, all_params, page_line_num_attr, wrap_attr, 4096)
+        page.set_pages(text, all_params, page_line_num_attr, wrap_attr)
 
 class MsgScr(Msg):
     # タグのテキストを処理する
