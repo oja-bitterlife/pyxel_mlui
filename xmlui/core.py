@@ -123,17 +123,17 @@ class XUEvent:
 
         self.now:set[str] = set([])
         self.trg:set[str] = set([])
-        self._release:set[str] = set([])
+        self.release:set[str] = set([])
 
     def clear_trg(self):
         self.trg:set[str] = set([])
-        self._release:set[str] = set([])
+        self.release:set[str] = set([])
 
     # 更新
     def update(self):
         # 状態更新
         self.trg = set([i for i in self._receive if i not in self.now])
-        self._relase = set([i for i in self.now if i not in self._receive])
+        self.release = set([i for i in self.now if i not in self._receive])
         self.now = self._receive
 
         # 取得し直す
@@ -144,6 +144,16 @@ class XUEvent:
         if event_name in self._receive:
             raise ValueError(f"event_name:{event_name} is already registered.")
         self._receive.add(event_name)
+
+    def copy(self):
+        clone = XUEvent()
+        clone.is_active = self.is_active
+        clone.on_init = self.on_init
+        clone._receive = set(self._receive)
+        clone.now = set(self.now)
+        clone.trg = set(self.trg)
+        clone.release = set(self.release)
+        return clone
 
 # UIパーツの状態取得
 # #############################################################################
@@ -504,6 +514,11 @@ class XUTemplate(XUState):
         # 処理関数の登録
         self._draw_funcs[tag_name] = func
 
+    # タグ処理が登録されていたら実行
+    def draw_element(self, tag_name:str, state:XUState, event:XUEvent) -> str | None:
+        if tag_name in self._draw_funcs:
+            return self._draw_funcs[tag_name](state, event)
+
 class XMLUI(XUState):
     # 初期化
     # *************************************************************************
@@ -573,28 +588,21 @@ class XMLUI(XUState):
         # 更新処理
         for state in self.children:  # 中でTreeを変えたいのでイテレータではなくリストで
             # active/inactiveどちらのeventを使うか決定
-            event = copy.copy(self.event) if state in self.active_states else XUEvent()
+            event = self.event.copy() if state in self.active_states else XUEvent()
 
-            # やっぱりinitialize情報がどこかに欲しい
-            event.on_init = state.update_count == 0
-
-            # 更新処理
+            # updateカウンタ更新
+            event.on_init = state.update_count == 0  # やっぱりinitialize情報がどこかに欲しい
             state.set_attr("update_count", state.update_count+1)  # 1スタート(0は初期化時)
-            self.draw_element(state.tag, state, event)
+
+            # 登録されている関数を実行。戻り値はイベント
+            for template in self._templates:
+                result = template.draw_element(state.tag, state, event)
+                if result is not None:
+                    self.on(result)
 
         # デバッグ
         if self.debug.is_lib_debug:
             self.debug.update()
-
-    # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
-    def draw_element(self, tag_name:str, state:XUState, event:XUEvent):
-        for template in self._templates:
-            # タグ処理が登録されてるテンプレートの登録関数を見つける
-            if tag_name in template._draw_funcs:
-                # 登録されている関数を実行。戻り値はイベント
-                result = template._draw_funcs[tag_name](state, event)
-                if result is not None:
-                    self.on(result)
 
     # イベント
     # *************************************************************************
