@@ -903,14 +903,14 @@ class XUSelector(XUSelectBase):
                 self.selected_no = i
                 break
 
-        # 子の状態更新
+        # 全てのitemの選択の更新
+        self.select(self.selected_no)
+
+        # 座標更新
         for i,item in enumerate(self._items):
             # 座標が設定されていなければ初期座標で設定
             if not item.has_attr(XUSelectItem.ITEM_X_ATTR):
                 item.set_pos(i % rows * item_w, i // rows * item_h)
-
-            # 選択状態の更新
-            self.select(self.selected_no)
 
     @property
     def selected_no(self) -> int:
