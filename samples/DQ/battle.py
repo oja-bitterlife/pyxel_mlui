@@ -56,3 +56,6 @@ def ui_init(template):
     def msg_text(msg_text:text.MsgDQ, event:XUEvent):
         # メッセージ共通処理
         common_msg_text(msg_text, event)
+
+        if msg_text.is_finish:
+            return "finish_msg"
