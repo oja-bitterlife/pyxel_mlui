@@ -25,10 +25,11 @@ class Battle:
         self.template.remove()
 
     def update(self):
-        pass
-        # msg_text = self.xmlui.find_by_tag("msg_text")
-        # if msg_text.anim.is_finish:
-        #     text.MsgDQ.start_system(msg_text, msg_text.text + "\n" + "コマンド？")
+        if not self.xmlui.exists_id("menu"):
+            msg_text = self.xmlui.find_by_tag("msg_text")
+            text.MsgDQ.start_system(msg_text, msg_text.text + "\n" + "コマンド？")
+
+            self.xmlui.open("menu")
             
     def draw(self):
         # UIの描画(fieldとdefaultグループ)
