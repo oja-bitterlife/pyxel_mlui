@@ -52,4 +52,4 @@ class NPC:
             if talk:
                 text.MsgDQ.start_talk(msg_text, XUTextConv.format_dict(talk, field.param_db))  # talkでテキスト開始
             else:
-                text.MsgDQ.start_system(msg_text, "page_item", "だれもいません", {})  # systemメッセージ
+                text.MsgDQ.start_system(msg_text, "page_item", "だれもいません", {}, "page_line_num", "wrap_attr")  # systemメッセージ

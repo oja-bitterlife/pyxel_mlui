@@ -1048,19 +1048,21 @@ class XUTextPage(XUSelectList):
 
     # ツリー操作
     # -----------------------------------------------------
-    def set_pages(self:XUState, text:str, all_params:dict[str,Any], page_line_num:str=1024, wrap=4096):
+    def set_pages(self:XUState, text:str, all_params:dict[str,Any], page_line_num_attr:str, wrap_attr:str):
         self.clear_pages()
-        self.append_pages(text, all_params, page_line_num, wrap)
+        self.append_pages(text, all_params, page_line_num_attr, wrap_attr)
 
     def clear_pages(self):
         for child in self.find_by_tagall(self._item_tag):
             child.remove()
 
-    def append_pages(self, text:str, all_params:dict[str,Any], page_line_num:str=1024, wrap=4096):
+    def append_pages(self, text:str, all_params:dict[str,Any], page_line_num_attr:str, wrap_atr:str):
         # まずはパラメータ置換
         format_text = XUTextConv.format_dict(text, all_params)
 
         # ページ分割してページごとにタグにしてAddChild
+        page_line_num = self.attr_int(page_line_num_attr, 1024)
+        wrap = self.attr_int(wrap_atr, 4096)
         for page in XUTextPage.split_page_texts(format_text, page_line_num, wrap):
             page_anim = XUState(self.xmlui, Element(self._item_tag))
             page_anim.set_text(page)

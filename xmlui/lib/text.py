@@ -50,14 +50,14 @@ class Msg(XUTextPage):
         page.clear_pages()
 
     @classmethod
-    def append_msg(cls, state:XUState, item_tag:str, text:str, all_params:dict[str,Any], page_line_num:str=1024, wrap=4096):
+    def append_msg(cls, state:XUState, item_tag:str, text:str, all_params:dict[str,Any], page_line_num_attr:str, wrap_attr:str):
         page = XUTextPage(state, item_tag)
-        page.append_pages(text, all_params, page_line_num, wrap)
+        page.append_pages(text, all_params, state.attr_int(page_line_num_attr, 1024), state.attr_int(wrap_attr, 4096))
 
     @classmethod
-    def start_msg(cls, state:XUState, item_tag:str, text:str, all_params:dict[str,Any], page_line_num:str=1024, wrap=4096):
+    def start_msg(cls, state:XUState, item_tag:str, text:str, all_params:dict[str,Any], page_line_num_attr:str=1024, wrap_attr=4096):
         page = XUTextPage(state, item_tag)
-        page.set_pages(text, all_params, page_line_num, wrap)
+        page.set_pages(text, all_params, page_line_num_attr, wrap_attr, 4096)
 
 class MsgScr(Msg):
     # タグのテキストを処理する
@@ -110,14 +110,14 @@ class MsgDQ(MsgScr):
         return indents
 
     @classmethod
-    def start_talk(cls, state:XUState, item_tag:str, text:str, all_params:dict[str,Any], page_line_num:str=1024, wrap=4096):
+    def start_talk(cls, state:XUState, item_tag:str, text:str, all_params:dict[str,Any], page_line_num_attr:str, wrap_attr:str):
         state.set_attr(cls.IS_TALK_ATTR, True)
-        cls.start_msg(state, item_tag, text, all_params, page_line_num, wrap)
+        cls.start_msg(state, item_tag, text, all_params, page_line_num_attr, wrap_attr)
 
     @classmethod
-    def start_system(cls, state:XUState, item_tag:str, text:str, all_params:dict[str,Any], page_line_num:str=1024, wrap=4096):
+    def start_system(cls, state:XUState, item_tag:str, text:str, all_params:dict[str,Any], page_line_num_attr:str, wrap_attr):
         state.set_attr(cls.IS_TALK_ATTR, False)
-        cls.start_msg(state, item_tag, text, all_params, page_line_num, wrap)
+        cls.start_msg(state, item_tag, text, all_params, page_line_num_attr, wrap_attr)
 
     @classmethod
     def is_talk(cls, state:XUState):
@@ -135,7 +135,7 @@ class Decorator(XUTemplate.HasRef):
             self.template.set_drawfunc(tag_name, draw)
         return wrapper
 
-    def msg(self, tag_name:str, item_tag:str, page_line_num_attr:str="page_line_num", wrap_attr:str="wrap"):
+    def msg(self, tag_name:str, item_tag:str):
         def wrapper(bind_func:Callable[[Msg,XUEvent], str|None]):
             # 登録用関数をジェネレート
             def draw(state:XUState, event:XUEvent):
@@ -144,7 +144,7 @@ class Decorator(XUTemplate.HasRef):
             self.template.set_drawfunc(tag_name, draw)
         return wrapper
 
-    def msg_scr(self, tag_name:str, item_tag:str, page_line_num_attr:str="page_line_num", wrap_attr:str="wrap"):
+    def msg_scr(self, tag_name:str, item_tag:str):
         def wrapper(bind_func:Callable[[MsgScr,XUEvent], str|None]):
             # 登録用関数をジェネレート
             def draw(state:XUState, event:XUEvent):
@@ -153,7 +153,7 @@ class Decorator(XUTemplate.HasRef):
             self.template.set_drawfunc(tag_name, draw)
         return wrapper
 
-    def msg_dq(self, tag_name:str, item_tag:str, page_line_num_attr:str="page_line_num", wrap_attr:str="wrap"):
+    def msg_dq(self, tag_name:str, item_tag:str):
         def wrapper(bind_func:Callable[[MsgDQ,XUEvent], str|None]):
             # 登録用関数をジェネレート
             def draw(state:XUState, event:XUEvent):
