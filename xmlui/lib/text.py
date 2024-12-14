@@ -110,8 +110,8 @@ class MsgDQ(MsgScr):
 # デコレータを用意
 # *****************************************************************************
 class Decorator(DefaultDecorator):
-    def __init__(self, xmlui:XMLUI, group:str|None=None):
-        super().__init__(xmlui, group)
+    def __init__(self, template:XUTemplate):
+        super().__init__(template)
 
     def label(self, tag_name:str, align_attr:str="align", valign_attr:str="valign"):
         def wrapper(bind_func:Callable[[Label,XUEvent], str|None]):
@@ -119,7 +119,7 @@ class Decorator(DefaultDecorator):
             def draw(state:XUState, event:XUEvent):
                 return bind_func(Label(state, align_attr, valign_attr), event)
             # 関数登録
-            self.xmlui.set_drawfunc(tag_name, draw, self.group)
+            self.template.set_drawfunc(tag_name, draw)
         return wrapper
 
     def msg(self, tag_name:str, page_line_num_attr:str="page_line_num", wrap_attr:str="wrap"):
@@ -128,7 +128,7 @@ class Decorator(DefaultDecorator):
             def draw(state:XUState, event:XUEvent):
                 return bind_func(Msg(state, page_line_num_attr, wrap_attr), event)
             # 関数登録
-            self.xmlui.set_drawfunc(tag_name, draw, self.group)
+            self.template.set_drawfunc(tag_name, draw)
         return wrapper
 
     def msg_scr(self, tag_name:str, page_line_num_attr:str="page_line_num", wrap_attr:str="wrap"):
@@ -137,7 +137,7 @@ class Decorator(DefaultDecorator):
             def draw(state:XUState, event:XUEvent):
                 return bind_func(MsgScr(state, page_line_num_attr, wrap_attr), event)
             # 関数登録
-            self.xmlui.set_drawfunc(tag_name, draw, self.group)
+            self.template.set_drawfunc(tag_name, draw)
         return wrapper
 
     def msg_dq(self, tag_name:str, page_line_num_attr:str="page_line_num", wrap_attr:str="wrap"):
@@ -146,5 +146,5 @@ class Decorator(DefaultDecorator):
             def draw(state:XUState, event:XUEvent):
                 return bind_func(MsgDQ(state, page_line_num_attr, wrap_attr), event)
             # 関数登録
-            self.xmlui.set_drawfunc(tag_name, draw, self.group)
+            self.template.set_drawfunc(tag_name, draw)
         return wrapper

@@ -137,8 +137,8 @@ class RectFrame(WinFrame):
 # デコレータを用意
 # *****************************************************************************
 class Decorator(DefaultDecorator):
-    def __init__(self, xmlui:XMLUI, group:str|None=None):
-        super().__init__(xmlui, group)
+    def __init__(self, template:XUTemplate):
+        super().__init__(template)
 
     def round_frame(self, tag_name:str):
         def wrapper(bind_func:Callable[[RoundFrame,XUEvent], str|None]):
@@ -148,7 +148,7 @@ class Decorator(DefaultDecorator):
                 frame.update()
                 return bind_func(frame, event)
             # 関数登録
-            self.xmlui.set_drawfunc(tag_name, draw, self.group)
+            self.template.set_drawfunc(tag_name, draw)
         return wrapper
 
     def rect_frame(self, tag_name:str):
@@ -159,5 +159,5 @@ class Decorator(DefaultDecorator):
                 frame.update()
                 return bind_func(frame, event)
             # 関数登録
-            self.xmlui.set_drawfunc(tag_name, draw, self.group)
+            self.template.set_drawfunc(tag_name, draw)
         return wrapper

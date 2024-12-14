@@ -63,8 +63,8 @@ class Dial(XUDial):
 # デコレータを用意
 # *****************************************************************************
 class Decorator(DefaultDecorator):
-    def __init__(self, xmlui:XMLUI, group:str|None=None):
-        super().__init__(xmlui, group)
+    def __init__(self, template:XUTemplate):
+        super().__init__(template)
 
     # デコレータを用意
     def dial(self, tag_name:str, digit_length:int, align:str="center", valign:str="center", digit_list:str="0123456789"):
@@ -73,5 +73,5 @@ class Decorator(DefaultDecorator):
             def draw(state:XUState, event:XUEvent):
                 return bind_func(Dial(state, digit_length, align, valign, digit_list), event)
             # 関数登録
-            self.xmlui.set_drawfunc(tag_name, draw, self.group)
+            self.template.set_drawfunc(tag_name, draw)
         return wrapper

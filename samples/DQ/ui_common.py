@@ -12,9 +12,8 @@ ui_theme = Theme(PyxelFont("assets/font/b12.bdf"))
 
 # ライブラリのインスタンス化
 xmlui = XMLUI(pyxel.width, pyxel.height)
-xmlui.load_template("assets/ui/common.xml")
+common_template = xmlui.load_template("assets/ui/common.xml")
 xmlui.debug.level = ui_theme.debug.debug_level
-
 
 
 # 共通で使える関数
@@ -42,8 +41,8 @@ def get_world_clip(win:XUWinBase) -> XURect:
         area.h -= clip_size
     return area
 
-common_win = win.Decorator(xmlui)
-common_text = text.Decorator(xmlui)
+common_win = win.Decorator(common_template)
+common_text = text.Decorator(common_template)
 
 # 工事中表示用
 # *****************************************************************************

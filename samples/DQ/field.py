@@ -12,8 +12,6 @@ from params import param_db
 
 
 class Field:
-    UI_TEMPLATE_FIELD = "ui_field"
-
     def __init__(self, xmlui:XMLUI):
         self.xmlui = xmlui
 
@@ -27,12 +25,11 @@ class Field:
 
         # UIの読み込み
         self.template = self.xmlui.load_template("assets/ui/field.xml")
-        ui_init(self.xmlui, self.UI_TEMPLATE_FIELD)
+        ui_init(self.template)
 
     def __del__(self):
         # 読みこんだUIの削除
         self.template.remove()
-        self.xmlui.remove_drawfunc(self.UI_TEMPLATE_FIELD)
 
     def update(self):
         # UIメニューが開いていたらキャラが動かないように
@@ -70,7 +67,7 @@ class Field:
         self.player.draw()
 
         # UIの描画(fieldとdefaultグループ)
-        self.xmlui.draw([self.UI_TEMPLATE_FIELD])
+        self.xmlui.draw()
 
 
 # 町の中UI
@@ -207,7 +204,7 @@ def ui_init(template):
                 XUWinBase.find_win(tools_list).start_close()
 
                 # メッセージウインドウを開く
-                msg_win = xmlui.find_by_id("menu").open("message")
+                msg_win = tools_list.xmlui.find_by_id("menu").open("message")
                 msg_text = msg_win.find_by_tag("msg_text")
                 msg_text.start_system(msg_text, "ＨＰが　１０かいふくした")  # systemメッセージ
             else:

@@ -2,8 +2,6 @@ from typing import Callable
 from xmlui.core import XUTemplate,XUState,XUEvent
 
 class DefaultDecorator:
-    DEFAULT_GROUP = ""
-
     def __init__(self, template:XUTemplate):
         self.template = template
 

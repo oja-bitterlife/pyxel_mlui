@@ -1,23 +1,20 @@
 import pyxel
 
 # タイトル画面
-from xmlui.core import XMLUI,XUEvent
+from xmlui.core import XMLUI,XUTemplate,XUEvent
 from xmlui.lib import select
 from ui_common import ui_theme
 
 class Title:
-    UI_TEMPLATE_TITLE = "ui_title"
-
     def __init__(self, xmlui:XMLUI):
         self.xmlui = xmlui
-        self.xmlui.load_template("assets/ui/title.xml", self.UI_TEMPLATE_TITLE)
-        self.xmlui.open(self.UI_TEMPLATE_TITLE, "game_title")
+        self.template = self.xmlui.load_template("assets/ui/title.xml")
+        self.xmlui.open("game_title")
 
-        ui_init(self.xmlui, "title")
+        ui_init(self.template)
 
     def __del__(self):
-        self.xmlui.remove_template(self.UI_TEMPLATE_TITLE)
-        self.xmlui.remove_drawfunc("title")
+        self.template.remove()
 
     def update(self):
         if "game_start" in self.xmlui.event.trg:
@@ -25,14 +22,14 @@ class Title:
         return None
 
     def draw(self):
-        self.xmlui.draw(["title"])
+        self.xmlui.draw()
 
 
 # タイトル画面UI
 # ---------------------------------------------------------
 from ui_common import draw_menu_cursor
-def ui_init(xmlui:XMLUI, group:str):
-    title_select = select.Decorator(xmlui, group)
+def ui_init(template:XUTemplate):
+    title_select = select.Decorator(template)
 
     @title_select.list("game_start", "menu_item", "item_w", "item_h")
     def game_start(game_start:select.List, event:XUEvent):
