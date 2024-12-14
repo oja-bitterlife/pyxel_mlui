@@ -60,7 +60,6 @@ def ui_init(template):
         input_def = ui_theme.input_def
         dial.change_by_event(event.trg, *input_def.CURSOR)
 
-        # print(dial.number)
         for item in dial.digits:
             area = item.area
             pyxel.text(area.x, area.y, item.text, 7, ui_theme.font.system.font)

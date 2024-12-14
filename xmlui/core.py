@@ -892,7 +892,7 @@ class XUSelectBase(_XUUtilBase):
         return self.selected_item.action
 
 # XUSelectBase更新用
-class XUSelect(XUSelectBase):
+class XUSelector(XUSelectBase):
     def __init__(self, state:XUState, item_tag:str, rows:int, item_w:int, item_h:int):
         super().__init__(state, item_tag)
         self._rows = rows
@@ -948,7 +948,7 @@ class XUSelect(XUSelectBase):
         self.select(y*self._rows + x)
 
 # グリッド選択
-class XUSelectGrid(XUSelect):
+class XUSelectGrid(XUSelector):
     def __init__(self, state:XUState, item_tag:str, rows_attr:str, item_w_attr:str, item_h_attr:str):
         item_w = state.attr_int(item_w_attr, 0)
         item_h = state.attr_int(item_h_attr, 0)
@@ -976,11 +976,11 @@ class XUSelectGrid(XUSelect):
         return self._select_by_event(input, left_event, right_event, up_event, down_event, False, False)
 
 # リスト選択
-class XUSelectList(XUSelect):
+class XUSelectList(XUSelector):
     def __init__(self, state:XUState, item_tag:str, item_w_attr:str, item_h_attr:str):
         item_w = state.attr_int(item_w_attr, 0)
         item_h = state.attr_int(item_h_attr, 0)
-        rows = 1024 if item_w > item_h else 1  # 横並びかどうか
+        rows = len(state.find_by_tagall(item_tag)) if item_w > item_h else 1  # 横並びかどうか
         super().__init__(state, item_tag, rows, item_w, item_h)
   
     # 入力に応じた挙動一括。変更があった場合はTrue
@@ -1005,28 +1005,33 @@ class XUSelectNum(XUSelectList):
     def __init__(self, state:XUState, item_tag:str, item_w_attr:str):
         super().__init__(state, item_tag, item_w_attr, "")
 
+    # 各桁のitem
     @property
     def digits(self) -> list[XUSelectItem]:
         return self._items
 
+    # 各桁のitemに数値を設定
     def set_digits(self, num:int) -> Self:
         num = min(max(0, num), self.max)
-        for item in self._items:
+        for item in reversed(self._items):
             item.set_text(str(num % 10))
             num //= 10
         return self
 
+    # 数値として取得
     @property
     def number(self) -> int:
-        return int("".join([item.text for item in self._items]))
-    
+        return int("".join([item.text for item in self.digits]))
+
+    # 最大値
     @property
     def max(self) -> int:
         return pow(10, self.length)-1
 
     # 入力に応じた挙動一括。変更があった場合はTrue
     def change_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str):
-        self.select_by_event(input, left_event, right_event)
+        # 左右逆でイベント
+        self.select_by_event(input, right_event, left_event)
 
         # 数値の変更
         number = self.number
