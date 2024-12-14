@@ -1029,9 +1029,9 @@ class XUSelectNum(XUSelectList):
         return pow(10, self.length)-1
 
     # 入力に応じた挙動一括。変更があった場合はTrue
-    def change_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str):
-        # 左右逆でイベント
-        self.select_by_event(input, right_event, left_event)
+    def change_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
+        # 左右逆でイベントを使う
+        changed = self.select_by_event(input, right_event, left_event)
 
         # 数値の変更
         number = self.number
@@ -1040,8 +1040,12 @@ class XUSelectNum(XUSelectList):
             new_num = number + pow(10, self.selected_no)
         if down_event in input:
             new_num = number - pow(10, self.selected_no)
+
         if number != new_num:
             self.set_digits(new_num)
+            changed = True
+        
+        return changed
 
 
 # ウインドウサポート
