@@ -820,10 +820,12 @@ class XUTextPage(_XUUtilBase):
 
     # ページテキスト
     # -----------------------------------------------------
+    # 現在ページのアニメーション情報アクセス
     @property
     def anim(self):
         return XUTextAnim(self, self.page_text)
 
+    # 1ページ分の文字列を取得
     @property
     def page_text(self) -> str:
         if not len(self.pages):  # データがまだない
@@ -851,10 +853,12 @@ class XUSelectItem(XUState):
     def __init__(self, state:XUState):
         super().__init__(state.xmlui, state._element)
 
+    # 追加アトリビュートに座標設定(元のXMLを汚さない)
     def set_pos(self, x:int, y:int) -> Self:
         self.set_attr([self.ITEM_X_ATTR, self.ITEM_Y_ATTR], [x, y])
         return self
 
+    # 追加アトリビュートの方を見る
     @property
     def area(self) -> XURect:
         area = super().area
@@ -866,7 +870,7 @@ class XUSelectItem(XUState):
 class XUSelectBase(_XUUtilBase):
     # クラス定数
     ROOT_TAG = "_xmlui_select_root"
-    SELECTED_NO_ATTR = "_xmlui_selected_no"
+    SELECTED_ATTR = "_xmlui_selected"
 
     def __init__(self, state:XUState, item_tag:str):
         super().__init__(state, self.ROOT_TAG)
@@ -874,19 +878,32 @@ class XUSelectBase(_XUUtilBase):
         # 自分の直下のitemだけ回収する
         self._items = [XUSelectItem(XUState(state.xmlui, element)) for element in state._element if element.tag == item_tag]
 
+    # 選択中のitemの番号(Treeの並び順)
     @property
     def selected_no(self) -> int:
-        return self.attr_int(self.SELECTED_NO_ATTR, 0)
+        # 追加アトリビュート優先で検索
+        for i,item in enumerate(self._items):
+            if item.attr_bool(self.SELECTED_ATTR):
+                return i
 
+        # 無ければタグのselectedを検索
+        for i,item in enumerate(self._items):
+            if item.selected:
+                return i
+
+        return 0  # デフォルト
+
+    # 選択中のitem
     @property
     def selected_item(self) -> XUSelectItem:
         return self._items[self.selected_no]
 
+    # itemの数
     @property
-    def length(self) -> int:
+    def item_num(self) -> int:
         return len(self._items)
 
-    # __eq__だとpylanceの方認識がおかしくなるのでactionを使う
+    # __eq__だとpylanceの型認識がおかしくなるのでactionを使う
     @property
     def action(self) -> str:
         return self.selected_item.action
@@ -897,43 +914,25 @@ class XUSelector(XUSelectBase):
         super().__init__(state, item_tag)
         self._rows = rows
 
-        # タグに付いてるselected取得
-        for i,item in enumerate(self._items):
-            if item.selected:
-                self.selected_no = i
-                break
-
-        # 全てのitemの選択の更新
-        self.select(self.selected_no)
-
         # 座標更新
         for i,item in enumerate(self._items):
             # 座標が設定されていなければ初期座標で設定
             if not item.has_attr(XUSelectItem.ITEM_X_ATTR):
                 item.set_pos(i % rows * item_w, i // rows * item_h)
 
-    @property
-    def selected_no(self) -> int:
-        return self.attr_int(self.SELECTED_NO_ATTR, 0)
-
-    @selected_no.setter
-    def selected_no(self, no:int) -> int:
-        self.set_attr(self.SELECTED_NO_ATTR, no)
-        return no
-
     # 値設定用
     # -----------------------------------------------------
+    # 選択を番号で追加アトリビュートに設定する(元のXMLを汚さない)
     def select(self, no:int):
-        self.selected_no = min(max(0, no), self.length)
-
-        # アイテム設定
+        # 追加アトリビュートの方で設定
         for i,item in enumerate(self._items):
-            item.set_attr("selected", i == no)
+            item.set_attr(self.SELECTED_ATTR, i == no)
 
+    # 選択を移動させる
     def next(self, add:int=1, x_wrap=False, y_wrap=False):
         # キャッシュ
         no = self.selected_no
-        cols = max(self.length//self._rows, 1)
+        cols = max(self.item_num//self._rows, 1)
 
         x = no % self._rows
         y = no // self._rows
@@ -969,9 +968,11 @@ class XUSelectGrid(XUSelector):
 
         return self.selected_no != old_no
 
+    # 選択一括処理Wrap版
     def select_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
         return self._select_by_event(input, left_event, right_event, up_event, down_event, True, True)
 
+    # 選択一括処理NoWrap版
     def select_no_wrap(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
         return self._select_by_event(input, left_event, right_event, up_event, down_event, False, False)
 
@@ -994,9 +995,11 @@ class XUSelectList(XUSelector):
 
         return self.selected_no != old_no
 
+    # 選択一括処理Wrap版
     def select_by_event(self, input:set[str], prev_event:str, next_event:str) -> bool:
         return self._select_by_event(input, prev_event, next_event, True)
 
+    # 選択一括処理NoWrap版
     def select_no_wrap(self, input:set[str], prev_event:str, next_event:str) -> bool:
         return self._select_by_event(input, prev_event, next_event, False)
 
@@ -1026,7 +1029,7 @@ class XUSelectNum(XUSelectList):
     # 最大値
     @property
     def max(self) -> int:
-        return pow(10, self.length)-1
+        return pow(10, self.item_num)-1
 
     # 入力に応じた挙動一括。変更があった場合はTrue
     def change_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
@@ -1091,7 +1094,7 @@ class XUWinBase(XUState):
 
     # ウインドウの状態管理
     # -----------------------------------------------------
-    # ウインドウの状態に応じてアニメーション用カウンタを更新する
+    # ウインドウの状態に応じてカウンタを更新する。状態は更新しない
     def update(self):
         win_state = self.attr_str(self.WIN_STATE_ATTR)
         match win_state:
@@ -1104,6 +1107,7 @@ class XUWinBase(XUState):
     @property
     def win_state(self) -> str:
         return self.attr_str(self.WIN_STATE_ATTR)
+
     @win_state.setter
     def win_state(self, win_state:str) -> str:
         self.set_attr(self.WIN_STATE_ATTR, win_state)
@@ -1111,16 +1115,22 @@ class XUWinBase(XUState):
 
     # opning/closingの状態管理
     # -----------------------------------------------------
+    # 現在open中かどうか。open完了もTrue
     @property
     def is_opening(self):
         return self.win_state == self.STATE_OPENING or self.win_state == self.STATE_OPENED
+
+    # 現在close中かどうか。close完了もTrue
     @property
     def is_closing(self):
         return self.win_state == self.STATE_CLOSING or self.win_state == self.STATE_CLOSED
 
+    # openされてからのカウント(≒update_count)
     @property
     def opening_count(self) -> int:
         return self.attr_int(self.OPENING_COUNT_ATTR)
+
+    # closingが発生してからのcount
     @property
     def closing_count(self) -> int:
         return self.attr_int(self.CLOSING_COUNT_ATTR)
