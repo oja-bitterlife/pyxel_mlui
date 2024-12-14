@@ -1,5 +1,4 @@
 from xmlui.core import *
-from xmlui.lib.decorator import DefaultDecorator
 
 # コレは外だし
 class WinFrame(XUWinBase):
@@ -136,10 +135,7 @@ class RectFrame(WinFrame):
 
 # デコレータを用意
 # *****************************************************************************
-class Decorator(DefaultDecorator):
-    def __init__(self, template:XUTemplate):
-        super().__init__(template)
-
+class Decorator(XUTemplate.DecoratorBase):
     def round_frame(self, tag_name:str):
         def wrapper(bind_func:Callable[[RoundFrame,XUEvent], str|None]):
             # 登録用関数をジェネレート

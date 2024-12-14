@@ -1,6 +1,5 @@
 from xmlui.core import *
 from xmlui.lib.text import FontBase
-from xmlui.lib.decorator import DefaultDecorator
 
 # キー入力
 # #############################################################################
@@ -62,10 +61,7 @@ class Dial(XUDial):
 
 # デコレータを用意
 # *****************************************************************************
-class Decorator(DefaultDecorator):
-    def __init__(self, template:XUTemplate):
-        super().__init__(template)
-
+class Decorator(XUTemplate.DecoratorBase):
     # デコレータを用意
     def dial(self, tag_name:str, digit_length:int, align:str="center", valign:str="center", digit_list:str="0123456789"):
         def wrapper(bind_func:Callable[[Dial,XUEvent], str|None]):

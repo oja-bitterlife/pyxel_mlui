@@ -1,5 +1,4 @@
 from xmlui.core import *
-from xmlui.lib.decorator import DefaultDecorator
 
 # セレクトアイテム
 class Item(XUSelectItem):
@@ -19,10 +18,7 @@ class List(XUSelectList):
 
 # デコレータを用意
 # *****************************************************************************
-class Decorator(DefaultDecorator):
-    def __init__(self, template:XUTemplate):
-        super().__init__(template)
-
+class Decorator(XUTemplate.DecoratorBase):
     def item(self, item_tag:str):
         def wrapper(bind_func:Callable[[Item,XUEvent], str|None]):
             # 登録用関数をジェネレート

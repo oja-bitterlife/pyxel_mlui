@@ -1,5 +1,4 @@
 from xmlui.core import *
-from xmlui.lib.decorator import DefaultDecorator
 
 # フォントを扱う
 # #############################################################################
@@ -109,10 +108,7 @@ class MsgDQ(MsgScr):
 
 # デコレータを用意
 # *****************************************************************************
-class Decorator(DefaultDecorator):
-    def __init__(self, template:XUTemplate):
-        super().__init__(template)
-
+class Decorator(XUTemplate.DecoratorBase):
     def label(self, tag_name:str, align_attr:str="align", valign_attr:str="valign"):
         def wrapper(bind_func:Callable[[Label,XUEvent], str|None]):
             # 登録用関数をジェネレート

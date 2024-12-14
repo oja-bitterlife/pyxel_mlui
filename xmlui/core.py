@@ -508,16 +508,34 @@ class XUTemplate(XUState):
     def duplicate(self, id:str) -> XUState:
         return XUState(self.xmlui, copy.deepcopy(self.find_by_id(id)._element))
 
-    # 描画関係
+    # 処理関数登録
     # *************************************************************************
     def set_drawfunc(self, tag_name:str, func:Callable[[XUState,XUEvent], str|None]):
         # 処理関数の登録
         self._draw_funcs[tag_name] = func
 
+    # デコレータも用意
+    class DecoratorBase:
+        def __init__(self, template:"XUTemplate"):
+            self.template = template
+
+        def tag_draw(self, tag_name:str):
+            def wrapper(bind_func:Callable[[XUState,XUEvent], str|None]):
+                self.template.set_drawfunc(tag_name, bind_func)
+            return wrapper
+
+    def tag_draw(self, tag_name:str):
+        def wrapper(bind_func:Callable[[XUState,XUEvent], str|None]):
+            self.set_drawfunc(tag_name, bind_func)
+        return wrapper
+
+    # 描画関係
+    # *************************************************************************
     # タグ処理が登録されていたら実行
     def draw_element(self, tag_name:str, state:XUState, event:XUEvent) -> str | None:
         if tag_name in self._draw_funcs:
             return self._draw_funcs[tag_name](state, event)
+
 
 class XMLUI(XUState):
     # 初期化

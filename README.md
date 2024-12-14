@@ -61,7 +61,7 @@ def update():
 
 def draw():
     # ライブラリの実行
-    xmlui.draw([])
+    xmlui.draw()
 
 pyxel.run(update, draw)
 ```
@@ -88,20 +88,20 @@ from xmlui import XUState,XUEvent
 
 xmlui = XMLUI()
 # XMLファイルの読み込み
-xmlui.template_fromfile("test.xml")
-# タグのid指定でopen(表示開始)
+test_template = xmlui.template_fromfile("test.xml")
+# タグのid指定でUIをopen(表示開始)
 xmlui.open("test_ui")
 
 def update():
     pass
 
 def draw():
-    xmlui.draw([])
+    xmlui.draw()
 
 # 描画用関数を用意する(デコレータ方式)
 # デコレータの引数にタグ名を書く
 # 関数名はかぶらなければなんでもいい
-@xmlui.tag_bind("window")
+@test_template.tag_draw("window")
 def window(window:XUState, event:XUEvent):  
     # 第一パラメータのareaにUIのスクリーン座標
     area = window.area
