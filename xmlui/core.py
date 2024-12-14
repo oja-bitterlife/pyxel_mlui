@@ -970,11 +970,6 @@ class XUTextAnim(XUSelectItem):
     def zenkaku(self) -> str:
         return XUTextConv.convert_zenkaku(self.text)
 
-    def set_format_text(self, text:str, all_params:dict[str,Any]) -> Self:
-        self._element.text = XUTextConv.format_dict(text, all_params)
-        return self
-
-
 class XUTextPage(XUSelectList):
     SEPARATE_REGEXP = r"\\n"  # 改行に変換する正規表現(\nへ)
     PAGE_REGEXP = r"\\p"  # 改ページに変換する正規表現(\0へ)
@@ -1025,7 +1020,7 @@ class XUTextPage(XUSelectList):
     def page_no(self, no:int=0) -> Self:
         # ページを切り替えたときはカウンタをリセット
         if self.page_no != no:
-            self.anim.draw_count = 0
+            self.anim_page.draw_count = 0
         self.select(no)
         return self
 
@@ -1033,22 +1028,22 @@ class XUTextPage(XUSelectList):
     # -----------------------------------------------------
     # 現在ページのアニメーション情報アクセス
     @property
-    def anim(self):
+    def anim_page(self):
         return XUTextAnim(self._items[self.page_no])
 
     @property
-    def anims(self) -> list[XUTextAnim]:
+    def anim_pages(self) -> list[XUTextAnim]:
         return [XUTextAnim(item) for item in self._items]
 
     # 次ページがなくテキストは表示完了 = 完全に終了
     @property
     def is_all_finish(self):
-        return not self.is_next_wait and self.anim.is_finish
+        return not self.is_next_wait and self.anim_page.is_finish
 
     # 次ページあり
     @property
     def is_next_wait(self):
-        return self.anim.is_finish and self.page_no < self.item_num-1
+        return self.anim_page.is_finish and self.page_no < self.item_num-1
 
 
 # ウインドウサポート

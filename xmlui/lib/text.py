@@ -52,16 +52,16 @@ class MsgScr(Msg):
     # 最後尾までスクロールした結果文字列を返す
     def scroll_buf(self:"MsgScr", scroll_line_num:int) -> list[str]:
         # 現在ページの挿入
-        buf = self.anim.text.splitlines()
+        buf = self.anim_page.text.splitlines()
 
         # 行が足りるまでページを巻き戻して挿入
         for page_no in range(self.page_no-1, -1, -1):
             if len(buf) >= scroll_line_num:
                 break
-            buf = self.anims[page_no].all_text.splitlines() + buf
+            buf = self.anim_pages[page_no].all_text.splitlines() + buf
 
         # 最大行数に絞る。アニメーション中だけ最下行が使える。
-        max_line = scroll_line_num if not self.anim.is_finish else scroll_line_num-1
+        max_line = scroll_line_num if not self.anim_page.is_finish else scroll_line_num-1
         buf = list(reversed(list(reversed(buf))[:max_line]))
 
         return buf
@@ -78,33 +78,38 @@ class MsgDQ(MsgScr):
     # 各行に会話用インデントが必要かを返す
     def scroll_indents(self, scroll_line_num:int) -> list[bool]:
         # 現在ページの挿入
-        page_lines = self.anim.all_text.splitlines()
+        page_lines = self.anim_page.all_text.splitlines()
         indents = [True if i != 0 and not page_lines[0].startswith(self.TALK_MARK) else False for i,_ in enumerate(page_lines)]
 
         # 行が足りるまでページを巻き戻して挿入
         for page_no in range(self.page_no-1, -1, -1):
             if len(indents) >= scroll_line_num:
                 break
-            page_lines = self.anims[page_no].all_text.splitlines()
+            page_lines = self.anim_pages[page_no].all_text.splitlines()
             indents =  [True if not line.startswith(self.TALK_MARK) else False for line in page_lines] + indents
 
         # 最大行数に絞る。アニメーション中だけ最下行が使える。
-        max_line = scroll_line_num if not self.anim.is_finish else scroll_line_num-1
+        max_line = scroll_line_num if not self.anim_page.is_finish else scroll_line_num-1
         indents = list(reversed(list(reversed(indents))[:max_line]))
 
         return indents
 
     @classmethod
     def start_talk(cls, state:XUState, text:str):
-        state._element.text = text
         state.set_attr(cls.IS_TALK_ATTR, True)
+
+        format_text = XUTextConv.format_dict(text, {})
+        page_anim = XUTextAnim(XUState(state.xmlui, Element("page_anim")))
+        page_anim.set_text(format_text)
+        state.add_child(page_anim)
 
     @classmethod
     def start_system(cls, state:XUState, text:str):
         state.set_attr(cls.IS_TALK_ATTR, False)
 
+        format_text = XUTextConv.format_dict(text, {})
         page_anim = XUTextAnim(XUState(state.xmlui, Element("page_anim")))
-        page_anim.set_format_text(text, {})
+        page_anim.set_text(format_text)
         state.add_child(page_anim)
 
     @classmethod
