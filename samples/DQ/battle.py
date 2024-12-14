@@ -36,14 +36,12 @@ class Battle:
 
 # バトルUI
 # *****************************************************************************
-from ui_common import draw_menu_cursor, draw_msg_cursor
+from ui_common import common_msg_text
 
 def ui_init(template):
     # fieldグループ用デコレータを作る
-    field_select = select.Decorator(template)
-    field_text = text.Decorator(template)
-    field_input = input.Decorator(template)
-
+    battle_select = select.Decorator(template)
+    battle_text = text.Decorator(template)
 
     # バトルステータスタイトル
     # @field_text.label("status_title", "align", "valign")
@@ -54,21 +52,7 @@ def ui_init(template):
     #     x, y = status_title.aligned_pos(ui_theme.font.system)
     #     pyxel.text(x+1, y-1, param_db["name"], 7, ui_theme.font.system.font)
 
-
-    @field_input.dial("dial", "dial_item", "item_w")
-    def dial(dial:input.Dial, event:XUEvent):
-        input_def = ui_theme.input_def
-        dial.change_by_event(event.trg, *input_def.CURSOR)
-
-        for item in dial.digits:
-            area = item.area
-            pyxel.text(area.x, area.y, item.text, 7, ui_theme.font.system.font)
-
-        # 確定
-        if input_def.BTN_A in event.trg:
-            yesno= dial.open("yes_no", "dial_yes_no")
-            yesno.set_attr("value", dial.digits)
-
-        # # 閉じる
-        # if input_def.BTN_B in event.trg:
-        #     dial.close_on()
+    @battle_text.msg_dq("msg_text")
+    def msg_text(msg_text:text.MsgDQ, event:XUEvent):
+        # メッセージ共通処理
+        common_msg_text(msg_text, event)

@@ -72,7 +72,7 @@ class Field:
 
 # 町の中UI
 # *****************************************************************************
-from ui_common import draw_menu_cursor, draw_msg_cursor, get_world_clip
+from ui_common import draw_menu_cursor, get_world_clip, common_msg_text
 
 def ui_init(template):
     # fieldグループ用デコレータを作る
@@ -224,3 +224,17 @@ def ui_init(template):
         # カーソル表示
         if tools_item.selected and tools_item.enable:
             draw_menu_cursor(tools_item, 0, 0)
+
+    @field_text.msg_dq("msg_text")
+    def msg_text(msg_text:text.MsgDQ, event:XUEvent):
+        # メッセージ共通処理
+        common_msg_text(msg_text, event)
+
+        input_def = ui_theme.input_def  # 入力イベント情報
+        if input_def.BTN_A in event.trg or input_def.BTN_B in event.now:
+            if msg_text.is_finish:
+                XUWinBase.find_parent_win(msg_text).start_close()
+
+        # 自分が閉じたらメニューごと閉じる
+        if XUWinBase.find_parent_win(msg_text).win_state == XUWinBase.STATE_CLOSED:
+            XUWinBase(msg_text.xmlui.find_by_id("menu")).start_close()
