@@ -225,7 +225,7 @@ def ui_init(template):
         if tools_item.selected and tools_item.enable:
             draw_menu_cursor(tools_item, 0, 0)
 
-    @field_text.msg_dq("msg_text")
+    @field_text.msg_dq("msg_text", "page_anim")
     def msg_text(msg_text:text.MsgDQ, event:XUEvent):
         # メッセージ共通処理
         common_msg_text(msg_text, event)

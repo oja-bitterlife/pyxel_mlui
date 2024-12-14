@@ -101,8 +101,11 @@ class MsgDQ(MsgScr):
 
     @classmethod
     def start_system(cls, state:XUState, text:str):
-        state._element.text = text
         state.set_attr(cls.IS_TALK_ATTR, False)
+
+        page_anim = XUTextAnim(XUState(state.xmlui, Element("page_anim")))
+        page_anim.set_format_text(text, {})
+        state.add_child(page_anim)
 
     @classmethod
     def is_talk(cls, state:XUState):

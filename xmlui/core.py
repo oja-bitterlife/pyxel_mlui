@@ -922,7 +922,7 @@ class XUTextAnim(XUSelectItem):
     TEXT_COUNT_ATTR = "_xmlui_text_count"
 
     def __init__(self, state:XUState):
-        super().__init__(state.xmlui)
+        super().__init__(state)
         self.length = XUTextConv.length(super().text)
 
     # 表示カウンタ操作
@@ -969,6 +969,11 @@ class XUTextAnim(XUSelectItem):
     @property
     def zenkaku(self) -> str:
         return XUTextConv.convert_zenkaku(self.text)
+
+    def set_format_text(self, text:str, all_params:dict[str,Any]) -> Self:
+        self._element.text = XUTextConv.format_dict(text, all_params)
+        return self
+
 
 class XUTextPage(XUSelectList):
     SEPARATE_REGEXP = r"\\n"  # 改行に変換する正規表現(\nへ)
