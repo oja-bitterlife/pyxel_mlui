@@ -34,11 +34,10 @@ def update(): # フレームの更新処理
                     scene = Battle(xmlui)
 
     # デバッグ用
-    if pyxel.btn(pyxel.KEY_CTRL):
-        if pyxel.btnp(pyxel.KEY_T):
-            print(xmlui.strtree())
-        if pyxel.btnp(pyxel.KEY_Q):
-            pyxel.quit()
+    if pyxel.btnp(pyxel.KEY_TAB):
+        print(xmlui.strtree())
+    if pyxel.btnp(pyxel.KEY_F5):
+        xmlui.reload_templates()
 
 def draw(): # 描画処理
     global scene

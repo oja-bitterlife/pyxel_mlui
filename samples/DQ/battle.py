@@ -13,16 +13,16 @@ class Battle:
         self.xmlui = xmlui
 
         # UIの読み込み
-        self.xmlui.load_template("assets/ui/battle.xml", self.UI_TEMPLATE_BATTLE)
+        self.template = self.xmlui.load_template("assets/ui/battle.xml")
         ui_init(self.xmlui, self.UI_TEMPLATE_BATTLE)
 
         # バトル開始UI初期化
-        battle = self.xmlui.open(self.UI_TEMPLATE_BATTLE, "battle")
+        battle = self.xmlui.open("battle")
         battle.find_by_tag("msg_text").set_text("てきが　あらわれた")
 
     def __del__(self):
         # 読みこんだUIの削除
-        self.xmlui.remove_template(self.UI_TEMPLATE_BATTLE)
+        self.template.remove()
         self.xmlui.remove_drawfunc(self.UI_TEMPLATE_BATTLE)
 
     def update(self):

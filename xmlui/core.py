@@ -451,15 +451,16 @@ class XMLUI_Template(XUState):
     def __init__(self, root:XUState, xml_filename:str):
         f= open(xml_filename, "r", encoding="utf8")
         super().__init__(root.xmlui, xml.etree.ElementTree.fromstring(f.read()))
-        self.filename = xml_filename
-
-    def __del__(self):
-        print(f"template removed: {self.filename}")
-
+        self.xml_filename = xml_filename
 
     # 登録を削除する
     def remove(self):
         self.xmlui._templates.remove(self)
+
+    # XMLファイルを再読み込みする(開発用)
+    def reload(self):
+        self.xmlui._templates.remove(self)
+        self.xmlui._templates.append(XMLUI_Template(self.xmlui, self.xml_filename))
 
     # XML操作
     # *************************************************************************
@@ -523,10 +524,21 @@ class XMLUI(XUState):
 
     # template操作
     # *************************************************************************
-    def load_template(self, template_filename:str) -> XMLUI_Template:
-        template = XMLUI_Template(self, template_filename)
+    def load_template(self, xml_filename:str) -> XMLUI_Template:
+        template = XMLUI_Template(self, xml_filename)
         self._templates.append(template)
         return template
+
+    def find_template(self, xml_filename:str) -> XMLUI_Template:
+        for template in self._templates:
+            if template.xml_filename == xml_filename:
+                return template
+        raise Exception(f"Template '{xml_filename}' not found")
+
+    # 開発用。テンプレートを読み込み直す
+    def reload_templates(self):
+        for template in self._templates:
+            template.reload()
 
     # 更新用
     # *************************************************************************
