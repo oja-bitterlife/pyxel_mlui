@@ -37,11 +37,11 @@ class Decorator(XUTemplate.HasRef):
             self.template.set_drawfunc(tag_name, draw)
         return wrapper
 
-    def list(self, tag_name:str, tag_item:str, item_w_attr:str, item_h_attr:str):
+    def list(self, tag_name:str, item_tag:str, item_w_attr:str, item_h_attr:str):
         def wrapper(bind_func:Callable[[List,XUEvent], str|None]):
             # 登録用関数をジェネレート
             def draw(state:XUState, event:XUEvent):
-                return bind_func(List(state, tag_item, item_w_attr, item_h_attr), event)
+                return bind_func(List(state, item_tag, item_w_attr, item_h_attr), event)
             # 関数登録
             self.template.set_drawfunc(tag_name, draw)
         return wrapper

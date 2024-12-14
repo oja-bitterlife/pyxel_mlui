@@ -700,6 +700,7 @@ class XUSelectBase(_XUUtilBase):
 
     def __init__(self, state:XUState, item_tag:str):
         super().__init__(state, self.ROOT_TAG)
+        self._item_tag = item_tag
 
         # 自分の直下のitemだけ回収する
         self._items = [XUSelectItem(XUState(state.xmlui, element)) for element in state._element if element.tag == item_tag]
@@ -1045,6 +1046,25 @@ class XUTextPage(XUSelectList):
     def is_next_wait(self):
         return self.anim_page.is_finish and self.page_no < self.item_num-1
 
+    # ツリー操作
+    # -----------------------------------------------------
+    def set_pages(self:XUState, text:str, all_params:dict[str,Any], page_line_num:str=1024, wrap=4096):
+        self.clear_pages()
+        self.append_pages(text, all_params, page_line_num, wrap)
+
+    def clear_pages(self):
+        for child in self.find_by_tagall(self._item_tag):
+            child.remove()
+
+    def append_pages(self, text:str, all_params:dict[str,Any], page_line_num:str=1024, wrap=4096):
+        # まずはパラメータ置換
+        format_text = XUTextConv.format_dict(text, all_params)
+
+        # ページ分割してページごとにタグにしてAddChild
+        for page in XUTextPage.split_page_texts(format_text, page_line_num, wrap):
+            page_anim = XUState(self.xmlui, Element(self._item_tag))
+            page_anim.set_text(page)
+            self.add_child(page_anim)
 
 # ウインドウサポート
 # *****************************************************************************
