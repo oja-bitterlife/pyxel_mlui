@@ -846,6 +846,9 @@ class XUTextPage(_XUUtilBase):
 # *****************************************************************************
 # 選択クラス用アイテム
 class XUSelectItem(XUState):
+    # 選択追加アトリビュート(元のXMLを汚さない)
+    SELECTED_ATTR = "_xmlui_selected"
+
     # アイテム座標保存先
     ITEM_X_ATTR = "_xmlui_sel_item_x"
     ITEM_Y_ATTR = "_xmlui_sel_item_y"
@@ -857,6 +860,11 @@ class XUSelectItem(XUState):
     def set_pos(self, x:int, y:int) -> Self:
         self.set_attr([self.ITEM_X_ATTR, self.ITEM_Y_ATTR], [x, y])
         return self
+
+    # 追加アトリビュートの方をみるように
+    @property
+    def selected(self) -> bool:
+        return self.attr_bool(self.SELECTED_ATTR)
 
     # 追加アトリビュートの方を見る
     @property
@@ -870,7 +878,6 @@ class XUSelectItem(XUState):
 class XUSelectBase(_XUUtilBase):
     # クラス定数
     ROOT_TAG = "_xmlui_select_root"
-    SELECTED_ATTR = "_xmlui_selected"
 
     def __init__(self, state:XUState, item_tag:str):
         super().__init__(state, self.ROOT_TAG)
@@ -883,12 +890,12 @@ class XUSelectBase(_XUUtilBase):
     def selected_no(self) -> int:
         # 追加アトリビュート優先で検索
         for i,item in enumerate(self._items):
-            if item.attr_bool(self.SELECTED_ATTR):
+            if item.selected:
                 return i
 
         # 無ければタグのselectedを検索
         for i,item in enumerate(self._items):
-            if item.selected:
+            if item._element.get("selected", False):
                 return i
 
         return 0  # デフォルト
@@ -920,13 +927,15 @@ class XUSelector(XUSelectBase):
             if not item.has_attr(XUSelectItem.ITEM_X_ATTR):
                 item.set_pos(i % rows * item_w, i // rows * item_h)
 
+        # 選択状態復帰
+        self.select(self.selected_no)
+
     # 値設定用
     # -----------------------------------------------------
-    # 選択を番号で追加アトリビュートに設定する(元のXMLを汚さない)
+    # 選択追加アトリビュートに設定する(元のXMLを汚さない)
     def select(self, no:int):
-        # 追加アトリビュートの方で設定
         for i,item in enumerate(self._items):
-            item.set_attr(self.SELECTED_ATTR, i == no)
+            item.set_attr(item.SELECTED_ATTR, i == no)
 
     # 選択を移動させる
     def next(self, add:int=1, x_wrap=False, y_wrap=False):
