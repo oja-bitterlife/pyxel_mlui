@@ -77,10 +77,10 @@ class Field:
 # *****************************************************************************
 from ui_common import draw_menu_cursor, draw_msg_cursor, get_world_clip
 
-def ui_init(xmlui, group):
+def ui_init(template):
     # fieldグループ用デコレータを作る
-    field_select = select.Decorator(xmlui, group)
-    field_text = text.Decorator(xmlui, group)
+    field_select = select.Decorator(template)
+    field_text = text.Decorator(template)
 
     # ラベル
     # ---------------------------------------------------------

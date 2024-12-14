@@ -443,37 +443,14 @@ class XUState:
 
 # XMLでUIライブラリ本体
 # #############################################################################
-# テンプレート用
-class XMLUI_Template(XUState):
-    # 初期化
-    # *************************************************************************
-    # ファイルから読み込み(ファイル読み込み失敗処理は外に任せる)
-    def __init__(self, root:XUState, xml_filename:str):
-        f= open(xml_filename, "r", encoding="utf8")
-        super().__init__(root.xmlui, xml.etree.ElementTree.fromstring(f.read()))
-        self.xml_filename = xml_filename
-
-    # 登録を削除する
-    def remove(self):
-        self.xmlui._templates.remove(self)
-
-    # XMLファイルを再読み込みする(開発用)
-    def reload(self):
-        self.xmlui._templates.remove(self)
-        self.xmlui._templates.append(XMLUI_Template(self.xmlui, self.xml_filename))
-
-    # XML操作
-    # *************************************************************************
-    # Elmentを複製して取り出す
-    def duplicate(self, id:str) -> XUState:
-        return XUState(self.xmlui, copy.deepcopy(self.find_by_id(id)._element))
-
 # デバッグ用
 class XMLUI_Debug:
     # デバッグ用フラグ
     DEBUG_LEVEL_LIB:int = 100  # ライブラリ作成用
     DEBUG_LEVEL_DEFAULT:int = 0
+
     DEBUG_PRINT_TREE = "DEBUG_PRINT_TREE"
+    DEBUG_RELOAD = "DEBUG_RELOAD"
 
     def __init__(self, xmlui:"XMLUI"):
         self.xmlui = xmlui
@@ -482,10 +459,46 @@ class XMLUI_Debug:
     def update(self):
         if self.DEBUG_PRINT_TREE in self.xmlui.event.trg:
             print(self.xmlui.strtree())
+        if self.DEBUG_RELOAD in self.xmlui.event.trg:
+            print(self.xmlui.reload_templates())
 
     @property
     def is_lib_debug(self) -> bool:
         return self.level >= self.DEBUG_LEVEL_LIB
+
+# テンプレート
+class XUTemplate(XUState):
+    # 初期化
+    # *************************************************************************
+    # ファイルから読み込み(ファイル読み込み失敗処理は外に任せる)
+    def __init__(self, root:XUState, xml_filename:str):
+        f= open(xml_filename, "r", encoding="utf8")
+        super().__init__(root.xmlui, xml.etree.ElementTree.fromstring(f.read()))
+        self.xml_filename = xml_filename
+
+        # 処理関数の登録
+        self._draw_funcs:dict[str, Callable[[XUState, XUEvent], str|None]] = {}
+
+    # 登録を削除する
+    def remove(self):
+        self.xmlui._templates.remove(self)
+
+    # XMLファイルを再読み込みする(開発用)
+    def reload(self):
+        self.xmlui._templates.remove(self)
+        self.xmlui._templates.append(XUTemplate(self.xmlui, self.xml_filename))
+
+    # XML操作
+    # *************************************************************************
+    # Elmentを複製して取り出す
+    def duplicate(self, id:str) -> XUState:
+        return XUState(self.xmlui, copy.deepcopy(self.find_by_id(id)._element))
+
+    # 描画関係
+    # *************************************************************************
+    def set_drawfunc(self, tag_name:str, func:Callable[[XUState,XUEvent], str|None]):
+        # 処理関数の登録
+        self._draw_funcs[tag_name] = func
 
 class XMLUI(XUState):
     # 初期化
@@ -507,11 +520,8 @@ class XMLUI(XUState):
         # 入力
         self.event = XUEvent(True)  # 唯一のactiveとする
 
-        # 処理関数の登録(dict[グループ][タグ名]())
-        self._draw_funcs:dict[str, dict[str, Callable[[XUState, XUEvent], str|None]]] = {}
-
         # XMLテンプレート置き場
-        self._templates:list[XMLUI_Template] = []
+        self._templates:list[XUTemplate] = []
 
         # デバッグ用
         self.debug = XMLUI_Debug(self)
@@ -524,12 +534,12 @@ class XMLUI(XUState):
 
     # template操作
     # *************************************************************************
-    def load_template(self, xml_filename:str) -> XMLUI_Template:
-        template = XMLUI_Template(self, xml_filename)
+    def load_template(self, xml_filename:str) -> XUTemplate:
+        template = XUTemplate(self, xml_filename)
         self._templates.append(template)
         return template
 
-    def find_template(self, xml_filename:str) -> XMLUI_Template:
+    def find_template(self, xml_filename:str) -> XUTemplate:
         for template in self._templates:
             if template.xml_filename == xml_filename:
                 return template
@@ -540,12 +550,9 @@ class XMLUI(XUState):
         for template in self._templates:
             template.reload()
 
-    # 更新用
+    # 更新
     # *************************************************************************
-    def draw(self, draw_group:str|list[str]=[]):
-        # デフォルトグループを入れておく
-        draw_group = [""] + ([draw_group] if isinstance(draw_group, str) else draw_group)
-
+    def draw(self):
         # イベントの更新
         self.event.update()
 
@@ -569,35 +576,21 @@ class XMLUI(XUState):
 
             # 更新処理
             state.set_attr("update_count", state.update_count+1)  # 1スタート(0は初期化時)
-            self.draw_element(draw_group, state.tag, state, event)
+            self.draw_element(state.tag, state, event)
 
         # デバッグ
         if self.debug.is_lib_debug:
             self.debug.update()
 
     # 個別処理。関数のオーバーライドでもいいし、個別関数登録でもいい
-    def draw_element(self, draw_group:list[str], tag_name:str, state:XUState, event:XUEvent):
-        # 登録済みの関数だけ実行
-        for group_name in draw_group:  # 指定したグループのみ描画
-
-            # 登録タグごとに関数呼び出し
-            if tag_name in self._draw_funcs[group_name]:
-
+    def draw_element(self, tag_name:str, state:XUState, event:XUEvent):
+        for template in self._templates:
+            # タグ処理が登録されてるテンプレートの登録関数を見つける
+            if tag_name in template._draw_funcs:
                 # 登録されている関数を実行。戻り値はイベント
-                result = self._draw_funcs[group_name][tag_name](state, event)
+                result = template._draw_funcs[tag_name](state, event)
                 if result is not None:
                     self.on(result)
-
-    # 処理登録
-    # *************************************************************************
-    def set_drawfunc(self, tag_name:str, func:Callable[[XUState,XUEvent], str|None], group_name:str=""):
-        # 初回は辞書を作成
-        if group_name not in self._draw_funcs:
-            self._draw_funcs[group_name] = {}
-        self._draw_funcs[group_name][tag_name] = func
-
-    def remove_drawfunc(self, group_name:str):
-        del self._draw_funcs[group_name]
 
     # イベント
     # *************************************************************************
