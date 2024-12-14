@@ -1,7 +1,7 @@
 import pyxel
 
 # タイトル画面
-from xmlui.core import XMLUI,XUEvent,XUWinBase,XUTextBase,XURect
+from xmlui.core import XMLUI,XUEvent,XUWinBase,XUTextConv,XURect
 from xmlui.lib import select,text
 from ui_common import ui_theme
 from field_player import Player
@@ -232,7 +232,7 @@ def ui_init(template):
 
         input_def = ui_theme.input_def  # 入力イベント情報
         if input_def.BTN_A in event.trg or input_def.BTN_B in event.now:
-            if msg_text.is_finish:
+            if msg_text.is_all_finish:
                 XUWinBase.find_parent_win(msg_text).start_close()
 
         # 自分が閉じたらメニューごと閉じる

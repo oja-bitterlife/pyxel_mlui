@@ -5,7 +5,7 @@ import pyxel
 from xmlui.lib import text,win
 from xmlui.pyxel_util.theme import Theme
 from xmlui.pyxel_util.font import PyxelFont
-from xmlui.core import XMLUI,XUState,XUEvent,XUWinBase,XURect,XUTextBase
+from xmlui.core import XMLUI,XUState,XUEvent,XUWinBase,XURect,XUTextConv
 from params import param_db
 
 ui_theme = Theme(PyxelFont("assets/font/b12.bdf"))
@@ -157,7 +157,7 @@ def status_item(status_item:text.Label, event:XUEvent):
     system_font = ui_theme.font.system
 
     # 値の取得
-    text = XUTextBase.dict_new(status_item.text, param_db)
+    text = XUTextConv.dict_new(status_item.text, param_db)
 
     # テキストは右寄せ
     area = status_item.area

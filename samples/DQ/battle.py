@@ -1,7 +1,7 @@
 import pyxel
 
 # タイトル画面
-from xmlui.core import XMLUI,XUEvent,XUWinBase,XUTextBase,XURect
+from xmlui.core import XMLUI,XUEvent,XUWinBase,XUTextConv,XURect
 from xmlui.lib import select,text,input
 from ui_common import ui_theme
 from params import param_db
@@ -99,5 +99,5 @@ def ui_init(template):
         # メッセージ共通処理
         common_msg_text(msg_text, event)
 
-        if msg_text.is_finish:
+        if msg_text.is_all_finish:
             return "finish_msg"

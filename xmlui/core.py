@@ -661,187 +661,6 @@ class _XUUtilBase(XUState):
             self._util_root = XUState(state.xmlui, Element(root_tag))
             state.add_child(self._util_root)
 
-# テキスト系
-# *****************************************************************************
-# 半角を全角に変換
-_from_hanakaku = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-_to_zenkaku = "０１２３４５６７８９ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ"
-_from_hanakaku += " !\"#$%&'()*+,-./:;<=>?@[]^_`{|}~"  # 半角記号を追加
-_to_zenkaku += "　！＂＃＄％＆＇（）＊＋，－．／：；＜＝＞？＠［］＾＿｀｛｜｝～"  # 全角記号を追加
-_hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
-
-# テキスト基底
-class XUTextBase(str):
-    SEPARATE_REGEXP = r"\\n"  # 改行に変換する正規表現
-
-    # 文字列中の半角を全角に変換する
-    @classmethod
-    def convert_zenkaku(cls, hankaku:str) -> str:
-        return unicodedata.normalize("NFKC", hankaku).translate(_hankaku_zenkaku_dict)
-
-    # 初期化
-    # -----------------------------------------------------
-    def __new__(cls, text:str, wrap:int=4096) -> Self:
-        wrap = max(wrap, 1)   # 0だと無限になってしまうので最低1を入れておく
-
-        # 改行,wrap区切りにする(\n)
-        # -----------------------------------------------------
-        # 改行を\nに統一して全角化
-        tmp_text = "\n".join([line for line in text.splitlines()])  # XMLの改行テキストを前後を削って結合
-        tmp_text = re.sub(cls.SEPARATE_REGEXP, "\n", tmp_text)  # \nという文字列を改行コードに
-        tmp_text = cls.convert_zenkaku(tmp_text)  # 全角化
-
-        # 各行に分解し、その行をさらにwrapで分解する
-        lines =  sum([[line[i:i+wrap] for i in  range(0, len(line), wrap)] for line in tmp_text.splitlines()], [])
-
-        # 結合して保存
-        return super().__new__(cls, "\n".join(lines))
-
-    @classmethod
-    def dict_new(cls, text:str, all_params:dict[str,Any], wrap=4096) -> Self:
-        return cls(XUTextBase.dict_format(text, cls.find_params_dict(text, all_params)), wrap)
-
-    # 置き換えパラメータの抜き出し
-    @classmethod
-    def find_params(cls, text) -> set[str]:
-        return set(re.findall(r"{(\S+?)}", text))
-
-    @classmethod
-    def find_params_dict(cls, text:str, all_params:dict[str,Any]) -> dict[str,Any]:
-        out:dict[str,Any] = {}
-        for param in cls.find_params(text):
-            out[param] = all_params[param]
-        return out
-
-    @classmethod
-    def dict_format(cls, text:str, all_params:dict[str,Any]) -> str:
-        return text.format(**cls.find_params_dict(text, all_params))
-
-# アニメーションテキスト
-class XUTextAnim(XUState):
-    TEXT_COUNT_ATTR="_xmlui_text_count"
-
-    def __init__(self, state:XUState, text:str):
-        super().__init__(state.xmlui, state._element)
-        self._text = text
-
-    # 表示カウンタ操作
-    # -----------------------------------------------------
-    # 現在の表示文字数
-    @property
-    def draw_count(self) -> float:
-        return float(self.attr_float(self.TEXT_COUNT_ATTR, 0))
-
-    @draw_count.setter
-    def draw_count(self, count:float) -> float:
-        self.set_attr(self.TEXT_COUNT_ATTR, count)
-        return count
-
-    # アニメーション用
-    # -----------------------------------------------------
-    # draw_countまでの文字列を改行分割。スライスじゃないのは改行を数えないため
-    @classmethod
-    def _limitstr(cls, tmp_text, text_count:float) -> str:
-        limit = math.ceil(text_count)
-        # まずlimitまで縮める
-        for i,c in enumerate(tmp_text):
-            if (limit := limit if ord(c) < 0x20 else limit-1) < 0:  # 改行は数えない
-                tmp_text = tmp_text[:i]
-                break
-        return tmp_text
-
-    # 改行を抜いた文字数よりカウントが大きくなった
-    @property
-    def is_finish(self) -> bool:
-        return self.draw_count >= self.length
-
-    @property
-    def text(self) -> str:
-        return self._limitstr(self._text, self.draw_count)
-
-    # 改行を抜いた文字数(＝アニメーション数)取得
-    @property
-    def length(self) -> int:
-        return len(re.sub("\n|\0", "", self._text))
-
-class XUTextPage(_XUUtilBase):
-    PAGE_REGEXP = r"\\p"  # 改行に変換する正規表現
-
-    ROOT_TAG= "_xmlui_text_root"
-    PAGE_NO_ATTR="_xmlui_page_no"
-
-    def __init__(self, state:XUState, page_line_num:int, wrap:int=4096):
-        super().__init__(state, self.ROOT_TAG)
-        self.page_line_num = page_line_num
-        self.wrap = wrap
-
-        self.pages:list[list[str]] = self.split_page_lines(state.text, page_line_num, wrap)
-
-    # ページ分解。行ごと
-    @classmethod
-    def split_page_lines(cls, text, page_line_num:int, wrap:int) -> list[list[str]]:
-        # 手動ページ分解。文字列中の\pをページ区切りとして扱う
-        tmp_text = re.sub(cls.PAGE_REGEXP, "\0", text)  # \nという文字列をNullに
-        manual_pages = [XUTextBase(page_text, wrap) for page_text in tmp_text.split("\0")]  # ページごとにXUTextBase
-
-        # 行数で自動ページ分解
-        out:list[list[str]] = []
-        for text_base in manual_pages:
-            lines:list[str] = []
-            for line in text_base.splitlines():
-                lines.append(line)
-                if len(lines) >= page_line_num:
-                    out.append(lines)
-                    lines = []
-            if lines:  # 最後の残り
-                out.append(lines)
-        return out
-
-    # ページ分解。1ページ分のテキストごと
-    @classmethod
-    def split_page_texts(cls, text, page_line_num:int, wrap:int) -> list[str]:
-        return ["\n".join(page_lines) for page_lines in cls.split_page_lines(text, page_line_num, wrap)]
-
-    # ページ操作
-    # -----------------------------------------------------
-    # 現在ページ
-    @property
-    def page_no(self) -> int:
-        return self._util_root.attr_int(self.PAGE_NO_ATTR, 0)
-
-    # ページ設定
-    @page_no.setter
-    def page_no(self, no:int=0) -> Self:
-        # ページを切り替えたときはカウンタをリセット
-        if self.page_no != no:
-            self.anim.draw_count = 0
-        self._util_root.set_attr(self.PAGE_NO_ATTR, no)
-        return self
-
-    # ページテキスト
-    # -----------------------------------------------------
-    # 現在ページのアニメーション情報アクセス
-    @property
-    def anim(self):
-        return XUTextAnim(self, self.page_text)
-
-    # 1ページ分の文字列を取得
-    @property
-    def page_text(self) -> str:
-        if not len(self.pages):  # データがまだない
-            return ""
-        return "\n".join(self.pages[self.page_no])
-
-    # 次ページがなくテキストは表示完了 = 完全に終了
-    @property
-    def is_finish(self):
-        return not self.is_next_wait and self.anim.is_finish
-
-    # 次ページあり
-    @property
-    def is_next_wait(self):
-        return self.anim.is_finish and self.page_no < len(self.pages)-1
-
 # メニュー系
 # *****************************************************************************
 # 選択クラス用アイテム
@@ -1058,6 +877,165 @@ class XUSelectNum(XUSelectList):
             changed = True
         
         return changed
+
+# テキスト系
+# *****************************************************************************
+# 半角を全角に変換
+_from_hanakaku = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+_to_zenkaku = "０１２３４５６７８９ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ"
+_from_hanakaku += " !\"#$%&'()*+,-./:;<=>?@[]^_`{|}~"  # 半角記号を追加
+_to_zenkaku += "　！＂＃＄％＆＇（）＊＋，－．／：；＜＝＞？＠［］＾＿｀｛｜｝～"  # 全角記号を追加
+_hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
+
+# テキストパラメータ変換
+class XUTextConv:
+    # 文字列中の半角を全角に変換する
+    @classmethod
+    def convert_zenkaku(cls, hankaku:str) -> str:
+        return unicodedata.normalize("NFKC", hankaku).translate(_hankaku_zenkaku_dict)
+
+    # 置き換えパラメータのキーを抜き出し
+    @classmethod
+    def find_params(cls, text) -> set[str]:
+        return set(re.findall(r"{(\S+?)}", text))
+
+    # 置き換えパラメータを辞書で抜き出し
+    @classmethod
+    def find_params_dict(cls, text:str, all_params:dict[str,Any]) -> dict[str,Any]:
+        out:dict[str,Any] = {}
+        for param in cls.find_params(text):
+            out[param] = all_params[param]
+        return out
+
+    # パラメータを置き換える
+    @classmethod
+    def format_dict(cls, text:str, all_params:dict[str,Any]) -> str:
+        return text.format(**cls.find_params_dict(text, all_params))
+
+    # 改行・改ページを抜いた文字数
+    @classmethod
+    def length(cls, text:str) -> int:
+        return len(re.sub("\n|\0", "", text))
+
+# アニメーションテキストベース
+class XUTextAnim(XUSelectItem):
+    TEXT_COUNT_ATTR = "_xmlui_text_count"
+
+    def __init__(self, state:XUState):
+        super().__init__(state.xmlui)
+        self.length = XUTextConv.length(super().text)
+
+    # 表示カウンタ操作
+    # -----------------------------------------------------
+    # 現在の表示文字数
+    @property
+    def draw_count(self) -> float:
+        return float(self.attr_float(self.TEXT_COUNT_ATTR, 0))
+
+    @draw_count.setter
+    def draw_count(self, count:float) -> float:
+        self.set_attr(self.TEXT_COUNT_ATTR, count)
+        return count
+
+    # アニメーション用
+    # -----------------------------------------------------
+    # draw_countまでの文字列を改行分割。スライスじゃないのは改行を数えないため
+    @classmethod
+    def _limitstr(cls, tmp_text:str, text_count:float) -> str:
+        limit = math.ceil(text_count)
+
+        # limitまで縮める
+        for i,c in enumerate(tmp_text):
+            if (limit := limit if ord(c) < 0x20 else limit-1) < 0:  # 改行は数えない
+                return tmp_text[:i]
+        return tmp_text
+
+    # 改行を抜いた文字数よりカウントが大きくなった
+    @property
+    def is_finish(self) -> bool:
+        return self.draw_count >= self.length
+
+    # draw_countまでのテキストを受け取る
+    @property
+    def text(self) -> str:
+        return self._limitstr(super().text, self.draw_count)
+
+    # draw_countまでのテキストを全角で受け取る
+    @property
+    def zenkaku(self) -> str:
+        return XUTextConv.convert_zenkaku(self.text)
+
+class XUTextPage(XUSelectList):
+    SEPARATE_REGEXP = r"\\n"  # 改行に変換する正規表現(\nへ)
+    PAGE_REGEXP = r"\\p"  # 改ページに変換する正規表現(\0へ)
+
+    ROOT_TAG= "_xmlui_text_root"
+    PAGE_TAG = "_xmlui_page"
+
+    def __init__(self, state:XUState, page_item_tag:str):
+        super().__init__(state, page_item_tag, "", "")
+
+    # ページごとに行・ワードラップ分割
+    @classmethod
+    def split_page_lines(cls, text:str, page_line_num:int, wrap:int) -> list[list[str]]:
+        wrap = max(wrap, 1)   # 0だと無限になってしまうので最低1を入れておく
+
+        # 改行,wrap区切りにする(\n)
+        # -----------------------------------------------------
+        # 改行を\nに統一して全角化
+        tmp_text = re.sub(cls.PAGE_REGEXP, "\0", text)  # \pという文字列をNullに
+        tmp_text = re.sub(cls.SEPARATE_REGEXP, "\n", tmp_text)  # \nという文字列を改行コードに
+
+        # 行数で自動ページ分解
+        pages:list[list[str]] = []
+        for page_text in tmp_text.split("\0"):
+            lines =  sum([[line[i:i+wrap] for i in  range(0, len(line), wrap)] for line in page_text.splitlines()], [])
+            for line in lines:
+                lines.append(line)
+                if len(lines) >= page_line_num:
+                    pages.append(lines)
+                    lines = []
+            if lines:  # 最後の残り
+                pages.append(lines)
+        return pages
+
+    # ページごとテキスト(行・ワードラップ分割は\n結合)
+    @classmethod
+    def split_page_texts(cls, text:str, page_line_num:int, wrap:int) -> list[str]:
+        return ["\n".join(page) for page in cls.split_page_lines(text, page_line_num, wrap)]
+
+    # ページ操作
+    # -----------------------------------------------------
+    # 現在ページ
+    @property
+    def page_no(self) -> int:
+        return self.selected_no
+
+    # ページ設定
+    @page_no.setter
+    def page_no(self, no:int=0) -> Self:
+        # ページを切り替えたときはカウンタをリセット
+        if self.page_no != no:
+            self.anim.draw_count = 0
+        self.select(no)
+        return self
+
+    # ページテキスト
+    # -----------------------------------------------------
+    # 現在ページのアニメーション情報アクセス
+    @property
+    def anim(self):
+        return XUTextAnim(self._items[self.page_no])
+
+    # 次ページがなくテキストは表示完了 = 完全に終了
+    @property
+    def is_all_finish(self):
+        return not self.is_next_wait and self.anim.is_finish
+
+    # 次ページあり
+    @property
+    def is_next_wait(self):
+        return self.anim.is_finish and self.page_no < self.item_num-1
 
 
 # ウインドウサポート
