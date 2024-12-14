@@ -141,7 +141,7 @@ def msg_text(msg_text:text.MsgDQ, event:XUEvent):
     # ---------------------------------------------------------
     if input_def.BTN_A in event.trg or input_def.BTN_B in event.now:
         if msg_text.is_finish:
-            XUWinBase.find_win(msg_text).start_close()
+            XUWinBase.find_parent_win(msg_text).start_close()
         elif msg_text.is_next_wait:
             msg_text.page_no += 1  # 次ページへ
 
@@ -151,7 +151,7 @@ def msg_text(msg_text:text.MsgDQ, event:XUEvent):
             msg_text.anim.draw_count += 2  # 素早く表示
 
     # 自分が閉じたらメニューごと閉じる
-    if XUWinBase.find_win(msg_text).win_state == XUWinBase.STATE_CLOSED:
+    if XUWinBase.find_parent_win(msg_text).win_state == XUWinBase.STATE_CLOSED:
         XUWinBase(msg_text.xmlui.find_by_id("menu")).start_close()
 
 
@@ -168,13 +168,13 @@ def status_item(status_item:text.Label, event:XUEvent):
     # テキストは右寄せ
     area = status_item.area
     x, y = XURect.align_offset(area.w, area.h, system_font.text_width(text) + 5, 0, status_item.align, status_item.valign)
-    if area.y+y < get_world_clip(XUWinBase.find_win(status_item)).bottom():
+    if area.y+y < get_world_clip(XUWinBase.find_parent_win(status_item)).bottom():
         pyxel.text(area.x + x, area.y + y, text, 7, system_font.font)
 
 # ステータスタイトル(名前)
 @common_text.label("status_title", "align", "valign")
 def status_title(status_title:text.Label, event:XUEvent):
-    clip = get_world_clip(XUWinBase.find_win(status_title)).intersect(status_title.area)
+    clip = get_world_clip(XUWinBase.find_parent_win(status_title)).intersect(status_title.area)
     pyxel.rect(status_title.area.x, status_title.area.y, status_title.area.w, clip.h, 0)  # タイトルの下地
 
     # テキストは左寄せ

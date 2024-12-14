@@ -71,7 +71,7 @@ class BG:
                 self.blocks[door_y][door_x] = 2
                 XUWinBase(xmlui.find_by_id("menu")).start_close()
             else:
-                msg_win = xmlui.find_by_id("menu").open(field.Field.UI_TEMPLATE_FIELD, "message")
+                msg_win = xmlui.find_by_id("menu").open("message")
                 msg_text = msg_win.find_by_tag("msg_text")
                 text.MsgDQ.start_system(msg_text, "とびらがない")  # systemメッセージ
 

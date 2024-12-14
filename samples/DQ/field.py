@@ -84,7 +84,7 @@ def ui_init(template):
     # コマンドメニューのタイトル
     @field_text.label("title", "align", "valign")
     def title(title:text.Label, event:XUEvent):
-        clip = get_world_clip(XUWinBase.find_win(title)).intersect(title.area)
+        clip = get_world_clip(XUWinBase.find_parent_win(title)).intersect(title.area)
         pyxel.rect(title.area.x, title.area.y, title.area.w, clip.h, 0)  # タイトルの下地
 
         # テキストはセンタリング
@@ -95,7 +95,7 @@ def ui_init(template):
     # コマンドメニューのタイトル
     @field_text.label("menu_item_title", "align", "valign")
     def menu_item_title(menu_item_title:text.Label, event:XUEvent):
-        clip = get_world_clip(XUWinBase.find_win(menu_item_title)).intersect(menu_item_title.area)
+        clip = get_world_clip(XUWinBase.find_parent_win(menu_item_title)).intersect(menu_item_title.area)
         clip.h = max(clip.h, 4)  # フレームを隠すように
         pyxel.rect(menu_item_title.area.x, menu_item_title.area.y, menu_item_title.area.w, clip.h, 0)  # タイトルの下地
 
@@ -108,7 +108,7 @@ def ui_init(template):
     @field_select.item("menu_item")
     def menu_item(menu_item:select.Item, event:XUEvent):
         # ウインドウのクリップ状態に合わせて表示する
-        if menu_item.area.y < get_world_clip(XUWinBase.find_win(menu_item)).bottom():
+        if menu_item.area.y < get_world_clip(XUWinBase.find_parent_win(menu_item)).bottom():
             pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, 7, ui_theme.font.system.font)
 
             # カーソル表示
@@ -150,7 +150,7 @@ def ui_init(template):
 
         # 閉じる
         if input_def.BTN_B in event.trg:
-            XUWinBase.find_win(menu_grid).start_close()
+            XUWinBase.find_parent_win(menu_grid).start_close()
 
     # 会話方向
     # ---------------------------------------------------------
@@ -169,20 +169,20 @@ def ui_init(template):
             dir_select.select(3)
 
         if input_def.BTN_A in event.trg:
-            dir_win = XUWinBase.find_win(dir_select)
+            dir_win = XUWinBase.find_parent_win(dir_select)
             dir_win.start_close()
             return f"start_talk_{dir_select.action}"
 
         # 閉じる
         if input_def.BTN_B in event.trg:
-            XUWinBase.find_win(dir_select).start_close()
+            XUWinBase.find_parent_win(dir_select).start_close()
 
     # 会話方向アイテム
     # ---------------------------------------------------------
     @field_select.item("dir_item")
     def dir_item(dir_item:select.Item, event:XUEvent):
         # ウインドウのクリップ状態に合わせて表示する
-        if dir_item.area.y < get_world_clip(XUWinBase.find_win(dir_item)).bottom():
+        if dir_item.area.y < get_world_clip(XUWinBase.find_parent_win(dir_item)).bottom():
             pyxel.text(dir_item.area.x, dir_item.area.y, dir_item.text, 7, ui_theme.font.system.font)
 
         # カーソル表示
@@ -201,24 +201,24 @@ def ui_init(template):
         if input_def.BTN_A in event.trg:
             if tools_list.action == "herbs":
                 param_db["hp"] += 10
-                XUWinBase.find_win(tools_list).start_close()
+                XUWinBase.find_parent_win(tools_list).start_close()
 
                 # メッセージウインドウを開く
                 msg_win = tools_list.xmlui.find_by_id("menu").open("message")
                 msg_text = msg_win.find_by_tag("msg_text")
-                msg_text.start_system(msg_text, "ＨＰが　１０かいふくした")  # systemメッセージ
+                text.MsgDQ.start_system(msg_text, "ＨＰが　１０かいふくした")  # systemメッセージ
             else:
                 tools_list.xmlui.popup("common", "under_construct")
         
         # 閉じる
         if input_def.BTN_B in event.trg:
-            XUWinBase.find_win(tools_list).start_close()
+            XUWinBase.find_parent_win(tools_list).start_close()
 
 
     @field_select.item("tools_item")
     def tools_item(tools_item:select.Item, event:XUEvent):
         # ウインドウのクリップ状態に合わせて表示する
-        if tools_item.area.y < get_world_clip(XUWinBase.find_win(tools_item)).bottom():
+        if tools_item.area.y < get_world_clip(XUWinBase.find_parent_win(tools_item)).bottom():
             pyxel.text(6+tools_item.area.x, tools_item.area.y, tools_item.text, 7, ui_theme.font.system.font)
 
         # カーソル表示

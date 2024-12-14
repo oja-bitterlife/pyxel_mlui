@@ -996,7 +996,7 @@ class XUSelectList(XUSelectBase):
 
 # ダイアル
 # *****************************************************************************
-# 情報管理のみ
+# 情報管理のみ(後でSelectListベースで作り直す)
 class XUDial(_XUUtilBase):
     ROOT_TAG = "_xmlui_dial_root"
     EDIT_POS_ATTR = "edit_pos"  # 操作位置
@@ -1102,7 +1102,7 @@ class XUWinBase(XUState):
 
     # 一番近いXUWinBaseを持つ親を取得する
     @classmethod
-    def find_win(cls, state:XUState) -> "XUWinBase":
+    def find_parent_win(cls, state:XUState) -> "XUWinBase":
         for parent in state.ancestors:
             if XUWinBase.is_win(parent):
                 return XUWinBase(parent)

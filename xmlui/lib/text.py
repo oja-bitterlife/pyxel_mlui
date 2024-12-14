@@ -42,9 +42,9 @@ class Label(XUState):
 class Msg(XUTextPage):
     # タグのテキストを処理する
     def __init__(self, state:XUState, page_line_num_attr:str, wrap_attr:str):
-        page_line_num = state.attr_int(page_line_num_attr, 1)
-        wrap = state.attr_int(wrap_attr, 4096)
-        super().__init__(state, page_line_num, wrap)
+        self.page_line_num_attr = page_line_num_attr
+        self.wrap_attr = wrap_attr
+        super().__init__(state, state.attr_int(page_line_num_attr, 1), state.attr_int(wrap_attr, 4096))
 
 class MsgScr(Msg):
     # タグのテキストを処理する
@@ -94,17 +94,19 @@ class MsgDQ(MsgScr):
 
         return indents
 
-    def start_talk(self, text:str):
-        self._element.text = text
-        self.set_attr(self.IS_TALK_ATTR, True)
+    @classmethod
+    def start_talk(cls, state:XUState, text:str):
+        state._element.text = text
+        state.set_attr(cls.IS_TALK_ATTR, True)
 
-    def start_system(self, text:str):
-        self._element.text = text
-        self.set_attr(self.IS_TALK_ATTR, False)
+    @classmethod
+    def start_system(cls, state:XUState, text:str):
+        state._element.text = text
+        state.set_attr(cls.IS_TALK_ATTR, False)
 
-    @property
-    def is_talk(self):
-        return self.attr_bool(self.IS_TALK_ATTR, False)
+    @classmethod
+    def is_talk(cls, state:XUState):
+        return state.attr_bool(cls.IS_TALK_ATTR, False)
 
 # デコレータを用意
 # *****************************************************************************
