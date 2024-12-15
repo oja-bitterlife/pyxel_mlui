@@ -130,19 +130,19 @@ def ui_init(template):
                 case "talk":
                     menu_grid.open("talk_dir")
                 case "spel":
-                    menu_grid.xmlui.popup("common", "under_construct")
+                    menu_grid.xmlui.popup("under_construct")
                 case "status":
-                    menu_grid.xmlui.popup("common", "under_construct")
+                    menu_grid.xmlui.popup("under_construct")
                 case "tools":
                     menu_grid.open("tools")
                 case "stairs":
                     return "down_stairs"
                 case "check":
-                    menu_grid.xmlui.popup("common", "under_construct")
+                    menu_grid.xmlui.popup("under_construct")
                 case "door":
                     return "open_door"
                 case "take":
-                    menu_grid.xmlui.popup("common", "under_construct")
+                    menu_grid.xmlui.popup("under_construct")
 
         # アイテムの無効化(アイテムカーソル用)
         is_message_oepn = menu_grid.xmlui.exists_id("message")

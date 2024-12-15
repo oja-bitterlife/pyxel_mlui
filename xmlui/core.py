@@ -913,9 +913,6 @@ class XUPageItem(XUSelectItem):
     # 現在の表示文字数
     @property
     def draw_count(self) -> float:
-        # draw_countがセットされるまではupdate_countを使う(draw_count加算し忘れ用)
-        if self.has_attr(self.DRAW_COUNT_ATTR):
-            return self.update_count
         return float(self.attr_float(self.DRAW_COUNT_ATTR, 0))
 
     @draw_count.setter
