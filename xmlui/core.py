@@ -1001,7 +1001,7 @@ class XUPageInfo(XUSelectBase):
     # ツリー操作
     # -----------------------------------------------------
     def add_pages(self, text:str, page_line_num:int=1024, wrap:int=4096):
-        for page in XUPageAnim.split_page_texts(text, page_line_num, wrap):
+        for page in XUPageText.split_page_texts(text, page_line_num, wrap):
             page_item = XUPageItem(XUElem(self.xmlui, Element(self.ITEM_TAG)))
             self._util_info.add_child(page_item.set_text(page))
 
@@ -1009,7 +1009,7 @@ class XUPageInfo(XUSelectBase):
         for child in self._util_info.find_by_tagall(self.ITEM_TAG):
             child.remove()
 
-class XUPageAnim(XUPageInfo):
+class XUPageText(XUPageInfo):
     SEPARATE_REGEXP = r"\\n"  # 改行に変換する正規表現(\nへ)
     PAGE_REGEXP = r"\\p"  # 改ページに変換する正規表現(\0へ)
 

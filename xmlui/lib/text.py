@@ -39,7 +39,7 @@ class Label(XUElem):
         return area.aligned_pos(font.text_width(self.text), font.size, self.align, self.valign)
 
 # メッセージ
-class Msg(XUPageAnim):
+class Msg(XUPageText):
     PAGE_LINE_NUM_ATTR = 'page_line_num'
     WRAP_ATTR = 'wrap'
 
@@ -49,10 +49,25 @@ class Msg(XUPageAnim):
         wrap = elem.attr_int(self.WRAP_ATTR, 4096)
         super().__init__(elem, page_line_num, wrap)
 
-    # スクロール用[-line_num:]で後ろの行が拾える
+    # スクロール用
+    # -----------------------------------------------------
+    # 全体スクロール用。[-line_num:-lime_num+size]で好きな範囲を拾える
     @property
     def all_lines(self) -> list[str]:
         return sum([page.all_text.splitlines() for page in self.pages], [])
+
+    # 必要な行だけ返す(アニメーション対応)
+    def get_scroll_lines(self, scroll_size:int) -> list[str]:
+        # スクロール枠の中に収まる行を取得する
+        all_lines = []
+        for i in range(self.page_no-1, -1, -1):  # 現在より前へ戻りながら追加
+            all_lines = self.pages[i].all_text.splitlines() + all_lines
+            if len(all_lines) >= scroll_size:
+                break
+        all_lines += self.current_page.text.splitlines()  # 現在のページを追加
+
+        # scroll枠に収まるlineリストを返す
+        return all_lines[-scroll_size:]
 
     @classmethod
     def clear_msg(cls, elem:XUElem):
@@ -74,19 +89,6 @@ class MsgDQ(Msg):
     TALK_MARK = "＊「"
     IS_TALK_ATTR = "_xmlui_talk_mark"
 
-    # スクロールバッファとインデントが必要かどうかを返す
-    def get_scroll_lines(self, scroll_size:int) -> list[str]:
-        # スクロール枠の中に収まる行を取得する
-        all_lines = []
-        for i in range(self.page_no-1, -1, -1):  # 現在より前へ戻りながら追加
-            all_lines = (self.TALK_MARK + self.pages[i].all_text).splitlines() + all_lines
-            if len(all_lines) >= scroll_size:
-                break
-        all_lines += (self.TALK_MARK + self.current_page.text).splitlines()  # 現在のページを追加
-
-        # scroll枠に収まるlineリストを返す
-        return all_lines[-scroll_size:]
-
     @property
     def is_talk(self):
         return self.attr_bool(self.IS_TALK_ATTR, False)
@@ -95,6 +97,10 @@ class MsgDQ(Msg):
     def start_talk(cls, elem:XUElem, text:str, all_params:dict[str,Any]={}):
         elem.set_attr(cls.IS_TALK_ATTR, True)
         cls.start_msg(elem, text, all_params)
+
+        # 会話マーク追加
+        for page in XUPageText(elem).pages:
+            page._element.text = cls.TALK_MARK + page.all_text
 
     @classmethod
     def start_system(cls, elem:XUElem, text:str, all_params:dict[str,Any]={}):
