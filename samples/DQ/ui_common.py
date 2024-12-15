@@ -104,10 +104,10 @@ def common_msg_text(msg_text:text.MsgDQ, event:XUEvent):
 
     # テキスト表示
     # ---------------------------------------------------------
-    msg_text.anim_page.draw_count += 0.5
+    msg_text.current_page.draw_count += 0.5
 
     # talkの時は各ページ先頭にマーク
-    pages = [anim_page.all_text.splitlines() for anim_page in msg_text.anim_pages]
+    pages = [anim_page.all_text.splitlines() for anim_page in msg_text.pages]
     if msg_text.is_talk:
         for page_lines in pages:
             page_lines[0] = text.MsgDQ.TALK_MARK + page_lines[0]
@@ -118,13 +118,13 @@ def common_msg_text(msg_text:text.MsgDQ, event:XUEvent):
     # Scroll
     scroll_size = page_line_num+2
     scroll_buf = msg_text.scroll_buf(scroll_size)
-    if msg_text.anim_page.all_text.startswith("＊「"):
+    if msg_text.current_page.all_text.startswith("＊「"):
         scroll_indents = msg_text.scroll_indents(scroll_size)
     else:
         scroll_indents = [False for _ in range(scroll_size)]
 
     # アニメーション用表示位置ずらし。スクロール時半文字ずれる
-    shift_y = -3 if not msg_text.anim_page.is_finish and len(scroll_buf) >= scroll_size else 5
+    shift_y = -3 if not msg_text.current_page.is_finish and len(scroll_buf) >= scroll_size else 5
 
     # テキスト描画
     line_height = system_font.size + 3  # 行間設定
@@ -149,7 +149,7 @@ def common_msg_text(msg_text:text.MsgDQ, event:XUEvent):
     # 表示途中のアクション
     if not msg_text.is_next_wait:
         if input_def.BTN_A in event.now or input_def.BTN_B in event.now:
-            msg_text.anim_page.draw_count += 2  # 素早く表示
+            msg_text.current_page.draw_count += 2  # 素早く表示
 
 
 # ステータスウインドウ( ｰ`дｰ´)ｷﾘｯ

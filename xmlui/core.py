@@ -1031,7 +1031,7 @@ class XUTextAnim(_XUSelectWriter):
     def page_no(self, no:int=0) -> Self:
         # ページを切り替えたときはカウンタをリセット
         if self.page_no != no:
-            self.anim_page.draw_count = 0
+            self.current_page.draw_count = 0
         self.select(no)
         return self
 
@@ -1039,22 +1039,22 @@ class XUTextAnim(_XUSelectWriter):
     # -----------------------------------------------------
     # 現在ページのアニメーション情報アクセス
     @property
-    def anim_page(self):
+    def current_page(self):
         return XUPageItem(self._items[self.page_no])
 
     @property
-    def anim_pages(self) -> list[XUPageItem]:
+    def pages(self) -> list[XUPageItem]:
         return [XUPageItem(item) for item in self._items]
 
     # 次ページがなくテキストは表示完了 = 完全に終了
     @property
     def is_all_finish(self):
-        return not self.is_next_wait and self.anim_page.is_finish
+        return not self.is_next_wait and self.current_page.is_finish
 
     # 次ページあり
     @property
     def is_next_wait(self):
-        return self.anim_page.is_finish and self.page_no < self.item_num-1
+        return self.current_page.is_finish and self.page_no < self.item_num-1
 
     # ツリー操作
     # -----------------------------------------------------

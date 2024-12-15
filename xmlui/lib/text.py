@@ -67,16 +67,16 @@ class MsgScr(Msg):
     # 最後尾までスクロールした結果文字列を返す
     def scroll_buf(self:"MsgScr", scroll_line_num:int) -> list[str]:
         # 現在ページの挿入
-        buf = self.anim_page.text.splitlines()
+        buf = self.current_page.text.splitlines()
 
         # 行が足りるまでページを巻き戻して挿入
         for page_no in range(self.page_no-1, -1, -1):
             if len(buf) >= scroll_line_num:
                 break
-            buf = self.anim_pages[page_no].all_text.splitlines() + buf
+            buf = self.pages[page_no].all_text.splitlines() + buf
 
         # 最大行数に絞る。アニメーション中だけ最下行が使える。
-        max_line = scroll_line_num if not self.anim_page.is_finish else scroll_line_num-1
+        max_line = scroll_line_num if not self.current_page.is_finish else scroll_line_num-1
         buf = list(reversed(list(reversed(buf))[:max_line]))
 
         return buf
@@ -89,18 +89,18 @@ class MsgDQ(MsgScr):
     # 各行に会話用インデントが必要かを返す
     def scroll_indents(self, scroll_line_num:int) -> list[bool]:
         # 現在ページの挿入
-        page_lines = self.anim_page.all_text.splitlines()
+        page_lines = self.current_page.all_text.splitlines()
         indents = [True if i != 0 and not page_lines[0].startswith(self.TALK_MARK) else False for i,_ in enumerate(page_lines)]
 
         # 行が足りるまでページを巻き戻して挿入
         for page_no in range(self.page_no-1, -1, -1):
             if len(indents) >= scroll_line_num:
                 break
-            page_lines = self.anim_pages[page_no].all_text.splitlines()
+            page_lines = self.pages[page_no].all_text.splitlines()
             indents =  [True if not line.startswith(self.TALK_MARK) else False for line in page_lines] + indents
 
         # 最大行数に絞る。アニメーション中だけ最下行が使える。
-        max_line = scroll_line_num if not self.anim_page.is_finish else scroll_line_num-1
+        max_line = scroll_line_num if not self.current_page.is_finish else scroll_line_num-1
         indents = list(reversed(list(reversed(indents))[:max_line]))
 
         return indents
