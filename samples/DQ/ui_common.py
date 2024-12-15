@@ -135,10 +135,10 @@ def common_msg_text(msg_text:text.MsgDQ, event:XUEvent):
 
     # カーソル表示
     # ---------------------------------------------------------
-    # if msg_text.is_next_wait:
-    #     cursor_count = msg_text.anim.draw_count-msg_text.anim.length
-    #     if cursor_count//7 % 2 == 0:
-    #         draw_msg_cursor(msg_text, 0, len(scroll_buf)*line_height + shift_y-3)
+    if msg_text.is_next_wait:
+        cursor_count = msg_text.current_page.draw_count - msg_text.current_page.length
+        if cursor_count//7 % 2 == 0:
+            draw_msg_cursor(msg_text, 0, len(scroll_buf)*line_height + shift_y-3)
 
     # 入力アクション
     # ---------------------------------------------------------
