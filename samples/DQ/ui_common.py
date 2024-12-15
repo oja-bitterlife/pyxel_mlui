@@ -5,7 +5,7 @@ import pyxel
 from xmlui.lib import text,win
 from xmlui.pyxel_util.theme import Theme
 from xmlui.pyxel_util.font import PyxelFont
-from xmlui.core import XMLUI,XUElement,XUEvent,XUWinBase,XURect,XUTextConv
+from xmlui.core import XMLUI,XUElem,XUEvent,XUWinBase,XURect,XUTextConv
 from params import param_db
 
 ui_theme = Theme(PyxelFont("assets/font/b12.bdf"))
@@ -19,13 +19,13 @@ xmlui.debug.level = ui_theme.debug.debug_level
 # 共通で使える関数
 # *****************************************************************************
 # カーソル描画
-def draw_menu_cursor(state:XUElement, x:int, y:int):
+def draw_menu_cursor(state:XUElem, x:int, y:int):
     tri_size = 6
     left = state.area.x + x
     top = state.area.y+2 + y
     pyxel.tri(left, top, left, top+tri_size, left+tri_size//2, top+tri_size//2, 7)
 
-def draw_msg_cursor(state:XUElement, x:int, y:int):
+def draw_msg_cursor(state:XUElem, x:int, y:int):
     tri_size = 6
     center_x = 127-tri_size//2+x  # Xはど真ん中固定で
     y = state.area.y + tri_size - 3 + y

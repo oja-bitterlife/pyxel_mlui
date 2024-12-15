@@ -24,7 +24,7 @@ debug_level = 100
 """
 
 import tomllib
-from xmlui.core import XUElement
+from xmlui.core import XUElem
 from xmlui.lib import input
 from xmlui.pyxel_util.font import PyxelFont
 

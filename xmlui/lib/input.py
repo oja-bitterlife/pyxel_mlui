@@ -49,7 +49,7 @@ class Dial(XUSelectNum):
     # WRAP_ATTR = "wrap"  # ワードラップ文字数
 
     # タグのテキストを処理する
-    def __init__(self, state:XUElement, item_tag:str, item_w_attr:str):
+    def __init__(self, state:XUElem, item_tag:str, item_w_attr:str):
         super().__init__(state, item_tag, item_w_attr)
 
     # def aligned_pos(self, font:FontBase) -> tuple[int, int]:
@@ -64,7 +64,7 @@ class Decorator(XUTemplate.HasRef):
     def dial(self, tag_name:str, item_tag:str, item_w_attr:str):
         def wrapper(bind_func:Callable[[Dial,XUEvent], str|None]):
             # 登録用関数をジェネレート
-            def draw(state:XUElement, event:XUEvent):
+            def draw(state:XUElem, event:XUEvent):
                 return bind_func(Dial(state, item_tag, item_w_attr), event)
             # 関数登録
             self.template.set_drawfunc(tag_name, draw)
