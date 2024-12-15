@@ -979,6 +979,35 @@ class XUPageInfo(XUSelectBase):
     def __init__(self, elem:XUElem):
         super().__init__(elem, self.PAGE_TAG, 1, 0, 0)
 
+    # ページ操作
+    # -----------------------------------------------------
+    # 現在ページ
+    @property
+    def page_no(self) -> int:
+        return self.selected_no
+
+    # ページテキスト
+    # -----------------------------------------------------
+    # 現在ページのアニメーション情報アクセス
+    @property
+    def current_page(self):
+        return XUPageItem(self.items[self.page_no])
+
+    # 型キャスト
+    @property
+    def pages(self) -> list[XUPageItem]:
+        return [XUPageItem(item) for item in self.items]
+
+    # 次ページがなくテキストは表示完了 = 完全に終了
+    @property
+    def is_all_finish(self):
+        return not self.is_next_wait and self.current_page.is_finish
+
+    # 次ページあり
+    @property
+    def is_next_wait(self):
+        return self.current_page.is_finish and self.page_no < self.item_num-1
+
     # ツリー操作
     # -----------------------------------------------------
     def add_page(self, page_item:XUPageItem):
@@ -988,7 +1017,6 @@ class XUPageInfo(XUSelectBase):
         for child in self._util_info.find_by_tagall(self.PAGE_TAG):
             child.remove()
 
-
 class XUPageAnim(XUPageInfo):
     SEPARATE_REGEXP = r"\\n"  # 改行に変換する正規表現(\nへ)
     PAGE_REGEXP = r"\\p"  # 改ページに変換する正規表現(\0へ)
@@ -997,7 +1025,7 @@ class XUPageAnim(XUPageInfo):
         super().__init__(elem)
 
         # ページ未登録なら登録しておく
-        if len(self._util_info.find_by_tagall(self.PAGE_TAG)) == 0 and XUTextUtil.length(self.text) > 0:
+        if len(self.pages) == 0 and XUTextUtil.length(self.text) > 0:
             for page in self.split_page_texts(self.text, page_line_num, wrap):
                 page_item = XUSelectItem(XUElem(self.xmlui, Element(self.PAGE_TAG)))
                 self._util_info.add_child(page_item.set_text(page))
@@ -1031,41 +1059,14 @@ class XUPageAnim(XUPageInfo):
 
     # ページ操作
     # -----------------------------------------------------
-    # 現在ページ
-    @property
-    def page_no(self) -> int:
-        return self.selected_no
-
     # ページ設定
-    @page_no.setter
-    def page_no(self, no:int=0) -> Self:
+    def set_page_no(self, no:int=0) -> Self:
         # ページを切り替えたときはカウンタをリセット
         if self.page_no != no:
             self.current_page.draw_count = 0
         self.select(no)
         return self
 
-    # ページテキスト
-    # -----------------------------------------------------
-    # 現在ページのアニメーション情報アクセス
-    @property
-    def current_page(self):
-        return XUPageItem(self.items[self.page_no])
-
-    # 型キャスト
-    @property
-    def pages(self) -> list[XUPageItem]:
-        return [XUPageItem(item) for item in self.items]
-
-    # 次ページがなくテキストは表示完了 = 完全に終了
-    @property
-    def is_all_finish(self):
-        return not self.is_next_wait and self.current_page.is_finish
-
-    # 次ページあり
-    @property
-    def is_next_wait(self):
-        return self.current_page.is_finish and self.page_no < self.item_num-1
 
 # ウインドウサポート
 # *****************************************************************************

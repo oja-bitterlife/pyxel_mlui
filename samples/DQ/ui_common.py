@@ -144,7 +144,7 @@ def common_msg_text(msg_text:text.MsgDQ, event:XUEvent):
     # ---------------------------------------------------------
     if input_def.BTN_A in event.trg or input_def.BTN_B in event.now:
         if msg_text.is_next_wait:
-            msg_text.page_no += 1  # 次ページへ
+            msg_text.set_page_no(msg_text.page_no+1)  # 次ページへ
 
     # 表示途中のアクション
     if not msg_text.is_next_wait:
