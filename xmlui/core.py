@@ -778,10 +778,7 @@ class _XUSelectWriter(XUSelectBase):
 
 # グリッド選択
 class XUSelectGrid(_XUSelectWriter):
-    def __init__(self, elem:XUElem, item_tag:str, rows_attr:str, item_w_attr:str, item_h_attr:str):
-        rows = elem.attr_int(rows_attr, 1)
-        item_w = elem.attr_int(item_w_attr, 0)
-        item_h = elem.attr_int(item_h_attr, 0)
+    def __init__(self, elem:XUElem, item_tag:str, rows:int, item_w:int, item_h:int):
         super().__init__(elem, item_tag, rows, item_w, item_h)
 
     # 入力に応じた挙動一括。変更があった場合はTrue
@@ -809,9 +806,7 @@ class XUSelectGrid(_XUSelectWriter):
 
 # リスト選択
 class XUSelectList(_XUSelectWriter):
-    def __init__(self, elem:XUElem, item_tag:str, item_w_attr:str, item_h_attr:str):
-        item_w = elem.attr_int(item_w_attr, 0) if item_w_attr else 0
-        item_h = elem.attr_int(item_h_attr, 0) if item_h_attr else 0
+    def __init__(self, elem:XUElem, item_tag:str, item_w:int, item_h:int):
         rows = len(elem.find_by_tagall(item_tag)) if item_w > item_h else 1  # 横並びかどうか
         super().__init__(elem, item_tag, rows, item_w, item_h)
   
@@ -836,8 +831,8 @@ class XUSelectList(_XUSelectWriter):
 
 # ダイアル選択用
 class XUSelectNum(XUSelectList):
-    def __init__(self, elem:XUElem, item_tag:str, item_w_attr:str):
-        super().__init__(elem, item_tag, item_w_attr, "")
+    def __init__(self, elem:XUElem, item_tag:str, item_w:int):
+        super().__init__(elem, item_tag, item_w, 0)
 
     # 各桁のitem
     @property
@@ -892,7 +887,7 @@ _to_zenkaku += "　！＂＃＄％＆＇（）＊＋，－．／：；＜＝＞�
 _hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
 
 # テキストパラメータ変換
-class XUTextConv:
+class XUTextUtil:
     # 文字列中の半角を全角に変換する
     @classmethod
     def convert_zenkaku(cls, hankaku:str) -> str:
@@ -955,6 +950,12 @@ class XUTextAnim(XUSelectItem):
     def is_finish(self) -> bool:
         return self.draw_count >= self.length
 
+    # 一気に表示
+    @property
+    def finish(self) -> Self:
+        self.draw_count = self.length
+        return self
+
     # draw_countまでのテキストを受け取る
     @property
     def text(self) -> str:
@@ -963,7 +964,7 @@ class XUTextAnim(XUSelectItem):
     # draw_countまでのテキストを全角で受け取る
     @property
     def zenkaku(self) -> str:
-        return XUTextConv.convert_zenkaku(self.text)
+        return XUTextUtil.convert_zenkaku(self.text)
 
     # 全体テキストを受け取る
     @property
@@ -973,16 +974,17 @@ class XUTextAnim(XUSelectItem):
     # テキスト全体の長さ(\n\0抜き)
     @property
     def length(self) -> int:
-        return XUTextConv.length(super().text)
+        return XUTextUtil.length(super().text)
 
-class XUTextPage(XUSelectList):
+# ページをセレクトアイテムで管理
+class XUTextPage(_XUSelectWriter):
     SEPARATE_REGEXP = r"\\n"  # 改行に変換する正規表現(\nへ)
     PAGE_REGEXP = r"\\p"  # 改ページに変換する正規表現(\0へ)
 
     INFO_TAG= "_xmlui_text_info"
 
     def __init__(self, elem:XUElem, item_tag:str):
-        super().__init__(elem, item_tag, "", "")
+        super().__init__(elem, item_tag, 1, 0, 0)
 
     # ページごとに行・ワードラップ分割
     @classmethod
@@ -1052,22 +1054,20 @@ class XUTextPage(XUSelectList):
 
     # ツリー操作
     # -----------------------------------------------------
-    def set_pages(self, text:str, all_params:dict[str,Any], page_line_num_attr:str, wrap_attr:str):
+    def set_pages(self, text:str, all_params:dict[str,Any], line_num:int, wrap:int):
         self.clear_pages()
-        self.append_pages(text, all_params, page_line_num_attr, wrap_attr)
+        self.append_pages(text, all_params, line_num, wrap)
 
     def clear_pages(self):
         for child in self.find_by_tagall(self._item_tag):
             child.remove()
 
-    def append_pages(self, text:str, all_params:dict[str,Any], page_line_num_attr:str, wrap_atr:str):
+    def append_pages(self, text:str, all_params:dict[str,Any], line_num:int, wrap:int):
         # まずはパラメータ置換
-        format_text = XUTextConv.format_dict(text, all_params)
+        format_text = XUTextUtil.format_dict(text, all_params)
 
         # ページ分割してページごとにタグにしてAddChild
-        page_line_num = self.attr_int(page_line_num_attr, 1024)
-        wrap = self.attr_int(wrap_atr, 4096)
-        for page in XUTextPage.split_page_texts(format_text, page_line_num, wrap):
+        for page in XUTextPage.split_page_texts(format_text, line_num, wrap):
             page_anim = XUElem(self.xmlui, Element(self._item_tag))
             page_anim.set_text(page)
             self.add_child(page_anim)

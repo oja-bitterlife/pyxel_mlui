@@ -1,7 +1,7 @@
 import dataclasses
 import pyxel
 
-from xmlui.core import XUTextConv
+from xmlui.core import XUTextUtil
 from xmlui.lib import text
 import field
 
@@ -50,6 +50,6 @@ class NPC:
             msg_win = xmlui.find_by_id("menu").open("message")
             msg_text = msg_win.find_by_tag("msg_text")
             if talk:
-                text.MsgDQ.start_talk(msg_text, XUTextConv.format_dict(talk, field.param_db))  # talkでテキスト開始
+                text.MsgDQ.start_talk(msg_text, XUTextUtil.format_dict(talk, field.param_db))  # talkでテキスト開始
             else:
                 text.MsgDQ.start_system(msg_text, "page_anim", "だれもいません", {}, "page_line_num", "wrap_attr")  # systemメッセージ

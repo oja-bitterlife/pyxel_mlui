@@ -1,7 +1,7 @@
 import pyxel
 
 # タイトル画面
-from xmlui.core import XMLUI,XUEvent,XUWinBase,XUTextConv,XURect
+from xmlui.core import XMLUI,XUEvent,XUWinBase,XUTextUtil,XURect
 from xmlui.lib import select,text,input
 from ui_common import ui_theme
 from params import param_db
