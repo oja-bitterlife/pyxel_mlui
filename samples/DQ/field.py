@@ -155,11 +155,20 @@ def ui_init(template):
 
     # 会話方向
     # ---------------------------------------------------------
+    def dir_item(dir_item:XUSelectItem):
+        # ウインドウのクリップ状態に合わせて表示する
+        if dir_item.area.y < get_world_clip(XUWinBase.find_parent_win(dir_item)).bottom():
+            pyxel.text(dir_item.area.x, dir_item.area.y, dir_item.text, 7, ui_theme.font.system.font)
+
+        # カーソル表示
+        if dir_item.selected and dir_item.enable:
+            draw_menu_cursor(dir_item, -5, 0)
+
     @field_select.list("dir_select", "dir_item")
     def dir_select(dir_select:select.List, event:XUEvent):
         # 各アイテムの描画
         for item in dir_select.items:
-            menu_item(item)
+            dir_item(item)
 
         input_def = ui_theme.input_def
 
@@ -182,23 +191,24 @@ def ui_init(template):
         if input_def.BTN_B in event.trg:
             XUWinBase.find_parent_win(dir_select).start_close()
 
-    # 会話方向アイテム
-    # ---------------------------------------------------------
-    @field_select.item("dir_item")
-    def dir_item(dir_item:select.Item, event:XUEvent):
-        # ウインドウのクリップ状態に合わせて表示する
-        if dir_item.area.y < get_world_clip(XUWinBase.find_parent_win(dir_item)).bottom():
-            pyxel.text(dir_item.area.x, dir_item.area.y, dir_item.text, 7, ui_theme.font.system.font)
-
-        # カーソル表示
-        if dir_item.selected and dir_item.enable:
-            draw_menu_cursor(dir_item, -5, 0)
-
 
     # どうぐメニュー
     # ---------------------------------------------------------
+    def tools_item(tools_item:XUSelectItem):
+        # ウインドウのクリップ状態に合わせて表示する
+        if tools_item.area.y < get_world_clip(XUWinBase.find_parent_win(tools_item)).bottom():
+            pyxel.text(6+tools_item.area.x, tools_item.area.y, tools_item.text, 7, ui_theme.font.system.font)
+
+        # カーソル表示
+        if tools_item.selected and tools_item.enable:
+            draw_menu_cursor(tools_item, 0, 0)
+
     @field_select.list("tools_list", "tools_item")
     def tools_list(tools_list:select.List, event:XUEvent):
+        # 各アイテムの描画
+        for item in tools_list.items:
+            tools_item(item)
+
         input_def = ui_theme.input_def
 
         tools_list.select_by_event(event.trg, *input_def.UP_DOWN)
@@ -220,16 +230,8 @@ def ui_init(template):
             XUWinBase.find_parent_win(tools_list).start_close()
 
 
-    @field_select.item("tools_item")
-    def tools_item(tools_item:select.Item, event:XUEvent):
-        # ウインドウのクリップ状態に合わせて表示する
-        if tools_item.area.y < get_world_clip(XUWinBase.find_parent_win(tools_item)).bottom():
-            pyxel.text(6+tools_item.area.x, tools_item.area.y, tools_item.text, 7, ui_theme.font.system.font)
-
-        # カーソル表示
-        if tools_item.selected and tools_item.enable:
-            draw_menu_cursor(tools_item, 0, 0)
-
+    # フィールド画面のメッセージウインドウ
+    # ---------------------------------------------------------
     @field_text.msg_dq("msg_text")
     def msg_text(msg_text:text.MsgDQ, event:XUEvent):
         # メッセージ共通処理
