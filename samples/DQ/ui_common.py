@@ -112,20 +112,20 @@ def common_msg_text(msg_text:text.MsgDQ, event:XUEvent):
     idle_scroll_size = msg_text.attr_int(msg_text.PAGE_LINE_NUM_ATTR) + 1
     anim_scroll_size = msg_text.attr_int(msg_text.PAGE_LINE_NUM_ATTR) + 2
     scroll_size = idle_scroll_size if msg_text.current_page.is_finish else anim_scroll_size
-    scroll_lines =  msg_text.get_scroll_lines(scroll_size)
+    scroll_info =  msg_text.get_scroll_lines(scroll_size)
 
     # アニメーション用表示位置ずらし。スクロール時半文字ずれる
-    shift_y = -3 if not msg_text.current_page.is_finish and len(scroll_lines) >= anim_scroll_size else 5
+    shift_y = -3 if not msg_text.current_page.is_finish and len(scroll_info) >= anim_scroll_size else 5
 
     # テキスト描画
     line_height = system_font.size + 3  # 行間設定
-    for i,line in enumerate(scroll_lines):
+    for i,info in enumerate(scroll_info):
         x = area.x
         # 会話インデント
-        if not line.startswith(text.MsgDQ.TALK_MARK):
+        if info.need_indent:
             x += system_font.text_width(text.MsgDQ.TALK_MARK)
         y = shift_y + area.y + i*line_height
-        pyxel.text(x, y, line, 7, system_font.font)
+        pyxel.text(x, y, info.line_text, 7, system_font.font)
 
     # カーソル表示
     # ---------------------------------------------------------

@@ -49,26 +49,6 @@ class Msg(XUPageText):
         wrap = elem.attr_int(self.WRAP_ATTR, 4096)
         super().__init__(elem, page_line_num, wrap)
 
-    # スクロール用
-    # -----------------------------------------------------
-    # 全体スクロール用。[-line_num:-lime_num+size]で好きな範囲を拾える
-    @property
-    def all_lines(self) -> list[str]:
-        return sum([page.all_text.splitlines() for page in self.pages], [])
-
-    # 必要な行だけ返す(アニメーション対応)
-    def get_scroll_lines(self, scroll_size:int) -> list[str]:
-        # スクロール枠の中に収まる行を取得する
-        all_lines = []
-        for i in range(self.page_no-1, -1, -1):  # 現在より前へ戻りながら追加
-            all_lines = self.pages[i].all_text.splitlines() + all_lines
-            if len(all_lines) >= scroll_size:
-                break
-        all_lines += self.current_page.text.splitlines()  # 現在のページを追加
-
-        # scroll枠に収まるlineリストを返す
-        return all_lines[-scroll_size:]
-
     @classmethod
     def clear_msg(cls, elem:XUElem):
         XUPageInfo(elem).clear_pages()
@@ -88,6 +68,35 @@ class Msg(XUPageText):
 class MsgDQ(Msg):
     TALK_MARK = "＊「"
     IS_TALK_ATTR = "_xmlui_talk_mark"
+
+    # スクロール用
+    # -----------------------------------------------------
+    class DQScrollInfo:
+        def __init__(self, line_text:str, need_indent:bool):
+            self.line_text = line_text
+            self.need_indent = need_indent
+
+    # 必要な行だけ返す(アニメーション対応)
+    def get_scroll_lines(self, scroll_size:int) -> list[DQScrollInfo]:
+        # スクロール枠の中に収まる前のページを取得する
+        all_lines = []
+        for i in range(self.page_no-1, -1, -1):  # 現在より前へ戻りながら追加
+            all_lines = self.pages[i].all_text.splitlines() + all_lines
+            if len(all_lines) >= scroll_size:
+                break
+        need_indent = [not line.startswith(self.TALK_MARK) for line in all_lines]
+
+        # 現在のページの情報を追加
+        all_lines += self.current_page.text.splitlines()
+        need_indent += [not line.startswith(self.TALK_MARK) for line in self.current_page.all_text.splitlines()]
+
+        # オーバーした行を削除
+        over_line = max(0, len(all_lines) - scroll_size)
+        all_lines = all_lines[over_line:]
+        need_indent = need_indent[over_line:]
+
+        # scroll枠に収まるlineリストを返す
+        return [self.DQScrollInfo(line, need_indent[i]) for i,line in enumerate(all_lines)]
 
     @property
     def is_talk(self):
