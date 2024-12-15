@@ -7,13 +7,20 @@ class Item(XUSelectItem):
 
 # グリッドメニュー付きウインドウ
 class Grid(XUSelectGrid):
-    def __init__(self, state:XUState, item_tag:str, rows_attr:str, item_w_attr:str, item_h_attr:str):
-        super().__init__(state, item_tag, rows_attr, item_w_attr, item_h_attr)
+    ROWS_ATTR = 'rows'
+    ITEM_W_ATTR = 'item_w'
+    ITEM_H_ATTR = 'item_h'
+
+    def __init__(self, state:XUState, item_tag:str):
+        super().__init__(state, item_tag, self.ROWS_ATTR, self.ITEM_W_ATTR, self.ITEM_H_ATTR)
 
 # リストウインドウ
 class List(XUSelectList):
-    def __init__(self, state:XUState, item_tag:str, item_w_attr:str, item_h_attr:str):
-        super().__init__(state, item_tag, item_w_attr, item_h_attr)
+    ITEM_W_ATTR = 'item_w'
+    ITEM_H_ATTR = 'item_h'
+
+    def __init__(self, state:XUState, item_tag:str):
+        super().__init__(state, item_tag, self.ITEM_W_ATTR, self.ITEM_H_ATTR)
 
 
 # デコレータを用意
@@ -28,20 +35,20 @@ class Decorator(XUTemplate.HasRef):
             self.template.set_drawfunc(item_tag, draw)
         return wrapper
 
-    def grid(self, tag_name:str, item_tag:str, rows_attr:str, item_w_attr:str, item_h_attr:str):
+    def grid(self, tag_name:str, item_tag:str):
         def wrapper(bind_func:Callable[[Grid,XUEvent], str|None]):
             # 登録用関数をジェネレート
             def draw(state:XUState, event:XUEvent):
-                return bind_func(Grid(state, item_tag, rows_attr, item_w_attr, item_h_attr), event)
+                return bind_func(Grid(state, item_tag), event)
             # 関数登録
             self.template.set_drawfunc(tag_name, draw)
         return wrapper
 
-    def list(self, tag_name:str, item_tag:str, item_w_attr:str, item_h_attr:str):
+    def list(self, tag_name:str, item_tag:str):
         def wrapper(bind_func:Callable[[List,XUEvent], str|None]):
             # 登録用関数をジェネレート
             def draw(state:XUState, event:XUEvent):
-                return bind_func(List(state, item_tag, item_w_attr, item_h_attr), event)
+                return bind_func(List(state, item_tag), event)
             # 関数登録
             self.template.set_drawfunc(tag_name, draw)
         return wrapper

@@ -31,7 +31,7 @@ from ui_common import draw_menu_cursor
 def ui_init(template:XUTemplate):
     title_select = select.Decorator(template)
 
-    @title_select.list("game_start", "menu_item", "item_w", "item_h")
+    @title_select.list("game_start", "menu_item")
     def game_start(game_start:select.List, event:XUEvent):
         # メニュー選択
         input_def = ui_theme.input_def
@@ -44,7 +44,7 @@ def ui_init(template:XUTemplate):
                 case "continue":
                     game_start.xmlui.popup("under_construct")
 
-    @title_select.list("game_speed", "menu_item", "item_w", "item_h")
+    @title_select.list("game_speed", "menu_item")
     def game_speed(game_speed:select.List, event:XUEvent):
         # メニュー選択。カーソルが動いたらTrueが返る
         input_def = ui_theme.input_def

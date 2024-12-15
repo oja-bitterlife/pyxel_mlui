@@ -1048,7 +1048,7 @@ class XUTextPage(XUSelectList):
 
     # ツリー操作
     # -----------------------------------------------------
-    def set_pages(self:XUState, text:str, all_params:dict[str,Any], page_line_num_attr:str, wrap_attr:str):
+    def set_pages(self, text:str, all_params:dict[str,Any], page_line_num_attr:str, wrap_attr:str):
         self.clear_pages()
         self.append_pages(text, all_params, page_line_num_attr, wrap_attr)
 
