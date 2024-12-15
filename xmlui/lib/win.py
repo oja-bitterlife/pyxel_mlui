@@ -139,8 +139,8 @@ class Decorator(XUTemplate.HasRef):
     def round_frame(self, tag_name:str):
         def wrapper(bind_func:Callable[[RoundFrame,XUEvent], str|None]):
             # 登録用関数をジェネレート
-            def draw(state:XUElem, event:XUEvent):
-                frame = RoundFrame(state)
+            def draw(elem:XUElem, event:XUEvent):
+                frame = RoundFrame(elem)
                 frame.update()
                 return bind_func(frame, event)
             # 関数登録
@@ -150,8 +150,8 @@ class Decorator(XUTemplate.HasRef):
     def rect_frame(self, tag_name:str):
         def wrapper(bind_func:Callable[[RectFrame,XUEvent], str|None]):
             # 登録用関数をジェネレート
-            def draw(state:XUElem, event:XUEvent):
-                frame = RectFrame(state)
+            def draw(elem:XUElem, event:XUEvent):
+                frame = RectFrame(elem)
                 frame.update()
                 return bind_func(frame, event)
             # 関数登録

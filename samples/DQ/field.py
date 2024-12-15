@@ -117,7 +117,7 @@ def ui_init(template):
 
     # コマンドメニュー
     # ---------------------------------------------------------
-    @field_select.grid("menu_grid", "menu_item", "rows", "item_w", "item_h")
+    @field_select.grid("menu_grid", "menu_item")
     def menu_grid(menu_grid:select.Grid, event:XUEvent):
         # メニュー選択
         input_def = ui_theme.input_def
@@ -154,7 +154,7 @@ def ui_init(template):
 
     # 会話方向
     # ---------------------------------------------------------
-    @field_select.list("dir_select", "dir_item", "item_w", "item_h")
+    @field_select.list("dir_select", "dir_item")
     def dir_select(dir_select:select.List, event:XUEvent):
         input_def = ui_theme.input_def
 
@@ -192,7 +192,7 @@ def ui_init(template):
 
     # どうぐメニュー
     # ---------------------------------------------------------
-    @field_select.list("tools_list", "tools_item", "item_w", "item_h")
+    @field_select.list("tools_list", "tools_item")
     def tools_list(tools_list:select.List, event:XUEvent):
         input_def = ui_theme.input_def
 
