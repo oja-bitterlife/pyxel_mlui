@@ -1,7 +1,7 @@
 import pyxel
 
 # タイトル画面
-from xmlui.core import XMLUI,XUEvent,XUWinBase,XUTextUtil,XURect
+from xmlui.core import XMLUI,XUEvent,XUWinBase,XUSelectItem,XURect
 from xmlui.lib import select,text
 from ui_common import ui_theme
 from field_player import Player
@@ -92,7 +92,7 @@ def ui_init(template):
             x, y = title.aligned_pos(ui_theme.font.system)
             pyxel.text(x, y-1, title.text, 7, ui_theme.font.system.font)
 
-    # コマンドメニューのタイトル
+    # 各メニューごとのタイトル
     @field_text.label("menu_item_title", "align", "valign")
     def menu_item_title(menu_item_title:text.Label, event:XUEvent):
         clip = get_world_clip(XUWinBase.find_parent_win(menu_item_title)).intersect(menu_item_title.area)
@@ -103,10 +103,9 @@ def ui_init(template):
         x, y = menu_item_title.aligned_pos(ui_theme.font.system)
         pyxel.text(x, y-1, menu_item_title.text, 7, ui_theme.font.system.font)
 
-    # メニューアイテム
+    # コマンドメニュー
     # ---------------------------------------------------------
-    @field_select.item("menu_item")
-    def menu_item(menu_item:select.Item, event:XUEvent):
+    def menu_item(menu_item:XUSelectItem):
         # ウインドウのクリップ状態に合わせて表示する
         if menu_item.area.y < get_world_clip(XUWinBase.find_parent_win(menu_item)).bottom():
             pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, 7, ui_theme.font.system.font)
@@ -115,10 +114,12 @@ def ui_init(template):
             if menu_item.selected and menu_item.enable:
                 draw_menu_cursor(menu_item, 0, 0)
 
-    # コマンドメニュー
-    # ---------------------------------------------------------
     @field_select.grid("menu_grid", "menu_item")
     def menu_grid(menu_grid:select.Grid, event:XUEvent):
+        # 各アイテムの描画
+        for item in menu_grid.items:
+            menu_item(item)
+
         # メニュー選択
         input_def = ui_theme.input_def
         menu_grid.select_by_event(event.trg, *input_def.CURSOR)
@@ -145,7 +146,7 @@ def ui_init(template):
 
         # アイテムの無効化(アイテムカーソル用)
         is_message_oepn = menu_grid.xmlui.exists_id("message")
-        for item in menu_grid._items:
+        for item in menu_grid.items:
             item.enable = event.is_active and not is_message_oepn
 
         # 閉じる
@@ -156,6 +157,10 @@ def ui_init(template):
     # ---------------------------------------------------------
     @field_select.list("dir_select", "dir_item")
     def dir_select(dir_select:select.List, event:XUEvent):
+        # 各アイテムの描画
+        for item in dir_select.items:
+            menu_item(item)
+
         input_def = ui_theme.input_def
 
         # 会話ウインドウは特別な配置
