@@ -16,7 +16,7 @@ class NPC_Data:
 class NPC:
     npc_data = [
         # typ,   x, y, color, talk
-        NPC_Data("king", 8, 8, 2, "{name}が　つぎのれべるになるには\nあと　{rem_exp}ポイントの\nけいけんが　ひつようじゃ"),
+        NPC_Data("king", 8, 8, 2, "{name}が　つぎのれべるになるには\nあと　{rem_exp}ポイントの\nけいけんが　ひつようじゃ\\pそれでは　ゆくがよい"),
         NPC_Data("knight1", 8, 11, 3, "とびらのまえで　とびら　をせんたくしてね"),
         NPC_Data("knight2", 10, 11, 3, "とびらのさきに　かいだんがある"),
         NPC_Data("knighg3", 12, 9, 3, "たからばこ？\nとっちゃだめだだよ？"),

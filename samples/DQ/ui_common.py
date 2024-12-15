@@ -106,35 +106,28 @@ def common_msg_text(msg_text:text.MsgDQ, event:XUEvent):
     # ---------------------------------------------------------
     msg_text.current_page.draw_count += 0.5
 
-    all_lines = []
-    for i in range(msg_text.page_no):  # 現在より前のページを追加
-        all_lines += (text.MsgDQ.TALK_MARK + msg_text.pages[i].all_text).splitlines()
-    all_lines += (text.MsgDQ.TALK_MARK + msg_text.current_page.text).splitlines()  # 現在のページを追加
-
+    # スクロール表示
+    # ---------------------------------------------------------
     # スクロールバッファサイズはページサイズ+2
-    page_line_num = msg_text.attr_int(msg_text.PAGE_LINE_NUM_ATTR)
-    scroll_size = page_line_num + 2
-
-    # Scroll
-    scroll_buf = all_lines[-scroll_size:]
-    need_indent = [(not line.startswith(text.MsgDQ.TALK_MARK) and msg_text.is_talk) for line in scroll_buf]  # インデントが必要かどうか
+    scroll_size = msg_text.attr_int(msg_text.PAGE_LINE_NUM_ATTR) + 2
+    all_lines, scroll_lines, need_indent = msg_text.get_scroll_lines(scroll_size)
 
     # アニメーション用表示位置ずらし。スクロール時半文字ずれる
-    shift_y = -3 if not msg_text.current_page.is_finish and len(scroll_buf) >= scroll_size else 5
+    shift_y = -3 if not msg_text.current_page.is_finish and len(all_lines) >= scroll_size else 5
 
     # テキスト描画
     line_height = system_font.size + 3  # 行間設定
-    for i,page in enumerate(scroll_buf):
+    for i,line in enumerate(scroll_lines):
         x = area.x + (system_font.text_width(text.MsgDQ.TALK_MARK) if need_indent[i] else 0)
         y = shift_y + area.y + i*line_height
-        pyxel.text(x, y, page, 7, system_font.font)
+        pyxel.text(x, y, line, 7, system_font.font)
 
     # カーソル表示
     # ---------------------------------------------------------
     if msg_text.is_next_wait:
         cursor_count = msg_text.current_page.draw_count - msg_text.current_page.length
         if cursor_count//7 % 2 == 0:
-            draw_msg_cursor(msg_text, 0, len(scroll_buf)*line_height + shift_y-3)
+            draw_msg_cursor(msg_text, 0, scroll_size*line_height + shift_y-3)
 
     # 入力アクション
     # ---------------------------------------------------------

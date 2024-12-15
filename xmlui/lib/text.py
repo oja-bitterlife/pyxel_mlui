@@ -74,6 +74,24 @@ class MsgDQ(Msg):
     TALK_MARK = "＊「"
     IS_TALK_ATTR = "_xmlui_talk_mark"
 
+    # スクロールバッファとインデントが必要かどうかを返す
+    def get_scroll_lines(self, scroll_size:int) -> tuple[list[str], list[str], list[bool]]:
+        # アニメーション終了後は1つ減らす
+        if self.current_page.is_finish:
+            scroll_size -= 1
+
+        # スクロール枠の中に収まる行を取得する
+        all_lines = []
+        for i in range(self.page_no):  # 現在より前のページを追加
+            all_lines += (self.TALK_MARK + self.pages[i].all_text).splitlines()
+        all_lines += (self.TALK_MARK + self.current_page.text).splitlines()  # 現在のページを追加
+
+        # Scroll
+        scroll_lines:list[str] = all_lines[-scroll_size:]
+        need_indent = [(not line.startswith(self.TALK_MARK) and self.is_talk) for line in scroll_lines]  # インデントが必要かどうか
+
+        return all_lines, scroll_lines, need_indent
+
     @property
     def is_talk(self):
         return self.attr_bool(self.IS_TALK_ATTR, False)
