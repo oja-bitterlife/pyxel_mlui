@@ -106,14 +106,14 @@ class MsgDQ(MsgScr):
         return indents
 
     @classmethod
-    def start_talk(cls, elem:XUElem, item_tag:str, text:str, all_params:dict[str,Any]={}):
+    def start_talk(cls, elem:XUElem, text:str, all_params:dict[str,Any]={}):
         elem.set_attr(cls.IS_TALK_ATTR, True)
-        cls.start_msg(elem, item_tag, text, all_params)
+        cls.start_msg(elem, text, all_params)
 
     @classmethod
-    def start_system(cls, elem:XUElem, item_tag:str, text:str, all_params:dict[str,Any]={}):
+    def start_system(cls, elem:XUElem, text:str, all_params:dict[str,Any]={}):
         elem.set_attr(cls.IS_TALK_ATTR, False)
-        cls.start_msg(elem, item_tag, text, all_params)
+        cls.start_msg(elem, text, all_params)
 
     @classmethod
     def is_talk(cls, elem:XUElem):
@@ -131,29 +131,29 @@ class Decorator(XUTemplate.HasRef):
             self.template.set_drawfunc(tag_name, draw)
         return wrapper
 
-    def msg(self, tag_name:str, item_tag:str):
+    def msg(self, tag_name:str):
         def wrapper(bind_func:Callable[[Msg,XUEvent], str|None]):
             # 登録用関数をジェネレート
             def draw(elem:XUElem, event:XUEvent):
-                return bind_func(Msg(elem, item_tag), event)
+                return bind_func(Msg(elem), event)
             # 関数登録
             self.template.set_drawfunc(tag_name, draw)
         return wrapper
 
-    def msg_scr(self, tag_name:str, item_tag:str):
+    def msg_scr(self, tag_name:str):
         def wrapper(bind_func:Callable[[MsgScr,XUEvent], str|None]):
             # 登録用関数をジェネレート
             def draw(elem:XUElem, event:XUEvent):
-                return bind_func(MsgScr(elem, item_tag), event)
+                return bind_func(MsgScr(elem), event)
             # 関数登録
             self.template.set_drawfunc(tag_name, draw)
         return wrapper
 
-    def msg_dq(self, tag_name:str, item_tag:str):
+    def msg_dq(self, tag_name:str):
         def wrapper(bind_func:Callable[[MsgDQ,XUEvent], str|None]):
             # 登録用関数をジェネレート
             def draw(elem:XUElem, event:XUEvent):
-                return bind_func(MsgDQ(elem, item_tag), event)
+                return bind_func(MsgDQ(elem), event)
             # 関数登録
             self.template.set_drawfunc(tag_name, draw)
         return wrapper

@@ -53,7 +53,7 @@ def popup_win(win:win.RectFrame, event:XUEvent):
     pyxel.rect(win.area.x, win.area.y, win.area.w, win.area.h, 0)
     win.draw_frame(pyxel.screen.data_ptr(), [0,7,13], win.area.inflate(-2, -2))
 
-@common_text.msg("popup_text", "popup_text")
+@common_text.msg("popup_text")
 def popup_text(popup_text:text.Msg, event:XUEvent):
     input_def = ui_theme.input_def
     if input_def.BTN_A in event.trg or input_def.BTN_B in event.trg:

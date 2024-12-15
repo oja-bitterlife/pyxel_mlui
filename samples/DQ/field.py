@@ -206,7 +206,7 @@ def ui_init(template):
                 # メッセージウインドウを開く
                 msg_win = tools_list.xmlui.find_by_id("menu").open("message")
                 msg_text = msg_win.find_by_tag("msg_text")
-                text.MsgDQ.start_system(msg_text, "msg_text_item", "ＨＰが　１０かいふくした")  # systemメッセージ
+                text.MsgDQ.start_system(msg_text, "ＨＰが　１０かいふくした")  # systemメッセージ
             else:
                 tools_list.xmlui.popup("common", "under_construct")
         
@@ -225,7 +225,7 @@ def ui_init(template):
         if tools_item.selected and tools_item.enable:
             draw_menu_cursor(tools_item, 0, 0)
 
-    @field_text.msg_dq("msg_text", "page_anim")
+    @field_text.msg_dq("msg_text")
     def msg_text(msg_text:text.MsgDQ, event:XUEvent):
         # メッセージ共通処理
         common_msg_text(msg_text, event)
