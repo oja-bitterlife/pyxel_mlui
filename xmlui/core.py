@@ -912,7 +912,7 @@ class XUPageItem(XUSelectItem):
     # -----------------------------------------------------
     @classmethod
     def from_format_dict(cls, xmlui:XMLUI, text:str, all_params:dict[str,Any]) -> "XUPageItem":
-        page_item = XUPageItem(XUElem(xmlui, Element(XUTextAnim.PAGE_TAG)))
+        page_item = XUPageItem(XUElem(xmlui, Element(XUPageAnim.PAGE_TAG)))
         page_item.set_text(XUTextUtil.format_dict(text, all_params))
         return page_item
 
@@ -973,14 +973,28 @@ class XUPageItem(XUSelectItem):
         return XUTextUtil.length(super().text)
 
 # ページをセレクトアイテムで管理
-class XUTextAnim(XUSelectBase):
+class XUPageInfo(XUSelectBase):
+    PAGE_TAG = "_xmlui_text_page"
+
+    def __init__(self, elem:XUElem):
+        super().__init__(elem, self.PAGE_TAG, 1, 0, 0)
+
+    # ツリー操作
+    # -----------------------------------------------------
+    def add_page(self, page_item:XUPageItem):
+        self._util_info.add_child(page_item)
+
+    def clear_pages(self):
+        for child in self._util_info.find_by_tagall(self.PAGE_TAG):
+            child.remove()
+
+
+class XUPageAnim(XUPageInfo):
     SEPARATE_REGEXP = r"\\n"  # 改行に変換する正規表現(\nへ)
     PAGE_REGEXP = r"\\p"  # 改ページに変換する正規表現(\0へ)
 
-    PAGE_TAG = "_xmlui_text_page"
-
     def __init__(self, elem:XUElem, page_line_num:int=1024, wrap:int=4096):
-        super().__init__(elem, self.PAGE_TAG, 1, 0, 0)
+        super().__init__(elem)
 
         # ページ未登録なら登録しておく
         if len(self._util_info.find_by_tagall(self.PAGE_TAG)) == 0 and XUTextUtil.length(self.text) > 0:
@@ -1052,15 +1066,6 @@ class XUTextAnim(XUSelectBase):
     @property
     def is_next_wait(self):
         return self.current_page.is_finish and self.page_no < self.item_num-1
-
-    # ツリー操作
-    # -----------------------------------------------------
-    def add_page(self, page_item:XUPageItem):
-        self._util_info.add_child(page_item)
-
-    def clear_pages(self):
-        for child in self._util_info.find_by_tagall(self.PAGE_TAG):
-            child.remove()
 
 # ウインドウサポート
 # *****************************************************************************

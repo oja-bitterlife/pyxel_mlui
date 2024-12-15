@@ -39,7 +39,7 @@ class Label(XUElem):
         return area.aligned_pos(font.text_width(self.text), font.size, self.align, self.valign)
 
 # メッセージ
-class Msg(XUTextAnim):
+class Msg(XUPageAnim):
     PAGE_LINE_NUM_ATTR = 'page_line_num'
     WRAP_ATTR = 'wrap'
 
@@ -51,12 +51,12 @@ class Msg(XUTextAnim):
 
     @classmethod
     def clear_msg(cls, elem:XUElem):
-        XUTextAnim(elem).clear_pages()
+        XUPageInfo(elem)._util_info.clear_children()
 
     @classmethod
     def append_msg(cls, elem:XUElem, text:str, all_params:dict[str,Any]={}):
         page_item = XUPageItem.from_format_dict(elem.xmlui, text, all_params)
-        XUTextAnim(elem).add_page(page_item)
+        XUPageInfo(elem)._util_info.add_child(page_item)
 
     @classmethod
     def start_msg(cls, elem:XUElem, text:str, all_params:dict[str,Any]={}):
