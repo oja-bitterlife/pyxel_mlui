@@ -738,7 +738,8 @@ class XUSelectBase(XUSelectInfo):
                 # 初期座標
                 item.set_pos(item.x + i % rows * item_w, item.y + i // rows * item_h)
 
-        self._rows = rows
+        # 操作の時に使うので覚えておく
+        self.rows = rows
 
         # 選択状態復帰
         self.select(self.selected_no)
@@ -754,19 +755,19 @@ class XUSelectBase(XUSelectInfo):
     def next(self, add:int=1, x_wrap=False, y_wrap=False):
         # キャッシュ
         no = self.selected_no
-        cols = max(self.item_num//self._rows, 1)
+        cols = max(self.item_num//self.rows, 1)
 
-        x = no % self._rows
-        y = no // self._rows
+        x = no % self.rows
+        y = no // self.rows
         sign = 1 if add >= 0 else -1
-        add_x = abs(add) % self._rows * sign
-        add_y = abs(add) // self._rows * sign
+        add_x = abs(add) % self.rows * sign
+        add_y = abs(add) // self.rows * sign
 
         # wrapモードとmin/maxモードそれぞれで設定
-        x = (x + self._rows + add_x) % self._rows if x_wrap else min(max(x + add_x, 0), self._rows-1)
+        x = (x + self.rows + add_x) % self.rows if x_wrap else min(max(x + add_x, 0), self.rows-1)
         y = (y + cols + add_y) % cols if y_wrap else min(max(y + add_y, 0), cols-1)
 
-        self.select(y*self._rows + x)
+        self.select(y*self.rows + x)
 
 # グリッド選択
 class XUSelectGrid(XUSelectBase):
@@ -782,9 +783,9 @@ class XUSelectGrid(XUSelectBase):
         elif right_event in input:
             self.next(1, x_wrap, y_wrap)
         elif up_event in input:
-            self.next(-self._rows, x_wrap, y_wrap)
+            self.next(-self.rows, x_wrap, y_wrap)
         elif down_event in input:
-            self.next(self._rows, x_wrap, y_wrap)
+            self.next(self.rows, x_wrap, y_wrap)
 
         return self.selected_no != old_no
 
