@@ -39,7 +39,7 @@ class Label(XUElem):
         return area.aligned_pos(font.text_width(self.text), font.size, self.align, self.valign)
 
 # メッセージ
-class Msg(XUTextPage):
+class Msg(XUTextAnim):
     LINE_NUM_ATTR = 'line_num'
     WRAP_ATTR = 'wrap'
 
@@ -49,19 +49,19 @@ class Msg(XUTextPage):
 
     @classmethod
     def clear_msg(cls, elem:XUElem, item_tag:str):
-        XUTextPage(elem, item_tag).clear_pages()
+        XUTextAnim(elem, item_tag).clear_pages()
 
     @classmethod
     def append_msg(cls, elem:XUElem, item_tag:str, text:str, all_params:dict[str,Any]={}):
         line_num = elem.attr_int(cls.LINE_NUM_ATTR, 1024)
         wrap = elem.attr_int(cls.WRAP_ATTR, 4096)
-        XUTextPage(elem, item_tag).append_pages(text, all_params, line_num, wrap)
+        XUTextAnim(elem, item_tag).append_pages(text, all_params, line_num, wrap)
 
     @classmethod
     def start_msg(cls, elem:XUElem, item_tag:str, text:str, all_params:dict[str,Any]={}):
         line_num = elem.attr_int(cls.LINE_NUM_ATTR, 1024)
         wrap = elem.attr_int(cls.WRAP_ATTR, 4096)
-        XUTextPage(elem, item_tag).set_pages(text, all_params, line_num, wrap)
+        XUTextAnim(elem, item_tag).set_pages(text, all_params, line_num, wrap)
 
 class MsgScr(Msg):
     # 最後尾までスクロールした結果文字列を返す

@@ -916,8 +916,8 @@ class XUTextUtil:
     def length(cls, text:str) -> int:
         return len(re.sub("\n|\0", "", text))
 
-# アニメーションテキストベース
-class XUTextAnim(XUSelectItem):
+# アニメーションテキストページ
+class XUPageItem(XUSelectItem):
     TEXT_COUNT_ATTR = "_xmlui_text_count"
 
     # 表示カウンタ操作
@@ -977,14 +977,20 @@ class XUTextAnim(XUSelectItem):
         return XUTextUtil.length(super().text)
 
 # ページをセレクトアイテムで管理
-class XUTextPage(_XUSelectWriter):
+class XUTextAnim(_XUSelectWriter):
     SEPARATE_REGEXP = r"\\n"  # 改行に変換する正規表現(\nへ)
     PAGE_REGEXP = r"\\p"  # 改ページに変換する正規表現(\0へ)
 
-    INFO_TAG= "_xmlui_text_info"
+    PAGE_TAG = "_xmlui_text_page"
 
-    def __init__(self, elem:XUElem, item_tag:str):
-        super().__init__(elem, item_tag, 1, 0, 0)
+    def __init__(self, elem:XUElem, page_line_num:int=1024, wrap:int=4096):
+        super().__init__(elem, self.PAGE_TAG, 1, 0, 0)
+
+        # ページ未登録なら登録しておく
+        if len(self._util_info.find_by_tagall(self.PAGE_TAG)) == 0 and XUTextUtil.length(self.text) > 0:
+            for page in self.split_page_texts(self.text, page_line_num, wrap):
+                page_elem = XUElem(self.xmlui, Element(self.PAGE_TAG))
+                self._util_info.add_child(page_elem.set_text(page))
 
     # ページごとに行・ワードラップ分割
     @classmethod
@@ -992,12 +998,10 @@ class XUTextPage(_XUSelectWriter):
         wrap = max(wrap, 1)   # 0だと無限になってしまうので最低1を入れておく
 
         # 改行,wrap区切りにする(\n)
-        # -----------------------------------------------------
-        # 改行を\nに統一して全角化
         tmp_text = re.sub(cls.PAGE_REGEXP, "\0", text)  # \pという文字列をNullに
         tmp_text = re.sub(cls.SEPARATE_REGEXP, "\n", tmp_text)  # \nという文字列を改行コードに
 
-        # 行数で自動ページ分解
+        # 行数でページ分解
         pages:list[list[str]] = []
         for page_text in tmp_text.split("\0"):
             lines =  sum([[line[i:i+wrap] for i in  range(0, len(line), wrap)] for line in page_text.splitlines()], [])
@@ -1036,11 +1040,11 @@ class XUTextPage(_XUSelectWriter):
     # 現在ページのアニメーション情報アクセス
     @property
     def anim_page(self):
-        return XUTextAnim(self._items[self.page_no])
+        return XUPageItem(self._items[self.page_no])
 
     @property
-    def anim_pages(self) -> list[XUTextAnim]:
-        return [XUTextAnim(item) for item in self._items]
+    def anim_pages(self) -> list[XUPageItem]:
+        return [XUPageItem(item) for item in self._items]
 
     # 次ページがなくテキストは表示完了 = 完全に終了
     @property
@@ -1054,23 +1058,12 @@ class XUTextPage(_XUSelectWriter):
 
     # ツリー操作
     # -----------------------------------------------------
-    def set_pages(self, text:str, all_params:dict[str,Any], line_num:int, wrap:int):
-        self.clear_pages()
-        self.append_pages(text, all_params, line_num, wrap)
+    def add_page(self, page_item:XUPageItem):
+        self._util_info.add_child(page_item)
 
     def clear_pages(self):
-        for child in self.find_by_tagall(self._item_tag):
+        for child in self._util_info.find_by_tagall(self._item_tag):
             child.remove()
-
-    def append_pages(self, text:str, all_params:dict[str,Any], line_num:int, wrap:int):
-        # まずはパラメータ置換
-        format_text = XUTextUtil.format_dict(text, all_params) if all_params else text
-
-        # ページ分割してページごとにタグにしてAddChild
-        for page in XUTextPage.split_page_texts(format_text, line_num, wrap):
-            page_anim = XUElem(self.xmlui, Element(self._item_tag))
-            page_anim.set_text(page)
-            self.add_child(page_anim)
 
 # ウインドウサポート
 # *****************************************************************************
