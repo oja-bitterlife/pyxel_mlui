@@ -51,12 +51,12 @@ class Msg(XUPageAnim):
 
     @classmethod
     def clear_msg(cls, elem:XUElem):
-        XUPageInfo(elem)._util_info.clear_children()
+        XUPageInfo(elem).clear_pages()
 
     @classmethod
     def append_msg(cls, elem:XUElem, text:str, all_params:dict[str,Any]={}):
         page_item = XUPageItem.from_format_dict(elem.xmlui, text, all_params)
-        XUPageInfo(elem)._util_info.add_child(page_item)
+        XUPageInfo(elem).add_page(page_item)
 
     @classmethod
     def start_msg(cls, elem:XUElem, text:str, all_params:dict[str,Any]={}):

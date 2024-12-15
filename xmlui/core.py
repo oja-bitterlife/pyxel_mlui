@@ -728,7 +728,7 @@ class XUSelectBase(XUSelectInfo):
         super().__init__(elem)
 
         # infoタグの下になければ自分の直下から探してコピーする
-        if not self.items:
+        if not self.items and item_tag:
             for i,child in enumerate([child for child in self._element if child.tag == item_tag]):
                 # タグ名は専用のものに置き換え
                 item = XUSelectItem(XUElem(elem.xmlui, copy.deepcopy(child)))
@@ -912,7 +912,7 @@ class XUPageItem(XUSelectItem):
     # -----------------------------------------------------
     @classmethod
     def from_format_dict(cls, xmlui:XMLUI, text:str, all_params:dict[str,Any]) -> "XUPageItem":
-        page_item = XUPageItem(XUElem(xmlui, Element(XUPageAnim.PAGE_TAG)))
+        page_item = XUPageItem(XUElem(xmlui, Element(XUPageAnim.ITEM_TAG)))
         page_item.set_text(XUTextUtil.format_dict(text, all_params))
         return page_item
 
@@ -974,10 +974,8 @@ class XUPageItem(XUSelectItem):
 
 # ページをセレクトアイテムで管理
 class XUPageInfo(XUSelectBase):
-    PAGE_TAG = "_xmlui_text_page"
-
     def __init__(self, elem:XUElem):
-        super().__init__(elem, self.PAGE_TAG, 1, 0, 0)
+        super().__init__(elem, "", 1, 0, 0)
 
     # ページ操作
     # -----------------------------------------------------
@@ -1014,7 +1012,7 @@ class XUPageInfo(XUSelectBase):
         self._util_info.add_child(page_item)
 
     def clear_pages(self):
-        for child in self._util_info.find_by_tagall(self.PAGE_TAG):
+        for child in self._util_info.find_by_tagall(self.ITEM_TAG):
             child.remove()
 
 class XUPageAnim(XUPageInfo):
@@ -1027,7 +1025,7 @@ class XUPageAnim(XUPageInfo):
         # ページ未登録なら登録しておく
         if len(self.pages) == 0 and XUTextUtil.length(self.text) > 0:
             for page in self.split_page_texts(self.text, page_line_num, wrap):
-                page_item = XUSelectItem(XUElem(self.xmlui, Element(self.PAGE_TAG)))
+                page_item = XUSelectItem(XUElem(self.xmlui, Element(self.ITEM_TAG)))
                 self._util_info.add_child(page_item.set_text(page))
 
     # ページごとに行・ワードラップ分割
