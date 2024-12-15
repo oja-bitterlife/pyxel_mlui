@@ -920,6 +920,14 @@ class XUTextUtil:
 class XUPageItem(XUSelectItem):
     TEXT_COUNT_ATTR = "_xmlui_text_count"
 
+    # ジェネレーター
+    # -----------------------------------------------------
+    @classmethod
+    def from_format_dict(cls, xmlui:XMLUI, text:str, all_params:dict[str,Any]) -> "XUPageItem":
+        page_item = XUPageItem(XUElem(xmlui, Element(XUTextAnim.PAGE_TAG)))
+        page_item.set_text(XUTextUtil.format_dict(text, all_params))
+        return page_item
+
     # 表示カウンタ操作
     # -----------------------------------------------------
     # 現在の表示文字数

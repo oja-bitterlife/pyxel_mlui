@@ -40,28 +40,28 @@ class Label(XUElem):
 
 # メッセージ
 class Msg(XUTextAnim):
-    LINE_NUM_ATTR = 'line_num'
+    PAGE_LINE_NUM_ATTR = 'page_line_num'
     WRAP_ATTR = 'wrap'
 
     # タグのテキストを処理する
-    def __init__(self, elem:XUElem, item_tag:str):
-        super().__init__(elem, item_tag)
+    def __init__(self, elem:XUElem):
+        page_line_num = elem.attr_int(self.PAGE_LINE_NUM_ATTR, 1024)
+        wrap = elem.attr_int(self.WRAP_ATTR, 4096)
+        super().__init__(elem, page_line_num, wrap)
 
     @classmethod
-    def clear_msg(cls, elem:XUElem, item_tag:str):
-        XUTextAnim(elem, item_tag).clear_pages()
+    def clear_msg(cls, elem:XUElem):
+        XUTextAnim(elem).clear_pages()
 
     @classmethod
-    def append_msg(cls, elem:XUElem, item_tag:str, text:str, all_params:dict[str,Any]={}):
-        line_num = elem.attr_int(cls.LINE_NUM_ATTR, 1024)
-        wrap = elem.attr_int(cls.WRAP_ATTR, 4096)
-        XUTextAnim(elem, item_tag).append_pages(text, all_params, line_num, wrap)
+    def append_msg(cls, elem:XUElem, text:str, all_params:dict[str,Any]={}):
+        page_item = XUPageItem.from_format_dict(elem.xmlui, text, all_params)
+        XUTextAnim(elem).add_page(page_item)
 
     @classmethod
-    def start_msg(cls, elem:XUElem, item_tag:str, text:str, all_params:dict[str,Any]={}):
-        line_num = elem.attr_int(cls.LINE_NUM_ATTR, 1024)
-        wrap = elem.attr_int(cls.WRAP_ATTR, 4096)
-        XUTextAnim(elem, item_tag).set_pages(text, all_params, line_num, wrap)
+    def start_msg(cls, elem:XUElem, text:str, all_params:dict[str,Any]={}):
+        cls.clear_msg(elem)
+        cls.append_msg(elem, text, all_params)
 
 class MsgScr(Msg):
     # 最後尾までスクロールした結果文字列を返す
