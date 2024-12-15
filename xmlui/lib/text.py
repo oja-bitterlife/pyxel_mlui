@@ -49,6 +49,11 @@ class Msg(XUPageAnim):
         wrap = elem.attr_int(self.WRAP_ATTR, 4096)
         super().__init__(elem, page_line_num, wrap)
 
+    # スクロール用[-line_num:]で後ろの行が拾える
+    @property
+    def all_lines(self) -> list[str]:
+        return sum([page.all_text.splitlines() for page in self.pages], [])
+
     @classmethod
     def clear_msg(cls, elem:XUElem):
         XUPageInfo(elem).clear_pages()
@@ -64,47 +69,14 @@ class Msg(XUPageAnim):
         cls.clear_msg(elem)
         cls.append_msg(elem, text, all_params)
 
-class MsgScr(Msg):
-    # 最後尾までスクロールした結果文字列を返す
-    def scroll_buf(self:"MsgScr", scroll_line_num:int) -> list[str]:
-        # 現在ページの挿入
-        buf = self.current_page.text.splitlines()
-
-        # 行が足りるまでページを巻き戻して挿入
-        for page_no in range(self.page_no-1, -1, -1):
-            if len(buf) >= scroll_line_num:
-                break
-            buf = self.pages[page_no].all_text.splitlines() + buf
-
-        # 最大行数に絞る。アニメーション中だけ最下行が使える。
-        max_line = scroll_line_num if not self.current_page.is_finish else scroll_line_num-1
-        buf = list(reversed(list(reversed(buf))[:max_line]))
-
-        return buf
-
 # おまけ
-class MsgDQ(MsgScr):
+class MsgDQ(Msg):
     TALK_MARK = "＊「"
     IS_TALK_ATTR = "_xmlui_talk_mark"
 
-    # 各行に会話用インデントが必要かを返す
-    def scroll_indents(self, scroll_line_num:int) -> list[bool]:
-        # 現在ページの挿入
-        page_lines = self.current_page.all_text.splitlines()
-        indents = [True if i != 0 and not page_lines[0].startswith(self.TALK_MARK) else False for i,_ in enumerate(page_lines)]
-
-        # 行が足りるまでページを巻き戻して挿入
-        for page_no in range(self.page_no-1, -1, -1):
-            if len(indents) >= scroll_line_num:
-                break
-            page_lines = self.pages[page_no].all_text.splitlines()
-            indents =  [True if not line.startswith(self.TALK_MARK) else False for line in page_lines] + indents
-
-        # 最大行数に絞る。アニメーション中だけ最下行が使える。
-        max_line = scroll_line_num if not self.current_page.is_finish else scroll_line_num-1
-        indents = list(reversed(list(reversed(indents))[:max_line]))
-
-        return indents
+    @property
+    def is_talk(self):
+        return self.attr_bool(self.IS_TALK_ATTR, False)
 
     @classmethod
     def start_talk(cls, elem:XUElem, text:str, all_params:dict[str,Any]={}):
@@ -115,10 +87,6 @@ class MsgDQ(MsgScr):
     def start_system(cls, elem:XUElem, text:str, all_params:dict[str,Any]={}):
         elem.set_attr(cls.IS_TALK_ATTR, False)
         cls.start_msg(elem, text, all_params)
-
-    @classmethod
-    def is_talk(cls, elem:XUElem):
-        return elem.attr_bool(cls.IS_TALK_ATTR, False)
 
 # デコレータを用意
 # *****************************************************************************
@@ -137,15 +105,6 @@ class Decorator(XUTemplate.HasRef):
             # 登録用関数をジェネレート
             def draw(elem:XUElem, event:XUEvent):
                 return bind_func(Msg(elem), event)
-            # 関数登録
-            self.template.set_drawfunc(tag_name, draw)
-        return wrapper
-
-    def msg_scr(self, tag_name:str):
-        def wrapper(bind_func:Callable[[MsgScr,XUEvent], str|None]):
-            # 登録用関数をジェネレート
-            def draw(elem:XUElem, event:XUEvent):
-                return bind_func(MsgScr(elem), event)
             # 関数登録
             self.template.set_drawfunc(tag_name, draw)
         return wrapper

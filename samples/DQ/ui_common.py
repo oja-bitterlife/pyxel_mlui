@@ -104,24 +104,21 @@ def common_msg_text(msg_text:text.MsgDQ, event:XUEvent):
 
     # テキスト表示
     # ---------------------------------------------------------
-    msg_text.current_page.draw_count += 0.5
+    # msg_text.current_page.draw_count += 0.5
 
     # talkの時は各ページ先頭にマーク
-    pages = [anim_page.all_text.splitlines() for anim_page in msg_text.pages]
+    pages = [page.all_text.splitlines() for page in msg_text.pages]
     if msg_text.is_talk:
         for page_lines in pages:
             page_lines[0] = text.MsgDQ.TALK_MARK + page_lines[0]
 
-    # とりあえず
-    page_line_num = 3
+    # スクロールバッファサイズはページサイズ+2
+    page_line_num = msg_text.attr_int(msg_text.PAGE_LINE_NUM_ATTR)
+    scroll_size = page_line_num + 2
 
     # Scroll
-    scroll_size = page_line_num+2
-    scroll_buf = msg_text.scroll_buf(scroll_size)
-    if msg_text.current_page.all_text.startswith("＊「"):
-        scroll_indents = msg_text.scroll_indents(scroll_size)
-    else:
-        scroll_indents = [False for _ in range(scroll_size)]
+    scroll_buf = sum(pages, [])[-scroll_size:]
+    need_indent = [(not line.startswith(text.MsgDQ.TALK_MARK) and msg_text.is_talk) for line in scroll_buf]  # インデントが必要かどうか
 
     # アニメーション用表示位置ずらし。スクロール時半文字ずれる
     shift_y = -3 if not msg_text.current_page.is_finish and len(scroll_buf) >= scroll_size else 5
@@ -129,7 +126,7 @@ def common_msg_text(msg_text:text.MsgDQ, event:XUEvent):
     # テキスト描画
     line_height = system_font.size + 3  # 行間設定
     for i,page in enumerate(scroll_buf):
-        x = area.x + (system_font.size*2 if scroll_indents[i] else 0)
+        x = area.x + (system_font.text_width(text.MsgDQ.TALK_MARK) if need_indent[i] else 0)
         y = shift_y + area.y + i*line_height
         pyxel.text(x, y, page, 7, system_font.font)
 

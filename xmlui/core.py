@@ -906,18 +906,21 @@ class XUTextUtil:
 
 # アニメーションテキストページ
 class XUPageItem(XUSelectItem):
-    TEXT_COUNT_ATTR = "_xmlui_text_count"
+    DRAW_COUNT_ATTR = "_xmlui_text_count"
 
     # 表示カウンタ操作
     # -----------------------------------------------------
     # 現在の表示文字数
     @property
     def draw_count(self) -> float:
-        return float(self.attr_float(self.TEXT_COUNT_ATTR, 0))
+        # draw_countがセットされるまではupdate_countを使う(draw_count加算し忘れ用)
+        if self.has_attr(self.DRAW_COUNT_ATTR):
+            return self.update_count
+        return float(self.attr_float(self.DRAW_COUNT_ATTR, 0))
 
     @draw_count.setter
     def draw_count(self, count:float) -> float:
-        self.set_attr(self.TEXT_COUNT_ATTR, count)
+        self.set_attr(self.DRAW_COUNT_ATTR, count)
         return count
 
     # アニメーション用
