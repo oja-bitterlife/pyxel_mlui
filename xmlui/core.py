@@ -1064,7 +1064,7 @@ class XUTextPage(_XUSelectWriter):
 
     def append_pages(self, text:str, all_params:dict[str,Any], line_num:int, wrap:int):
         # まずはパラメータ置換
-        format_text = XUTextUtil.format_dict(text, all_params)
+        format_text = XUTextUtil.format_dict(text, all_params) if all_params else text
 
         # ページ分割してページごとにタグにしてAddChild
         for page in XUTextPage.split_page_texts(format_text, line_num, wrap):

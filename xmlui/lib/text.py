@@ -29,10 +29,10 @@ class FontBase:
 # #############################################################################
 # ラベル
 class Label(XUElem):
-    def __init__(self, state:XUElem, align_attr:str, valign_attr:str):
-        super().__init__(state.xmlui, state._element)
-        self.align = state.attr_str(align_attr, "left")
-        self.valign = state.attr_str(valign_attr, "top")
+    def __init__(self, elem:XUElem, align_attr:str, valign_attr:str):
+        super().__init__(elem.xmlui, elem._element)
+        self.align = elem.attr_str(align_attr, "left")
+        self.valign = elem.attr_str(valign_attr, "top")
 
     def aligned_pos(self, font:FontBase) -> tuple[int, int]:
         area = self.area
@@ -40,30 +40,30 @@ class Label(XUElem):
 
 # メッセージ
 class Msg(XUTextPage):
+    LINE_NUM_ATTR = 'line_num'
+    WRAP_ATTR = 'wrap'
+
     # タグのテキストを処理する
-    def __init__(self, state:XUElem, item_tag:str):
-        super().__init__(state, item_tag)
+    def __init__(self, elem:XUElem, item_tag:str):
+        super().__init__(elem, item_tag)
 
     @classmethod
-    def clear_msg(cls, state:XUElem, item_tag:str):
-        page = XUTextPage(state, item_tag)
-        page.clear_pages()
+    def clear_msg(cls, elem:XUElem, item_tag:str):
+        XUTextPage(elem, item_tag).clear_pages()
 
     @classmethod
-    def append_msg(cls, state:XUElem, item_tag:str, text:str, all_params:dict[str,Any], page_line_num_attr:str, wrap_attr:str):
-        page = XUTextPage(state, item_tag)
-        page.append_pages(text, all_params, page_line_num_attr, wrap_attr)
+    def append_msg(cls, elem:XUElem, item_tag:str, text:str, all_params:dict[str,Any]={}):
+        line_num = elem.attr_int(cls.LINE_NUM_ATTR, 1024)
+        wrap = elem.attr_int(cls.WRAP_ATTR, 4096)
+        XUTextPage(elem, item_tag).append_pages(text, all_params, line_num, wrap)
 
     @classmethod
-    def start_msg(cls, state:XUElem, item_tag:str, text:str, all_params:dict[str,Any], page_line_num_attr:str, wrap_attr:str):
-        page = XUTextPage(state, item_tag)
-        page.set_pages(text, all_params, page_line_num_attr, wrap_attr)
+    def start_msg(cls, elem:XUElem, item_tag:str, text:str, all_params:dict[str,Any]={}):
+        line_num = elem.attr_int(cls.LINE_NUM_ATTR, 1024)
+        wrap = elem.attr_int(cls.WRAP_ATTR, 4096)
+        XUTextPage(elem, item_tag).set_pages(text, all_params, line_num, wrap)
 
 class MsgScr(Msg):
-    # タグのテキストを処理する
-    def __init__(self, state:XUElem, item_tag:str):
-        super().__init__(state, item_tag)
-
     # 最後尾までスクロールした結果文字列を返す
     def scroll_buf(self:"MsgScr", scroll_line_num:int) -> list[str]:
         # 現在ページの挿入
@@ -86,10 +86,6 @@ class MsgDQ(MsgScr):
     TALK_MARK = "＊「"
     IS_TALK_ATTR = "_xmlui_talk_mark"
 
-    # タグのテキストを処理する
-    def __init__(self, state:XUElem, item_tag:str):
-        super().__init__(state, item_tag)
-
     # 各行に会話用インデントが必要かを返す
     def scroll_indents(self, scroll_line_num:int) -> list[bool]:
         # 現在ページの挿入
@@ -110,18 +106,18 @@ class MsgDQ(MsgScr):
         return indents
 
     @classmethod
-    def start_talk(cls, state:XUElem, item_tag:str, text:str, all_params:dict[str,Any], page_line_num_attr:str, wrap_attr:str):
-        state.set_attr(cls.IS_TALK_ATTR, True)
-        cls.start_msg(state, item_tag, text, all_params, page_line_num_attr, wrap_attr)
+    def start_talk(cls, elem:XUElem, item_tag:str, text:str, all_params:dict[str,Any]={}):
+        elem.set_attr(cls.IS_TALK_ATTR, True)
+        cls.start_msg(elem, item_tag, text, all_params)
 
     @classmethod
-    def start_system(cls, state:XUElem, item_tag:str, text:str, all_params:dict[str,Any], page_line_num_attr:str, wrap_attr):
-        state.set_attr(cls.IS_TALK_ATTR, False)
-        cls.start_msg(state, item_tag, text, all_params, page_line_num_attr, wrap_attr)
+    def start_system(cls, elem:XUElem, item_tag:str, text:str, all_params:dict[str,Any]={}):
+        elem.set_attr(cls.IS_TALK_ATTR, False)
+        cls.start_msg(elem, item_tag, text, all_params)
 
     @classmethod
-    def is_talk(cls, state:XUElem):
-        return state.attr_bool(cls.IS_TALK_ATTR, False)
+    def is_talk(cls, elem:XUElem):
+        return elem.attr_bool(cls.IS_TALK_ATTR, False)
 
 # デコレータを用意
 # *****************************************************************************
@@ -129,8 +125,8 @@ class Decorator(XUTemplate.HasRef):
     def label(self, tag_name:str, align_attr:str="align", valign_attr:str="valign"):
         def wrapper(bind_func:Callable[[Label,XUEvent], str|None]):
             # 登録用関数をジェネレート
-            def draw(state:XUElem, event:XUEvent):
-                return bind_func(Label(state, align_attr, valign_attr), event)
+            def draw(elem:XUElem, event:XUEvent):
+                return bind_func(Label(elem, align_attr, valign_attr), event)
             # 関数登録
             self.template.set_drawfunc(tag_name, draw)
         return wrapper
@@ -138,8 +134,8 @@ class Decorator(XUTemplate.HasRef):
     def msg(self, tag_name:str, item_tag:str):
         def wrapper(bind_func:Callable[[Msg,XUEvent], str|None]):
             # 登録用関数をジェネレート
-            def draw(state:XUElem, event:XUEvent):
-                return bind_func(Msg(state, item_tag), event)
+            def draw(elem:XUElem, event:XUEvent):
+                return bind_func(Msg(elem, item_tag), event)
             # 関数登録
             self.template.set_drawfunc(tag_name, draw)
         return wrapper
@@ -147,8 +143,8 @@ class Decorator(XUTemplate.HasRef):
     def msg_scr(self, tag_name:str, item_tag:str):
         def wrapper(bind_func:Callable[[MsgScr,XUEvent], str|None]):
             # 登録用関数をジェネレート
-            def draw(state:XUElem, event:XUEvent):
-                return bind_func(MsgScr(state, item_tag), event)
+            def draw(elem:XUElem, event:XUEvent):
+                return bind_func(MsgScr(elem, item_tag), event)
             # 関数登録
             self.template.set_drawfunc(tag_name, draw)
         return wrapper
@@ -156,8 +152,8 @@ class Decorator(XUTemplate.HasRef):
     def msg_dq(self, tag_name:str, item_tag:str):
         def wrapper(bind_func:Callable[[MsgDQ,XUEvent], str|None]):
             # 登録用関数をジェネレート
-            def draw(state:XUElem, event:XUEvent):
-                return bind_func(MsgDQ(state, item_tag), event)
+            def draw(elem:XUElem, event:XUEvent):
+                return bind_func(MsgDQ(elem, item_tag), event)
             # 関数登録
             self.template.set_drawfunc(tag_name, draw)
         return wrapper
