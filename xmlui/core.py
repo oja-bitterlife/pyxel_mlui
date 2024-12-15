@@ -984,14 +984,9 @@ class XUTextAnim(XUSelectBase):
 
         # ページ未登録なら登録しておく
         if len(self._util_info.find_by_tagall(self.PAGE_TAG)) == 0 and XUTextUtil.length(self.text) > 0:
-            self._items = []
             for page in self.split_page_texts(self.text, page_line_num, wrap):
                 page_item = XUSelectItem(XUElem(self.xmlui, Element(self.PAGE_TAG)))
                 self._util_info.add_child(page_item.set_text(page))
-
-                # 登録し損なってる
-                self._items.append(page_item)
-
 
     # ページごとに行・ワードラップ分割
     @classmethod
@@ -1041,11 +1036,12 @@ class XUTextAnim(XUSelectBase):
     # 現在ページのアニメーション情報アクセス
     @property
     def current_page(self):
-        return XUPageItem(self._items[self.page_no])
+        return XUPageItem(self.items[self.page_no])
 
+    # 型キャスト
     @property
     def pages(self) -> list[XUPageItem]:
-        return [XUPageItem(item) for item in self._items]
+        return [XUPageItem(item) for item in self.items]
 
     # 次ページがなくテキストは表示完了 = 完全に終了
     @property
