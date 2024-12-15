@@ -1000,10 +1000,9 @@ class XUPageInfo(XUSelectBase):
 
     # ツリー操作
     # -----------------------------------------------------
-    def add_pages(self, text:str, page_line_num:int=1024, wrap:int=4096):
-        for page in XUPageText.split_page_texts(text, page_line_num, wrap):
-            page_item = XUPageItem(XUElem(self.xmlui, Element(self.ITEM_TAG)))
-            self._util_info.add_child(page_item.set_text(page))
+    def add_page(self, text:str):
+        page_item = XUPageItem(XUElem(self.xmlui, Element(self.ITEM_TAG)))
+        self._util_info.add_child(page_item.set_text(text))
 
     def clear_pages(self):
         for child in self._util_info.find_by_tagall(self.ITEM_TAG):
@@ -1018,7 +1017,8 @@ class XUPageText(XUPageInfo):
 
         # ページ未登録なら登録しておく
         if len(self.pages) == 0 and XUTextUtil.length(self.text) > 0:
-            self.add_pages(self.text, page_line_num, wrap)
+            for page in self.split_page_texts(self.text, page_line_num, wrap):
+                self.add_page(page)
 
     # ページごとに行・ワードラップ分割
     @classmethod
