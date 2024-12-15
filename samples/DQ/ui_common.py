@@ -155,7 +155,7 @@ def status_item(status_item:text.Label, event:XUEvent):
     system_font = ui_theme.font.system
 
     # 値の取得
-    text = XUTextUtil.format_dict(status_item.text, param_db)
+    text = XUTextUtil.convert_zenkaku(XUTextUtil.format_dict(status_item.text, param_db))
 
     # テキストは右寄せ
     area = status_item.area

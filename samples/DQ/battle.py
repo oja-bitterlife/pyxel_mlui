@@ -70,7 +70,7 @@ def ui_init(template):
 
     # コマンドメニュー
     # ---------------------------------------------------------
-    @battle_select.grid("menu_grid", "menu_item", "rows", "item_w", "item_h")
+    @battle_select.grid("menu_grid", "menu_item")
     def menu_grid(menu_grid:select.Grid, event:XUEvent):
         # メニュー選択
         input_def = ui_theme.input_def
@@ -79,14 +79,10 @@ def ui_init(template):
         # 選択アイテムの表示
         if input_def.BTN_A in event.trg:
             match menu_grid.action:
-                case "attack":
-                    menu_grid.xmlui.popup("common", "under_construct")
-                case "spel":
-                    menu_grid.xmlui.popup("common", "under_construct")
-                case "run":
-                    menu_grid.xmlui.popup("common", "under_construct")
                 case "tools":
                     menu_grid.open("tools")
+                case _:
+                    menu_grid.xmlui.popup("common", "under_construct")
 
         # # アイテムの無効化(アイテムカーソル用)
         # is_message_oepn = menu_grid.xmlui.exists_id("message")
