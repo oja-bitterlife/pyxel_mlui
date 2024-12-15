@@ -655,11 +655,10 @@ class _XUUtilBase(XUState):
 
         # UtilBase用ルートの作成(状態保存先)
         if state.exists_tag(root_tag):
-            self._util_root = state.find_by_tag(root_tag)
-            self._util_root.clear_children()  # 綺麗にして構築し直す
+            self._util_info = state.find_by_tag(root_tag)
         else:
-            self._util_root = XUState(state.xmlui, Element(root_tag))
-            state.add_child(self._util_root)
+            self._util_info = XUState(state.xmlui, Element(root_tag))
+            state.add_child(self._util_info)
 
 # メニュー系
 # *****************************************************************************
@@ -696,10 +695,10 @@ class XUSelectItem(XUState):
 # 選択ベース
 class XUSelectBase(_XUUtilBase):
     # クラス定数
-    ROOT_TAG = "_xmlui_select_root"
+    INFO_TAG = "_xmlui_select_info"
 
     def __init__(self, state:XUState, item_tag:str):
-        super().__init__(state, self.ROOT_TAG)
+        super().__init__(state, self.INFO_TAG)
         self._item_tag = item_tag
 
         # 自分の直下のitemだけ回収する
@@ -975,7 +974,7 @@ class XUTextPage(XUSelectList):
     SEPARATE_REGEXP = r"\\n"  # 改行に変換する正規表現(\nへ)
     PAGE_REGEXP = r"\\p"  # 改ページに変換する正規表現(\0へ)
 
-    ROOT_TAG= "_xmlui_text_root"
+    INFO_TAG= "_xmlui_text_info"
 
     def __init__(self, state:XUState, item_tag:str):
         super().__init__(state, item_tag, "", "")
