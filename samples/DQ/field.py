@@ -92,7 +92,7 @@ def ui_init(template):
             x, y = title.aligned_pos(ui_theme.font.system)
             pyxel.text(x, y-1, title.text, 7, ui_theme.font.system.font)
 
-    # 各メニューごとのタイトル
+    # 各メニューごとのタイトル(コマンドメニューと少し場所がずれる)
     @field_text.label("menu_item_title", "align", "valign")
     def menu_item_title(menu_item_title:text.Label, event:XUEvent):
         clip = get_world_clip(XUWinBase.find_parent_win(menu_item_title)).intersect(menu_item_title.area)
@@ -129,19 +129,13 @@ def ui_init(template):
             match menu_grid.action:
                 case "talk":
                     menu_grid.open("talk_dir")
-                case "spel":
-                    menu_grid.xmlui.popup("under_construct")
-                case "status":
-                    menu_grid.xmlui.popup("under_construct")
                 case "tools":
                     menu_grid.open("tools")
                 case "stairs":
                     return "down_stairs"
-                case "check":
-                    menu_grid.xmlui.popup("under_construct")
                 case "door":
                     return "open_door"
-                case "take":
+                case _:
                     menu_grid.xmlui.popup("under_construct")
 
         # アイテムの無効化(アイテムカーソル用)

@@ -82,3 +82,7 @@ class BG:
             if self.blocks[block_y][block_x] == self.STAIRS:
                 XUWinBase(xmlui.find_by_id("menu")).start_close()
                 xmlui.on("start_battle")
+            else:
+                msg_win = xmlui.find_by_id("menu").open("message")
+                msg_text = msg_win.find_by_tag("msg_text")
+                text.MsgDQ.start_system(msg_text, "かいだんがない")  # systemメッセージ
