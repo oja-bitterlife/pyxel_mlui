@@ -107,6 +107,7 @@ class XURect:
 
 
 # イベント管理用
+# #############################################################################
 class XUEvent:
     # 綴り間違いをしないようuse_eventをチェックする時は定数を使うようにする
     ABSORBER = "absorber"
@@ -155,9 +156,10 @@ class XUEvent:
         clone.release = set(self.release)
         return clone
 
-# UIパーツの状態取得
+
+# UIパーツの状態管理
 # #############################################################################
-# XMLの状態管理ReadOnly
+# XMLのElement管理
 class XUElem:
     def __init__(self, xmlui:'XMLUI', element:Element):
         self.xmlui = xmlui  # ライブラリへのIF
@@ -528,11 +530,11 @@ class XUTemplate(XUElem):
     # 描画関係
     # *************************************************************************
     # タグ処理が登録されていたら実行
-    def draw_element(self, tag_name:str, state:XUElem, event:XUEvent) -> str | None:
+    def draw_element(self, tag_name:str, elem:XUElem, event:XUEvent) -> str | None:
         if tag_name in self._draw_funcs:
-            return self._draw_funcs[tag_name](state, event)
+            return self._draw_funcs[tag_name](elem, event)
 
-
+# XMLUIコア本体
 class XMLUI(XUElem):
     # 初期化
     # *************************************************************************
@@ -590,9 +592,9 @@ class XMLUI(XUElem):
         self.event.update()
 
         # ActiveStateの取得。Active=最後、なので最後から確認
-        self.active_states:list[XUElem] = []
-        for event in reversed([state for state in self._rec_iter() if state.use_event and state.enable]):
-            self.active_states.append(event)  # イベントを使うstateを回収
+        self.active_elems:list[XUElem] = []
+        for event in reversed([elem for elem in self._rec_iter() if elem.use_event and elem.enable]):
+            self.active_elems.append(event)  # イベントを使うelemを回収
             if event.use_event == XUEvent.ABSORBER:  # イベント通知終端
                 break
 
@@ -600,17 +602,17 @@ class XMLUI(XUElem):
         self._parent_cache = {c:XUElem(self, p) for p in self._element.iter() for c in p}
 
         # 更新処理
-        for state in self.children:  # 中でTreeを変えたいのでイテレータではなくリストで
+        for elem in self.children:  # 中でTreeを変えたいのでイテレータではなくリストで
             # active/inactiveどちらのeventを使うか決定
-            event = self.event.copy() if state in self.active_states else XUEvent()
+            event = self.event.copy() if elem in self.active_elems else XUEvent()
 
             # updateカウンタ更新
-            event.on_init = state.update_count == 0  # やっぱりinitialize情報がどこかに欲しい
-            state.set_attr("update_count", state.update_count+1)  # 1スタート(0は初期化時)
+            event.on_init = elem.update_count == 0  # やっぱりinitialize情報がどこかに欲しい
+            elem.set_attr("update_count", elem.update_count+1)  # 1スタート(0は初期化時)
 
             # 登録されている関数を実行。戻り値はイベント
             for template in self._templates:
-                result = template.draw_element(state.tag, state, event)
+                result = template.draw_element(elem.tag, elem, event)
                 if result is not None:
                     self.on(result)
 
@@ -646,19 +648,19 @@ class XMLUI(XUElem):
 # 基本は必要な情報をツリーでぶら下げる
 # Treeが不要ならたぶんXUStateで事足りる
 class _XUUtilBase(XUElem):
-    def __init__(self, state:XUElem, root_tag:str):
-        super().__init__(state.xmlui, state._element)
+    def __init__(self, elem:XUElem, root_tag:str):
+        super().__init__(elem.xmlui, elem._element)
 
         # 自前設定が無ければabsorberにしておく
         if self.use_event == XUEvent.NONE:
             self.set_attr("use_event", XUEvent.ABSORBER)
 
         # UtilBase用ルートの作成(状態保存先)
-        if state.exists_tag(root_tag):
-            self._util_info = state.find_by_tag(root_tag)
+        if elem.exists_tag(root_tag):
+            self._util_info = elem.find_by_tag(root_tag)
         else:
-            self._util_info = XUElem(state.xmlui, Element(root_tag))
-            state.add_child(self._util_info)
+            self._util_info = XUElem(elem.xmlui, Element(root_tag))
+            elem.add_child(self._util_info)
 
 # メニュー系
 # *****************************************************************************
@@ -671,8 +673,8 @@ class XUSelectItem(XUElem):
     ITEM_X_ATTR = "_xmlui_sel_item_x"
     ITEM_Y_ATTR = "_xmlui_sel_item_y"
 
-    def __init__(self, state:XUElem):
-        super().__init__(state.xmlui, state._element)
+    def __init__(self, elem:XUElem):
+        super().__init__(elem.xmlui, elem._element)
 
     # 追加アトリビュートに座標設定(元のXMLを汚さない)
     def set_pos(self, x:int, y:int) -> Self:
@@ -697,12 +699,12 @@ class XUSelectBase(_XUUtilBase):
     # クラス定数
     INFO_TAG = "_xmlui_select_info"
 
-    def __init__(self, state:XUElem, item_tag:str):
-        super().__init__(state, self.INFO_TAG)
+    def __init__(self, elem:XUElem, item_tag:str):
+        super().__init__(elem, self.INFO_TAG)
         self._item_tag = item_tag
 
         # 自分の直下のitemだけ回収する
-        self._items = [XUSelectItem(XUElem(state.xmlui, child)) for child in self._element if child.tag == item_tag]
+        self._items = [XUSelectItem(XUElem(elem.xmlui, child)) for child in self._element if child.tag == item_tag]
 
     # 選択中のitemの番号(Treeの並び順)
     @property
@@ -736,8 +738,8 @@ class XUSelectBase(_XUUtilBase):
 
 # XUSelectBase更新用
 class XUSelector(XUSelectBase):
-    def __init__(self, state:XUElem, item_tag:str, rows:int, item_w:int, item_h:int):
-        super().__init__(state, item_tag)
+    def __init__(self, elem:XUElem, item_tag:str, rows:int, item_w:int, item_h:int):
+        super().__init__(elem, item_tag)
         self._rows = rows
 
         # 座標更新
@@ -776,10 +778,11 @@ class XUSelector(XUSelectBase):
 
 # グリッド選択
 class XUSelectGrid(XUSelector):
-    def __init__(self, state:XUElem, item_tag:str, rows_attr:str, item_w_attr:str, item_h_attr:str):
-        item_w = state.attr_int(item_w_attr, 0)
-        item_h = state.attr_int(item_h_attr, 0)
-        super().__init__(state, item_tag, state.attr_int(rows_attr, 1), item_w, item_h)
+    def __init__(self, elem:XUElem, item_tag:str, rows_attr:str, item_w_attr:str, item_h_attr:str):
+        item_w = elem.attr_int(item_w_attr, 0)
+        item_h = elem.attr_int(item_h_attr, 0)
+        rows = elem.attr_int(rows_attr, 1)
+        super().__init__(elem, item_tag, rows, item_w, item_h)
 
     # 入力に応じた挙動一括。変更があった場合はTrue
     def _select_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str, x_wrap:bool, y_wrap:bool) -> bool:
@@ -806,11 +809,11 @@ class XUSelectGrid(XUSelector):
 
 # リスト選択
 class XUSelectList(XUSelector):
-    def __init__(self, state:XUElem, item_tag:str, item_w_attr:str, item_h_attr:str):
-        item_w = state.attr_int(item_w_attr, 0) if item_w_attr else 0
-        item_h = state.attr_int(item_h_attr, 0) if item_h_attr else 0
-        rows = len(state.find_by_tagall(item_tag)) if item_w > item_h else 1  # 横並びかどうか
-        super().__init__(state, item_tag, rows, item_w, item_h)
+    def __init__(self, elem:XUElem, item_tag:str, item_w_attr:str, item_h_attr:str):
+        item_w = elem.attr_int(item_w_attr, 0) if item_w_attr else 0
+        item_h = elem.attr_int(item_h_attr, 0) if item_h_attr else 0
+        rows = len(elem.find_by_tagall(item_tag)) if item_w > item_h else 1  # 横並びかどうか
+        super().__init__(elem, item_tag, rows, item_w, item_h)
   
     # 入力に応じた挙動一括。変更があった場合はTrue
     def _select_by_event(self, input:set[str], prev_event:str, next_event:str, wrap:bool) -> bool:
@@ -833,8 +836,8 @@ class XUSelectList(XUSelector):
 
 # ダイアル選択用
 class XUSelectNum(XUSelectList):
-    def __init__(self, state:XUElem, item_tag:str, item_w_attr:str):
-        super().__init__(state, item_tag, item_w_attr, "")
+    def __init__(self, elem:XUElem, item_tag:str, item_w_attr:str):
+        super().__init__(elem, item_tag, item_w_attr, "")
 
     # 各桁のitem
     @property
@@ -921,10 +924,6 @@ class XUTextConv:
 class XUTextAnim(XUSelectItem):
     TEXT_COUNT_ATTR = "_xmlui_text_count"
 
-    def __init__(self, state:XUElem):
-        super().__init__(state)
-        self.length = XUTextConv.length(super().text)
-
     # 表示カウンタ操作
     # -----------------------------------------------------
     # 現在の表示文字数
@@ -960,15 +959,20 @@ class XUTextAnim(XUSelectItem):
     def text(self) -> str:
         return self._limitstr(super().text, self.draw_count)
 
+    # draw_countまでのテキストを全角で受け取る
+    @property
+    def zenkaku(self) -> str:
+        return XUTextConv.convert_zenkaku(self.text)
+
     # 全体テキストを受け取る
     @property
     def all_text(self) -> str:
         return super().text
 
-    # draw_countまでのテキストを全角で受け取る
+    # テキスト全体の長さ(\n\0抜き)
     @property
-    def zenkaku(self) -> str:
-        return XUTextConv.convert_zenkaku(self.text)
+    def length(self) -> int:
+        return XUTextConv.length(super().text)
 
 class XUTextPage(XUSelectList):
     SEPARATE_REGEXP = r"\\n"  # 改行に変換する正規表現(\nへ)
@@ -976,8 +980,8 @@ class XUTextPage(XUSelectList):
 
     INFO_TAG= "_xmlui_text_info"
 
-    def __init__(self, state:XUElem, item_tag:str):
-        super().__init__(state, item_tag, "", "")
+    def __init__(self, elem:XUElem, item_tag:str):
+        super().__init__(elem, item_tag, "", "")
 
     # ページごとに行・ワードラップ分割
     @classmethod
