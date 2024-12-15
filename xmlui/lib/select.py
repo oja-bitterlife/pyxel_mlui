@@ -2,7 +2,7 @@ from xmlui.core import *
 
 # セレクトアイテム
 class Item(XUSelectItem):
-    def __init__(self, state:XUState):
+    def __init__(self, state:XUElement):
         super().__init__(state)
 
 # グリッドメニュー付きウインドウ
@@ -11,7 +11,7 @@ class Grid(XUSelectGrid):
     ITEM_W_ATTR = 'item_w'
     ITEM_H_ATTR = 'item_h'
 
-    def __init__(self, state:XUState, item_tag:str):
+    def __init__(self, state:XUElement, item_tag:str):
         super().__init__(state, item_tag, self.ROWS_ATTR, self.ITEM_W_ATTR, self.ITEM_H_ATTR)
 
 # リストウインドウ
@@ -19,7 +19,7 @@ class List(XUSelectList):
     ITEM_W_ATTR = 'item_w'
     ITEM_H_ATTR = 'item_h'
 
-    def __init__(self, state:XUState, item_tag:str):
+    def __init__(self, state:XUElement, item_tag:str):
         super().__init__(state, item_tag, self.ITEM_W_ATTR, self.ITEM_H_ATTR)
 
 
@@ -29,7 +29,7 @@ class Decorator(XUTemplate.HasRef):
     def item(self, item_tag:str):
         def wrapper(bind_func:Callable[[Item,XUEvent], str|None]):
             # 登録用関数をジェネレート
-            def draw(state:XUState, event:XUEvent):
+            def draw(state:XUElement, event:XUEvent):
                 return bind_func(Item(state), event)
             # 関数登録
             self.template.set_drawfunc(item_tag, draw)
@@ -38,7 +38,7 @@ class Decorator(XUTemplate.HasRef):
     def grid(self, tag_name:str, item_tag:str):
         def wrapper(bind_func:Callable[[Grid,XUEvent], str|None]):
             # 登録用関数をジェネレート
-            def draw(state:XUState, event:XUEvent):
+            def draw(state:XUElement, event:XUEvent):
                 return bind_func(Grid(state, item_tag), event)
             # 関数登録
             self.template.set_drawfunc(tag_name, draw)
@@ -47,7 +47,7 @@ class Decorator(XUTemplate.HasRef):
     def list(self, tag_name:str, item_tag:str):
         def wrapper(bind_func:Callable[[List,XUEvent], str|None]):
             # 登録用関数をジェネレート
-            def draw(state:XUState, event:XUEvent):
+            def draw(state:XUElement, event:XUEvent):
                 return bind_func(List(state, item_tag), event)
             # 関数登録
             self.template.set_drawfunc(tag_name, draw)
