@@ -104,20 +104,19 @@ def common_msg_text(msg_text:text.MsgDQ, event:XUEvent):
 
     # テキスト表示
     # ---------------------------------------------------------
-    # msg_text.current_page.draw_count += 0.5
+    msg_text.current_page.draw_count += 0.5
 
-    # talkの時は各ページ先頭にマーク
-    pages = [page.all_text.splitlines() for page in msg_text.pages]
-    if msg_text.is_talk:
-        for page_lines in pages:
-            page_lines[0] = text.MsgDQ.TALK_MARK + page_lines[0]
+    all_lines = []
+    for i in range(msg_text.page_no):  # 現在より前のページを追加
+        all_lines += (text.MsgDQ.TALK_MARK + msg_text.pages[i].all_text).splitlines()
+    all_lines += (text.MsgDQ.TALK_MARK + msg_text.current_page.text).splitlines()  # 現在のページを追加
 
     # スクロールバッファサイズはページサイズ+2
     page_line_num = msg_text.attr_int(msg_text.PAGE_LINE_NUM_ATTR)
     scroll_size = page_line_num + 2
 
     # Scroll
-    scroll_buf = sum(pages, [])[-scroll_size:]
+    scroll_buf = all_lines[-scroll_size:]
     need_indent = [(not line.startswith(text.MsgDQ.TALK_MARK) and msg_text.is_talk) for line in scroll_buf]  # インデントが必要かどうか
 
     # アニメーション用表示位置ずらし。スクロール時半文字ずれる
