@@ -78,17 +78,19 @@ class MsgDQ(Msg):
 
     # 必要な行だけ返す(アニメーション対応)
     def get_scroll_lines(self, scroll_size:int) -> list[DQScrollInfo]:
+        is_talk = self.is_talk  # 何度も使うのでキャッシュ
+
         # スクロール枠の中に収まる前のページを取得する
         all_lines = []
         for i in range(self.page_no-1, -1, -1):  # 現在より前へ戻りながら追加
             all_lines = self.pages[i].all_text.splitlines() + all_lines
             if len(all_lines) >= scroll_size:
                 break
-        need_indent = [not line.startswith(self.TALK_MARK) for line in all_lines]
+        need_indent = [is_talk and not line.startswith(self.TALK_MARK) for line in all_lines]
 
         # 現在のページの情報を追加
         all_lines += self.current_page.text.splitlines()
-        need_indent += [not line.startswith(self.TALK_MARK) for line in self.current_page.all_text.splitlines()]
+        need_indent += [is_talk and not line.startswith(self.TALK_MARK) for line in self.current_page.all_text.splitlines()]
 
         # オーバーした行を削除
         over_line = max(0, len(all_lines) - scroll_size)
