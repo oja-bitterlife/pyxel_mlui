@@ -730,12 +730,13 @@ class XUSelectBase(XUSelectInfo):
         # infoタグの下になければ自分の直下から探してコピーする
         if not self.items:
             for i,child in enumerate([child for child in self._element if child.tag == item_tag]):
+                # タグ名は専用のものに置き換え
                 item = XUSelectItem(XUElem(elem.xmlui, copy.deepcopy(child)))
                 item._element.tag = self.ITEM_TAG
                 self._util_info.add_child(item)
 
                 # 初期座標
-                item.set_pos(i % rows * item_w, i // rows * item_h)
+                item.set_pos(item.x + i % rows * item_w, item.y + i // rows * item_h)
 
         self._rows = rows
 
