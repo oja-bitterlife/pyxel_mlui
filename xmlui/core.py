@@ -736,8 +736,8 @@ class XUSelectBase(_XUUtilBase):
     def action(self) -> str:
         return self.selected_item.action
 
-# XUSelectBase更新用
-class XUSelector(XUSelectBase):
+# XUSelectBase書き込み用
+class _XUSelectWriter(XUSelectBase):
     def __init__(self, elem:XUElem, item_tag:str, rows:int, item_w:int, item_h:int):
         super().__init__(elem, item_tag)
         self._rows = rows
@@ -777,11 +777,11 @@ class XUSelector(XUSelectBase):
         self.select(y*self._rows + x)
 
 # グリッド選択
-class XUSelectGrid(XUSelector):
+class XUSelectGrid(_XUSelectWriter):
     def __init__(self, elem:XUElem, item_tag:str, rows_attr:str, item_w_attr:str, item_h_attr:str):
+        rows = elem.attr_int(rows_attr, 1)
         item_w = elem.attr_int(item_w_attr, 0)
         item_h = elem.attr_int(item_h_attr, 0)
-        rows = elem.attr_int(rows_attr, 1)
         super().__init__(elem, item_tag, rows, item_w, item_h)
 
     # 入力に応じた挙動一括。変更があった場合はTrue
@@ -808,7 +808,7 @@ class XUSelectGrid(XUSelector):
         return self._select_by_event(input, left_event, right_event, up_event, down_event, False, False)
 
 # リスト選択
-class XUSelectList(XUSelector):
+class XUSelectList(_XUSelectWriter):
     def __init__(self, elem:XUElem, item_tag:str, item_w_attr:str, item_h_attr:str):
         item_w = elem.attr_int(item_w_attr, 0) if item_w_attr else 0
         item_h = elem.attr_int(item_h_attr, 0) if item_h_attr else 0
@@ -875,6 +875,7 @@ class XUSelectNum(XUSelectList):
         if down_event in input:
             new_num = number - pow(10, self.selected_no)
 
+        # 数値に変更があったら反映
         if number != new_num:
             self.set_digits(new_num)
             changed = True
