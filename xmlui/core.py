@@ -1032,8 +1032,8 @@ class XUPageAnim(XUPageInfo):
         # 行数でページ分解
         pages:list[list[str]] = []
         for page_text in tmp_text.split("\0"):
-            lines =  sum([[line[i:i+wrap] for i in  range(0, len(line), wrap)] for line in page_text.splitlines()], [])
-            for line in lines:
+            lines:list[str] = []
+            for line in sum([[line[i:i+wrap] for i in  range(0, len(line), wrap)] for line in page_text.splitlines()], []):
                 lines.append(line)
                 if len(lines) >= page_line_num:
                     pages.append(lines)
