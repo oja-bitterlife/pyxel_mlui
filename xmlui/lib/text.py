@@ -55,8 +55,9 @@ class Msg(XUPageAnim):
 
     @classmethod
     def append_msg(cls, elem:XUElem, text:str, all_params:dict[str,Any]={}):
-        page_item = XUPageItem.from_format_dict(elem.xmlui, text, all_params)
-        XUPageInfo(elem).add_page(page_item)
+        page_line_num = elem.attr_int(cls.PAGE_LINE_NUM_ATTR, 1024)
+        wrap = elem.attr_int(cls.WRAP_ATTR, 4096)
+        XUPageInfo(elem).add_pages(XUTextUtil.format_dict(text, all_params), page_line_num, wrap)
 
     @classmethod
     def start_msg(cls, elem:XUElem, text:str, all_params:dict[str,Any]={}):

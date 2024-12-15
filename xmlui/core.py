@@ -908,14 +908,6 @@ class XUTextUtil:
 class XUPageItem(XUSelectItem):
     TEXT_COUNT_ATTR = "_xmlui_text_count"
 
-    # ジェネレーター
-    # -----------------------------------------------------
-    @classmethod
-    def from_format_dict(cls, xmlui:XMLUI, text:str, all_params:dict[str,Any]) -> "XUPageItem":
-        page_item = XUPageItem(XUElem(xmlui, Element(XUPageAnim.ITEM_TAG)))
-        page_item.set_text(XUTextUtil.format_dict(text, all_params))
-        return page_item
-
     # 表示カウンタ操作
     # -----------------------------------------------------
     # 現在の表示文字数
@@ -991,7 +983,7 @@ class XUPageInfo(XUSelectBase):
     def current_page(self):
         return XUPageItem(self.items[self.page_no])
 
-    # 型キャスト
+    # ただの型キャスト。中身はitems
     @property
     def pages(self) -> list[XUPageItem]:
         return [XUPageItem(item) for item in self.items]
@@ -1008,8 +1000,10 @@ class XUPageInfo(XUSelectBase):
 
     # ツリー操作
     # -----------------------------------------------------
-    def add_page(self, page_item:XUPageItem):
-        self._util_info.add_child(page_item)
+    def add_pages(self, text:str, page_line_num:int=1024, wrap:int=4096):
+        for page in XUPageAnim.split_page_texts(text, page_line_num, wrap):
+            page_item = XUPageItem(XUElem(self.xmlui, Element(self.ITEM_TAG)))
+            self._util_info.add_child(page_item.set_text(page))
 
     def clear_pages(self):
         for child in self._util_info.find_by_tagall(self.ITEM_TAG):
@@ -1024,9 +1018,7 @@ class XUPageAnim(XUPageInfo):
 
         # ページ未登録なら登録しておく
         if len(self.pages) == 0 and XUTextUtil.length(self.text) > 0:
-            for page in self.split_page_texts(self.text, page_line_num, wrap):
-                page_item = XUSelectItem(XUElem(self.xmlui, Element(self.ITEM_TAG)))
-                self._util_info.add_child(page_item.set_text(page))
+            self.add_pages(self.text, page_line_num, wrap)
 
     # ページごとに行・ワードラップ分割
     @classmethod
