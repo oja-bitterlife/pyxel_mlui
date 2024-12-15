@@ -409,6 +409,7 @@ class XUElem:
     @property
     def action(self) -> str:  # イベント情報取得
         return self.attr_str("action", "")
+
     @property
     def selected(self) -> bool:  # 選択アイテムの選択状態
         return self.attr_bool("selected", False)
@@ -666,56 +667,41 @@ class _XUUtilBase(XUElem):
 # *****************************************************************************
 # 選択クラス用アイテム
 class XUSelectItem(XUElem):
-    # 選択追加アトリビュート(元のXMLを汚さない)
-    SELECTED_ATTR = "_xmlui_selected"
-
-    # アイテム座標保存先
-    ITEM_X_ATTR = "_xmlui_sel_item_x"
-    ITEM_Y_ATTR = "_xmlui_sel_item_y"
-
     def __init__(self, elem:XUElem):
         super().__init__(elem.xmlui, elem._element)
 
-    # 追加アトリビュートに座標設定(元のXMLを汚さない)
-    def set_pos(self, x:int, y:int) -> Self:
-        self.set_attr([self.ITEM_X_ATTR, self.ITEM_Y_ATTR], [x, y])
-        return self
-
-    # 追加アトリビュートの方をみるように
-    @property
-    def selected(self) -> bool:
-        return self.attr_bool(self.SELECTED_ATTR)
-
-    # 追加アトリビュートの方を見る
-    @property
-    def area(self) -> XURect:
-        area = super().area
-        area.x += self.attr_int(self.ITEM_X_ATTR)
-        area.y += self.attr_int(self.ITEM_Y_ATTR)
-        return area
-
 # 選択ベース
-class XUSelectBase(_XUUtilBase):
+class XUSelectInfo(_XUUtilBase):
     # クラス定数
     INFO_TAG = "_xmlui_select_info"
+    ITEM_TAG = "_xmlui_select_item"
 
-    def __init__(self, elem:XUElem, item_tag:str):
+    def __init__(self, elem:XUElem):
         super().__init__(elem, self.INFO_TAG)
-        self._item_tag = item_tag
 
-        # 自分の直下のitemだけ回収する
-        self._items = [XUSelectItem(XUElem(elem.xmlui, child)) for child in self._element if child.tag == item_tag]
+    # 処理を途中で抜けるならこっちが早い
+    @property
+    def item_iter(self):
+        # 直下のみ対象。別の選択が下にくっつくことがあるので下まではみない
+        for child in self._util_info._element:
+            if child.tag == self.ITEM_TAG:
+                yield XUSelectItem(XUElem(self.xmlui, child))
+
+    # listでまとめて返す。扱いやすい
+    @property
+    def items(self) -> list[XUSelectItem]:
+        return list(self.item_iter)
 
     # 選択中のitemの番号(Treeの並び順)
     @property
     def selected_no(self) -> int:
         # 追加アトリビュート優先で検索
-        for i,item in enumerate(self._items):
+        for i,item in enumerate(self.item_iter):
             if item.selected:
                 return i
 
         # 無ければタグのselectedを検索
-        for i,item in enumerate(self._items):
+        for i,item in enumerate(self.item_iter):
             if item._element.get("selected", False):
                 return i
 
@@ -724,12 +710,12 @@ class XUSelectBase(_XUUtilBase):
     # 選択中のitem
     @property
     def selected_item(self) -> XUSelectItem:
-        return self._items[self.selected_no]
+        return self.items[self.selected_no]
 
     # itemの数
     @property
     def item_num(self) -> int:
-        return len(self._items)
+        return len(self.items)
 
     # __eq__だとpylanceの型認識がおかしくなるのでactionを使う
     @property
@@ -737,16 +723,21 @@ class XUSelectBase(_XUUtilBase):
         return self.selected_item.action
 
 # XUSelectBase書き込み用
-class _XUSelectWriter(XUSelectBase):
+class XUSelectBase(XUSelectInfo):
     def __init__(self, elem:XUElem, item_tag:str, rows:int, item_w:int, item_h:int):
-        super().__init__(elem, item_tag)
-        self._rows = rows
+        super().__init__(elem)
 
-        # 座標更新
-        for i,item in enumerate(self._items):
-            # 座標が設定されていなければ初期座標で設定
-            if not item.has_attr(XUSelectItem.ITEM_X_ATTR):
+        # infoタグの下になければ自分の直下から探してコピーする
+        if not self.items:
+            for i,child in enumerate([child for child in self._element if child.tag == item_tag]):
+                item = XUSelectItem(XUElem(elem.xmlui, copy.deepcopy(child)))
+                item._element.tag = self.ITEM_TAG
+                self._util_info.add_child(item)
+
+                # 初期座標
                 item.set_pos(i % rows * item_w, i // rows * item_h)
+
+        self._rows = rows
 
         # 選択状態復帰
         self.select(self.selected_no)
@@ -755,8 +746,8 @@ class _XUSelectWriter(XUSelectBase):
     # -----------------------------------------------------
     # 選択追加アトリビュートに設定する(元のXMLを汚さない)
     def select(self, no:int):
-        for i,item in enumerate(self._items):
-            item.set_attr(item.SELECTED_ATTR, i == no)
+        for i,item in enumerate(self.items):
+            item.set_attr("selected", i == no)
 
     # 選択を移動させる
     def next(self, add:int=1, x_wrap=False, y_wrap=False):
@@ -777,7 +768,7 @@ class _XUSelectWriter(XUSelectBase):
         self.select(y*self._rows + x)
 
 # グリッド選択
-class XUSelectGrid(_XUSelectWriter):
+class XUSelectGrid(XUSelectBase):
     def __init__(self, elem:XUElem, item_tag:str, rows:int, item_w:int, item_h:int):
         super().__init__(elem, item_tag, rows, item_w, item_h)
 
@@ -805,7 +796,7 @@ class XUSelectGrid(_XUSelectWriter):
         return self._select_by_event(input, left_event, right_event, up_event, down_event, False, False)
 
 # リスト選択
-class XUSelectList(_XUSelectWriter):
+class XUSelectList(XUSelectBase):
     def __init__(self, elem:XUElem, item_tag:str, item_w:int, item_h:int):
         rows = len(elem.find_by_tagall(item_tag)) if item_w > item_h else 1  # 横並びかどうか
         super().__init__(elem, item_tag, rows, item_w, item_h)
@@ -834,15 +825,10 @@ class XUSelectNum(XUSelectList):
     def __init__(self, elem:XUElem, item_tag:str, item_w:int):
         super().__init__(elem, item_tag, item_w, 0)
 
-    # 各桁のitem
-    @property
-    def digits(self) -> list[XUSelectItem]:
-        return self._items
-
     # 各桁のitemに数値を設定
     def set_digits(self, num:int) -> Self:
         num = min(max(0, num), self.max)
-        for item in reversed(self._items):
+        for item in reversed(self.items):
             item.set_text(str(num % 10))
             num //= 10
         return self
@@ -850,7 +836,7 @@ class XUSelectNum(XUSelectList):
     # 数値として取得
     @property
     def number(self) -> int:
-        return int("".join([item.text for item in self.digits]))
+        return int("".join([item.text for item in self.items]))
 
     # 最大値
     @property
@@ -985,7 +971,7 @@ class XUPageItem(XUSelectItem):
         return XUTextUtil.length(super().text)
 
 # ページをセレクトアイテムで管理
-class XUTextAnim(_XUSelectWriter):
+class XUTextAnim(XUSelectBase):
     SEPARATE_REGEXP = r"\\n"  # 改行に変換する正規表現(\nへ)
     PAGE_REGEXP = r"\\p"  # 改ページに変換する正規表現(\0へ)
 
@@ -996,9 +982,14 @@ class XUTextAnim(_XUSelectWriter):
 
         # ページ未登録なら登録しておく
         if len(self._util_info.find_by_tagall(self.PAGE_TAG)) == 0 and XUTextUtil.length(self.text) > 0:
+            self._items = []
             for page in self.split_page_texts(self.text, page_line_num, wrap):
-                page_elem = XUElem(self.xmlui, Element(self.PAGE_TAG))
-                self._util_info.add_child(page_elem.set_text(page))
+                page_item = XUSelectItem(XUElem(self.xmlui, Element(self.PAGE_TAG)))
+                self._util_info.add_child(page_item.set_text(page))
+
+                # 登録し損なってる
+                self._items.append(page_item)
+
 
     # ページごとに行・ワードラップ分割
     @classmethod
@@ -1070,7 +1061,7 @@ class XUTextAnim(_XUSelectWriter):
         self._util_info.add_child(page_item)
 
     def clear_pages(self):
-        for child in self._util_info.find_by_tagall(self._item_tag):
+        for child in self._util_info.find_by_tagall(self.PAGE_TAG):
             child.remove()
 
 # ウインドウサポート
