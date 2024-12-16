@@ -1,4 +1,5 @@
 from xmlui.core import *
+from xmlui.core import XUPageItem
 
 # フォントを扱う
 # #############################################################################
@@ -49,12 +50,9 @@ class Msg(XUPageText):
         wrap = elem.attr_int(self.WRAP_ATTR, 4096)
         super().__init__(elem, page_line_num, wrap)
 
-    def clear_msg(self):
-        self.clear_pages()
-
     # 全角にして登録
-    def append_msg(self, text:str, all_params:dict[str,Any]={}):
-        self.add_pages(XUTextUtil.format_zenkaku(text, all_params), self.page_line_num, self.wrap)
+    def append_msg(self, text:str, all_params:dict[str,Any]={}) -> list[XUPageItem]:
+        return self.add_pages(XUTextUtil.format_zenkaku(text, all_params), self.page_line_num, self.wrap)
 
 # おまけ
 class MsgDQ(Msg):
@@ -116,10 +114,8 @@ class MsgDQ(Msg):
     # -----------------------------------------------------
     # 会話マークを追加して格納
     def append_talk(self, text:str, all_params:dict[str,Any]={}):
-        initial_page_num = len(self.pages)  # 追加前のページ数を覚えておく
-        self.append_msg(text, all_params)
-
-        for page in self.pages[initial_page_num:]:  # 追加されたページにのみ処理
+        for page in self.append_msg(text, all_params):
+            # 追加されたページにTALKをマーキング
             page_item = self.MsgDQItem(page).set_talk(True)
             page._element.text = self.TALK_MARK + page_item.all_text
 

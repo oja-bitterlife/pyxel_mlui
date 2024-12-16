@@ -1000,10 +1000,11 @@ class XUPageInfo(XUSelectBase):
     # -----------------------------------------------------
     # テキストをページ分解してツリーにぶら下げる。作ったページを返す
     def add_pages(self, text:str, page_line_num:int, wrap:int) -> list[XUPageItem]:
-        pages = []
+        pages:list[XUPageItem] = []
         for page_text in XUPageText.split_page_texts(text, page_line_num, wrap):
             page_item = XUPageItem(XUElem(self.xmlui, Element(self.ITEM_TAG)))
             self._util_info.add_child(page_item.set_text(page_text))
+
             pages.append(page_item)  # return用
         return pages
 
