@@ -3,6 +3,7 @@ import pyxel
 # xmlui_pyxelの初期化
 # *****************************************************************************
 from xmlui.lib import text,win
+from xmlui_ext import dq
 from xmlui.pyxel_util.theme import Theme
 from xmlui.pyxel_util.font import PyxelFont
 from xmlui.core import XMLUI,XUElem,XUEvent,XUWinBase,XURect,XUTextUtil
@@ -95,7 +96,7 @@ def round_win(round_win:win.RoundFrame, event:XUEvent):
 
 # メッセージウインドウ
 # ---------------------------------------------------------
-def common_msg_text(msg_text:text.MsgDQ, event:XUEvent, cursor_visible:bool):
+def common_msg_text(msg_text:dq.MsgDQ, event:XUEvent, cursor_visible:bool):
     area = msg_text.area  # areaは重いので必ずキャッシュ
 
     # テーマ情報取得
@@ -122,9 +123,9 @@ def common_msg_text(msg_text:text.MsgDQ, event:XUEvent, cursor_visible:bool):
     for i,info in enumerate(scroll_info):
         x = area.x
         # 会話インデント
-        if info.mark_type == text.MsgDQ.MARK_TALK:
-            x += system_font.text_width(text.MsgDQ.TALK_START)
-        elif info.mark_type == text.MsgDQ.MARK_ENEMY:
+        if info.mark_type == dq.MsgDQ.Mark.TALK:
+            x += system_font.text_width(dq.MsgDQ.TALK_START)
+        elif info.mark_type == dq.MsgDQ.Mark.ENEMY:
             x += system_font.size
         y = shift_y + area.y + i*line_height
         pyxel.text(x, y, info.line_text, 7, system_font.font)

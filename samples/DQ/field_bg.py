@@ -1,8 +1,7 @@
 import pyxel
 
 from xmlui.core import XUWinBase,XUElem
-from xmlui.lib import text
-import field
+from xmlui_ext import dq
 
 class BG:
     FLOOR = 2
@@ -71,7 +70,7 @@ class BG:
                 self.blocks[door_y][door_x] = 2
                 XUWinBase(menu).start_close()
             else:
-                msg_text = text.MsgDQ(menu.open("message").find_by_id("msg_text"))
+                msg_text = dq.MsgDQ(menu.open("message").find_by_id("msg_text"))
                 msg_text.append_msg("とびらがない")  # systemメッセージ
 
     # 階段チェック
@@ -82,5 +81,5 @@ class BG:
                 XUWinBase(menu).start_close()
                 menu.xmlui.on("start_battle")
             else:
-                msg_text = text.MsgDQ(menu.open("message").find_by_id("msg_text"))
+                msg_text = dq.MsgDQ(menu.open("message").find_by_id("msg_text"))
                 msg_text.append_msg("かいだんがない")  # systemメッセージ

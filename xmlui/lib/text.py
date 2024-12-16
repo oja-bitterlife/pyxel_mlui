@@ -54,90 +54,6 @@ class Msg(XUPageText):
     def append_msg(self, text:str, all_params:dict[str,Any]={}) -> list[XUPageItem]:
         return self.add_pages(XUTextUtil.format_zenkaku(text, all_params), self.page_line_num, self.wrap)
 
-# おまけ
-class MsgDQ(Msg):
-    TALK_START = "＊「"
-    MARK_ATTR = "_xmlui_talk_mark"
-
-    MARK_NONE = ""
-    MARK_TALK = "talk"
-    MARK_ENEMY = "enemy"
-
-    # インデント用
-    # -----------------------------------------------------
-    class MsgDQItem(XUPageItem):
-        def __init__(self, page_item:XUElem):
-            super().__init__(page_item)
-
-        def is_mark(self, mark:str) -> bool:
-            return self.attr_str(MsgDQ.MARK_ATTR) == mark
-
-        def set_mark(self, mark:str) -> Self:
-            self.set_attr(MsgDQ.MARK_ATTR, mark)
-            return self
-
-        def get_lines_indent(self) -> list[bool]:
-            out = []
-            for line in self.all_text.splitlines():
-                match self.attr_str(MsgDQ.MARK_ATTR):
-                    case MsgDQ.MARK_TALK:
-                        out.append(MsgDQ.MARK_TALK if not line.startswith(MsgDQ.TALK_START) else MsgDQ.MARK_NONE)
-                    case MsgDQ.MARK_ENEMY:
-                        out.append(MsgDQ.MARK_ENEMY)
-                    case _:
-                        out.append(MsgDQ.MARK_NONE)
-            return out
-
-    # スクロール用
-    # -----------------------------------------------------
-    class DQScrollInfo:
-        def __init__(self, line_text:str, mark_type:bool):
-            self.line_text = line_text
-            self.mark_type = mark_type
-
-    # 必要な行だけ返す(アニメーション対応)
-    def get_scroll_lines(self, scroll_size:int) -> list[DQScrollInfo]:
-        # スクロール枠の中に収まる前のページを取得する
-        all_lines = []
-        mark_type = []
-        for i in range(self.page_no-1, -1, -1):  # 現在より前へ戻りながら追加
-            page_item = self.MsgDQItem(self.pages[i])
-
-            all_lines = page_item.all_text.splitlines() + all_lines
-            mark_type = page_item.get_lines_indent() + mark_type
-
-            if len(all_lines) >= scroll_size:
-                break
-
-        # 現在のページの情報を追加
-        page_item = self.MsgDQItem(self.current_page)
-        all_lines += page_item.text.splitlines()
-        mark_type += page_item.get_lines_indent()
-
-        # オーバーした行を削除
-        over_line = max(0, len(all_lines) - scroll_size)
-        all_lines = all_lines[over_line:]
-        mark_type = mark_type[over_line:]
-
-        # scroll枠に収まるlineリストを返す
-        return [self.DQScrollInfo(line, mark_type[i]) for i,line in enumerate(all_lines)]
-
-    # ページ登録
-    # -----------------------------------------------------
-    # 会話マークを追加して格納
-    def append_talk(self, text:str, all_params:dict[str,Any]={}):
-        for page in self.append_msg(text, all_params):
-            # 追加されたページにTALKをマーキング
-            page_item = self.MsgDQItem(page).set_mark(self.MARK_TALK)
-            page._element.text = self.TALK_START + page_item.all_text
-
-    # Enemyマークを追加して格納
-    def append_enemy(self, text:str, all_params:dict[str,Any]={}):
-        for page in self.append_msg(text, all_params):
-            # 追加されたページにTALKをマーキング
-            page_item = self.MsgDQItem(page).set_mark(self.MARK_ENEMY)
-            page._element.text = page_item.all_text
-
 
 # デコレータを用意
 # *****************************************************************************
@@ -156,15 +72,6 @@ class Decorator(XUTemplate.HasRef):
             # 登録用関数をジェネレート
             def draw(elem:XUElem, event:XUEvent):
                 return bind_func(Msg(elem), event)
-            # 関数登録
-            self.template.set_drawfunc(tag_name, draw)
-        return wrapper
-
-    def msg_dq(self, tag_name:str):
-        def wrapper(bind_func:Callable[[MsgDQ,XUEvent], str|None]):
-            # 登録用関数をジェネレート
-            def draw(elem:XUElem, event:XUEvent):
-                return bind_func(MsgDQ(elem), event)
             # 関数登録
             self.template.set_drawfunc(tag_name, draw)
         return wrapper

@@ -3,7 +3,8 @@ import pyxel
 
 # タイトル画面
 from xmlui.core import XMLUI,XUEvent,XUWinBase,XUSelectItem,XUTextUtil
-from xmlui.lib import select,text,input
+from xmlui.lib import select,text
+from xmlui_ext import dq
 from ui_common import ui_theme
 from params import param_db
 
@@ -29,7 +30,7 @@ class Battle:
 
         # バトル開始UI初期化
         self.battle = self.xmlui.open("battle")
-        msg_dq = text.MsgDQ(self.battle.find_by_id("msg_text"))
+        msg_dq = dq.MsgDQ(self.battle.find_by_id("msg_text"))
         msg_dq.append_msg("{enemy}が　あらわれた！", battle_db)
 
     def __del__(self):
@@ -37,7 +38,7 @@ class Battle:
         self.template.remove()
 
     def update(self):
-        msg_dq = text.MsgDQ(self.battle.find_by_id("msg_text"))
+        msg_dq = dq.MsgDQ(self.battle.find_by_id("msg_text"))
         match self.state:
             case Battle.ST_MSG_DRAWING:
                 # メッセージ表示完了
@@ -48,7 +49,7 @@ class Battle:
                     self.state = Battle.ST_CMD_WAIT
 
             case Battle.ST_CMD_WAIT:
-                menu = text.MsgDQ(self.battle.find_by_id("menu"))
+                menu = dq.MsgDQ(self.battle.find_by_id("menu"))
                 if "attack" in self.xmlui.event.trg:
                     battle_db["hit"] = XUTextUtil.format_zenkaku(random.randint(1, 100))
                     marge_db = param_db | battle_db
@@ -79,6 +80,7 @@ def ui_init(template):
     # fieldグループ用デコレータを作る
     battle_select = select.Decorator(template)
     battle_text = text.Decorator(template)
+    battle_dq = dq.Decorator(template)
 
     # コマンドメニューのタイトル
     @battle_text.label("title", "align", "valign")
@@ -119,8 +121,8 @@ def ui_init(template):
             return menu_grid.action
 
 
-    @battle_text.msg_dq("msg_text")
-    def msg_text(msg_text:text.MsgDQ, event:XUEvent):
+    @battle_dq.msg_dq("msg_text")
+    def msg_text(msg_text:dq.MsgDQ, event:XUEvent):
         # メッセージ共通処理
         common_msg_text(msg_text, event, False)
 

@@ -3,6 +3,7 @@ import pyxel
 # タイトル画面
 from xmlui.core import XMLUI,XUEvent,XUWinBase,XUSelectItem,XURect
 from xmlui.lib import select,text
+from xmlui_ext import dq
 from ui_common import ui_theme
 from field_player import Player
 from field_bg import BG
@@ -79,6 +80,7 @@ def ui_init(template):
     # fieldグループ用デコレータを作る
     field_select = select.Decorator(template)
     field_text = text.Decorator(template)
+    field_dq = dq.Decorator(template)
 
     # ラベル
     # ---------------------------------------------------------
@@ -215,7 +217,7 @@ def ui_init(template):
 
                 # メッセージウインドウを開く
                 msg_win = tools_list.xmlui.find_by_id("menu").open("message")
-                msg_text = text.MsgDQ(msg_win.find_by_id("msg_text"))
+                msg_text = dq.MsgDQ(msg_win.find_by_id("msg_text"))
                 msg_text.append_msg("ＨＰが　１０かいふくした")  # systemメッセージ
             else:
                 tools_list.xmlui.popup("under_construct")
@@ -227,8 +229,8 @@ def ui_init(template):
 
     # フィールド画面のメッセージウインドウ
     # ---------------------------------------------------------
-    @field_text.msg_dq("msg_text")
-    def msg_text(msg_text:text.MsgDQ, event:XUEvent):
+    @field_dq.msg_dq("msg_text")
+    def msg_text(msg_text:dq.MsgDQ, event:XUEvent):
         # メッセージ共通処理
         common_msg_text(msg_text, event, True)
 

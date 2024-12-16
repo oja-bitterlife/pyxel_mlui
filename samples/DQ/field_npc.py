@@ -2,7 +2,7 @@ import dataclasses
 import pyxel
 
 from xmlui.core import XUElem
-from xmlui.lib import text
+from xmlui_ext import dq
 import field
 
 @dataclasses.dataclass
@@ -47,7 +47,7 @@ class NPC:
         # 会話が発生した
         if talk is not None:
             # メッセージウインドウを開く
-            msg_text = text.MsgDQ(menu.open("message").find_by_id("msg_text"))
+            msg_text = dq.MsgDQ(menu.open("message").find_by_id("msg_text"))
             if talk:
                 msg_text.append_talk(talk, field.param_db)  # talkでテキスト開始
             else:
