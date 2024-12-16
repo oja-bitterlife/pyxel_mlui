@@ -27,7 +27,7 @@ class Battle:
 
         # バトル開始UI初期化
         self.battle = self.xmlui.open("battle")
-        msg_text = text.MsgDQ(self.battle.find_by_tag("msg_text"))
+        msg_text = text.MsgDQ(self.battle.find_by_id("msg_text"))
         msg_text.append_msg("{enemy}が　あらわれた！", battle_db)
 
     def __del__(self):
@@ -35,7 +35,7 @@ class Battle:
         self.template.remove()
 
     def update(self):
-        msg_text = text.MsgDQ(self.battle.find_by_tag("msg_text"))
+        msg_text = text.MsgDQ(self.battle.find_by_id("msg_text"))
         match self.state:
             case Battle.ST_MSG_DRAWING:
                 # メッセージ表示完了

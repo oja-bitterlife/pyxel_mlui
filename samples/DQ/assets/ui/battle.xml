@@ -4,8 +4,8 @@
     <info>バトル画面用</info>
     <battle id="battle">
         <info>バトルメッセージウインドウ</info>
-        <round_win abs_x="48" abs_y="160" w="160" h="88" id="message">
-            <msg_text x="10" y="8" w="184" page_line_num="3" wrap="10"/>
+        <round_win abs_x="48" abs_y="160" w="160" h="88">
+            <msg_text x="10" y="8" w="184" page_line_num="3" wrap="10" id="msg_text"/>
         </round_win>
 
         <info>ステータスウインドウ</info>

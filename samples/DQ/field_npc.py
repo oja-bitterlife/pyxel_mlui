@@ -1,7 +1,7 @@
 import dataclasses
 import pyxel
 
-from xmlui.core import XUTextUtil
+from xmlui.core import XMLUI
 from xmlui.lib import text
 import field
 
@@ -33,7 +33,7 @@ class NPC:
         return ""
 
     # 会話イベントチェック
-    def check_talk(self, xmlui, player):
+    def check_talk(self, xmlui:XMLUI, player):
         talk = None
         if "start_talk_east" in xmlui.event.trg:
             talk = self._check(player.block_x+1, player.block_y)
@@ -48,8 +48,8 @@ class NPC:
         if talk is not None:
             # メッセージウインドウを開く
             msg_win = xmlui.find_by_id("menu").open("message")
-            msg_text = msg_win.find_by_tag("msg_text")
+            msg_text = text.MsgDQ(msg_win.find_by_id("msg_text"))
             if talk:
-                text.MsgDQ.append_talk(msg_text, talk, field.param_db)  # talkでテキスト開始
+                msg_text.append_talk(talk, field.param_db)  # talkでテキスト開始
             else:
-                text.MsgDQ.append_msg(msg_text, "だれもいません")  # systemメッセージ
+                msg_text.append_msg("だれもいません")  # systemメッセージ

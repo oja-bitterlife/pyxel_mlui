@@ -283,12 +283,6 @@ class XUElem:
     def find_by_tagall(self, tag:str) -> list['XUElem']:
         return [child for child in self._rec_iter() if child.tag == tag]
 
-    def find_by_tag(self, tag:str) -> 'XUElem':
-        elements:list[XUElem] = self.find_by_tagall(tag)
-        if elements:
-            return elements[0]
-        raise Exception(f"\n{self.strtree()}\nTag '{tag}' not found in '{self.tag}' and children")
-
     # ツリーを遡って親を探す
     def find_parent_by_id(self, id:str) -> 'XUElem':
         parent = self.parent
@@ -658,7 +652,7 @@ class _XUUtilBase(XUElem):
 
         # UtilBase用ルートの作成(状態保存先)
         if elem.exists_tag(root_tag):
-            self._util_info = elem.find_by_tag(root_tag)
+            self._util_info = elem.find_by_tagall(root_tag)[0]
         else:
             self._util_info = XUElem(elem.xmlui, Element(root_tag))
             elem.add_child(self._util_info)
