@@ -6,8 +6,17 @@ from xmlui.lib import select,text,input
 from ui_common import ui_theme
 from params import param_db
 
+battle_db = {
+    "enemy": "てき",
+}
+
 class Battle:
     UI_TEMPLATE_BATTLE = "ui_battle"
+
+    # バトルの状態遷移
+    ST_MSG_DRAWING = "msg_drawing"
+    ST_CMD_WAIT = "command_wait"
+    state = ST_MSG_DRAWING
 
     def __init__(self, xmlui:XMLUI):
         self.xmlui = xmlui
@@ -19,22 +28,29 @@ class Battle:
         # バトル開始UI初期化
         self.battle = self.xmlui.open("battle")
         msg_text = text.MsgDQ(self.battle.find_by_tag("msg_text"))
-        msg_text.append_msg("てきが　あらわれた")
+        msg_text.append_msg("{enemy}が　あらわれた！", battle_db)
 
     def __del__(self):
         # 読みこんだUIの削除
         self.template.remove()
 
     def update(self):
-        if not self.battle.exists_id("menu"):
-            msg_text = text.MsgDQ(self.battle.find_by_tag("msg_text"))
-            if msg_text.current_page.text == "コマンド？":
-                self.battle.open("menu")
+        msg_text = text.MsgDQ(self.battle.find_by_tag("msg_text"))
+        match self.state:
+            case Battle.ST_MSG_DRAWING:
+                # メッセージ表示完了
+                if msg_text.is_all_finish:
+                    # コマンド入力開始
+                    self.state = Battle.ST_CMD_WAIT
+                    msg_text.append_msg("コマンド？")
+                    self.battle.open("menu")
 
-            elif msg_text.current_page.all_text != "コマンド？":
-                 print(msg_text.selected_no)
-                 msg_text.append_msg("コマンド？")
-            
+            case Battle.ST_CMD_WAIT:
+                menu = text.MsgDQ(self.battle.find_by_tag("menu"))
+                if "attack" in self.xmlui.event.trg:
+                    msg_text.append_msg("{name}の　こうげき！", battle_db)
+
+
     def draw(self):
         # UIの描画(fieldとdefaultグループ)
         self.xmlui.draw()
@@ -85,10 +101,10 @@ def ui_init(template):
         # 選択アイテムの表示
         if input_def.BTN_A in event.trg:
             match menu_grid.action:
-                case "tools":
-                    menu_grid.open("tools")
+                case "atack":
+                    return menu_grid.action
                 case _:
-                    menu_grid.xmlui.popup("common", "under_construct")
+                    menu_grid.xmlui.popup("under_construct")
 
         # # アイテムの無効化(アイテムカーソル用)
         # is_message_oepn = menu_grid.xmlui.exists_id("message")
@@ -101,7 +117,8 @@ def ui_init(template):
         # メッセージ共通処理
         common_msg_text(msg_text, event)
 
-        if msg_text.is_next_wait:
+        # メッセージウインドウがアクティブの時は自動テキスト送り
+        if event.is_active and msg_text.is_next_wait:
             msg_text.next()
 
         if msg_text.is_all_finish:

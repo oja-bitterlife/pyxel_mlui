@@ -29,7 +29,7 @@
     </battle>
 
     <info>バトル画面用</info>
-    <round_win abs_x="112" abs_y="8" w="128" h="50" id="menu">
+    <round_win abs_x="128" abs_y="8" w="160" h="50" id="menu">
         <title x="36" y="0" w="52" h="12" align="center">コマンド</title>
         <menu_grid x="8" y="14" rows="2" item_w="58" item_h="16">
             <menu_item action="atack">たたかう</menu_item>

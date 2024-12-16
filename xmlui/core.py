@@ -278,7 +278,7 @@ class XUElem:
         for child in self._rec_iter():
             if child.id == id:
                 return child
-        raise Exception(f"{self.strtree()}\nID '{id}' not found in '{self.tag}' and children")
+        raise Exception(f"\n{self.strtree()}\nID '{id}' not found in '{self.tag}' and children")
 
     def find_by_tagall(self, tag:str) -> list['XUElem']:
         return [child for child in self._rec_iter() if child.tag == tag]
@@ -287,7 +287,7 @@ class XUElem:
         elements:list[XUElem] = self.find_by_tagall(tag)
         if elements:
             return elements[0]
-        raise Exception(f"{self.strtree()}\nTag '{tag}' not found in '{self.tag}' and children")
+        raise Exception(f"\n{self.strtree()}\nTag '{tag}' not found in '{self.tag}' and children")
 
     # ツリーを遡って親を探す
     def find_parent_by_id(self, id:str) -> 'XUElem':
@@ -296,7 +296,7 @@ class XUElem:
             if parent.id == id:
                 return parent
             parent = parent.parent
-        raise Exception(f"{self.strtree()}\nParent '{id}' not found in '{self.tag}' parents")
+        raise Exception(f"\n{self.strtree()}\nParent '{id}' not found in '{self.tag}' parents")
 
     # openした親
     def find_owner(self) -> 'XUElem':
