@@ -123,7 +123,7 @@ def common_msg_text(msg_text:text.MsgDQ, event:XUEvent, cursor_visible:bool):
         x = area.x
         # 会話インデント
         if info.need_indent:
-            x += system_font.text_width(text.MsgDQ.TALK_MARK)
+            x += system_font.text_width(text.MsgDQ.TALK_START)
         y = shift_y + area.y + i*line_height
         pyxel.text(x, y, info.line_text, 7, system_font.font)
 

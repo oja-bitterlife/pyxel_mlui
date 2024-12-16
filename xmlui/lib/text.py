@@ -56,8 +56,11 @@ class Msg(XUPageText):
 
 # おまけ
 class MsgDQ(Msg):
-    TALK_MARK = "＊「"
-    IS_TALK_ATTR = "_xmlui_talk_mark"
+    TALK_START = "＊「"
+    MARK_ATTR = "_xmlui_talk_mark"
+
+    MARK_TALK = "talk"
+    MARK_ENEMY = "enemy"
 
     # インデント用
     # -----------------------------------------------------
@@ -65,16 +68,15 @@ class MsgDQ(Msg):
         def __init__(self, page_item:XUElem):
             super().__init__(page_item)
 
-        @property
-        def is_talk(self) -> bool:
-            return self.attr_bool(MsgDQ.IS_TALK_ATTR)
+        def is_mark(self, mark:str) -> bool:
+            return self.attr_str(MsgDQ.MARK_ATTR) == mark
 
-        def set_talk(self, is_talk:bool) -> Self:
-            self.set_attr(MsgDQ.IS_TALK_ATTR, is_talk)
+        def set_mark(self, mark:str) -> Self:
+            self.set_attr(MsgDQ.MARK_ATTR, mark)
             return self
 
         def get_lines_indent(self) -> list[bool]:
-            return [self.is_talk and not line.startswith(MsgDQ.TALK_MARK) for line in self.all_text.splitlines()]
+            return [self.is_mark(MsgDQ.MARK_TALK) and not line.startswith(MsgDQ.TALK_START) for line in self.all_text.splitlines()]
 
     # スクロール用
     # -----------------------------------------------------
@@ -116,8 +118,8 @@ class MsgDQ(Msg):
     def append_talk(self, text:str, all_params:dict[str,Any]={}):
         for page in self.append_msg(text, all_params):
             # 追加されたページにTALKをマーキング
-            page_item = self.MsgDQItem(page).set_talk(True)
-            page._element.text = self.TALK_MARK + page_item.all_text
+            page_item = self.MsgDQItem(page).set_mark(self.MARK_TALK)
+            page._element.text = self.TALK_START + page_item.all_text
 
 
 # デコレータを用意
