@@ -42,10 +42,11 @@ class Field:
                 self.xmlui.open_by_event(ui_theme.input_def.BTN_A, "menu")
 
         else:
+            menu = self.xmlui.find_by_id("menu")
             # 会話イベントチェック
-            self.npc.check_talk(self.xmlui, self.player)
-            self.bg.check_door(self.xmlui, self.player)
-            self.bg.check_stairs(self.xmlui, self.player)
+            self.npc.check_talk(menu, self.player)
+            self.bg.check_door(menu, self.player)
+            self.bg.check_stairs(menu, self.player)
 
         # バトル開始
         if "start_battle" in self.xmlui.event.trg:

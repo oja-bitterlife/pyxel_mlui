@@ -1,6 +1,6 @@
 import pyxel
 
-from xmlui.core import XUWinBase
+from xmlui.core import XUWinBase,XUElem
 from xmlui.lib import text
 import field
 
@@ -54,8 +54,8 @@ class BG:
                         pyxel.rect(x*16+scroll_x, y*16+scroll_y, 15, 15, 1)
 
     # とびらチェック
-    def check_door(self, xmlui, player):
-        if "open_door" in xmlui.event.trg:
+    def check_door(self, menu:XUElem, player):
+        if "open_door" in menu.xmlui.event.trg:
             block_x, block_y = player.x//16, player.y//16
             door_x, door_y = -1, -1
             if self.blocks[block_y-1][block_x] == self.DOOR:
@@ -69,20 +69,18 @@ class BG:
             
             if door_x != -1:
                 self.blocks[door_y][door_x] = 2
-                XUWinBase(xmlui.find_by_id("menu")).start_close()
+                XUWinBase(menu).start_close()
             else:
-                msg_win = xmlui.find_by_id("menu").open("message")
-                msg_text = msg_win.find_by_tag("msg_text")
-                text.MsgDQ.append_msg(msg_text, "とびらがない")  # systemメッセージ
+                msg_text = text.MsgDQ(menu.open("message").find_by_id("msg_text"))
+                msg_text.append_msg("とびらがない")  # systemメッセージ
 
     # 階段チェック
-    def check_stairs(self, xmlui, player):
-        if "down_stairs" in xmlui.event.trg:
+    def check_stairs(self, menu:XUElem, player):
+        if "down_stairs" in menu.xmlui.event.trg:
             block_x, block_y = player.x//16, player.y//16
             if self.blocks[block_y][block_x] == self.STAIRS:
-                XUWinBase(xmlui.find_by_id("menu")).start_close()
-                xmlui.on("start_battle")
+                XUWinBase(menu).start_close()
+                menu.xmlui.on("start_battle")
             else:
-                msg_win = xmlui.find_by_id("menu").open("message")
-                msg_text = msg_win.find_by_tag("msg_text")
-                text.MsgDQ.append_msg(msg_text, "かいだんがない")  # systemメッセージ
+                msg_text = text.MsgDQ(menu.open("message").find_by_id("msg_text"))
+                msg_text.append_msg("かいだんがない")  # systemメッセージ

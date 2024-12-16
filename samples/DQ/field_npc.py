@@ -1,7 +1,7 @@
 import dataclasses
 import pyxel
 
-from xmlui.core import XMLUI
+from xmlui.core import XUElem
 from xmlui.lib import text
 import field
 
@@ -33,22 +33,21 @@ class NPC:
         return ""
 
     # 会話イベントチェック
-    def check_talk(self, xmlui:XMLUI, player):
+    def check_talk(self, menu:XUElem, player):
         talk = None
-        if "start_talk_east" in xmlui.event.trg:
+        if "start_talk_east" in menu.xmlui.event.trg:
             talk = self._check(player.block_x+1, player.block_y)
-        if "start_talk_west" in xmlui.event.trg:
+        if "start_talk_west" in menu.xmlui.event.trg:
             talk = self._check(player.block_x-1, player.block_y)
-        if "start_talk_south" in xmlui.event.trg:
+        if "start_talk_south" in menu.xmlui.event.trg:
             talk = self._check(player.block_x, player.block_y+1)
-        if "start_talk_north" in xmlui.event.trg:
+        if "start_talk_north" in menu.xmlui.event.trg:
             talk = self._check(player.block_x, player.block_y-1)
 
         # 会話が発生した
         if talk is not None:
             # メッセージウインドウを開く
-            msg_win = xmlui.find_by_id("menu").open("message")
-            msg_text = text.MsgDQ(msg_win.find_by_id("msg_text"))
+            msg_text = text.MsgDQ(menu.open("message").find_by_id("msg_text"))
             if talk:
                 msg_text.append_talk(talk, field.param_db)  # talkでテキスト開始
             else:
