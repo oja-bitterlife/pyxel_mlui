@@ -876,17 +876,17 @@ _hankaku_zenkaku_dict = str.maketrans(_from_hanakaku, _to_zenkaku)
 
 # テキストパラメータ変換
 class XUTextUtil:
-    # 文字列中の半角を全角に変換する
-    @classmethod
-    def convert_zenkaku(cls, hankaku:str) -> str:
-        return unicodedata.normalize("NFKC", hankaku).translate(_hankaku_zenkaku_dict)
+    SEPARATE_REGEXP = r"\\n"  # 改行に変換する正規表現(\nへ)
+    PAGE_REGEXP = r"\\p"  # 改ページに変換する正規表現(\0へ)
 
-    # 置き換えパラメータのキーを抜き出し
+    # 置き換えパラメータの抜き出し
+    # -----------------------------------------------------
+    # キーを抜き出し
     @classmethod
     def find_params(cls, text) -> set[str]:
         return set(re.findall(r"{(\S+?)}", text))
 
-    # 置き換えパラメータを辞書で抜き出し
+    # 辞書で抜き出し
     @classmethod
     def find_params_dict(cls, text:str, all_params:dict[str,Any]) -> dict[str,Any]:
         out:dict[str,Any] = {}
@@ -894,12 +894,23 @@ class XUTextUtil:
             out[param] = all_params[param]
         return out
 
-    # パラメータを置き換える
+    # パラメータを置き換える(\n\0置換も行う)
+    # -----------------------------------------------------
     @classmethod
-    def format_dict(cls, text:str, all_params:dict[str,Any]) -> str:
-        return text.format(**cls.find_params_dict(text, all_params))
+    def format_dict(cls, text:str, all_params:dict[str,Any]={}) -> str:
+        tmp_text = re.sub(cls.PAGE_REGEXP, "\0", text)  # \pという文字列をNullに
+        tmp_text = re.sub(cls.SEPARATE_REGEXP, "\n", tmp_text)  # \nという文字列を改行コードに
+        return text.format(**cls.find_params_dict(tmp_text, all_params)) if all_params else tmp_text
 
-    # 改行・改ページを抜いた文字数
+    # 文字列中の半角を全角に変換する
+    @classmethod
+    def format_zenkaku(cls, text:str, all_params:dict[str,Any]={}) -> str:
+        text = cls.format_dict(text)  # \n\pを先に変換しておく
+        return unicodedata.normalize("NFKC", text).translate(_hankaku_zenkaku_dict)
+
+    # その他
+    # -----------------------------------------------------
+    # 改行・改ページを抜いた文字数カウント
     @classmethod
     def length(cls, text:str) -> int:
         return len(re.sub("\n|\0", "", text))
@@ -952,7 +963,7 @@ class XUPageItem(XUSelectItem):
     # draw_countまでのテキストを全角で受け取る
     @property
     def zenkaku(self) -> str:
-        return XUTextUtil.convert_zenkaku(self.text)
+        return XUTextUtil.format_zenkaku(self.text)
 
     # 全体テキストを受け取る
     @property
@@ -1000,38 +1011,31 @@ class XUPageInfo(XUSelectBase):
 
     # ツリー操作
     # -----------------------------------------------------
-    def add_page(self, text:str):
-        page_item = XUPageItem(XUElem(self.xmlui, Element(self.ITEM_TAG)))
-        self._util_info.add_child(page_item.set_text(text))
+    def add_pages(self, text:str, page_line_num:int, wrap:int):
+        for page_text in XUPageText.split_page_texts(text, page_line_num, wrap):
+            page_item = XUPageItem(XUElem(self.xmlui, Element(self.ITEM_TAG)))
+            self._util_info.add_child(page_item.set_text(page_text))
 
     def clear_pages(self):
         for child in self._util_info.find_by_tagall(self.ITEM_TAG):
             child.remove()
 
 class XUPageText(XUPageInfo):
-    SEPARATE_REGEXP = r"\\n"  # 改行に変換する正規表現(\nへ)
-    PAGE_REGEXP = r"\\p"  # 改ページに変換する正規表現(\0へ)
-
     def __init__(self, elem:XUElem, page_line_num:int=1024, wrap:int=4096):
         super().__init__(elem)
 
         # ページ未登録なら登録しておく
-        if len(self.pages) == 0 and XUTextUtil.length(self.text) > 0:
-            for page in self.split_page_texts(self.text, page_line_num, wrap):
-                self.add_page(page)
+        if not self.pages and not self.text.strip():
+            self.add_pages(self.text, page_line_num, wrap)
 
     # ページごとに行・ワードラップ分割
     @classmethod
     def split_page_lines(cls, text:str, page_line_num:int, wrap:int) -> list[list[str]]:
         wrap = max(wrap, 1)   # 0だと無限になってしまうので最低1を入れておく
 
-        # 改行,wrap区切りにする(\n)
-        tmp_text = re.sub(cls.PAGE_REGEXP, "\0", text)  # \pという文字列をNullに
-        tmp_text = re.sub(cls.SEPARATE_REGEXP, "\n", tmp_text)  # \nという文字列を改行コードに
-
         # 行数でページ分解
         pages:list[list[str]] = []
-        for page_text in tmp_text.split("\0"):
+        for page_text in text.split("\0"):
             lines:list[str] = []
             for line in sum([[line[i:i+wrap] for i in  range(0, len(line), wrap)] for line in page_text.splitlines()], []):
                 lines.append(line)

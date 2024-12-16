@@ -55,13 +55,10 @@ class Msg(XUPageText):
 
     @classmethod
     def append_msg(cls, elem:XUElem, text:str, all_params:dict[str,Any]={}):
+        # 全角にして登録
         page_line_num = elem.attr_int(cls.PAGE_LINE_NUM_ATTR, 1024)
         wrap = elem.attr_int(cls.WRAP_ATTR, 4096)
-
-        # 全角にして登録
-        page_info = XUPageInfo(elem)
-        for page in cls.split_page_texts(XUTextUtil.format_dict(text, all_params), page_line_num, wrap):
-            page_info.add_page(XUTextUtil.convert_zenkaku(page))
+        XUPageInfo(elem).add_pages(XUTextUtil.format_zenkaku(text, all_params), page_line_num, wrap)
 
     @classmethod
     def start_msg(cls, elem:XUElem, text:str, all_params:dict[str,Any]={}):
@@ -73,6 +70,24 @@ class MsgDQ(Msg):
     TALK_MARK = "＊「"
     IS_TALK_ATTR = "_xmlui_talk_mark"
 
+    # インデント用
+    # -----------------------------------------------------
+    class MsgDQItem(XUPageItem):
+        def __init__(self, page_item:XUElem):
+            super().__init__(page_item)
+
+        @property
+        def is_talk(self) -> bool:
+            return self.attr_bool(MsgDQ.IS_TALK_ATTR)
+
+        def set_talk(self, is_talk:bool) -> Self:
+            self.set_attr(MsgDQ.IS_TALK_ATTR, is_talk)
+            return self
+
+        @property
+        def lines_indent(self) -> list[bool]:
+            return [self.is_talk and not line.startswith(MsgDQ.TALK_MARK) for line in self.all_text.splitlines()]
+
     # スクロール用
     # -----------------------------------------------------
     class DQScrollInfo:
@@ -82,19 +97,22 @@ class MsgDQ(Msg):
 
     # 必要な行だけ返す(アニメーション対応)
     def get_scroll_lines(self, scroll_size:int) -> list[DQScrollInfo]:
-        is_talk = self.is_talk  # 何度も使うのでキャッシュ
-
         # スクロール枠の中に収まる前のページを取得する
         all_lines = []
+        need_indent = []
         for i in range(self.page_no-1, -1, -1):  # 現在より前へ戻りながら追加
-            all_lines = self.pages[i].all_text.splitlines() + all_lines
+            page_item = self.MsgDQItem(self.pages[i])
+
+            all_lines = page_item.all_text.splitlines() + all_lines
+            need_indent = page_item.lines_indent + need_indent
+
             if len(all_lines) >= scroll_size:
                 break
-        need_indent = [is_talk and not line.startswith(self.TALK_MARK) for line in all_lines]
 
         # 現在のページの情報を追加
-        all_lines += self.current_page.text.splitlines()
-        need_indent += [is_talk and not line.startswith(self.TALK_MARK) for line in self.current_page.all_text.splitlines()]
+        page_item = self.MsgDQItem(self.current_page)
+        all_lines = page_item.all_text.splitlines() + all_lines
+        need_indent = page_item.lines_indent + need_indent
 
         # オーバーした行を削除
         over_line = max(0, len(all_lines) - scroll_size)
@@ -104,23 +122,18 @@ class MsgDQ(Msg):
         # scroll枠に収まるlineリストを返す
         return [self.DQScrollInfo(line, need_indent[i]) for i,line in enumerate(all_lines)]
 
-    @property
-    def is_talk(self):
-        return self.attr_bool(self.IS_TALK_ATTR, False)
-
+    # ページ登録
+    # -----------------------------------------------------
+    # 会話マークを追加して格納
     @classmethod
-    def start_talk(cls, elem:XUElem, text:str, all_params:dict[str,Any]={}):
-        elem.set_attr(cls.IS_TALK_ATTR, True)
-        cls.start_msg(elem, text, all_params)
+    def append_talk(cls, elem:XUElem, text:str, all_params:dict[str,Any]={}):
+        page_info = XUPageInfo(elem)
+        initial_page_num = len(page_info.pages)  # 追加前のページ数を覚えておく
+        cls.append_msg(elem, text, all_params)
 
-        # 会話マーク追加
-        for page in XUPageText(elem).pages:
-            page._element.text = cls.TALK_MARK + page.all_text
-
-    @classmethod
-    def start_system(cls, elem:XUElem, text:str, all_params:dict[str,Any]={}):
-        elem.set_attr(cls.IS_TALK_ATTR, False)
-        cls.start_msg(elem, text, all_params)
+        for page in page_info.pages[initial_page_num:]:  # 追加されたページにのみ処理
+            page_item = cls.MsgDQItem(page).set_talk(True)
+            page._element.text = cls.TALK_MARK + page_item.all_text
 
 # デコレータを用意
 # *****************************************************************************
