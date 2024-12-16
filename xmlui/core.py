@@ -900,7 +900,7 @@ class XUTextUtil:
     def format_dict(cls, text:str, all_params:dict[str,Any]={}) -> str:
         tmp_text = re.sub(cls.PAGE_REGEXP, "\0", text)  # \pという文字列をNullに
         tmp_text = re.sub(cls.SEPARATE_REGEXP, "\n", tmp_text)  # \nという文字列を改行コードに
-        return text.format(**cls.find_params_dict(tmp_text, all_params)) if all_params else tmp_text
+        return tmp_text.format(**cls.find_params_dict(tmp_text, all_params)) if all_params else tmp_text
 
     # 文字列中の半角を全角に変換する
     @classmethod

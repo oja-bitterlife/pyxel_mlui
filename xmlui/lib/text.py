@@ -53,9 +53,9 @@ class Msg(XUPageText):
     def clear_msg(cls, elem:XUElem):
         XUPageInfo(elem).clear_pages()
 
+    # 全角にして登録
     @classmethod
     def append_msg(cls, elem:XUElem, text:str, all_params:dict[str,Any]={}):
-        # 全角にして登録
         page_line_num = elem.attr_int(cls.PAGE_LINE_NUM_ATTR, 1024)
         wrap = elem.attr_int(cls.WRAP_ATTR, 4096)
         XUPageInfo(elem).add_pages(XUTextUtil.format_zenkaku(text, all_params), page_line_num, wrap)
