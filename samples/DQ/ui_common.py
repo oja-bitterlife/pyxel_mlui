@@ -134,13 +134,6 @@ def common_msg_text(msg_text:text.MsgDQ, event:XUEvent):
         if cursor_count//7 % 2 == 0:
             draw_msg_cursor(msg_text, 0, scroll_size*line_height + shift_y-3)
 
-    # 入力アクション
-    # ---------------------------------------------------------
-    if input_def.BTN_A in event.trg or input_def.BTN_B in event.now:
-        if msg_text.is_next_wait:
-            msg_text.set_page_no(msg_text.page_no+1)  # 次ページへ
-            return
-
     # 表示途中のアクション
     if not msg_text.is_next_wait:
         if input_def.BTN_A in event.now or input_def.BTN_B in event.now:

@@ -231,11 +231,21 @@ def ui_init(template):
         # メッセージ共通処理
         common_msg_text(msg_text, event)
 
-        input_def = ui_theme.input_def  # 入力イベント情報
-        if input_def.BTN_A in event.trg or input_def.BTN_B in event.now:
-            if msg_text.is_all_finish:
-                XUWinBase.find_parent_win(msg_text).start_close()
-
         # 自分が閉じたらメニューごと閉じる
         if XUWinBase.find_parent_win(msg_text).win_state == XUWinBase.STATE_CLOSED:
             XUWinBase(msg_text.xmlui.find_by_id("menu")).start_close()
+
+        # 入力アクション
+        # ---------------------------------------------------------
+        input_def = ui_theme.input_def  # 入力イベント情報
+
+        if input_def.BTN_A in event.trg or input_def.BTN_B in event.now:
+            if msg_text.is_all_finish:
+                XUWinBase.find_parent_win(msg_text).start_close()  # 閉じる
+                return
+
+        if input_def.BTN_A in event.trg or input_def.BTN_B in event.now:
+            if msg_text.is_next_wait:
+                msg_text.set_page_no(msg_text.page_no+1)  # 次ページへ
+                return
+

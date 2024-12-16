@@ -695,16 +695,9 @@ class XUSelectInfo(_XUUtilBase):
     # 選択中のitemの番号(Treeの並び順)
     @property
     def selected_no(self) -> int:
-        # 追加アトリビュート優先で検索
         for i,item in enumerate(self.item_iter):
             if item.selected:
                 return i
-
-        # 無ければタグのselectedを検索
-        for i,item in enumerate(self.item_iter):
-            if item._element.get("selected", False):
-                return i
-
         return 0  # デフォルト
 
     # 選択中のitem

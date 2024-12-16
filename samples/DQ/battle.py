@@ -20,20 +20,20 @@ class Battle:
         self.battle = self.xmlui.open("battle")
         msg_text = text.MsgDQ(self.battle.find_by_tag("msg_text"))
         msg_text.append_msg("てきが　あらわれた")
-        msg_text.append_msg("コマンド？")
 
     def __del__(self):
         # 読みこんだUIの削除
         self.template.remove()
 
     def update(self):
-        # if not self.xmlui.exists_id("menu"):
-        #     msg_text = text.MsgDQ(self.battle.find_by_tag("msg_text"))
-        #     msg_text.append_msg("コマンド？")
+        if not self.battle.exists_id("menu"):
+            msg_text = text.MsgDQ(self.battle.find_by_tag("msg_text"))
+            if msg_text.current_page.text == "コマンド？":
+                self.battle.open("menu")
 
-        #     # コマンド待ち開始
-        #     self.battle.open("menu")
-        pass
+            elif msg_text.current_page.all_text != "コマンド？":
+                 print(msg_text.selected_no)
+                 msg_text.append_msg("コマンド？")
             
     def draw(self):
         # UIの描画(fieldとdefaultグループ)
@@ -100,6 +100,9 @@ def ui_init(template):
     def msg_text(msg_text:text.MsgDQ, event:XUEvent):
         # メッセージ共通処理
         common_msg_text(msg_text, event)
+
+        if msg_text.is_next_wait:
+            msg_text.next()
 
         if msg_text.is_all_finish:
             return "finish_msg"
