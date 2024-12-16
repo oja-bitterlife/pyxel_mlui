@@ -59,7 +59,6 @@ class Msg(XUPageText):
         page_line_num = elem.attr_int(cls.PAGE_LINE_NUM_ATTR, 1024)
         wrap = elem.attr_int(cls.WRAP_ATTR, 4096)
         XUPageInfo(elem).add_pages(XUTextUtil.format_zenkaku(text, all_params), page_line_num, wrap)
-        print(text, XUTextUtil.format_zenkaku(text, all_params))
 
 # おまけ
 class MsgDQ(Msg):
@@ -80,8 +79,7 @@ class MsgDQ(Msg):
             self.set_attr(MsgDQ.IS_TALK_ATTR, is_talk)
             return self
 
-        @property
-        def lines_indent(self) -> list[bool]:
+        def get_lines_indent(self) -> list[bool]:
             return [self.is_talk and not line.startswith(MsgDQ.TALK_MARK) for line in self.all_text.splitlines()]
 
     # スクロール用
@@ -100,15 +98,15 @@ class MsgDQ(Msg):
             page_item = self.MsgDQItem(self.pages[i])
 
             all_lines = page_item.all_text.splitlines() + all_lines
-            need_indent = page_item.lines_indent + need_indent
+            need_indent = page_item.get_lines_indent() + need_indent
 
             if len(all_lines) >= scroll_size:
                 break
 
         # 現在のページの情報を追加
         page_item = self.MsgDQItem(self.current_page)
-        all_lines = page_item.all_text.splitlines() + all_lines
-        need_indent = page_item.lines_indent + need_indent
+        all_lines += page_item.text.splitlines()
+        need_indent += page_item.get_lines_indent()
 
         # オーバーした行を削除
         over_line = max(0, len(all_lines) - scroll_size)
