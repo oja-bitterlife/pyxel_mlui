@@ -122,8 +122,10 @@ def common_msg_text(msg_text:text.MsgDQ, event:XUEvent, cursor_visible:bool):
     for i,info in enumerate(scroll_info):
         x = area.x
         # 会話インデント
-        if info.need_indent:
+        if info.mark_type == text.MsgDQ.MARK_TALK:
             x += system_font.text_width(text.MsgDQ.TALK_START)
+        elif info.mark_type == text.MsgDQ.MARK_ENEMY:
+            x += system_font.size
         y = shift_y + area.y + i*line_height
         pyxel.text(x, y, info.line_text, 7, system_font.font)
 

@@ -62,8 +62,8 @@ class Battle:
                 battle_db["damage"] = XUTextUtil.format_zenkaku(random.randint(1, 10))
                 marge_db = param_db | battle_db
 
-                pages = msg_dq.append_msg("{enemy}の　こうげき！", marge_db)
-                pages = msg_dq.append_msg("{name}は　{damage}ポイントの\nだめーじを　うけた", marge_db)
+                msg_dq.append_enemy("{enemy}の　こうげき！", marge_db)
+                msg_dq.append_enemy("{name}は　{damage}ポイントの\nだめーじを　うけた", marge_db)
                 self.state = Battle.ST_MSG_DRAWING
 
 

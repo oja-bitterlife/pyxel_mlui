@@ -59,6 +59,7 @@ class MsgDQ(Msg):
     TALK_START = "＊「"
     MARK_ATTR = "_xmlui_talk_mark"
 
+    MARK_NONE = ""
     MARK_TALK = "talk"
     MARK_ENEMY = "enemy"
 
@@ -80,30 +81,30 @@ class MsgDQ(Msg):
             for line in self.all_text.splitlines():
                 match self.attr_str(MsgDQ.MARK_ATTR):
                     case MsgDQ.MARK_TALK:
-                        out.append(not line.startswith(MsgDQ.TALK_START))
+                        out.append(MsgDQ.MARK_TALK if not line.startswith(MsgDQ.TALK_START) else MsgDQ.MARK_NONE)
                     case MsgDQ.MARK_ENEMY:
-                        out.append(True)
+                        out.append(MsgDQ.MARK_ENEMY)
                     case _:
-                        out.append(False)
+                        out.append(MsgDQ.MARK_NONE)
             return out
 
     # スクロール用
     # -----------------------------------------------------
     class DQScrollInfo:
-        def __init__(self, line_text:str, need_indent:bool):
+        def __init__(self, line_text:str, mark_type:bool):
             self.line_text = line_text
-            self.need_indent = need_indent
+            self.mark_type = mark_type
 
     # 必要な行だけ返す(アニメーション対応)
     def get_scroll_lines(self, scroll_size:int) -> list[DQScrollInfo]:
         # スクロール枠の中に収まる前のページを取得する
         all_lines = []
-        need_indent = []
+        mark_type = []
         for i in range(self.page_no-1, -1, -1):  # 現在より前へ戻りながら追加
             page_item = self.MsgDQItem(self.pages[i])
 
             all_lines = page_item.all_text.splitlines() + all_lines
-            need_indent = page_item.get_lines_indent() + need_indent
+            mark_type = page_item.get_lines_indent() + mark_type
 
             if len(all_lines) >= scroll_size:
                 break
@@ -111,15 +112,15 @@ class MsgDQ(Msg):
         # 現在のページの情報を追加
         page_item = self.MsgDQItem(self.current_page)
         all_lines += page_item.text.splitlines()
-        need_indent += page_item.get_lines_indent()
+        mark_type += page_item.get_lines_indent()
 
         # オーバーした行を削除
         over_line = max(0, len(all_lines) - scroll_size)
         all_lines = all_lines[over_line:]
-        need_indent = need_indent[over_line:]
+        mark_type = mark_type[over_line:]
 
         # scroll枠に収まるlineリストを返す
-        return [self.DQScrollInfo(line, need_indent[i]) for i,line in enumerate(all_lines)]
+        return [self.DQScrollInfo(line, mark_type[i]) for i,line in enumerate(all_lines)]
 
     # ページ登録
     # -----------------------------------------------------
@@ -135,7 +136,7 @@ class MsgDQ(Msg):
         for page in self.append_msg(text, all_params):
             # 追加されたページにTALKをマーキング
             page_item = self.MsgDQItem(page).set_mark(self.MARK_ENEMY)
-            page._element.text = self.TALK_START + page_item.all_text
+            page._element.text = page_item.all_text
 
 
 # デコレータを用意
