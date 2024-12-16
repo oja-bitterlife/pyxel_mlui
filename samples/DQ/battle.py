@@ -48,7 +48,9 @@ class Battle:
             case Battle.ST_CMD_WAIT:
                 menu = text.MsgDQ(self.battle.find_by_id("menu"))
                 if "attack" in self.xmlui.event.trg:
-                    msg_text.append_msg("{name}の　こうげき！", battle_db)
+                    msg_text.append_msg("{name}の　こうげき！", param_db)
+                    XUWinBase(menu).start_close()
+                    self.state = Battle.ST_MSG_DRAWING
 
 
     def draw(self):
@@ -100,22 +102,16 @@ def ui_init(template):
 
         # 選択アイテムの表示
         if input_def.BTN_A in event.trg:
-            match menu_grid.action:
-                case "atack":
-                    return menu_grid.action
-                case _:
-                    menu_grid.xmlui.popup("under_construct")
-
-        # # アイテムの無効化(アイテムカーソル用)
-        # is_message_oepn = menu_grid.xmlui.exists_id("message")
-        # for item in menu_grid._items:
-        #     item.enable = event.is_active and not is_message_oepn
+            return menu_grid.action
 
 
     @battle_text.msg_dq("msg_text")
     def msg_text(msg_text:text.MsgDQ, event:XUEvent):
         # メッセージ共通処理
-        common_msg_text(msg_text, event)
+        common_msg_text(msg_text, event, False)
+
+        # メッセージウインドウの無効化(カーソル用)
+        # msg_text.enable = False
 
         # メッセージウインドウがアクティブの時は自動テキスト送り
         if event.is_active and msg_text.is_next_wait:

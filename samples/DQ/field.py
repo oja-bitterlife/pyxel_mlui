@@ -230,7 +230,7 @@ def ui_init(template):
     @field_text.msg_dq("msg_text")
     def msg_text(msg_text:text.MsgDQ, event:XUEvent):
         # メッセージ共通処理
-        common_msg_text(msg_text, event)
+        common_msg_text(msg_text, event, True)
 
         # 自分が閉じたらメニューごと閉じる
         if XUWinBase.find_parent_win(msg_text).win_state == XUWinBase.STATE_CLOSED:

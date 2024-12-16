@@ -95,7 +95,7 @@ def round_win(round_win:win.RoundFrame, event:XUEvent):
 
 # メッセージウインドウ
 # ---------------------------------------------------------
-def common_msg_text(msg_text:text.MsgDQ, event:XUEvent):
+def common_msg_text(msg_text:text.MsgDQ, event:XUEvent, cursor_visible:bool):
     area = msg_text.area  # areaは重いので必ずキャッシュ
 
     # テーマ情報取得
@@ -129,7 +129,7 @@ def common_msg_text(msg_text:text.MsgDQ, event:XUEvent):
 
     # カーソル表示
     # ---------------------------------------------------------
-    if msg_text.is_next_wait:
+    if cursor_visible and msg_text.is_next_wait:
         cursor_count = msg_text.current_page.draw_count - msg_text.current_page.length
         if cursor_count//7 % 2 == 0:
             draw_msg_cursor(msg_text, 0, scroll_size*line_height + shift_y-3)
