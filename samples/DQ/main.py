@@ -6,16 +6,16 @@ import pyxel
 # *********************************************************
 pyxel.init(256, 256)
 
-from title import Title
-from field import Field
-from battle import Battle
+from samples.DQ.title.title import Title
+from samples.DQ.field.field import Field
+from samples.DQ.battle.battle import Battle
 
 # 最初はタイトル
 from ui_common import xmlui
 from ui_common import ui_theme
 
-#scene = Title(xmlui)
-scene = Field(xmlui)
+scene = Title(xmlui)
+#scene = Field(xmlui)
 #scene = Battle(xmlui)
 
 # Main
@@ -40,7 +40,6 @@ def update(): # フレームの更新処理
         xmlui.reload_templates()
 
 def draw(): # 描画処理
-    global scene
     # ゲームの描画コード
     pyxel.cls(0)
 
@@ -59,6 +58,7 @@ def draw(): # 描画処理
         xmlui.on(ui_theme.input_def.BTN_B)
 
     # UI描画
+    global scene
     if scene:
         scene.draw()
 

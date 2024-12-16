@@ -1,46 +1,6 @@
 from xmlui.core import *
 from xmlui.lib.text import FontBase
 
-# キー入力
-# #############################################################################
-# 定義のみ
-class InputDef:
-    LEFT:str
-    RIGHT:str
-    UP:str
-    DOWN:str
-    BTN_A:str
-    BTN_B:str
-    BTN_X:str
-    BTN_Y:str
-
-    def __init__(self, left:str, right:str, up:str, down:str, btn_a:str, btn_b:str, btn_x:str, btn_y:str):
-        self.LEFT = left
-        self.RIGHT = right
-        self.UP = up
-        self.DOWN = down
-        self.BTN_A = btn_a
-        self.BTN_B = btn_b
-        self.BTN_X = btn_x
-        self.BTN_Y = btn_y
-    
-    @property
-    def CURSOR(self):
-        return self.LEFT, self.RIGHT, self.UP, self.DOWN
-
-    @property
-    def LEFT_RIGHT(self):
-        return self.LEFT, self.RIGHT
-
-    @property
-    def UP_DOWN(self):
-        return self.UP, self.DOWN
-
-    @property
-    def ANY(self):
-        return self.LEFT, self.RIGHT, self.UP, self.DOWN, self.BTN_A, self.BTN_B, self.BTN_X, self.BTN_Y
-
-
 # 入力系
 # #############################################################################
 # 数値設定ダイアル

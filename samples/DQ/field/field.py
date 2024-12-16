@@ -5,10 +5,10 @@ from xmlui.core import XMLUI,XUEvent,XUWinBase,XUSelectItem,XURect
 from xmlui.lib import select,text
 from xmlui_ext import dq
 from ui_common import ui_theme
-from field_player import Player
-from field_bg import BG
-from field_npc import NPC
-from field_treasure import Treasure
+from field.player import Player
+from field.bg import BG
+from field.npc import NPC
+from field.treasure import Treasure
 from params import param_db
 
 

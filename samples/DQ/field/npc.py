@@ -3,7 +3,7 @@ import pyxel
 
 from xmlui.core import XUElem
 from xmlui_ext import dq
-import field
+import samples.DQ.field.field as field
 
 @dataclasses.dataclass
 class NPC_Data:

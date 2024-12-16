@@ -3,6 +3,7 @@ import pyxel
 # xmlui_pyxelの初期化
 # *****************************************************************************
 from xmlui.lib import text,win
+from xmlui.lib.input import XUInputDef,XUKeyDef
 from xmlui_ext import dq
 from xmlui.pyxel_util.theme import Theme
 from xmlui.pyxel_util.font import PyxelFont
@@ -10,6 +11,9 @@ from xmlui.core import XMLUI,XUElem,XUEvent,XUWinBase,XURect,XUTextUtil
 from params import param_db
 
 ui_theme = Theme(PyxelFont("assets/font/b12.bdf"))
+
+system_font = PyxelFont("assets/font/b12.bdf")
+input_def = XUInputDef()
 
 # ライブラリのインスタンス化
 xmlui = XMLUI(pyxel.width, pyxel.height)

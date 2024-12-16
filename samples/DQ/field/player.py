@@ -1,6 +1,6 @@
 import pyxel
-import field_npc
-import field_bg
+import samples.DQ.field.npc as npc
+import samples.DQ.field.bg as bg
 
 class Player:
     def __init__(self, x, y):
@@ -9,12 +9,12 @@ class Player:
         self.move_x = 0
         self.move_y = 0
 
-    def update(self, blocks:list[list[int]], npcs:list[field_npc.NPC_Data]):
+    def update(self, blocks:list[list[int]], npcs:list[npc.NPC_Data]):
         def _hitcheck(x, y):
             block_x = x // 16
             block_y = y // 16
             match blocks[block_y][block_x]:
-                case field_bg.BG.FLOOR | field_bg.BG.STAIRS:
+                case bg.BG.FLOOR | bg.BG.STAIRS:
                     pass
                 case _:
                     return False

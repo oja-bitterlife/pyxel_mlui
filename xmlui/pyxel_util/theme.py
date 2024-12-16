@@ -52,15 +52,6 @@ class _Debug:
     def __init__(self, section:dict):
         self.debug_level = section.get('debug_level', 0)
 
-class _InputDef(input.InputDef):
+class _InputDef(input.XUInputDef):
     def __init__(self, section:dict):
-        super().__init__(
-            section.get('LEFT', "CUR_L"),
-            section.get('RIGHT', "CUR_R"),
-            section.get('UP', "CUR_U"),
-            section.get('DOWN', "CUR_D"),
-            section.get('A', "BTN_A"),
-            section.get('B', "BTN_B"),
-            section.get('X', "BTN_X"),
-            section.get('Y', "BTN_Y")
-        )
+        super().__init__()

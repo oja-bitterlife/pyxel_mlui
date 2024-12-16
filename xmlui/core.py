@@ -10,6 +10,7 @@ import re
 import math
 import copy
 from typing import Callable,Any,Self  # 型を使うよ
+from enum import StrEnum
 
 
 # 描画領域計算用
@@ -628,6 +629,77 @@ class XMLUI(XUElem):
     def popup(self, id:str, id_alias:str|None=None) -> XUElem:
         return self.over.open(id, id_alias)
 
+# キー入力
+# #############################################################################
+# キー定義(デフォルト)
+class XUKeyDef(StrEnum):
+    LEFT  = "CUR_L"
+    RIGHT = "CUR_R"
+    UP    = "CUR_U"
+    DOWN  = "CUR_D"
+    BTN_A = "BTN_A"
+    BTN_B = "BTN_B"
+    BTN_X = "BTN_X"
+    BTN_Y = "BTN_Y"
+
+    @classmethod
+    def values(cls) -> dict[str, str]:
+        return {v:str(v) for v in cls.__members__.values()}
+
+# 入力統一化
+class XUInputDef:
+    # デフォルト値で設定
+    def __init__(self):
+        self._key_event_dict = XUKeyDef.values()
+
+    # キー定義文字列変更用
+    def set_def(self, key:XUKeyDef, value:str):
+        self._key_event_dict[key] = value
+
+    # アクセス用
+    @property
+    def LEFT(self):
+        return self._key_event_dict[XUKeyDef.LEFT]
+    @property
+    def RIGHT(self):
+        return self._key_event_dict[XUKeyDef.RIGHT]
+    @property
+    def UP(self):
+        return self._key_event_dict[XUKeyDef.UP]
+    @property
+    def DOWN(self):
+        return self._key_event_dict[XUKeyDef.DOWN]
+    @property
+    def BTN_A(self):
+        return self._key_event_dict[XUKeyDef.BTN_A]
+    @property
+    def BTN_B(self):
+        return self._key_event_dict[XUKeyDef.BTN_B]
+    @property
+    def BTN_X(self):
+        return self._key_event_dict[XUKeyDef.BTN_X]
+    @property
+    def BTN_Y(self):
+        return self._key_event_dict[XUKeyDef.BTN_Y]
+
+    # まとめてアクセス
+    @property
+    def CURSOR(self):
+        return self.LEFT, self.RIGHT, self.UP, self.DOWN
+
+    @property
+    def LEFT_RIGHT(self):
+        return self.LEFT, self.RIGHT
+
+    @property
+    def UP_DOWN(self):
+        return self.UP, self.DOWN
+
+    @property
+    def ANY(self):
+        return self.LEFT, self.RIGHT, self.UP, self.DOWN, self.BTN_A, self.BTN_B, self.BTN_X, self.BTN_Y
+
+
 # ユーティリティークラス
 # #############################################################################
 # 基本は必要な情報をツリーでぶら下げる
@@ -752,7 +824,7 @@ class XUSelectGrid(XUSelectBase):
         super().__init__(elem, item_tag, rows, item_w, item_h)
 
     # 入力に応じた挙動一括。変更があった場合はTrue
-    def _select_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str, x_wrap:bool, y_wrap:bool) -> bool:
+    def _select_by_event(self, input:set[str], left_event:XUKeyDef, right_event:XUKeyDef, up_event:XUKeyDef, down_event:XUKeyDef, x_wrap:bool, y_wrap:bool) -> bool:
         old_no = self.selected_no
 
         if left_event in input:
@@ -767,11 +839,11 @@ class XUSelectGrid(XUSelectBase):
         return self.selected_no != old_no
 
     # 選択一括処理Wrap版
-    def select_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
+    def select_by_event(self, input:set[str], left_event:XUKeyDef, right_event:XUKeyDef, up_event:XUKeyDef, down_event:XUKeyDef) -> bool:
         return self._select_by_event(input, left_event, right_event, up_event, down_event, True, True)
 
     # 選択一括処理NoWrap版
-    def select_no_wrap(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
+    def select_no_wrap(self, input:set[str], left_event:XUKeyDef, right_event:XUKeyDef, up_event:XUKeyDef, down_event:XUKeyDef) -> bool:
         return self._select_by_event(input, left_event, right_event, up_event, down_event, False, False)
 
 # リスト選択
