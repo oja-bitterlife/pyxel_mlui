@@ -4,7 +4,7 @@
     <info>バトル画面用</info>
     <battle id="battle">
         <info>バトルメッセージウインドウ</info>
-        <round_win abs_x="48" abs_y="160" w="160" h="88">
+        <round_win abs_x="28" abs_y="160" w="200" h="88">
             <msg_text x="10" y="8" w="184" page_line_num="3" wrap="10" id="msg_text"/>
         </round_win>
 
@@ -29,7 +29,7 @@
     </battle>
 
     <info>バトル画面用</info>
-    <round_win abs_x="128" abs_y="8" w="160" h="50" id="menu">
+    <round_win abs_x="112" abs_y="8" w="128" h="50" id="menu">
         <title x="36" y="0" w="52" h="12" align="center">コマンド</title>
         <menu_grid x="8" y="14" rows="2" item_w="58" item_h="16">
             <menu_item action="atack">たたかう</menu_item>
