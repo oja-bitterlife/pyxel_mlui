@@ -1,7 +1,7 @@
 import pyxel
 
 # タイトル画面
-from xmlui.core import XMLUI,XUTemplate,XUEvent
+from xmlui.core import XMLUI,XUTemplate,XUEvent,XUSelectItem
 from xmlui.lib import select
 from ui_common import ui_theme
 
@@ -33,6 +33,9 @@ def ui_init(template:XUTemplate):
 
     @title_select.list("game_start", "menu_item")
     def game_start(game_start:select.List, event:XUEvent):
+        for item in game_start.items:
+            menu_item(item)
+
         # メニュー選択
         input_def = ui_theme.input_def
         game_start.select_by_event(event.trg, *input_def.UP_DOWN)
@@ -46,6 +49,9 @@ def ui_init(template:XUTemplate):
 
     @title_select.list("game_speed", "menu_item")
     def game_speed(game_speed:select.List, event:XUEvent):
+        for item in game_speed.items:
+            menu_item(item)
+
         # メニュー選択。カーソルが動いたらTrueが返る
         input_def = ui_theme.input_def
         if game_speed.select_by_event(event.trg, *input_def.LEFT_RIGHT):
@@ -60,8 +66,7 @@ def ui_init(template:XUTemplate):
 
     # メニューアイテム
     # ---------------------------------------------------------
-    @title_select.item("menu_item")
-    def start_item(menu_item:select.Item, event:XUEvent):
+    def menu_item(menu_item:XUSelectItem):
         area = menu_item.area
         pyxel.text(area.x+6, area.y, menu_item.text, 7, ui_theme.font.system.font)
     

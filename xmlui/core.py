@@ -1023,6 +1023,8 @@ class XUPageInfo(XUSelectBase):
 class XUPageText(XUPageInfo):
     def __init__(self, elem:XUElem, page_line_num:int=1024, wrap:int=4096):
         super().__init__(elem)
+        self.page_line_num = page_line_num
+        self.wrap = wrap
 
         # ページ未登録なら登録しておく
         if not self.pages and not self.text.strip():

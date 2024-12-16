@@ -214,8 +214,8 @@ def ui_init(template):
 
                 # メッセージウインドウを開く
                 msg_win = tools_list.xmlui.find_by_id("menu").open("message")
-                msg_text = msg_win.find_by_tag("msg_text")
-                text.MsgDQ.append_msg(msg_text, "ＨＰが　１０かいふくした")  # systemメッセージ
+                msg_text = text.MsgDQ(msg_win.find_by_tag("msg_text"))
+                msg_text.append_msg("ＨＰが　１０かいふくした")  # systemメッセージ
             else:
                 tools_list.xmlui.popup("under_construct")
         

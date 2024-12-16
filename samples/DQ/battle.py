@@ -1,7 +1,7 @@
 import pyxel
 
 # タイトル画面
-from xmlui.core import XMLUI,XUEvent,XUWinBase,XUTextUtil,XURect
+from xmlui.core import XMLUI,XUEvent,XUWinBase,XUSelectItem,XUPageInfo
 from xmlui.lib import select,text,input
 from ui_common import ui_theme
 from params import param_db
@@ -17,20 +17,23 @@ class Battle:
         ui_init(self.template)
 
         # バトル開始UI初期化
-        battle = self.xmlui.open("battle")
-        battle.find_by_tag("msg_text").set_text("てきが　あらわれた")
+        self.battle = self.xmlui.open("battle")
+        msg_text = text.MsgDQ(self.battle.find_by_tag("msg_text"))
+        msg_text.append_msg("てきが　あらわれた")
+        msg_text.append_msg("コマンド？")
 
     def __del__(self):
         # 読みこんだUIの削除
         self.template.remove()
 
     def update(self):
-        if not self.xmlui.exists_id("menu"):
-            msg_text = self.xmlui.find_by_tag("msg_text")
-            text.MsgDQ.start_system(msg_text, msg_text.text + "\n" + "コマンド？")
+        # if not self.xmlui.exists_id("menu"):
+        #     msg_text = text.MsgDQ(self.battle.find_by_tag("msg_text"))
+        #     msg_text.append_msg("コマンド？")
 
-            # コマンド待ち開始
-            self.xmlui.open("menu")
+        #     # コマンド待ち開始
+        #     self.battle.open("menu")
+        pass
             
     def draw(self):
         # UIの描画(fieldとdefaultグループ)
@@ -58,8 +61,7 @@ def ui_init(template):
 
     # メニューアイテム
     # ---------------------------------------------------------
-    @battle_select.item("menu_item")
-    def menu_item(menu_item:select.Item, event:XUEvent):
+    def menu_item(menu_item:XUSelectItem):
         # ウインドウのクリップ状態に合わせて表示する
         if menu_item.area.y < get_world_clip(XUWinBase.find_parent_win(menu_item)).bottom():
             pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, 7, ui_theme.font.system.font)
@@ -72,6 +74,10 @@ def ui_init(template):
     # ---------------------------------------------------------
     @battle_select.grid("menu_grid", "menu_item")
     def menu_grid(menu_grid:select.Grid, event:XUEvent):
+        # 各アイテムの描画
+        for item in menu_grid.items:
+            menu_item(item)
+
         # メニュー選択
         input_def = ui_theme.input_def
         menu_grid.select_by_event(event.trg, *input_def.CURSOR)

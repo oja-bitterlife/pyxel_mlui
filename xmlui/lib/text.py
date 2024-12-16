@@ -49,16 +49,12 @@ class Msg(XUPageText):
         wrap = elem.attr_int(self.WRAP_ATTR, 4096)
         super().__init__(elem, page_line_num, wrap)
 
-    @classmethod
-    def clear_msg(cls, elem:XUElem):
-        XUPageInfo(elem).clear_pages()
+    def clear_msg(self):
+        self.clear_pages()
 
     # 全角にして登録
-    @classmethod
-    def append_msg(cls, elem:XUElem, text:str, all_params:dict[str,Any]={}):
-        page_line_num = elem.attr_int(cls.PAGE_LINE_NUM_ATTR, 1024)
-        wrap = elem.attr_int(cls.WRAP_ATTR, 4096)
-        XUPageInfo(elem).add_pages(XUTextUtil.format_zenkaku(text, all_params), page_line_num, wrap)
+    def append_msg(self, text:str, all_params:dict[str,Any]={}):
+        self.add_pages(XUTextUtil.format_zenkaku(text, all_params), self.page_line_num, self.wrap)
 
 # おまけ
 class MsgDQ(Msg):
@@ -119,15 +115,14 @@ class MsgDQ(Msg):
     # ページ登録
     # -----------------------------------------------------
     # 会話マークを追加して格納
-    @classmethod
-    def append_talk(cls, elem:XUElem, text:str, all_params:dict[str,Any]={}):
-        page_info = XUPageInfo(elem)
-        initial_page_num = len(page_info.pages)  # 追加前のページ数を覚えておく
-        cls.append_msg(elem, text, all_params)
+    def append_talk(self, text:str, all_params:dict[str,Any]={}):
+        initial_page_num = len(self.pages)  # 追加前のページ数を覚えておく
+        self.append_msg(text, all_params)
 
-        for page in page_info.pages[initial_page_num:]:  # 追加されたページにのみ処理
-            page_item = cls.MsgDQItem(page).set_talk(True)
-            page._element.text = cls.TALK_MARK + page_item.all_text
+        for page in self.pages[initial_page_num:]:  # 追加されたページにのみ処理
+            page_item = self.MsgDQItem(page).set_talk(True)
+            page._element.text = self.TALK_MARK + page_item.all_text
+
 
 # デコレータを用意
 # *****************************************************************************

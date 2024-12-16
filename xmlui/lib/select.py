@@ -1,10 +1,5 @@
 from xmlui.core import *
 
-# セレクトアイテム
-class Item(XUSelectItem):
-    def __init__(self, elem:XUElem):
-        super().__init__(elem)
-
 # グリッドメニュー付きウインドウ
 class Grid(XUSelectGrid):
     ROWS_ATTR = 'rows'
@@ -31,15 +26,6 @@ class List(XUSelectList):
 # デコレータを用意
 # *****************************************************************************
 class Decorator(XUTemplate.HasRef):
-    def item(self, item_tag:str):
-        def wrapper(bind_func:Callable[[Item,XUEvent], str|None]):
-            # 登録用関数をジェネレート
-            def draw(elem:XUElem, event:XUEvent):
-                return bind_func(Item(elem), event)
-            # 関数登録
-            self.template.set_drawfunc(item_tag, draw)
-        return wrapper
-
     def grid(self, tag_name:str, item_tag:str):
         def wrapper(bind_func:Callable[[Grid,XUEvent], str|None]):
             # 登録用関数をジェネレート
