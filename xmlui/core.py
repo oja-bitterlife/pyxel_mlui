@@ -891,9 +891,9 @@ class XUTextUtil:
 
     # 文字列中の半角を全角に変換する
     @classmethod
-    def format_zenkaku(cls, text:str, all_params:dict[str,Any]={}) -> str:
-        text = cls.format_dict(text, all_params)  # \n\pを先に変換しておく
-        return unicodedata.normalize("NFKC", text).translate(_hankaku_zenkaku_dict)
+    def format_zenkaku(cls, val:str|int|float|bool, all_params:dict[str,Any]={}) -> str:
+        val = cls.format_dict(str(val), all_params)  # \n\pを先に変換しておく
+        return unicodedata.normalize("NFKC", val).translate(_hankaku_zenkaku_dict)
 
     # その他
     # -----------------------------------------------------

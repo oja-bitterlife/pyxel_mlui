@@ -1,13 +1,14 @@
+import random
 import pyxel
 
 # タイトル画面
-from xmlui.core import XMLUI,XUEvent,XUWinBase,XUSelectItem,XUPageInfo
+from xmlui.core import XMLUI,XUEvent,XUWinBase,XUSelectItem,XUTextUtil
 from xmlui.lib import select,text,input
 from ui_common import ui_theme
 from params import param_db
 
 battle_db = {
-    "enemy": "てき",
+    "enemy": "なにか",
 }
 
 class Battle:
@@ -16,6 +17,7 @@ class Battle:
     # バトルの状態遷移
     ST_MSG_DRAWING = "msg_drawing"
     ST_CMD_WAIT = "command_wait"
+    ST_ENEMY_TURN = "enemy_turn"
     state = ST_MSG_DRAWING
 
     def __init__(self, xmlui:XMLUI):
@@ -27,30 +29,36 @@ class Battle:
 
         # バトル開始UI初期化
         self.battle = self.xmlui.open("battle")
-        msg_text = text.MsgDQ(self.battle.find_by_id("msg_text"))
-        msg_text.append_msg("{enemy}が　あらわれた！", battle_db)
+        msg_dq = text.MsgDQ(self.battle.find_by_id("msg_text"))
+        msg_dq.append_msg("{enemy}が　あらわれた！", battle_db)
 
     def __del__(self):
         # 読みこんだUIの削除
         self.template.remove()
 
     def update(self):
-        msg_text = text.MsgDQ(self.battle.find_by_id("msg_text"))
+        msg_dq = text.MsgDQ(self.battle.find_by_id("msg_text"))
         match self.state:
             case Battle.ST_MSG_DRAWING:
                 # メッセージ表示完了
-                if msg_text.is_all_finish:
+                if msg_dq.is_all_finish:
                     # コマンド入力開始
-                    self.state = Battle.ST_CMD_WAIT
-                    msg_text.append_msg("コマンド？")
+                    msg_dq.append_msg("コマンド？")
                     self.battle.open("menu")
+                    self.state = Battle.ST_CMD_WAIT
 
             case Battle.ST_CMD_WAIT:
                 menu = text.MsgDQ(self.battle.find_by_id("menu"))
                 if "attack" in self.xmlui.event.trg:
-                    msg_text.append_msg("{name}の　こうげき！", param_db)
+                    msg_dq.append_msg("{name}の　こうげき！", param_db)
+                    battle_db["damage"] = XUTextUtil.format_zenkaku(random.randint(1, 100))
+                    msg_dq.append_msg("{enemy}に　{damage}ポイントの\nダメージを　あたえた！", battle_db)
                     XUWinBase(menu).start_close()
-                    self.state = Battle.ST_MSG_DRAWING
+                    self.state = Battle.ST_ENEMY_TURN
+
+            case Battle.ST_ENEMY_TURN:
+                # msg_dq.append_with_mark(msg_dq.MARK_ENEMY, "{enemy}の　こうげき！", param_db)
+                self.state = Battle.ST_MSG_DRAWING
 
 
     def draw(self):
