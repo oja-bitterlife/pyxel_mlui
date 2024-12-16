@@ -46,7 +46,7 @@ class Battle:
                     self.battle.open("menu")
 
             case Battle.ST_CMD_WAIT:
-                menu = text.MsgDQ(self.battle.find_by_tag("menu"))
+                menu = text.MsgDQ(self.battle.find_by_id("menu"))
                 if "attack" in self.xmlui.event.trg:
                     msg_text.append_msg("{name}の　こうげき！", battle_db)
 
