@@ -76,7 +76,16 @@ class MsgDQ(Msg):
             return self
 
         def get_lines_indent(self) -> list[bool]:
-            return [self.is_mark(MsgDQ.MARK_TALK) and not line.startswith(MsgDQ.TALK_START) for line in self.all_text.splitlines()]
+            out = []
+            for line in self.all_text.splitlines():
+                match self.attr_str(MsgDQ.MARK_ATTR):
+                    case MsgDQ.MARK_TALK:
+                        out.append(not line.startswith(MsgDQ.TALK_START))
+                    case MsgDQ.MARK_ENEMY:
+                        out.append(True)
+                    case _:
+                        out.append(False)
+            return out
 
     # スクロール用
     # -----------------------------------------------------
@@ -119,6 +128,13 @@ class MsgDQ(Msg):
         for page in self.append_msg(text, all_params):
             # 追加されたページにTALKをマーキング
             page_item = self.MsgDQItem(page).set_mark(self.MARK_TALK)
+            page._element.text = self.TALK_START + page_item.all_text
+
+    # Enemyマークを追加して格納
+    def append_enemy(self, text:str, all_params:dict[str,Any]={}):
+        for page in self.append_msg(text, all_params):
+            # 追加されたページにTALKをマーキング
+            page_item = self.MsgDQItem(page).set_mark(self.MARK_ENEMY)
             page._element.text = self.TALK_START + page_item.all_text
 
 
