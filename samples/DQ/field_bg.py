@@ -73,7 +73,7 @@ class BG:
             else:
                 msg_win = xmlui.find_by_id("menu").open("message")
                 msg_text = msg_win.find_by_tag("msg_text")
-                text.MsgDQ.start_system(msg_text, "とびらがない")  # systemメッセージ
+                text.MsgDQ.append_msg(msg_text, "とびらがない")  # systemメッセージ
 
     # 階段チェック
     def check_stairs(self, xmlui, player):
@@ -85,4 +85,4 @@ class BG:
             else:
                 msg_win = xmlui.find_by_id("menu").open("message")
                 msg_text = msg_win.find_by_tag("msg_text")
-                text.MsgDQ.start_system(msg_text, "かいだんがない")  # systemメッセージ
+                text.MsgDQ.append_msg(msg_text, "かいだんがない")  # systemメッセージ

@@ -215,9 +215,9 @@ def ui_init(template):
                 # メッセージウインドウを開く
                 msg_win = tools_list.xmlui.find_by_id("menu").open("message")
                 msg_text = msg_win.find_by_tag("msg_text")
-                text.MsgDQ.start_system(msg_text, "ＨＰが　１０かいふくした")  # systemメッセージ
+                text.MsgDQ.append_msg(msg_text, "ＨＰが　１０かいふくした")  # systemメッセージ
             else:
-                tools_list.xmlui.popup("common", "under_construct")
+                tools_list.xmlui.popup("under_construct")
         
         # 閉じる
         if input_def.BTN_B in event.trg:
