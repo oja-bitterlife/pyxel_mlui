@@ -50,14 +50,20 @@ class Battle:
             case Battle.ST_CMD_WAIT:
                 menu = text.MsgDQ(self.battle.find_by_id("menu"))
                 if "attack" in self.xmlui.event.trg:
-                    msg_dq.append_msg("{name}の　こうげき！", param_db)
-                    battle_db["damage"] = XUTextUtil.format_zenkaku(random.randint(1, 100))
-                    msg_dq.append_msg("{enemy}に　{damage}ポイントの\nダメージを　あたえた！", battle_db)
+                    battle_db["hit"] = XUTextUtil.format_zenkaku(random.randint(1, 100))
+                    marge_db = param_db | battle_db
+
+                    msg_dq.append_msg("{name}の　こうげき！", marge_db)
+                    msg_dq.append_msg("{enemy}に　{hit}ポイントの\nダメージを　あたえた！", marge_db)
                     XUWinBase(menu).start_close()
                     self.state = Battle.ST_ENEMY_TURN
 
             case Battle.ST_ENEMY_TURN:
-                # msg_dq.append_with_mark(msg_dq.MARK_ENEMY, "{enemy}の　こうげき！", param_db)
+                battle_db["damage"] = XUTextUtil.format_zenkaku(random.randint(1, 10))
+                marge_db = param_db | battle_db
+
+                pages = msg_dq.append_msg("{enemy}の　こうげき！", marge_db)
+                pages = msg_dq.append_msg("{name}は　{damage}ポイントの\nだめーじを　うけた", marge_db)
                 self.state = Battle.ST_MSG_DRAWING
 
 

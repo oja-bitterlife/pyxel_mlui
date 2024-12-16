@@ -998,10 +998,14 @@ class XUPageInfo(XUSelectBase):
 
     # ツリー操作
     # -----------------------------------------------------
-    def add_pages(self, text:str, page_line_num:int, wrap:int):
+    # テキストをページ分解してツリーにぶら下げる。作ったページを返す
+    def add_pages(self, text:str, page_line_num:int, wrap:int) -> list[XUPageItem]:
+        pages = []
         for page_text in XUPageText.split_page_texts(text, page_line_num, wrap):
             page_item = XUPageItem(XUElem(self.xmlui, Element(self.ITEM_TAG)))
             self._util_info.add_child(page_item.set_text(page_text))
+            pages.append(page_item)  # return用
+        return pages
 
     def clear_pages(self):
         for child in self._util_info.find_by_tagall(self.ITEM_TAG):
