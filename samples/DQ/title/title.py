@@ -6,35 +6,30 @@ from xmlui.lib import select
 from ui_common import input_def,system_font
 from system_info import system_info
 
-CHANGE_SLOW = "change_slow"
-CHANGE_NORMAL = "change_normal"
-CHANGE_FAST = "change_fast"
-
 class Title:
     def __init__(self, xmlui:XMLUI):
         self.xmlui = xmlui
-        self.template = self.xmlui.load_template("assets/ui/title.xml")
-        self.xmlui.open("game_title")
 
+        # XMLの読み込み
+        self.template = self.xmlui.load_template("assets/ui/title.xml")
+        self.xmlui.open("game_title")  # game_title以下表示開始
+
+        # 描画関数登録
         ui_init(self.template)
 
     def __del__(self):
+        # XMLの解放
         self.template.remove()
 
     def update(self):
+        # 次のシーンへ
         if "game_start" in self.xmlui.event.trg:
             return "field"
-
-        if CHANGE_SLOW in self.xmlui.event.trg:
-            system_info.msg_spd = 0.5
-        if CHANGE_NORMAL in self.xmlui.event.trg:
-            system_info.msg_spd = 1
-        if CHANGE_FAST in self.xmlui.event.trg:
-            system_info.msg_spd = 65535
 
         return None
 
     def draw(self):
+        # UIの表示
         self.xmlui.draw()
 
 
@@ -44,6 +39,7 @@ from ui_common import draw_menu_cursor
 def ui_init(template:XUTemplate):
     title_select = select.Decorator(template)
 
+    # START/CONTINUE選択
     @title_select.list("game_start", "menu_item")
     def game_start(game_start:select.List, event:XUEvent):
         for item in game_start.items:
@@ -56,11 +52,11 @@ def ui_init(template:XUTemplate):
         if input_def.BTN_A in event.trg:
             match game_start.action:
                 case "start":
-                    game_start.close()
                     return "game_start"
                 case "continue":
                     game_start.xmlui.popup("under_construct")
 
+    # メッセージスピード選択
     @title_select.list("game_speed", "menu_item")
     def game_speed(game_speed:select.List, event:XUEvent):
         for item in game_speed.items:
@@ -69,13 +65,13 @@ def ui_init(template:XUTemplate):
         # メニュー選択。カーソルが動いたらTrueが返る
         if game_speed.select_by_event(event.trg, *input_def.LEFT_RIGHT):
             # メッセージスピードを切り替える
-            match game_speed:
-                case "slow":
-                    print("msg is slow")
-                case "normal":
-                    print("msg is normal")
-                case "fast":
-                    print("msg is fast")
+            match game_speed.action:
+                case "change_slow":
+                    system_info.msg_spd = 1.0/3
+                case "change_normal":
+                    system_info.msg_spd = 1
+                case "change_fast":
+                    system_info.msg_spd = 65535
 
     # メニューアイテム
     # ---------------------------------------------------------
