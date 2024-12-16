@@ -631,7 +631,7 @@ class XMLUI(XUElem):
 
 # キー入力
 # #############################################################################
-# キー定義(デフォルト)
+# キー定義(デフォルトイベント名)
 class XUKeyDef(StrEnum):
     LEFT  = "CUR_L"
     RIGHT = "CUR_R"
@@ -642,18 +642,19 @@ class XUKeyDef(StrEnum):
     BTN_X = "BTN_X"
     BTN_Y = "BTN_Y"
 
+    # デフォルトの値で辞書を作るdict[キー定義, イベント文字列]
     @classmethod
-    def values(cls) -> dict[str, str]:
+    def default_values(cls) -> dict[str, str]:
         return {v:str(v) for v in cls.__members__.values()}
 
 # 入力統一化
 class XUInputDef:
     # デフォルト値で設定
     def __init__(self):
-        self._key_event_dict = XUKeyDef.values()
+        self._key_event_dict = XUKeyDef.default_values()
 
-    # キー定義文字列変更用
-    def set_def(self, key:XUKeyDef, value:str):
+    # イベント文字列変更用
+    def set_event(self, key:XUKeyDef, value:str):
         self._key_event_dict[key] = value
 
     # アクセス用
