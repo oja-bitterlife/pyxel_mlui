@@ -146,16 +146,6 @@ class XUEvent:
             raise ValueError(f"event_name:{event_name} is already registered.")
         self._receive.add(event_name)
 
-    def copy(self):
-        clone = XUEvent()
-        clone.is_active = self.is_active
-        clone.on_init = self.on_init
-        clone._receive = set(self._receive)
-        clone.now = set(self.now)
-        clone.trg = set(self.trg)
-        clone.release = set(self.release)
-        return clone
-
 
 # UIパーツの状態管理
 # #############################################################################
@@ -599,7 +589,7 @@ class XMLUI(XUElem):
         # 更新処理
         for elem in self.children:  # 中でTreeを変えたいのでイテレータではなくリストで
             # active/inactiveどちらのeventを使うか決定
-            event = self.event.copy() if elem in self.active_elems else XUEvent()
+            event = copy.deepcopy(self.event) if elem in self.active_elems else XUEvent()
 
             # updateカウンタ更新
             event.on_init = elem.update_count == 0  # やっぱりinitialize情報がどこかに欲しい
