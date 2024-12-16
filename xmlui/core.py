@@ -1140,3 +1140,9 @@ class XUWinBase(XUElem):
             child.enable = False  # 全ての子のイベント通知をoffに
             if XUWinBase.is_win(child):  # 子ウインドウも一緒にクローズ
                 XUWinBase(child).win_state = self.STATE_CLOSING
+
+
+# ゲージサポート
+# *****************************************************************************
+class XUGageBase(XUElem):
+    pass
