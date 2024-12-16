@@ -631,74 +631,58 @@ class XMLUI(XUElem):
 
 # キー入力
 # #############################################################################
-# キー定義(デフォルトイベント名)
-class XUKeyDef(StrEnum):
-    LEFT  = "CUR_L"
-    RIGHT = "CUR_R"
-    UP    = "CUR_U"
-    DOWN  = "CUR_D"
-    BTN_A = "BTN_A"
-    BTN_B = "BTN_B"
-    BTN_X = "BTN_X"
-    BTN_Y = "BTN_Y"
-
-    # デフォルトの値で辞書を作るdict[キー定義, イベント文字列]
-    @classmethod
-    def default_values(cls) -> dict[str, str]:
-        return {v:str(v) for v in cls.__members__.values()}
-
-# 入力統一化
 class XUInputDef:
-    # デフォルト値で設定
-    def __init__(self):
-        self._key_event_dict = XUKeyDef.default_values()
+    # キーイベント定義
+    class Key(str):
+        def __new__(cls, event:str):
+            return str.__new__(cls, event)
+    LEFT:Key = Key("CUR_L")
+    RIGHT:Key = Key("CUR_R")
+    UP:Key = Key("CUR_U")
+    DOWN:Key = Key("CUR_D")
+    BTN_A:Key = Key("BTN_A")
+    BTN_B:Key = Key("BTN_B")
+    BTN_X:Key = Key("BTN_X")
+    BTN_Y:Key = Key("BTN_Y")
 
     # イベント文字列変更用
-    def set_event(self, key:XUKeyDef, value:str):
-        self._key_event_dict[key] = value
-
-    # アクセス用
-    @property
-    def LEFT(self):
-        return self._key_event_dict[XUKeyDef.LEFT]
-    @property
-    def RIGHT(self):
-        return self._key_event_dict[XUKeyDef.RIGHT]
-    @property
-    def UP(self):
-        return self._key_event_dict[XUKeyDef.UP]
-    @property
-    def DOWN(self):
-        return self._key_event_dict[XUKeyDef.DOWN]
-    @property
-    def BTN_A(self):
-        return self._key_event_dict[XUKeyDef.BTN_A]
-    @property
-    def BTN_B(self):
-        return self._key_event_dict[XUKeyDef.BTN_B]
-    @property
-    def BTN_X(self):
-        return self._key_event_dict[XUKeyDef.BTN_X]
-    @property
-    def BTN_Y(self):
-        return self._key_event_dict[XUKeyDef.BTN_Y]
+    def change_def(self, key:Key, event_name:str):
+        match key:
+            case XUInputDef.LEFT:
+                XUInputDef.LEFT = XUInputDef.Key(event_name)
+            case XUInputDef.RIGHT:
+                XUInputDef.RIGHT = XUInputDef.Key(event_name)
+            case XUInputDef.UP:
+                XUInputDef.UP = XUInputDef.Key(event_name)
+            case XUInputDef.DOWN:
+                XUInputDef.DOWN = XUInputDef.Key(event_name)
+            case XUInputDef.BTN_A:
+                XUInputDef.BTN_A = XUInputDef.Key(event_name)
+            case XUInputDef.BTN_B:
+                XUInputDef.BTN_B = XUInputDef.Key(event_name)
+            case XUInputDef.BTN_X:
+                XUInputDef.BTN_X = XUInputDef.Key(event_name)
+            case XUInputDef.BTN_Y:
+                XUInputDef.BTN_Y = XUInputDef.Key(event_name)
+            case _:
+                raise Exception(f"Unknown key: {key}")
 
     # まとめてアクセス
     @property
     def CURSOR(self):
-        return self.LEFT, self.RIGHT, self.UP, self.DOWN
+        return XUInputDef.LEFT, XUInputDef.RIGHT, XUInputDef.UP, XUInputDef.DOWN
 
     @property
     def LEFT_RIGHT(self):
-        return self.LEFT, self.RIGHT
+        return XUInputDef.LEFT, XUInputDef.RIGHT
 
     @property
     def UP_DOWN(self):
-        return self.UP, self.DOWN
+        return XUInputDef.UP, XUInputDef.DOWN
 
     @property
     def ANY(self):
-        return self.LEFT, self.RIGHT, self.UP, self.DOWN, self.BTN_A, self.BTN_B, self.BTN_X, self.BTN_Y
+        return XUInputDef.LEFT, XUInputDef.RIGHT, XUInputDef.UP, XUInputDef.DOWN, XUInputDef.BTN_A, XUInputDef.BTN_B, XUInputDef.BTN_X, XUInputDef.BTN_Y
 
 
 # ユーティリティークラス
@@ -825,7 +809,7 @@ class XUSelectGrid(XUSelectBase):
         super().__init__(elem, item_tag, rows, item_w, item_h)
 
     # 入力に応じた挙動一括。変更があった場合はTrue
-    def _select_by_event(self, input:set[str], left_event:XUKeyDef, right_event:XUKeyDef, up_event:XUKeyDef, down_event:XUKeyDef, x_wrap:bool, y_wrap:bool) -> bool:
+    def _select_by_event(self, input:set[str], left_event:XUInputDef.Key, right_event:XUInputDef.Key, up_event:XUInputDef.Key, down_event:XUInputDef.Key, x_wrap:bool, y_wrap:bool) -> bool:
         old_no = self.selected_no
 
         if left_event in input:
@@ -840,11 +824,11 @@ class XUSelectGrid(XUSelectBase):
         return self.selected_no != old_no
 
     # 選択一括処理Wrap版
-    def select_by_event(self, input:set[str], left_event:XUKeyDef, right_event:XUKeyDef, up_event:XUKeyDef, down_event:XUKeyDef) -> bool:
+    def select_by_event(self, input:set[str], left_event:XUInputDef.Key, right_event:XUInputDef.Key, up_event:XUInputDef.Key, down_event:XUInputDef.Key) -> bool:
         return self._select_by_event(input, left_event, right_event, up_event, down_event, True, True)
 
     # 選択一括処理NoWrap版
-    def select_no_wrap(self, input:set[str], left_event:XUKeyDef, right_event:XUKeyDef, up_event:XUKeyDef, down_event:XUKeyDef) -> bool:
+    def select_no_wrap(self, input:set[str], left_event:XUInputDef.Key, right_event:XUInputDef.Key, up_event:XUInputDef.Key, down_event:XUInputDef.Key) -> bool:
         return self._select_by_event(input, left_event, right_event, up_event, down_event, False, False)
 
 # リスト選択
@@ -854,7 +838,7 @@ class XUSelectList(XUSelectBase):
         super().__init__(elem, item_tag, rows, item_w, item_h)
   
     # 入力に応じた挙動一括。変更があった場合はTrue
-    def _select_by_event(self, input:set[str], prev_event:str, next_event:str, wrap:bool) -> bool:
+    def _select_by_event(self, input:set[str], prev_event:XUInputDef.Key, next_event:XUInputDef.Key, wrap:bool) -> bool:
         old_no = self.selected_no
 
         if prev_event in input:
@@ -865,11 +849,11 @@ class XUSelectList(XUSelectBase):
         return self.selected_no != old_no
 
     # 選択一括処理Wrap版
-    def select_by_event(self, input:set[str], prev_event:str, next_event:str) -> bool:
+    def select_by_event(self, input:set[str], prev_event:XUInputDef.Key, next_event:XUInputDef.Key) -> bool:
         return self._select_by_event(input, prev_event, next_event, True)
 
     # 選択一括処理NoWrap版
-    def select_no_wrap(self, input:set[str], prev_event:str, next_event:str) -> bool:
+    def select_no_wrap(self, input:set[str], prev_event:XUInputDef.Key, next_event:XUInputDef.Key) -> bool:
         return self._select_by_event(input, prev_event, next_event, False)
 
 # ダイアル選択用
@@ -896,7 +880,7 @@ class XUSelectNum(XUSelectList):
         return pow(10, self.item_num)-1
 
     # 入力に応じた挙動一括。変更があった場合はTrue
-    def change_by_event(self, input:set[str], left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
+    def change_by_event(self, input:set[str], left_event:XUInputDef.Key, right_event:XUInputDef.Key, up_event:XUInputDef.Key, down_event:XUInputDef.Key) -> bool:
         # 左右逆でイベントを使う
         changed = self.select_by_event(input, right_event, left_event)
 

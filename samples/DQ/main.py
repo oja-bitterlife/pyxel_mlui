@@ -6,13 +6,12 @@ import pyxel
 # *********************************************************
 pyxel.init(256, 256)
 
-from samples.DQ.title.title import Title
-from samples.DQ.field.field import Field
-from samples.DQ.battle.battle import Battle
+from title.title import Title
+# from field.field import Field
+# from battle.battle import Battle
 
 # 最初はタイトル
-from ui_common import xmlui
-from ui_common import ui_theme
+from ui_common import xmlui,input_def
 
 scene = Title(xmlui)
 #scene = Field(xmlui)
@@ -28,10 +27,10 @@ def update(): # フレームの更新処理
             match next_scene:
                 case "title":
                     scene = Title(xmlui)
-                case "field":
-                    scene = Field(xmlui)
-                case "battle":
-                    scene = Battle(xmlui)
+                # case "field":
+                #     scene = Field(xmlui)
+                # case "battle":
+                #     scene = Battle(xmlui)
 
     # デバッグ用
     if pyxel.btnp(pyxel.KEY_TAB):
@@ -45,17 +44,17 @@ def draw(): # 描画処理
 
     # UI用キー入力
     if pyxel.btn(pyxel.KEY_LEFT) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_LEFT):
-        xmlui.on(ui_theme.input_def.LEFT)
+        xmlui.on(input_def.LEFT)
     if pyxel.btn(pyxel.KEY_RIGHT) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_RIGHT):
-        xmlui.on(ui_theme.input_def.RIGHT)
+        xmlui.on(input_def.RIGHT)
     if pyxel.btn(pyxel.KEY_UP) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_UP):
-        xmlui.on(ui_theme.input_def.UP)
+        xmlui.on(input_def.UP)
     if pyxel.btn(pyxel.KEY_DOWN) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN):
-        xmlui.on(ui_theme.input_def.DOWN)
+        xmlui.on(input_def.DOWN)
     if pyxel.btn(pyxel.KEY_RETURN) or pyxel.btn(pyxel.KEY_SPACE)  or pyxel.btn(pyxel.GAMEPAD1_BUTTON_A):
-        xmlui.on(ui_theme.input_def.BTN_A)
+        xmlui.on(input_def.BTN_A)
     if pyxel.btn(pyxel.KEY_BACKSPACE) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_B):
-        xmlui.on(ui_theme.input_def.BTN_B)
+        xmlui.on(input_def.BTN_B)
 
     # UI描画
     global scene

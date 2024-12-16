@@ -4,6 +4,11 @@ import pyxel
 from xmlui.core import XMLUI,XUTemplate,XUEvent,XUSelectItem
 from xmlui.lib import select
 from ui_common import input_def,system_font
+from system_info import system_info
+
+CHANGE_SLOW = "change_slow"
+CHANGE_NORMAL = "change_normal"
+CHANGE_FAST = "change_fast"
 
 class Title:
     def __init__(self, xmlui:XMLUI):
@@ -19,6 +24,14 @@ class Title:
     def update(self):
         if "game_start" in self.xmlui.event.trg:
             return "field"
+
+        if CHANGE_SLOW in self.xmlui.event.trg:
+            system_info.msg_spd = 0.5
+        if CHANGE_NORMAL in self.xmlui.event.trg:
+            system_info.msg_spd = 1
+        if CHANGE_FAST in self.xmlui.event.trg:
+            system_info.msg_spd = 65535
+
         return None
 
     def draw(self):
@@ -38,11 +51,13 @@ def ui_init(template:XUTemplate):
 
         # メニュー選択
         game_start.select_by_event(event.trg, *input_def.UP_DOWN)
+
+        # メニュー決定
         if input_def.BTN_A in event.trg:
             match game_start.action:
                 case "start":
                     game_start.close()
-                    game_start.xmlui.on("game_start")
+                    return "game_start"
                 case "continue":
                     game_start.xmlui.popup("under_construct")
 

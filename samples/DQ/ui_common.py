@@ -3,7 +3,7 @@ import pyxel
 # xmlui_pyxelの初期化
 # *****************************************************************************
 from xmlui.lib import text,win
-from xmlui.lib.input import XUInputDef,XUKeyDef
+from xmlui.lib.input import XUInputDef
 from xmlui_ext import dq
 from xmlui.pyxel_util.theme import Theme
 from xmlui.pyxel_util.font import PyxelFont
