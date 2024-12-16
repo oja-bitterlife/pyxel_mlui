@@ -39,15 +39,17 @@ class Label(XUElem):
         area = self.area
         return area.aligned_pos(font.text_width(self.text), font.size, self.align, self.valign)
 
-# メッセージ
+# メッセージ(ページつきアニメテキスト)
 class Msg(XUPageText):
-    PAGE_LINE_NUM_ATTR = 'page_line_num'
-    WRAP_ATTR = 'wrap'
+    PAGE_LINE_NUM_ATTR = 'page_line_num'  # 1ページに含まれる行数
+    WRAP_ATTR = 'wrap'  # 1行の最大長(折り返し位置)
 
     # タグのテキストを処理する
     def __init__(self, elem:XUElem):
+        # パラメータはXMLから取得
         page_line_num = elem.attr_int(self.PAGE_LINE_NUM_ATTR, 1024)
         wrap = elem.attr_int(self.WRAP_ATTR, 4096)
+
         super().__init__(elem, page_line_num, wrap)
 
     # 全角にして登録

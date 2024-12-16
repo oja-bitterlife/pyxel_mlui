@@ -96,8 +96,8 @@ def round_win(round_win:win.RoundFrame, event:XUEvent):
 
 # メッセージウインドウ
 # ---------------------------------------------------------
-def common_msg_text(msg_text:dq.MsgDQ, event:XUEvent, cursor_visible:bool):
-    area = msg_text.area  # areaは重いので必ずキャッシュ
+def common_msg_text(msg_dq:dq.MsgDQ, event:XUEvent, cursor_visible:bool):
+    area = msg_dq.area  # areaは重いので必ずキャッシュ
 
     # テーマ情報取得
     system_font = ui_theme.font.system  # フォント
@@ -105,42 +105,45 @@ def common_msg_text(msg_text:dq.MsgDQ, event:XUEvent, cursor_visible:bool):
 
     # テキスト表示
     # ---------------------------------------------------------
-    msg_text.current_page.draw_count += 0.5
+    msg_dq.current_page.draw_count += 0.5
 
     # スクロール表示
     # ---------------------------------------------------------
     # スクロールバッファサイズはページサイズ+2(待機中は+1)
-    idle_scroll_size = msg_text.attr_int(msg_text.PAGE_LINE_NUM_ATTR) + 1
-    anim_scroll_size = msg_text.attr_int(msg_text.PAGE_LINE_NUM_ATTR) + 2
-    scroll_size = idle_scroll_size if msg_text.current_page.is_finish else anim_scroll_size
-    scroll_info =  msg_text.get_scroll_lines(scroll_size)
+    idle_scroll_size = msg_dq.attr_int(msg_dq.PAGE_LINE_NUM_ATTR) + 1
+    anim_scroll_size = msg_dq.attr_int(msg_dq.PAGE_LINE_NUM_ATTR) + 2
+    scroll_size = idle_scroll_size if msg_dq.current_page.is_finish else anim_scroll_size
+    scroll_info =  msg_dq.get_scroll_lines(scroll_size)
 
     # アニメーション用表示位置ずらし。スクロール時半文字ずれる
-    shift_y = -3 if not msg_text.current_page.is_finish and len(scroll_info) >= anim_scroll_size else 5
+    shift_y = -3 if not msg_dq.current_page.is_finish and len(scroll_info) >= anim_scroll_size else 5
 
     # テキスト描画
     line_height = system_font.size + 3  # 行間設定
     for i,info in enumerate(scroll_info):
+        # xはインデント
         x = area.x
-        # 会話インデント
         if info.mark_type == dq.MsgDQ.Mark.TALK:
             x += system_font.text_width(dq.MsgDQ.TALK_START)
         elif info.mark_type == dq.MsgDQ.Mark.ENEMY:
             x += system_font.size
+
+        # yはスクロール
         y = shift_y + area.y + i*line_height
+
         pyxel.text(x, y, info.line_text, 7, system_font.font)
 
     # カーソル表示
     # ---------------------------------------------------------
-    if cursor_visible and msg_text.is_next_wait:
-        cursor_count = msg_text.current_page.draw_count - msg_text.current_page.length
+    if cursor_visible and msg_dq.is_next_wait:
+        cursor_count = msg_dq.current_page.draw_count - msg_dq.current_page.length
         if cursor_count//7 % 2 == 0:
-            draw_msg_cursor(msg_text, 0, scroll_size*line_height + shift_y-3)
+            draw_msg_cursor(msg_dq, 0, scroll_size*line_height + shift_y-3)
 
     # 表示途中のアクション
-    if not msg_text.is_next_wait:
+    if not msg_dq.is_next_wait:
         if input_def.BTN_A in event.now or input_def.BTN_B in event.now:
-            msg_text.current_page.draw_count += 2  # 素早く表示
+            msg_dq.current_page.draw_count += 2  # 素早く表示
 
 
 # ステータスウインドウ( ｰ`дｰ´)ｷﾘｯ
