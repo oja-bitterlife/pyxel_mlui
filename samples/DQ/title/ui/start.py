@@ -1,7 +1,7 @@
 from xmlui.core import XUTemplate,XUEvent
 from xmlui.lib import select
 from title.ui.item import menu_item
-from title import Title
+import title
 
 # タイトル画面UI
 # ---------------------------------------------------------
@@ -23,6 +23,6 @@ def ui_init(template:XUTemplate):
         if XUEvent.Key.BTN_A in event.trg:
             match game_start.action:
                 case "start":
-                    return Title.NEXT_SCENE_EVENT
+                    return title.Title.NEXT_SCENE_EVENT
                 case "continue":
                     game_start.xmlui.popup("under_construct")

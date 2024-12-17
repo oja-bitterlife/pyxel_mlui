@@ -1,5 +1,3 @@
-import pyxel
-
 # タイトル画面
 from xmlui.core import XMLUI
 from title.ui import start,speed
