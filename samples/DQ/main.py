@@ -13,8 +13,8 @@ from field import Field
 from xmlui.core import XUEvent
 from ui_common import xmlui
 
-#scene = Title(xmlui)
-scene = Field(xmlui)
+scene = Title(xmlui)
+#scene = Field(xmlui)
 #scene = Battle(xmlui)
 
 # Main

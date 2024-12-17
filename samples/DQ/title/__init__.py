@@ -1,3 +1,5 @@
+import pyxel
+
 # タイトル画面
 from xmlui.core import XMLUI
 from title.ui import start,speed
@@ -16,6 +18,9 @@ class Title:
         start.ui_init(self.template)
         speed.ui_init(self.template)
 
+        self.img = pyxel.Image(256, 256)
+        self.img.load(x=0, y=0, filename="assets/images/title.png")
+
     def __del__(self):
         # XMLの解放
         self.template.remove()
@@ -26,5 +31,8 @@ class Title:
             return "field"
 
     def draw(self):
+        # 画面の描画
+        pyxel.blt(0, 0, self.img, 0, 0, self.img.width, self.img.height)
+
         # UIの表示
         self.xmlui.draw()
