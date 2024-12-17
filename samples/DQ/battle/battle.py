@@ -6,7 +6,7 @@ from xmlui.core import XMLUI,XUEvent,XUWinBase,XUSelectItem,XUTextUtil
 from xmlui.lib import select,text
 from xmlui_ext import dq
 from ui_common import ui_theme
-from params import param_db
+from samples.DQ.params import param_db
 
 battle_db = {
     "enemy": "なにか",

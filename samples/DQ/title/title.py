@@ -1,10 +1,16 @@
+from enum import StrEnum
 import pyxel
 
 # タイトル画面
 from xmlui.core import XMLUI,XUTemplate,XUEvent,XUSelectItem
 from xmlui.lib import select
 from ui_common import input_def,system_font
-from system_info import system_info
+from db import system_info
+
+class MSG_SPEED(StrEnum):
+    SLOW = "change_slow"
+    NORMAL = "change_slow"
+    FAST = "change_slow"
 
 class Title:
     def __init__(self, xmlui:XMLUI):
@@ -25,8 +31,6 @@ class Title:
         # 次のシーンへ
         if "game_start" in self.xmlui.event.trg:
             return "field"
-
-        return None
 
     def draw(self):
         # UIの表示
@@ -66,11 +70,11 @@ def ui_init(template:XUTemplate):
         if game_speed.select_by_event(event.trg, *input_def.LEFT_RIGHT):
             # メッセージスピードを切り替える
             match game_speed.action:
-                case "change_slow":
+                case MSG_SPEED.SLOW:
                     system_info.msg_spd = 1.0/3
-                case "change_normal":
+                case MSG_SPEED.NORMAL:
                     system_info.msg_spd = 1
-                case "change_fast":
+                case MSG_SPEED.FAST:
                     system_info.msg_spd = 65535
 
     # メニューアイテム

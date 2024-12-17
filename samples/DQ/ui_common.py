@@ -8,7 +8,7 @@ from xmlui_ext import dq
 from xmlui.pyxel_util.theme import Theme
 from xmlui.pyxel_util.font import PyxelFont
 from xmlui.core import XMLUI,XUElem,XUEvent,XUWinBase,XURect,XUTextUtil
-from params import param_db
+import db
 
 ui_theme = Theme(PyxelFont("assets/font/b12.bdf"))
 
@@ -158,7 +158,7 @@ def status_item(status_item:text.Label, event:XUEvent):
     system_font = ui_theme.font.system
 
     # 値の取得
-    text = XUTextUtil.format_zenkaku(XUTextUtil.format_dict(status_item.text, param_db))
+    text = XUTextUtil.format_zenkaku(XUTextUtil.format_dict(status_item.text, vars(db.user_data)))
 
     # テキストは右寄せ
     area = status_item.area
@@ -175,4 +175,4 @@ def status_title(status_title:text.Label, event:XUEvent):
     # テキストは左寄せ
     if status_title.area.y < clip.bottom():  # world座標で比較
         x, y = status_title.aligned_pos(ui_theme.font.system)
-        pyxel.text(x+1, y-1, param_db["name"], 7, ui_theme.font.system.font)
+        pyxel.text(x+1, y-1, db.user_data.name, 7, ui_theme.font.system.font)

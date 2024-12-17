@@ -809,7 +809,7 @@ class XUSelectGrid(XUSelectBase):
         super().__init__(elem, item_tag, rows, item_w, item_h)
 
     # 入力に応じた挙動一括。変更があった場合はTrue
-    def _select_by_event(self, input:set[str], left_event:XUEventItem, right_event:XUEventItem, up_event:XUEventItem, down_event:XUEventItem, x_wrap:bool, y_wrap:bool) -> bool:
+    def _select_by_event(self, input:set[XUEventItem], left_event:XUEventItem, right_event:XUEventItem, up_event:XUEventItem, down_event:XUEventItem, x_wrap:bool, y_wrap:bool) -> bool:
         old_no = self.selected_no
 
         if left_event in input:
@@ -824,11 +824,11 @@ class XUSelectGrid(XUSelectBase):
         return self.selected_no != old_no
 
     # 選択一括処理Wrap版
-    def select_by_event(self, input:set[str], left_event:XUEventItem, right_event:XUEventItem, up_event:XUEventItem, down_event:XUEventItem) -> bool:
+    def select_by_event(self, input:set[XUEventItem], left_event:XUEventItem, right_event:XUEventItem, up_event:XUEventItem, down_event:XUEventItem) -> bool:
         return self._select_by_event(input, left_event, right_event, up_event, down_event, True, True)
 
     # 選択一括処理NoWrap版
-    def select_no_wrap(self, input:set[str], left_event:XUEventItem, right_event:XUEventItem, up_event:XUEventItem, down_event:XUEventItem) -> bool:
+    def select_no_wrap(self, input:set[XUEventItem], left_event:XUEventItem, right_event:XUEventItem, up_event:XUEventItem, down_event:XUEventItem) -> bool:
         return self._select_by_event(input, left_event, right_event, up_event, down_event, False, False)
 
 # リスト選択

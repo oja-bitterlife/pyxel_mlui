@@ -4,12 +4,14 @@ import pyxel
 from xmlui.core import XMLUI,XUEvent,XUWinBase,XUSelectItem,XURect
 from xmlui.lib import select,text
 from xmlui_ext import dq
-from ui_common import ui_theme
+
+import db
+from ui_common import system_font,input_def
+
 from field.player import Player
 from field.bg import BG
 from field.npc import NPC
 from field.treasure import Treasure
-from params import param_db
 
 
 class Field:
@@ -40,7 +42,7 @@ class Field:
 
             # キャラが動いていなければメニューオープン可能
             if not self.player.is_moving:
-                self.xmlui.open_by_event(ui_theme.input_def.BTN_A, "menu")
+                self.xmlui.open_by_event(input_def.BTN_A, "menu")
 
         else:
             menu = self.xmlui.find_by_id("menu")
@@ -92,8 +94,8 @@ def ui_init(template):
 
         # テキストはセンタリング
         if title.area.y < clip.bottom():  # world座標で比較
-            x, y = title.aligned_pos(ui_theme.font.system)
-            pyxel.text(x, y-1, title.text, 7, ui_theme.font.system.font)
+            x, y = title.aligned_pos(system_font)
+            pyxel.text(x, y-1, title.text, 7, system_font.font)
 
     # 各メニューごとのタイトル(コマンドメニューと少し場所がずれる)
     @field_text.label("menu_item_title", "align", "valign")
@@ -103,15 +105,15 @@ def ui_init(template):
         pyxel.rect(menu_item_title.area.x, menu_item_title.area.y, menu_item_title.area.w, clip.h, 0)  # タイトルの下地
 
         # テキストはセンタリングで常に表示
-        x, y = menu_item_title.aligned_pos(ui_theme.font.system)
-        pyxel.text(x, y-1, menu_item_title.text, 7, ui_theme.font.system.font)
+        x, y = menu_item_title.aligned_pos(system_font)
+        pyxel.text(x, y-1, menu_item_title.text, 7, system_font.font)
 
     # コマンドメニュー
     # ---------------------------------------------------------
     def menu_item(menu_item:XUSelectItem):
         # ウインドウのクリップ状態に合わせて表示する
         if menu_item.area.y < get_world_clip(XUWinBase.find_parent_win(menu_item)).bottom():
-            pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, 7, ui_theme.font.system.font)
+            pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, 7, system_font.font)
 
             # カーソル表示
             if menu_item.selected and menu_item.enable:
@@ -124,7 +126,6 @@ def ui_init(template):
             menu_item(item)
 
         # メニュー選択
-        input_def = ui_theme.input_def
         menu_grid.select_by_event(event.trg, *input_def.CURSOR)
 
         # 選択アイテムの表示
@@ -155,7 +156,7 @@ def ui_init(template):
     def dir_item(dir_item:XUSelectItem):
         # ウインドウのクリップ状態に合わせて表示する
         if dir_item.area.y < get_world_clip(XUWinBase.find_parent_win(dir_item)).bottom():
-            pyxel.text(dir_item.area.x, dir_item.area.y, dir_item.text, 7, ui_theme.font.system.font)
+            pyxel.text(dir_item.area.x, dir_item.area.y, dir_item.text, 7, system_font.font)
 
         # カーソル表示
         if dir_item.selected and dir_item.enable:
@@ -166,8 +167,6 @@ def ui_init(template):
         # 各アイテムの描画
         for item in dir_select.items:
             dir_item(item)
-
-        input_def = ui_theme.input_def
 
         # 会話ウインドウは特別な配置
         if input_def.UP in event.trg:
@@ -194,7 +193,7 @@ def ui_init(template):
     def tools_item(tools_item:XUSelectItem):
         # ウインドウのクリップ状態に合わせて表示する
         if tools_item.area.y < get_world_clip(XUWinBase.find_parent_win(tools_item)).bottom():
-            pyxel.text(6+tools_item.area.x, tools_item.area.y, tools_item.text, 7, ui_theme.font.system.font)
+            pyxel.text(6+tools_item.area.x, tools_item.area.y, tools_item.text, 7, system_font.font)
 
         # カーソル表示
         if tools_item.selected and tools_item.enable:
@@ -206,13 +205,11 @@ def ui_init(template):
         for item in tools_list.items:
             tools_item(item)
 
-        input_def = ui_theme.input_def
-
         tools_list.select_by_event(event.trg, *input_def.UP_DOWN)
 
         if input_def.BTN_A in event.trg:
             if tools_list.action == "herbs":
-                param_db["hp"] += 10
+                db.user_data.hp += 10
                 XUWinBase.find_parent_win(tools_list).start_close()
 
                 # メッセージウインドウを開く
@@ -240,8 +237,6 @@ def ui_init(template):
 
         # 入力アクション
         # ---------------------------------------------------------
-        input_def = ui_theme.input_def  # 入力イベント情報
-
         if input_def.BTN_A in event.trg or input_def.BTN_B in event.now:
             if msg_text.is_all_finish:
                 XUWinBase.find_parent_win(msg_text).start_close()  # 閉じる

@@ -7,14 +7,14 @@ import pyxel
 pyxel.init(256, 256)
 
 from title.title import Title
-# from field.field import Field
+from field.field import Field
 # from battle.battle import Battle
 
 # 最初はタイトル
 from ui_common import xmlui,input_def
 
-scene = Title(xmlui)
-#scene = Field(xmlui)
+#scene = Title(xmlui)
+scene = Field(xmlui)
 #scene = Battle(xmlui)
 
 # Main
@@ -27,8 +27,8 @@ def update(): # フレームの更新処理
             match next_scene:
                 case "title":
                     scene = Title(xmlui)
-                # case "field":
-                #     scene = Field(xmlui)
+                case "field":
+                    scene = Field(xmlui)
                 # case "battle":
                 #     scene = Battle(xmlui)
 
