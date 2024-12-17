@@ -1,11 +1,11 @@
 # フィールド関係
-from field.player import Player
-from field.bg import BG
-from field.npc import NPC
-from field.treasure import Treasure
+from field.system.player import Player
+from field.system.bg import BG
+from field.system.npc import NPC
+from field.system.treasure import Treasure
 
 # UI
-from xmlui.core import XMLUI,XUEvent,XUWinBase
+from xmlui.core import XMLUI,XUEvent
 from field.ui import msg_win,menu,talk_dir,tools
 
 class Field:
@@ -18,14 +18,10 @@ class Field:
         self.npc = NPC()
         self.treasure = Treasure()
 
-        self.goto_battle = False
-
         # UIの読み込み
         self.template = self.xmlui.load_template("assets/ui/field.xml")
-        msg_win.ui_init(self.template)
-        menu.ui_init(self.template)
-        talk_dir.ui_init(self.template)
-        tools.ui_init(self.template)
+        for module in [msg_win, menu, talk_dir, tools]:
+            module.ui_init(self.template)
 
     def __del__(self):
         # 読みこんだUIの削除
@@ -43,6 +39,7 @@ class Field:
 
         else:
             menu = self.xmlui.find_by_id("menu")
+
             # 会話イベントチェック
             self.npc.check_talk(menu, self.player)
             self.bg.check_door(menu, self.player)
@@ -50,11 +47,7 @@ class Field:
 
         # バトル開始
         if "start_battle" in self.xmlui.event.trg:
-            self.goto_battle = True
-        if self.goto_battle:
-            # メニューが開いていない状態まで待つ
-            if not self.xmlui.exists_id("menu") or XUWinBase(self.xmlui.find_by_id("menu")).win_state == XUWinBase.STATE_CLOSED:
-                return "battle"
+            return "battle"
 
     def draw(self):
         # プレイヤを中心に世界が動く。さす勇

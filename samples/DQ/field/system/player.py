@@ -1,6 +1,6 @@
 import pyxel
-import samples.DQ.field.npc as npc
-import samples.DQ.field.bg as bg
+import field.system.npc as npc
+import field.system.bg as bg
 
 class Player:
     def __init__(self, x, y):
