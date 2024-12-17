@@ -164,32 +164,9 @@ class XUEvent:
         BTN_X = XUEventItem("BTN_X")
         BTN_Y = XUEventItem("BTN_Y")
 
-        # クラスのまま使用する
+        # インスタンスを作らず、クラスのまま使用する
         def __init__(self) -> None:
             raise Exception("This class is not instantiable")
-
-        # イベント文字列変更用
-        @classmethod
-        def change_def(cls, key:XUEventItem, event_name:str):
-            match key:
-                case cls.LEFT:
-                    cls.LEFT = XUEventItem(event_name)
-                case cls.RIGHT:
-                    cls.RIGHT = XUEventItem(event_name)
-                case cls.UP:
-                    cls.UP = XUEventItem(event_name)
-                case cls.DOWN:
-                    cls.DOWN = XUEventItem(event_name)
-                case cls.BTN_A:
-                    cls.BTN_A = XUEventItem(event_name)
-                case cls.BTN_B:
-                    cls.BTN_B = XUEventItem(event_name)
-                case cls.BTN_X:
-                    cls.BTN_X = XUEventItem(event_name)
-                case cls.BTN_Y:
-                    cls.BTN_Y = XUEventItem(event_name)
-                case _:
-                    raise Exception(f"Unknown key: {key}")
 
         # まとめてアクセス
         @classmethod
