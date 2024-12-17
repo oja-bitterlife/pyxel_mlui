@@ -16,7 +16,7 @@ class PyxelFont(FontBase):
 # #############################################################################
 def set_ex_palette():
     # 16 デフォルトパレット
-    palette = pyxel.colors.to_list()
+    palette = pyxel.colors.to_list()[:16]
 
     # 15 デジタルパレット(16階調の0抜き)
     palette += [0x800000, 0x008000, 0x808000, 0x000080, 0x800080, 0x008080, 0xc0c0c0, 0x808080, 0xff0000, 0x00ff00, 0xffff00, 0x0000ff, 0xff00ff, 0x00ffff, 0xffffff]
