@@ -838,7 +838,7 @@ class XUSelectList(XUSelectBase):
         super().__init__(elem, item_tag, rows, item_w, item_h)
   
     # 入力に応じた挙動一括。変更があった場合はTrue
-    def _select_by_event(self, input:set[str], prev_event:XUEventItem, next_event:XUEventItem, wrap:bool) -> bool:
+    def _select_by_event(self, input:set[XUEventItem], prev_event:XUEventItem, next_event:XUEventItem, wrap:bool) -> bool:
         old_no = self.selected_no
 
         if prev_event in input:
@@ -849,11 +849,11 @@ class XUSelectList(XUSelectBase):
         return self.selected_no != old_no
 
     # 選択一括処理Wrap版
-    def select_by_event(self, input:set[str], prev_event:XUEventItem, next_event:XUEventItem) -> bool:
+    def select_by_event(self, input:set[XUEventItem], prev_event:XUEventItem, next_event:XUEventItem) -> bool:
         return self._select_by_event(input, prev_event, next_event, True)
 
     # 選択一括処理NoWrap版
-    def select_no_wrap(self, input:set[str], prev_event:XUEventItem, next_event:XUEventItem) -> bool:
+    def select_no_wrap(self, input:set[XUEventItem], prev_event:XUEventItem, next_event:XUEventItem) -> bool:
         return self._select_by_event(input, prev_event, next_event, False)
 
 # ダイアル選択用
@@ -880,7 +880,7 @@ class XUSelectNum(XUSelectList):
         return pow(10, self.item_num)-1
 
     # 入力に応じた挙動一括。変更があった場合はTrue
-    def change_by_event(self, input:set[str], left_event:XUEventItem, right_event:XUEventItem, up_event:XUEventItem, down_event:XUEventItem) -> bool:
+    def change_by_event(self, input:set[XUEventItem], left_event:XUEventItem, right_event:XUEventItem, up_event:XUEventItem, down_event:XUEventItem) -> bool:
         # 左右逆でイベントを使う
         changed = self.select_by_event(input, right_event, left_event)
 
