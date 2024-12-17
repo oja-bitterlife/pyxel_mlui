@@ -38,8 +38,6 @@ def update(): # フレームの更新処理
     if pyxel.btnp(pyxel.KEY_F5):
         xmlui.reload_templates()
 
-    print(xmlui.event.trg)
-
 def draw(): # 描画処理
     # ゲームの描画コード
     pyxel.cls(0)
