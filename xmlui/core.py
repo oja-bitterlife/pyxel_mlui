@@ -125,15 +125,15 @@ class XUEvent:
         self.clear()
 
     def clear(self):
-        self._receive:set[str] = set([])  # 次の状態受付
+        self._receive:set[XUEventItem] = set([])  # 次の状態受付
 
-        self.now:set[str] = set([])
-        self.trg:set[str] = set([])
-        self.release:set[str] = set([])
+        self.now:set[XUEventItem] = set([])
+        self.trg:set[XUEventItem] = set([])
+        self.release:set[XUEventItem] = set([])
 
     def clear_trg(self):
-        self.trg:set[str] = set([])
-        self.release:set[str] = set([])
+        self.trg:set[XUEventItem] = set([])
+        self.release:set[XUEventItem] = set([])
 
     # 更新
     def update(self):
@@ -146,7 +146,7 @@ class XUEvent:
         self._receive = set([])
 
     # 入力
-    def _on(self, event_name:str):
+    def _on(self, event_name:XUEventItem):
         if event_name in self._receive:
             raise ValueError(f"event_name:{event_name} is already registered.")
         self._receive.add(event_name)
@@ -614,7 +614,7 @@ class XMLUI(XUElem):
     # *************************************************************************
     # イベントを記録する。Trg処理は内部で行っているので現在の状態を入れる
     def on(self, event_name:str):
-        self.event._on(event_name)
+        self.event._on(XUEventItem(event_name))
 
     # イベントが発生していればopenする。すでに開いているチェック付き
     def open_by_event(self, event_names:list[str]|str, id:str, id_alias:str|None=None) -> XUElem|None:
