@@ -922,7 +922,8 @@ class XUTextUtil:
     # キーを抜き出し
     @classmethod
     def find_params(cls, text) -> set[str]:
-        return set(re.findall(r"{(\S+?)}", text))
+        params = re.findall(r"{(\S+?)}", text)
+        return set([param.split(":")[0] for param in params])  # :以降を取り除く
 
     # 辞書で抜き出し
     @classmethod
