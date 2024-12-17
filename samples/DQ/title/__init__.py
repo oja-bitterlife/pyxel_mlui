@@ -18,7 +18,8 @@ class Title:
         start.ui_init(self.template)
         speed.ui_init(self.template)
 
-        self.img = pyxel.Image.from_image(filename="assets/images/title.png")
+        self.img = pyxel.images[1].from_image(filename="assets/images/title.png", incl_colors=True)
+        pyxel.pal()
 
     def __del__(self):
         # XMLの解放
@@ -31,7 +32,7 @@ class Title:
 
     def draw(self):
         # 画面の描画
-        pyxel.blt(0, 0, self.img, 0, 0, self.img.width, self.img.height)
+        # pyxel.blt(0, 0, self.img, 0, 0, self.img.width, self.img.height)
 
         # UIの表示
         self.xmlui.draw()
