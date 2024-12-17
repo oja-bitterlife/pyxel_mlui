@@ -3,7 +3,7 @@ import pyxel
 
 from xmlui.core import XUElem
 from xmlui_ext import dq
-import samples.DQ.field.field as field
+import db
 
 @dataclasses.dataclass
 class NPC_Data:
@@ -49,6 +49,6 @@ class NPC:
             # メッセージウインドウを開く
             msg_text = dq.MsgDQ(menu.open("message").find_by_id("msg_text"))
             if talk:
-                msg_text.append_talk(talk, field.param_db)  # talkでテキスト開始
+                msg_text.append_talk(talk, vars(db.user_data))  # talkでテキスト開始
             else:
                 msg_text.append_msg("だれもいません")  # systemメッセージ

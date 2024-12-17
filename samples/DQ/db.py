@@ -13,6 +13,7 @@ class UserDataTable:
         self.mp = 123
         self.gold = 1234
         self.exp = 12345
+        self.rem_exp = 10
 user_data = UserDataTable()
 
 class EnemyDataTable:
