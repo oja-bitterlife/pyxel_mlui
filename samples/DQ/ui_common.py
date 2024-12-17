@@ -4,10 +4,9 @@ import pyxel
 # *****************************************************************************
 from xmlui.core import XMLUI,XUDebug,XUElem,XUEvent,XUWinBase,XURect,XUTextUtil
 from xmlui.lib import text,win
-from xmlui.lib import text,win
 from xmlui_ext import dq
 
-from xmlui.pyxel_util.font import PyxelFont
+from xmlui.lib.pyxel_util import PyxelFont
 import db
 
 system_font = PyxelFont("assets/font/b12.bdf")
