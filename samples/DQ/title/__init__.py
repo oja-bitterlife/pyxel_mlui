@@ -18,8 +18,7 @@ class Title:
         start.ui_init(self.template)
         speed.ui_init(self.template)
 
-        self.img = pyxel.Image(256, 256)
-        self.img.load(x=0, y=0, filename="assets/images/title.png")
+        self.img = pyxel.Image.from_image(filename="assets/images/title.png")
 
     def __del__(self):
         # XMLの解放
