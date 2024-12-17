@@ -5,8 +5,8 @@ import pyxel
 # *********************************************************
 pyxel.init(256, 256)
 
-from title.title import Title
-from field.field import Field
+from title import Title
+from field import Field
 # from battle.battle import Battle
 
 # 最初はタイトル
