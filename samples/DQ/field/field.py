@@ -1,18 +1,19 @@
 import pyxel
 
-# タイトル画面
+# UI
 from xmlui.core import XMLUI,XUEvent,XUWinBase,XUSelectItem,XURect
 from xmlui.lib import select,text
 from xmlui_ext import dq
 
+# システムデータ
 import db
-from ui_common import system_font,input_def
+from ui_common import system_font
 
+# フィールド関係
 from field.player import Player
 from field.bg import BG
 from field.npc import NPC
 from field.treasure import Treasure
-
 
 class Field:
     def __init__(self, xmlui:XMLUI):

@@ -151,6 +151,63 @@ class XUEvent:
             raise ValueError(f"event_name:{event_name} is already registered.")
         self._receive.add(event_name)
 
+    # キー入力イベント
+    # *************************************************************************
+    class Key:
+        # キーイベント定義
+        LEFT  = XUEventItem("CUR_L")
+        RIGHT = XUEventItem("CUR_R")
+        UP    = XUEventItem("CUR_U")
+        DOWN  = XUEventItem("CUR_D")
+        BTN_A = XUEventItem("BTN_A")
+        BTN_B = XUEventItem("BTN_B")
+        BTN_X = XUEventItem("BTN_X")
+        BTN_Y = XUEventItem("BTN_Y")
+
+        # クラスのまま使用する
+        def __init__(self) -> None:
+            raise Exception("This class is not instantiable")
+
+        # イベント文字列変更用
+        @classmethod
+        def change_def(cls, key:XUEventItem, event_name:str):
+            match key:
+                case cls.LEFT:
+                    cls.LEFT = XUEventItem(event_name)
+                case cls.RIGHT:
+                    cls.RIGHT = XUEventItem(event_name)
+                case cls.UP:
+                    cls.UP = XUEventItem(event_name)
+                case cls.DOWN:
+                    cls.DOWN = XUEventItem(event_name)
+                case cls.BTN_A:
+                    cls.BTN_A = XUEventItem(event_name)
+                case cls.BTN_B:
+                    cls.BTN_B = XUEventItem(event_name)
+                case cls.BTN_X:
+                    cls.BTN_X = XUEventItem(event_name)
+                case cls.BTN_Y:
+                    cls.BTN_Y = XUEventItem(event_name)
+                case _:
+                    raise Exception(f"Unknown key: {key}")
+
+        # まとめてアクセス
+        @classmethod
+        def LEFT_RIGHT(cls):
+            return cls.LEFT, cls.RIGHT
+
+        @classmethod
+        def UP_DOWN(cls):
+            return cls.UP, cls.DOWN
+
+        @classmethod
+        def CURSOR(cls):
+            return *cls.LEFT_RIGHT(), *cls.UP_DOWN()
+
+        @classmethod
+        def ANY(cls):
+            return *cls.CURSOR(), cls.BTN_A, cls.BTN_B, cls.BTN_X, cls.BTN_Y
+
 
 # UIパーツの状態管理
 # #############################################################################
@@ -445,27 +502,26 @@ class XUElem:
 # XMLでUIライブラリ本体
 # #############################################################################
 # デバッグ用
-class XMLUI_Debug:
+class XUDebug:
     # デバッグ用フラグ
-    DEBUG_LEVEL_LIB:int = 100  # ライブラリ作成用
-    DEBUG_LEVEL_DEFAULT:int = 0
+    DEBUGLEVEL_LIB:int = 100  # ライブラリ作成用
 
-    DEBUG_PRINT_TREE = "DEBUG_PRINT_TREE"
-    DEBUG_RELOAD = "DEBUG_RELOAD"
+    DEBUGEVENT_PRINTTREE = "DEBUG_PRINTTREE"
+    DEBUGEVENT_RELOAD = "DEBUG_RELOAD"
 
-    def __init__(self, xmlui:"XMLUI"):
+    def __init__(self, xmlui:"XMLUI", debug_level):
         self.xmlui = xmlui
-        self.level = self.DEBUG_LEVEL_DEFAULT
+        self.level = debug_level
 
     def update(self):
-        if self.DEBUG_PRINT_TREE in self.xmlui.event.trg:
+        if self.DEBUGEVENT_PRINTTREE in self.xmlui.event.trg:
             print(self.xmlui.strtree())
-        if self.DEBUG_RELOAD in self.xmlui.event.trg:
+        if self.DEBUGEVENT_RELOAD in self.xmlui.event.trg:
             print(self.xmlui.reload_templates())
 
     @property
     def is_lib_debug(self) -> bool:
-        return self.level >= self.DEBUG_LEVEL_LIB
+        return self.level >= self.DEBUGLEVEL_LIB
 
 # テンプレート
 class XUTemplate(XUElem):
@@ -481,7 +537,7 @@ class XUTemplate(XUElem):
         self._draw_funcs:dict[str, Callable[[XUElem, XUEvent], str|None]] = {}
 
     def __del__(self):
-        if self.xmlui.debug.is_lib_debug:
+        if self.xmlui._debug.is_lib_debug:
             print(f"Template was removed: {self.xml_filename}")
 
     # 登録を削除する
@@ -528,7 +584,7 @@ class XMLUI(XUElem):
     # 初期化
     # *************************************************************************
     # 初期化。<xmlui>を持つXMLを突っ込む
-    def __init__(self, screen_w:int, screen_h:int):
+    def __init__(self, screen_w:int, screen_h:int, debug_level=0):
         # rootを作って自分自身に設定
         root = Element("root")
         root.attrib["id"] = "root"
@@ -541,20 +597,20 @@ class XMLUI(XUElem):
         # キャッシュ
         self._parent_cache:dict[Element, XUElem] = {}  # dict[child] = parent_state
 
-        # 入力
-        self.event = XUEvent(True)  # 唯一のactiveとする
-
         # XMLテンプレート置き場
         self._templates:list[XUTemplate] = []
 
         # デバッグ用
-        self.debug = XMLUI_Debug(self)
+        self._debug = XUDebug(self, debug_level)
 
-        # root
-        self.base = XUElem(self, Element("base")).set_attr("id", "base")
-        self.over = XUElem(self, Element("oevr")).set_attr("id", "over")
-        self.add_child(self.base)  # 普通に使うもの
-        self.add_child(self.over)  # 上に強制で出す物
+        # イベント管理
+        self.event = XUEvent(True)  # 唯一のactiveとする
+
+        # 描画ツリー構築
+        self._base = XUElem(self, Element("base")).set_attr("id", "base")
+        self._over = XUElem(self, Element("oevr")).set_attr("id", "over")
+        self.add_child(self._base)  # 普通に使うもの
+        self.add_child(self._over)  # 上に強制で出す物
 
     # template操作
     # *************************************************************************
@@ -606,8 +662,8 @@ class XMLUI(XUElem):
                     self.on(result)
 
         # デバッグ
-        if self.debug.is_lib_debug:
-            self.debug.update()
+        if self._debug.is_lib_debug:
+            self._debug.update()
 
     # イベント
     # *************************************************************************
@@ -621,68 +677,16 @@ class XMLUI(XUElem):
             event_names = [event_names]  # 配列で統一
         for event_name in event_names:
             if event_name in self.event.trg:
-                return self.base.open(id, id_alias)
+                return self._base.open(id, id_alias)
         return None
 
     # override
     def open(self, id:str, id_alias:str|None=None) -> XUElem:
-        return self.base.open(id, id_alias)
+        return self._base.open(id, id_alias)
 
     # over側で開く
     def popup(self, id:str, id_alias:str|None=None) -> XUElem:
-        return self.over.open(id, id_alias)
-
-# キー入力
-# #############################################################################
-class XUInputDef:
-    # キーイベント定義
-    LEFT  = XUEventItem("CUR_L")
-    RIGHT = XUEventItem("CUR_R")
-    UP    = XUEventItem("CUR_U")
-    DOWN  = XUEventItem("CUR_D")
-    BTN_A = XUEventItem("BTN_A")
-    BTN_B = XUEventItem("BTN_B")
-    BTN_X = XUEventItem("BTN_X")
-    BTN_Y = XUEventItem("BTN_Y")
-
-    # イベント文字列変更用
-    def change_def(self, key:XUEventItem, event_name:str):
-        match key:
-            case XUInputDef.LEFT:
-                XUInputDef.LEFT = XUEventItem(event_name)
-            case XUInputDef.RIGHT:
-                XUInputDef.RIGHT = XUEventItem(event_name)
-            case XUInputDef.UP:
-                XUInputDef.UP = XUEventItem(event_name)
-            case XUInputDef.DOWN:
-                XUInputDef.DOWN = XUEventItem(event_name)
-            case XUInputDef.BTN_A:
-                XUInputDef.BTN_A = XUEventItem(event_name)
-            case XUInputDef.BTN_B:
-                XUInputDef.BTN_B = XUEventItem(event_name)
-            case XUInputDef.BTN_X:
-                XUInputDef.BTN_X = XUEventItem(event_name)
-            case XUInputDef.BTN_Y:
-                XUInputDef.BTN_Y = XUEventItem(event_name)
-            case _:
-                raise Exception(f"Unknown key: {key}")
-
-    # まとめてアクセス
-    @property
-    def CURSOR(self):
-        return XUInputDef.LEFT, XUInputDef.RIGHT, XUInputDef.UP, XUInputDef.DOWN
-
-    @property
-    def LEFT_RIGHT(self):
-        return XUInputDef.LEFT, XUInputDef.RIGHT
-
-    @property
-    def UP_DOWN(self):
-        return XUInputDef.UP, XUInputDef.DOWN
-
-    @property
-    def ANY(self):
-        return XUInputDef.LEFT, XUInputDef.RIGHT, XUInputDef.UP, XUInputDef.DOWN, XUInputDef.BTN_A, XUInputDef.BTN_B, XUInputDef.BTN_X, XUInputDef.BTN_Y
+        return self._over.open(id, id_alias)
 
 
 # ユーティリティークラス

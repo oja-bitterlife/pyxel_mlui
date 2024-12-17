@@ -1,5 +1,4 @@
 from xmlui.core import *
-from xmlui.lib.text import FontBase
 
 # 入力系
 # #############################################################################

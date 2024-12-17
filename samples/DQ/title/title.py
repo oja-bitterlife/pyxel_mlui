@@ -4,7 +4,7 @@ import pyxel
 # タイトル画面
 from xmlui.core import XMLUI,XUTemplate,XUEvent,XUSelectItem
 from xmlui.lib import select
-from ui_common import input_def,system_font
+from ui_common import system_font
 from db import system_info
 
 class MSG_SPEED(StrEnum):
@@ -50,10 +50,10 @@ def ui_init(template:XUTemplate):
             menu_item(item)
 
         # メニュー選択
-        game_start.select_by_event(event.trg, *input_def.UP_DOWN)
+        game_start.select_by_event(event.trg, *XUEvent.Key.UP_DOWN())
 
         # メニュー決定
-        if input_def.BTN_A in event.trg:
+        if XUEvent.Key.BTN_A in event.trg:
             match game_start.action:
                 case "start":
                     return "game_start"
@@ -67,7 +67,7 @@ def ui_init(template:XUTemplate):
             menu_item(item)
 
         # メニュー選択。カーソルが動いたらTrueが返る
-        if game_speed.select_by_event(event.trg, *input_def.LEFT_RIGHT):
+        if game_speed.select_by_event(event.trg, *XUEvent.Key.LEFT_RIGHT()):
             # メッセージスピードを切り替える
             match game_speed.action:
                 case MSG_SPEED.SLOW:
