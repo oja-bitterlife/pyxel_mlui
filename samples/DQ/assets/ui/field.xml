@@ -35,7 +35,7 @@
 
     <info>はなす の方向</info>
     <round_win x="-24" y="1" w="96" h="67" id="talk_dir">
-        <menu_item_title x="22" y="0" w="52" h="12" align="center">はなす</menu_item_title>
+        <child_menu_title x="22" y="0" w="52" h="12" align="center">はなす</child_menu_title>
         <dir_select x="12" y="16">
             <dir_item x="22" action="north">きた</dir_item>
             <dir_item x="1" y="16" action="west">にし</dir_item>
@@ -46,7 +46,7 @@
 
     <info>どうぐ</info>
     <round_win x="22" y="17" w="108" h="192" id="tools">
-        <menu_item_title x="34" y="0" w="52" h="12" align="center">どうぐ</menu_item_title>
+        <child_menu_title x="34" y="0" w="52" h="12" align="center">どうぐ</child_menu_title>
         <tools_list x="10" y="14" item_h="16">
             <tools_item action="herbs">やくそう</tools_item>
             <tools_item action="kimera-wing">きめらのつばさ</tools_item>

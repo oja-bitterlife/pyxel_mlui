@@ -53,7 +53,7 @@ def ui_init(template:XUTemplate):
             XUWinBase.find_parent_win(menu_grid).start_close()
 
     # コマンドメニューのタイトル
-    @field_text.label("title", "align", "valign")
+    @field_text.label("title")
     # ---------------------------------------------------------
     def title(title:text.Label, event:XUEvent):
         clip = get_world_clip(XUWinBase.find_parent_win(title)).intersect(title.area)
@@ -63,3 +63,16 @@ def ui_init(template:XUTemplate):
         if title.area.y < clip.bottom():  # world座標で比較
             x, y = title.aligned_pos(system_font)
             pyxel.text(x, y-1, title.text, 7, system_font.font)
+
+
+    # 子メニューごとのタイトル(コマンドメニューと少し場所がずれる)
+    # ---------------------------------------------------------
+    @field_text.label("child_menu_title")
+    def child_menu_title(child_menu_title:text.Label, event:XUEvent):
+        clip = get_world_clip(XUWinBase.find_parent_win(child_menu_title)).intersect(child_menu_title.area)
+        clip.h = max(clip.h, 4)  # フレームを隠すように
+        pyxel.rect(child_menu_title.area.x, child_menu_title.area.y, child_menu_title.area.w, clip.h, 0)  # タイトルの下地
+
+        # テキストはセンタリングで常に表示
+        x, y = child_menu_title.aligned_pos(system_font)
+        pyxel.text(x, y-1, child_menu_title.text, 7, system_font.font)

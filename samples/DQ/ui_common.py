@@ -158,7 +158,7 @@ def status_item(status_item:text.Label, event:XUEvent):
         pyxel.text(area.x + x, area.y + y, text, 7, system_font.font)
 
 # ステータスタイトル(名前)
-@common_text.label("status_title", "align", "valign")
+@common_text.label("status_title")
 def status_title(status_title:text.Label, event:XUEvent):
     clip = get_world_clip(XUWinBase.find_parent_win(status_title)).intersect(status_title.area)
     pyxel.rect(status_title.area.x, status_title.area.y, status_title.area.w, clip.h, 0)  # タイトルの下地
