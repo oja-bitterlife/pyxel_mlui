@@ -30,10 +30,13 @@ class FontBase:
 # #############################################################################
 # ラベル
 class Label(XUElem):
-    def __init__(self, elem:XUElem, align_attr:str, valign_attr:str):
+    ALIGN_ATTR = 'align'  # horizonアライメント
+    VALIGN_ATTR = 'valign'  # verticalアライメント
+
+    def __init__(self, elem:XUElem):
         super().__init__(elem.xmlui, elem._element)
-        self.align = elem.attr_str(align_attr, "left")
-        self.valign = elem.attr_str(valign_attr, "top")
+        self.align = elem.attr_str(self.ALIGN_ATTR, XURect.ALIGN_LEFT)
+        self.valign = elem.attr_str(self.VALIGN_ATTR, XURect.ALIGN_TOP)
 
     def aligned_pos(self, font:FontBase) -> tuple[int, int]:
         area = self.area
@@ -60,11 +63,11 @@ class Msg(XUPageText):
 # デコレータを用意
 # *****************************************************************************
 class Decorator(XUTemplate.HasRef):
-    def label(self, tag_name:str, align_attr:str="align", valign_attr:str="valign"):
+    def label(self, tag_name:str):
         def wrapper(bind_func:Callable[[Label,XUEvent], str|None]):
             # 登録用関数をジェネレート
             def draw(elem:XUElem, event:XUEvent):
-                return bind_func(Label(elem, align_attr, valign_attr), event)
+                return bind_func(Label(elem), event)
             # 関数登録
             self.template.set_drawfunc(tag_name, draw)
         return wrapper

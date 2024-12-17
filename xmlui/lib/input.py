@@ -4,7 +4,8 @@ from xmlui.core import *
 # #############################################################################
 # 数値設定ダイアル
 class Dial(XUSelectNum):
-    ITEM_W_ATTR = "item_w"  # ワードラップ文字数
+    ITEM_W_ATTR = "item_w"  # アイテム配置間隔
+    LENGTH_ATTR = "length"  # 桁数
 
     # タグのテキストを処理する
     def __init__(self, elem:XUElem, item_tag:str):

@@ -1,0 +1,65 @@
+import pyxel
+
+from xmlui.core import XUTemplate,XUEvent,XUWinBase,XUSelectItem
+from xmlui.lib import select,text
+from xmlui_ext import dq
+from ui_common import system_font,get_world_clip,draw_menu_cursor
+
+def ui_init(template:XUTemplate):
+    field_select = select.Decorator(template)
+    field_text = text.Decorator(template)
+
+    # コマンドメニュー
+    # ---------------------------------------------------------
+    def menu_item(menu_item:XUSelectItem):
+        # ウインドウのクリップ状態に合わせて表示する
+        if menu_item.area.y < get_world_clip(XUWinBase.find_parent_win(menu_item)).bottom():
+            pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, 7, system_font.font)
+
+            # カーソル表示
+            if menu_item.selected and menu_item.enable:
+                draw_menu_cursor(menu_item, 0, 0)
+
+    @field_select.grid("menu_grid", "menu_item")
+    def menu_grid(menu_grid:select.Grid, event:XUEvent):
+        # 各アイテムの描画
+        for item in menu_grid.items:
+            menu_item(item)
+
+        # メニュー選択
+        menu_grid.select_by_event(event.trg, *XUEvent.Key.CURSOR())
+
+        # 選択アイテムの表示
+        if XUEvent.Key.BTN_A in event.trg:
+            match menu_grid.action:
+                case "talk":
+                    menu_grid.open("talk_dir")
+                case "tools":
+                    menu_grid.open("tools")
+                case "stairs":
+                    return "down_stairs"
+                case "door":
+                    return "open_door"
+                case _:
+                    menu_grid.xmlui.popup("under_construct")
+
+        # アイテムの無効化(アイテムカーソル用)
+        is_message_oepn = menu_grid.xmlui.exists_id("message")
+        for item in menu_grid.items:
+            item.enable = event.is_active and not is_message_oepn
+
+        # 閉じる
+        if XUEvent.Key.BTN_B in event.trg:
+            XUWinBase.find_parent_win(menu_grid).start_close()
+
+    # コマンドメニューのタイトル
+    @field_text.label("title", "align", "valign")
+    # ---------------------------------------------------------
+    def title(title:text.Label, event:XUEvent):
+        clip = get_world_clip(XUWinBase.find_parent_win(title)).intersect(title.area)
+        pyxel.rect(title.area.x, title.area.y, title.area.w, clip.h, 0)  # タイトルの下地
+
+        # テキストはセンタリング
+        if title.area.y < clip.bottom():  # world座標で比較
+            x, y = title.aligned_pos(system_font)
+            pyxel.text(x, y-1, title.text, 7, system_font.font)
