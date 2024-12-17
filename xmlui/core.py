@@ -160,7 +160,7 @@ class XUElem:
         self.xmlui = xmlui  # ライブラリへのIF
         self._element = element  # 自身のElement
 
-    # UI_Stateは都度使い捨てなので、対象となるElementで比較する
+    # UI_Elemは都度使い捨てなので、対象となるElementで比較する
     def __eq__(self, other) -> bool:
         if isinstance(other, XUElem):
             return other._element is self._element
@@ -334,9 +334,11 @@ class XUElem:
         # オープン
         opened:XUElem|None = None
         for template in self.xmlui._templates:
+            # 複数のテンプレートの中から最初に見つかったidを複製してopenする
             if template.exists_id(id):
                 opened = template.duplicate(id).set_attr("id", id_alias)
                 self.add_child(opened)
+                break
         if opened == None:
             raise Exception(f"ID '{id}' not found")
 
