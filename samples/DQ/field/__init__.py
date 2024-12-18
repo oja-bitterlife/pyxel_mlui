@@ -8,7 +8,10 @@ from field.system.treasure import Treasure
 from xmlui.core import XMLUI,XUEvent
 from field.ui import msg_win,menu,talk_dir,tools
 
-class Field:
+# シーン関係
+from scene import SceneBase
+
+class Field(SceneBase):
     def __init__(self, xmlui:XMLUI):
         self.xmlui = xmlui
 

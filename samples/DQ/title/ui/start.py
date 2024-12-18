@@ -22,7 +22,7 @@ def ui_init(template:XUTemplate):
         # メニュー決定
         if XUEvent.Key.BTN_A in event.trg:
             match game_start.action:
-                case "start":
-                    return title.Title.NEXT_SCENE_EVENT
-                case "continue":
+                case "start" as action:
+                    return action
+                case _:
                     game_start.xmlui.popup("under_construct")
