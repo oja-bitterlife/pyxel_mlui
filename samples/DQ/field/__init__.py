@@ -9,11 +9,11 @@ from xmlui.core import XMLUI,XUEvent
 from field.ui import msg_win,menu,talk_dir,tools
 
 # シーン関係
-from xmlui_ext.scene import XUEScene
+from xmlui_ext.scene import XUXScene
 from battle import Battle  # 次シーン
 
 
-class Field(XUEScene):
+class Field(XUXScene):
     def __init__(self, xmlui:XMLUI):
         super().__init__(xmlui)
 
@@ -55,7 +55,7 @@ class Field(XUEScene):
             self.end_scene()
 
     def closed(self):
-        XUEScene.current_scene = Battle(self.xmlui)
+        XUXScene.current_scene = Battle(self.xmlui)
 
     def draw(self):
         # プレイヤを中心に世界が動く。さす勇

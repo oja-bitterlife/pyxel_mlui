@@ -4,7 +4,7 @@ import pyxel
 # タイトル画面
 from xmlui.core import XMLUI,XUEvent,XUWinBase,XUSelectItem,XUTextUtil
 from xmlui.lib import select,text
-from xmlui_ext.scene import XUEScene
+from xmlui_ext.scene import XUXScene
 from ui_common import system_font
 from xmlui_ext import dq
 import db
@@ -13,7 +13,7 @@ battle_db: dict[str, str] = {
     "enemy": "なにか",
 }
 
-class Battle(XUEScene):
+class Battle(XUXScene):
     UI_TEMPLATE_BATTLE = "ui_battle"
 
     # バトルの状態遷移

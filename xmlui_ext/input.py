@@ -63,7 +63,7 @@ class XUEInputInfo:
         return False
 
 # インプット管理クラス。どこかでcheck()を呼び出す
-class XUEInput(XUEInputInfo):
+class XUXInput(XUEInputInfo):
     # 全ボタン一気に調べてイベント設定
     def check(self):
         for event,keys in self.key_config.items():

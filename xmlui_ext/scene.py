@@ -2,15 +2,15 @@ from enum import StrEnum
 import pyxel
 
 from xmlui.core import XMLUI
-from xmlui_ext.input import XUEInput
+from xmlui_ext.input import XUXInput
 
-class XUEScene:
+class XUXScene:
     # フェードインアウト時間
     OPEN_COUNT_MAX = 15
     CLOSE_COUNT_MAX = 15
 
     # シーン管理用
-    current_scene:"XUEScene|None" = None
+    current_scene:"XUXScene|None" = None
 
     # Sceneのopen/close状態
     class State(StrEnum):
@@ -21,7 +21,7 @@ class XUEScene:
 
     def __init__(self, xmlui:XMLUI):
         self.xmlui = xmlui
-        self._state:XUEScene.State = self.State.OPENING
+        self._state:XUXScene.State = self.State.OPENING
 
         # フェードインアウト設定
         self.open_count = self.OPEN_COUNT_MAX
@@ -34,7 +34,7 @@ class XUEScene:
         # open/close中はupdateを呼び出さない
         if self._state == self.State.OPENED:
             # 更新処理呼び出し
-            XUEInput(self.xmlui).check()  # UI用キー入力
+            XUXInput(self.xmlui).check()  # UI用キー入力
             self.update()
 
     def draw_scene(self):
@@ -70,7 +70,7 @@ class XUEScene:
                 pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.fade_color)
                 self.open_count -= 1
             else:
-                self._state = XUEScene.State.OPENED
+                self._state = XUXScene.State.OPENED
 
         if self._state == self.State.CLOSING:
             if self.close_count > 0:
@@ -79,5 +79,5 @@ class XUEScene:
                 self.close_count -= 1
             else:
                 pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.fade_color)
-                self._state = XUEScene.State.CLOSED
+                self._state = XUXScene.State.CLOSED
 

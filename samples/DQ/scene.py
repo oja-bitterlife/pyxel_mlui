@@ -2,7 +2,7 @@ from enum import StrEnum
 import pyxel
 
 from xmlui.core import XMLUI
-from xmlui.lib.pyxel_util import PyxelInput
+from xmlui_ext.input import XUXInput
 
 class SceneBase:
     # フェードインアウト時間
@@ -34,7 +34,7 @@ class SceneBase:
         # open/close中はupdateを呼び出さない
         if self._state == self.State.OPENED:
             # 更新処理呼び出し
-            PyxelInput(self.xmlui).check()  # UI用キー入力
+            XUXInput(self.xmlui).check()  # UI用キー入力
             self.update()
 
     def draw_scene(self):
