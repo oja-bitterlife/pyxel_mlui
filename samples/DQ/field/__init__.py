@@ -10,6 +10,8 @@ from field.ui import msg_win,menu,talk_dir,tools
 
 # シーン関係
 from xmlui_ext.scene import XUEScene
+from battle import Battle  # 次シーン
+
 
 class Field(XUEScene):
     def __init__(self, xmlui:XMLUI):
@@ -49,8 +51,11 @@ class Field(XUEScene):
             self.bg.check_stairs(menu, self.player)
 
         # バトル開始
-        # if "start_battle" in self.xmlui.event.trg:
-        #     return "battle"
+        if "start_battle" in self.xmlui.event.trg:
+            self.end_scene()
+
+    def closed(self):
+        XUEScene.current_scene = Battle(self.xmlui)
 
     def draw(self):
         # プレイヤを中心に世界が動く。さす勇

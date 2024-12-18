@@ -4,15 +4,16 @@ import pyxel
 # タイトル画面
 from xmlui.core import XMLUI,XUEvent,XUWinBase,XUSelectItem,XUTextUtil
 from xmlui.lib import select,text
+from xmlui_ext.scene import XUEScene
+from ui_common import system_font
 from xmlui_ext import dq
-from ui_common import ui_theme
-from samples.DQ.params import param_db
+import db
 
-battle_db = {
+battle_db: dict[str, str] = {
     "enemy": "なにか",
 }
 
-class Battle:
+class Battle(XUEScene):
     UI_TEMPLATE_BATTLE = "ui_battle"
 
     # バトルの状態遷移
@@ -52,7 +53,7 @@ class Battle:
                 menu = dq.MsgDQ(self.battle.find_by_id("menu"))
                 if "attack" in self.xmlui.event.trg:
                     battle_db["hit"] = XUTextUtil.format_zenkaku(random.randint(1, 100))
-                    marge_db = param_db | battle_db
+                    marge_db = vars(db.user_data) | battle_db
 
                     msg_dq.append_msg("{name}の　こうげき！", marge_db)
                     msg_dq.append_msg("{enemy}に　{hit}ポイントの\nダメージを　あたえた！", marge_db)
@@ -61,7 +62,7 @@ class Battle:
 
             case Battle.ST_ENEMY_TURN:
                 battle_db["damage"] = XUTextUtil.format_zenkaku(random.randint(1, 10))
-                marge_db = param_db | battle_db
+                marge_db = vars(db.user_data)  | battle_db
 
                 msg_dq.append_enemy("{enemy}の　こうげき！", marge_db)
                 msg_dq.append_enemy("{name}は　{damage}ポイントの\nだめーじを　うけた", marge_db)
@@ -83,22 +84,22 @@ def ui_init(template):
     battle_dq = dq.Decorator(template)
 
     # コマンドメニューのタイトル
-    @battle_text.label("title", "align", "valign")
+    @battle_text.label("title")
     def title(title:text.Label, event:XUEvent):
         clip = get_world_clip(XUWinBase.find_parent_win(title)).intersect(title.area)
         pyxel.rect(title.area.x, title.area.y, title.area.w, clip.h, 0)  # タイトルの下地
 
         # テキストはセンタリング
         if title.area.y < clip.bottom():  # world座標で比較
-            x, y = title.aligned_pos(ui_theme.font.system)
-            pyxel.text(x, y-1, title.text, 7, ui_theme.font.system.font)
+            x, y = title.aligned_pos(system_font)
+            pyxel.text(x, y-1, title.text, 7, system_font.font)
 
     # メニューアイテム
     # ---------------------------------------------------------
     def menu_item(menu_item:XUSelectItem):
         # ウインドウのクリップ状態に合わせて表示する
         if menu_item.area.y < get_world_clip(XUWinBase.find_parent_win(menu_item)).bottom():
-            pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, 7, ui_theme.font.system.font)
+            pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, 7, system_font.font)
 
             # カーソル表示
             if menu_item.selected and menu_item.enable:
@@ -113,11 +114,10 @@ def ui_init(template):
             menu_item(item)
 
         # メニュー選択
-        input_def = ui_theme.input_def
-        menu_grid.select_by_event(event.trg, *input_def.CURSOR)
+        menu_grid.select_by_event(event.trg, *XUEvent.Key.CURSOR())
 
         # 選択アイテムの表示
-        if input_def.BTN_A in event.trg:
+        if XUEvent.Key.BTN_A in event.trg:
             return menu_grid.action
 
 
