@@ -1,4 +1,4 @@
-from typing import Self
+from typing import Any,Self
 
 import pyxel
 from xmlui.lib.text import FontBase
@@ -50,16 +50,16 @@ class PyxelPalette:
     # セピアカラーパレット取得
     @property
     def pal_sepia16(self) -> list[int]:
-        return [0] + self.palette[self.sepia_offset:self.sepia_offset+15]
+        return [0] + [self.sepia_offset + i for i in range(15)]
 
     # デジタルカラーパレット取得
     @property
     def pal_digital16(self) -> list[int]:
-        return [0] + self.palette[self.digital_offset:self.digital_offset+15]
+        return [0] + [self.digital_offset + i for i in range(15)]
 
     @property
     def pal_digital8(self) -> list[int]:
-        return [0] + self.palette[self.digital_offset+8:self.digital_offset+15]
+        return [0] + [self.digital_offset+8 + i for i in range(15)]
 
     # 海外フリーゲームでよく使われるカラーキー
     @property
