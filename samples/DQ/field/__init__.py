@@ -13,7 +13,7 @@ from scene import SceneBase
 
 class Field(SceneBase):
     def __init__(self, xmlui:XMLUI):
-        self.xmlui = xmlui
+        super().__init__(xmlui)
 
         # ゲーム本体(仮)
         self.player = Player(10, 10)
@@ -30,7 +30,7 @@ class Field(SceneBase):
         # 読みこんだUIの削除
         self.template.remove()
 
-    def update(self):
+    def run(self):
         # UIメニューが開いていたらキャラが動かないように
         if not self.xmlui.exists_id("menu"):
             # プレイヤの移動
@@ -49,10 +49,9 @@ class Field(SceneBase):
             self.bg.check_stairs(menu, self.player)
 
         # バトル開始
-        if "start_battle" in self.xmlui.event.trg:
-            return "battle"
+        # if "start_battle" in self.xmlui.event.trg:
+        #     return "battle"
 
-    def draw(self):
         # プレイヤを中心に世界が動く。さす勇
         scroll_x = -self.player.x +160-32
         scroll_y = -self.player.y +160-32-8
