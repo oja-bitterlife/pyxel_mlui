@@ -5,18 +5,19 @@ from xmlui.core import XMLUI
 from xmlui.lib.pyxel_util import PyxelInput
 
 class SceneBase:
+    # フェードインアウト時間
+    OPEN_COUNT_MAX = 15
+    CLOSE_COUNT_MAX = 15
+
     # シーン管理用
     current_scene:"SceneBase|None" = None
 
+    # Sceneのopen/close状態
     class State(StrEnum):
         OPENING = "opening"
         OPENED = "opened"
         CLOSING = "closing"
         CLOSED = "closed"
-
-    # フェードインアウト時間
-    OPEN_COUNT_MAX = 15
-    CLOSE_COUNT_MAX = 15
 
     def __init__(self, xmlui:XMLUI):
         self.xmlui = xmlui
