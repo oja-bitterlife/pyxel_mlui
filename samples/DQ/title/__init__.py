@@ -3,7 +3,6 @@ import pyxel
 # タイトル画面
 from xmlui.core import XMLUI
 from title.ui import start,speed
-from xmlui.lib.pyxel_util import set_ex_palette
 
 class Title:
     NEXT_SCENE_EVENT = "game_start"
@@ -20,7 +19,6 @@ class Title:
         speed.ui_init(self.template)
 
         self.img = pyxel.Image.from_image(filename="assets/images/title.png")
-        set_ex_palette()
 
     def __del__(self):
         # XMLの解放

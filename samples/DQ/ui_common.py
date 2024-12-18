@@ -6,18 +6,21 @@ from xmlui.core import XMLUI,XUDebug,XUElem,XUEvent,XUWinBase,XURect,XUTextUtil
 from xmlui.lib import text,win
 from xmlui_ext import dq
 
-from xmlui.lib.pyxel_util import PyxelFont
+from xmlui.lib.pyxel_util import PyxelFont,PyxelPalette
 import db
 
 system_font = PyxelFont("assets/font/b12.bdf")
-WIN_OPEN_SPEED   = 16
-WIN_CLOSE_SPEED   = 32
+system_palette = PyxelPalette()
 
 # ライブラリのインスタンス化
 xmlui = XMLUI(pyxel.width, pyxel.height, XUDebug.DEBUGLEVEL_LIB)
-
 common_template = xmlui.load_template("assets/ui/common.xml")
 
+
+# 共通定義
+# *****************************************************************************
+WIN_OPEN_SPEED   = 16
+WIN_CLOSE_SPEED   = 32
 
 # 共通で使える関数
 # *****************************************************************************

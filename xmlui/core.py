@@ -10,7 +10,6 @@ import re
 import math
 import copy
 from typing import Callable,Any,Self  # 型を使うよ
-from enum import StrEnum
 
 
 # 描画領域計算用
