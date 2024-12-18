@@ -29,14 +29,14 @@ class Title(SceneBase):
         self.template.remove()
 
 
-    def run(self):
-        # 画面の描画
+    def draw(self):
+        # 背景絵
         pyxel.blt(0, 0, self.img, 0, 0, self.img.width, self.img.height)
 
         # UIの表示
         self.xmlui.draw()
         if "start" in self.xmlui.event.trg:  # startが実行された
-            super().end_run()
+            super().end_scene()
 
     def closed(self):
         SceneBase.current_scene = Field(self.xmlui)

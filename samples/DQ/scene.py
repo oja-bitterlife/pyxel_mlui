@@ -8,8 +8,8 @@ class SceneBase:
     current_scene:"SceneBase|None" = None
 
     class State(StrEnum):
-        INIT = "init"
-        RUN = "run"
+        OPENING = "opening"
+        OPENED = "opened"
         CLOSING = "closing"
         CLOSED = "closed"
 
@@ -19,63 +19,52 @@ class SceneBase:
 
     def __init__(self, xmlui:XMLUI):
         self.xmlui = xmlui
-        self._state = self.State.INIT
+        self._state:SceneBase.State = self.State.OPENING
 
-        # フェードインアウト時間設定
+        # フェードインアウト設定
         self.open_count = self.OPEN_COUNT_MAX
         self.close_count = self.CLOSE_COUNT_MAX
+        self.fade_color = 0
 
-    def draw(self):
+    def update_scene(self):
+        self.update()
+
+    def draw_scene(self):
         pyxel.dither(1.0)  # 戻しておく
 
-        match self._state:
-            case self.State.INIT:
-                self.init()
-                self.init_after()
-            case self.State.RUN:
-                self.run()
-                self.run_after()
-            case self.State.CLOSING:
-                self.closing()
-                self.closing_after()
-            case self.State.CLOSED:
-                self.closed()
-            case _:
-                print("SceneBase: Unknown state")
-
-    def init(self):
-        pass
-
-    def init_after(self):
-        self._state = self.State.RUN
-
-    def run(self):
-        pass
-
-    def run_after(self):
-        if self.open_count > 0:
-            pyxel.dither(self.open_count/self.OPEN_COUNT_MAX)
-            pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, 0)
-            self.open_count -= 1
-
-    def end_run(self):
-        self._state = self.State.CLOSING
-        self._screen = pyxel.screen.data_ptr()[:]
-
-    def closing(self):
-        # 記録した画面を描画
-        screen = pyxel.screen.data_ptr()
-        screen[:] = self._screen
-
-    def closing_after(self):
-        if self.close_count > 0:
-            pyxel.dither((self.CLOSE_COUNT_MAX-self.close_count)/self.CLOSE_COUNT_MAX)
-            pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, 0)
-            self.close_count -= 1
+        if self._state == self.State.CLOSED:
+            pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.fade_color)
+            self.closed()
         else:
-            pyxel.dither(1.0)
-            pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, 0)
-            self._state = self.State.CLOSED
+            self.draw()
+            self.draw_after()
+
+    def draw_after(self):
+        if self._state == self.State.OPENING:
+            if self.open_count > 0:
+                pyxel.dither(self.open_count/self.OPEN_COUNT_MAX)
+                pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.fade_color)
+                self.open_count -= 1
+            else:
+                self._state = SceneBase.State.OPENED
+
+        if self._state == self.State.CLOSING:
+            if self.close_count > 0:
+                pyxel.dither((self.CLOSE_COUNT_MAX-self.close_count)/self.CLOSE_COUNT_MAX)
+                pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.fade_color)
+                self.close_count -= 1
+            else:
+                pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.fade_color)
+                self._state = SceneBase.State.CLOSED
+
+    def end_scene(self):
+        self._state = self.State.CLOSING
 
     def closed(self):
+        pass
+
+    # これらはsceneの中から呼び出すように。Pythonはメソッドを隠せないので……
+    def update(self):
+        pass
+    def draw(self):
         pass

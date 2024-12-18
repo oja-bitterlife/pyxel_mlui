@@ -30,7 +30,7 @@ class Field(SceneBase):
         # 読みこんだUIの削除
         self.template.remove()
 
-    def run(self):
+    def update(self):
         # UIメニューが開いていたらキャラが動かないように
         if not self.xmlui.exists_id("menu"):
             # プレイヤの移動
@@ -52,6 +52,7 @@ class Field(SceneBase):
         # if "start_battle" in self.xmlui.event.trg:
         #     return "battle"
 
+    def draw(self):
         # プレイヤを中心に世界が動く。さす勇
         scroll_x = -self.player.x +160-32
         scroll_y = -self.player.y +160-32-8

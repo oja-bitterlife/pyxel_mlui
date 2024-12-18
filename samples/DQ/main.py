@@ -36,7 +36,7 @@ def draw(): # 描画処理
 
     # UI描画
     if SceneBase.current_scene:
-        SceneBase.current_scene.draw()
+        SceneBase.current_scene.draw_scene()
 
 # アプリケーションの実行
 pyxel.run(update, draw)
