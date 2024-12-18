@@ -5,17 +5,20 @@ import pyxel
 # *********************************************************
 pyxel.init(256, 256)
 
-from title import Title
-from field import Field
-# from battle.battle import Battle
+from xmlui.core import XUEvent
+from xmlui.lib.pyxel_util import PyxelInput
+from ui_common import xmlui
 
 # 最初はタイトル
-from xmlui.core import XUEvent
-from ui_common import xmlui
+from title import Title
+from field import Field
+#from battle import Battle
 
 scene = Title(xmlui)
 #scene = Field(xmlui)
 #scene = Battle(xmlui)
+
+ui_input = PyxelInput(xmlui)
 
 # Main
 def update(): # フレームの更新処理
@@ -43,23 +46,11 @@ def draw(): # 描画処理
     pyxel.cls(0)
 
     # UI用キー入力
-    if pyxel.btn(pyxel.KEY_LEFT) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_LEFT):
-        xmlui.on(XUEvent.Key.LEFT)
-    if pyxel.btn(pyxel.KEY_RIGHT) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_RIGHT):
-        xmlui.on(XUEvent.Key.RIGHT)
-    if pyxel.btn(pyxel.KEY_UP) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_UP):
-        xmlui.on(XUEvent.Key.UP)
-    if pyxel.btn(pyxel.KEY_DOWN) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN):
-        xmlui.on(XUEvent.Key.DOWN)
-    if pyxel.btn(pyxel.KEY_RETURN) or pyxel.btn(pyxel.KEY_SPACE)  or pyxel.btn(pyxel.GAMEPAD1_BUTTON_A):
-        xmlui.on(XUEvent.Key.BTN_A)
-    if pyxel.btn(pyxel.KEY_BACKSPACE) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_B):
-        xmlui.on(XUEvent.Key.BTN_B)
+    ui_input.check()
 
     # UI描画
     global scene
-    if scene:
-        scene.draw()
+    scene.draw()
 
 # アプリケーションの実行
 pyxel.run(update, draw)

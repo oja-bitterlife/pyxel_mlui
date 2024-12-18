@@ -1,6 +1,7 @@
 from typing import Any,Self
 
 import pyxel
+from xmlui.core import XUEvent, XUEventItem
 from xmlui.lib.text import FontBase
 
 # Pyxelのフォントを使う
@@ -75,3 +76,44 @@ class PyxelPalette:
     @property
     def pal_white(self) -> int:
         return self.digital_offset+14
+
+
+# Pyxelの入力をXMLUIのイベントに変換する
+# #############################################################################
+class PyxelInput:
+    # キーコンフィグ時はここの設定書き換える
+    LEFT = [pyxel.GAMEPAD1_BUTTON_DPAD_LEFT, pyxel.KEY_LEFT, pyxel.KEY_A]
+    RIGHT = [pyxel.GAMEPAD1_BUTTON_DPAD_RIGHT, pyxel.KEY_RIGHT, pyxel.KEY_D]
+    UP = [pyxel.GAMEPAD1_BUTTON_DPAD_UP, pyxel.KEY_UP, pyxel.KEY_W]
+    DOWN = [pyxel.GAMEPAD1_BUTTON_DPAD_DOWN, pyxel.KEY_DOWN, pyxel.KEY_S]
+    # XBox準拠...
+    BTN_A = [pyxel.GAMEPAD1_BUTTON_A, pyxel.KEY_Z, pyxel.KEY_SPACE, pyxel.KEY_RETURN]
+    BTN_B = [pyxel.GAMEPAD1_BUTTON_B, pyxel.KEY_X, pyxel.KEY_BACKSPACE]
+    BTN_X = [pyxel.GAMEPAD1_BUTTON_X, pyxel.KEY_Q, pyxel.KEY_C]
+    BTN_Y = [pyxel.GAMEPAD1_BUTTON_Y, pyxel.KEY_E, pyxel.KEY_V]
+
+    def __init__(self, xmlui):
+        self.xmlui = xmlui
+
+    # 全ボタン一気に調べてイベント設定
+    def check(self):
+        # UI用キー入力
+        for event,keys in self.key_config.items():
+            for key in keys:
+                if pyxel.btn(key):
+                    self.xmlui.on(event)
+                    break
+
+    # その時のキー定義に合わせて構築し直すようプロパティで
+    @property
+    def key_config(self) -> dict[XUEventItem, list[int]]:
+        return {
+            XUEvent.Key.LEFT: self.LEFT,
+            XUEvent.Key.RIGHT: self.RIGHT,
+            XUEvent.Key.UP: self.UP,
+            XUEvent.Key.DOWN: self.DOWN,
+            XUEvent.Key.BTN_A: self.BTN_A,
+            XUEvent.Key.BTN_B: self.BTN_B,
+            XUEvent.Key.BTN_X: self.BTN_X,
+            XUEvent.Key.BTN_Y: self.BTN_Y,
+        }
