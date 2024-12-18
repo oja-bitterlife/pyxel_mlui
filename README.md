@@ -106,7 +106,7 @@ def window(window:XUState, event:XUEvent):
     # 第一パラメータのareaにUIのスクリーン座標
     area = window.area
     # pyxelで好きに描画
-    pyxel.boxb(area.x, area.y, area.w, area.h, 7)
+    pyxel.rectb(area.x, area.y, area.w, area.h, 7)
 
 pyxel.run(update, draw)
 ```
