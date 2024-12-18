@@ -18,8 +18,6 @@ scene = Title(xmlui)
 #scene = Field(xmlui)
 #scene = Battle(xmlui)
 
-ui_input = PyxelInput(xmlui)
-
 # Main
 def update(): # フレームの更新処理
     global scene
@@ -46,7 +44,7 @@ def draw(): # 描画処理
     pyxel.cls(0)
 
     # UI用キー入力
-    ui_input.check()
+    PyxelInput(xmlui).check()
 
     # UI描画
     global scene

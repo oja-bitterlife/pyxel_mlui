@@ -1,4 +1,7 @@
 import pyxel
+from xmlui.lib.pyxel_util import PyxelInputInfo
+from ui_common import xmlui
+
 import field.system.npc as npc
 import field.system.bg as bg
 
@@ -25,16 +28,17 @@ class Player:
 
         # キー入力チェック
         if not self.is_moving:
-            if pyxel.btn(pyxel.KEY_UP):
+            input_info = PyxelInputInfo(xmlui)
+            if input_info.input(pyxel.KEY_UP):
                 if _hitcheck(self.x, self.y-16):
                     self.move_y = -16
-            if pyxel.btn(pyxel.KEY_DOWN):
+            if input_info.input(pyxel.KEY_DOWN):
                 if _hitcheck(self.x, self.y+16):
                     self.move_y = 16
-            if pyxel.btn(pyxel.KEY_LEFT):
+            if input_info.input(pyxel.KEY_LEFT):
                 if _hitcheck(self.x-16, self.y):
                     self.move_x = -16
-            if pyxel.btn(pyxel.KEY_RIGHT):
+            if input_info.input(pyxel.KEY_RIGHT):
                 if _hitcheck(self.x+16, self.y):
                     self.move_x = 16
 
