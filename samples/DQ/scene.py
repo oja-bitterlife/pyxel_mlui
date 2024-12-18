@@ -4,6 +4,7 @@ import pyxel
 from xmlui.core import XMLUI
 
 class SceneBase:
+    # シーン管理用
     current_scene:"SceneBase|None" = None
 
     class State(StrEnum):
@@ -13,8 +14,8 @@ class SceneBase:
         CLOSED = "closed"
 
     # フェードインアウト時間
-    OPEN_COUNT_MAX = 30
-    CLOSE_COUNT_MAX = 30
+    OPEN_COUNT_MAX = 15
+    CLOSE_COUNT_MAX = 15
 
     def __init__(self, xmlui:XMLUI):
         self.xmlui = xmlui
@@ -59,9 +60,12 @@ class SceneBase:
 
     def end_run(self):
         self._state = self.State.CLOSING
+        self._screen = pyxel.screen.data_ptr()[:]
 
     def closing(self):
-        pass
+        # 記録した画面を描画
+        screen = pyxel.screen.data_ptr()
+        screen[:] = self._screen
 
     def closing_after(self):
         if self.close_count > 0:
@@ -69,6 +73,8 @@ class SceneBase:
             pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, 0)
             self.close_count -= 1
         else:
+            pyxel.dither(1.0)
+            pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, 0)
             self._state = self.State.CLOSED
 
     def closed(self):
