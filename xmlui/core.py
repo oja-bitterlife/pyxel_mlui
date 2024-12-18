@@ -641,6 +641,9 @@ class XMLUI(XUElem):
         if self._debug.is_lib_debug:
             self._debug.update()
 
+        # 最後に自分もカウントアップ
+        self.set_attr("update_count", self.update_count+1)
+
     # イベント
     # *************************************************************************
     # イベントを記録する。Trg処理は内部で行っているので現在の状態を入れる

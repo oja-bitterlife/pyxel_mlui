@@ -30,8 +30,13 @@ class Title:
             return "field"
 
     def draw(self):
+        pyxel.dither(1)
+
         # 画面の描画
         pyxel.blt(0, 0, self.img, 0, 0, self.img.width, self.img.height)
 
         # UIの表示
         self.xmlui.draw()
+
+        pyxel.dither((self.xmlui.update_count%30) /30)
+        pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, 0)
