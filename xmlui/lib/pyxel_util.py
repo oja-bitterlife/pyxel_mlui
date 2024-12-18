@@ -48,18 +48,30 @@ class PyxelPalette:
         return self
 
     # セピアカラーパレット取得
-    def get_sepia_16(self) -> list[int]:
+    @property
+    def pal_sepia16(self) -> list[int]:
         return [0] + self.palette[self.sepia_offset:self.sepia_offset+15]
 
     # デジタルカラーパレット取得
-    def get_digital_16(self) -> list[int]:
+    @property
+    def pal_digital16(self) -> list[int]:
         return [0] + self.palette[self.digital_offset:self.digital_offset+15]
 
+    @property
+    def pal_digital8(self) -> list[int]:
+        return [0] + self.palette[self.digital_offset+8:self.digital_offset+15]
+
     # 海外フリーゲームでよく使われるカラーキー
-    def get_magenta(self) -> int:
+    @property
+    def pal_magenta(self) -> int:
         return self.digital_offset+12
 
     # フリーゲームや映像でよく使われるカラーキー
-    def get_green(self) -> int:
+    @property
+    def pal_green(self) -> int:
         return self.digital_offset+9
 
+    # 白
+    @property
+    def pal_white(self) -> int:
+        return self.digital_offset+14
