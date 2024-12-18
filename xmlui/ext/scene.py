@@ -2,7 +2,7 @@ from enum import StrEnum
 import pyxel
 
 from xmlui.core import XMLUI
-from xmlui_ext.input import XUXInput
+from xmlui.ext.input import XUXInput
 
 class XUXScene:
     # フェードインアウト時間

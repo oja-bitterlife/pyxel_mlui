@@ -6,10 +6,9 @@ from field.system.treasure import Treasure
 
 # UI
 from xmlui.core import XMLUI,XUEvent
-from field.ui import msg_win,menu,talk_dir,tools
+from xmlui.ext.scene import XUXScene
 
-# シーン関係
-from xmlui_ext.scene import XUXScene
+from field.ui import msg_win,menu,talk_dir,tools
 from battle import Battle  # 次シーン
 
 

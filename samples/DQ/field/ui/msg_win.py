@@ -1,5 +1,5 @@
 from xmlui.core import XUTemplate,XUEvent,XUWinBase
-from xmlui_ext import dq
+from xmlui_modules import dq
 from ui_common import common_msg_text
 
 def ui_init(template:XUTemplate):

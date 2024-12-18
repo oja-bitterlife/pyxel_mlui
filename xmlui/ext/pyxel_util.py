@@ -1,8 +1,6 @@
-from typing import Any,Self
-from enum import StrEnum
+from typing import Self
 
 import pyxel
-from xmlui.core import XMLUI,XUEvent,XUEventItem
 from xmlui.lib.text import FontBase
 
 # Pyxelのフォントを使う

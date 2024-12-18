@@ -62,7 +62,9 @@ class XUEInputInfo:
             return key_event in self.xmlui.event.release
         return False
 
-# インプット管理クラス。どこかでcheck()を呼び出す
+
+# インプット管理クラス、状態更新用
+# どこかで作ってcheck()を１回呼び出すように
 class XUXInput(XUEInputInfo):
     # 全ボタン一気に調べてイベント設定
     def check(self):

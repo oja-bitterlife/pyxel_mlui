@@ -4,9 +4,9 @@ import pyxel
 # タイトル画面
 from xmlui.core import XMLUI,XUEvent,XUWinBase,XUSelectItem,XUTextUtil
 from xmlui.lib import select,text
-from xmlui_ext.scene import XUXScene
+from xmlui.ext.scene import XUXScene
 from ui_common import system_font
-from xmlui_ext import dq
+from xmlui_modules import dq
 import db
 
 battle_db: dict[str, str] = {
@@ -20,10 +20,10 @@ class Battle(XUXScene):
     ST_MSG_DRAWING = "msg_drawing"
     ST_CMD_WAIT = "command_wait"
     ST_ENEMY_TURN = "enemy_turn"
-    state = ST_MSG_DRAWING
+    battle_state = ST_MSG_DRAWING
 
     def __init__(self, xmlui:XMLUI):
-        self.xmlui = xmlui
+        self.__init__(xmlui)
 
         # UIの読み込み
         self.template = self.xmlui.load_template("assets/ui/battle.xml")
@@ -40,14 +40,14 @@ class Battle(XUXScene):
 
     def update(self):
         msg_dq = dq.MsgDQ(self.battle.find_by_id("msg_text"))
-        match self.state:
+        match self.battle_state:
             case Battle.ST_MSG_DRAWING:
                 # メッセージ表示完了
                 if msg_dq.is_all_finish:
                     # コマンド入力開始
                     msg_dq.append_msg("コマンド？")
                     self.battle.open("menu")
-                    self.state = Battle.ST_CMD_WAIT
+                    self.battle_state = Battle.ST_CMD_WAIT
 
             case Battle.ST_CMD_WAIT:
                 menu = dq.MsgDQ(self.battle.find_by_id("menu"))
@@ -58,7 +58,7 @@ class Battle(XUXScene):
                     msg_dq.append_msg("{name}の　こうげき！", marge_db)
                     msg_dq.append_msg("{enemy}に　{hit}ポイントの\nダメージを　あたえた！", marge_db)
                     XUWinBase(menu).start_close()
-                    self.state = Battle.ST_ENEMY_TURN
+                    self.battle_state = Battle.ST_ENEMY_TURN
 
             case Battle.ST_ENEMY_TURN:
                 battle_db["damage"] = XUTextUtil.format_zenkaku(random.randint(1, 10))
@@ -66,7 +66,7 @@ class Battle(XUXScene):
 
                 msg_dq.append_enemy("{enemy}の　こうげき！", marge_db)
                 msg_dq.append_enemy("{name}は　{damage}ポイントの\nだめーじを　うけた", marge_db)
-                self.state = Battle.ST_MSG_DRAWING
+                self.battle_state = Battle.ST_MSG_DRAWING
 
 
     def draw(self):

@@ -1,5 +1,5 @@
 import pyxel
-from xmlui_ext.input import XUEInputInfo
+from xmlui.ext.input import XUEInputInfo
 from ui_common import xmlui
 
 import field.system.npc as npc

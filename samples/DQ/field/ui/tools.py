@@ -3,7 +3,7 @@ import db
 
 from xmlui.core import XUTemplate,XUEvent,XUWinBase,XUSelectItem
 from xmlui.lib import select
-from xmlui_ext import dq
+from xmlui_modules import dq
 from ui_common import system_font,get_world_clip,draw_menu_cursor
 
 def ui_init(template:XUTemplate):

@@ -2,7 +2,7 @@ import dataclasses
 import pyxel
 
 from xmlui.core import XUElem
-from xmlui_ext import dq
+from xmlui_modules import dq
 import db
 
 @dataclasses.dataclass

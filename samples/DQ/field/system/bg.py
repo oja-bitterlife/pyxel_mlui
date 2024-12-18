@@ -1,7 +1,7 @@
 import pyxel
 
 from xmlui.core import XUWinBase,XUElem
-from xmlui_ext import dq
+from xmlui_modules import dq
 
 class BG:
     FLOOR = 2

@@ -7,12 +7,12 @@ pyxel.init(256, 256)
 
 from xmlui.core import XUEvent
 from ui_common import xmlui
-from xmlui_ext.scene import XUXScene
+from xmlui.ext.scene import XUXScene
 
 # 最初はタイトル
 from title import Title
 from field import Field
-#from battle import Battle
+from battle import Battle
 
 XUXScene.current_scene = Title(xmlui)
 #SceneBase.current_scene = Field(xmlui)
