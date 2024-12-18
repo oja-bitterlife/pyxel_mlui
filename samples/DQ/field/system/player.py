@@ -1,5 +1,5 @@
 import pyxel
-from xmlui.lib.pyxel_util import PyxelInputInfo
+from xmlui_ext.input import XUEInputInfo
 from ui_common import xmlui
 
 import field.system.npc as npc
@@ -28,7 +28,7 @@ class Player:
 
         # キー入力チェック
         if not self.is_moving:
-            input_info = PyxelInputInfo(xmlui)
+            input_info = XUEInputInfo(xmlui)
             if input_info.input(pyxel.KEY_UP):
                 if _hitcheck(self.x, self.y-16):
                     self.move_y = -16

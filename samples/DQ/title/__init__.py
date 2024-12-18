@@ -3,12 +3,12 @@ import pyxel
 # タイトル画面
 from xmlui.core import XMLUI
 from title.ui import start,speed
-from scene import SceneBase
+from xmlui_ext.scene import XUEScene
 
 # 次シーン
 from field import Field
 
-class Title(SceneBase):
+class Title(XUEScene):
     NEXT_SCENE_EVENT = "game_start"
 
     def __init__(self, xmlui:XMLUI):
@@ -39,5 +39,5 @@ class Title(SceneBase):
             super().end_scene()
 
     def closed(self):
-        SceneBase.current_scene = Field(self.xmlui)
+        XUEScene.current_scene = Field(self.xmlui)
 

@@ -9,9 +9,9 @@ from xmlui.core import XMLUI,XUEvent
 from field.ui import msg_win,menu,talk_dir,tools
 
 # シーン関係
-from scene import SceneBase
+from xmlui_ext.scene import XUEScene
 
-class Field(SceneBase):
+class Field(XUEScene):
     def __init__(self, xmlui:XMLUI):
         super().__init__(xmlui)
 
