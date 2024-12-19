@@ -14,14 +14,16 @@ class NPC_Data:
     color: int
     talk: str
 
+    ANIM_PAT = [0, 2, 0, 2]
+
     def setup(self):
         self.tile = XUXTilemap(1, 16, XURect(0, 0, 48, 64))
         self.draw_count = 0
 
     def draw(self, offset_x:int, offset_y:int):
-        pat = [1, 0, 1, 2]
         self.draw_count += 1
-        self.tile.draw_tile(self.x*16 + offset_x, self.y*16 + offset_y, pat[self.draw_count//10%len(pat)])
+        pat = self.ANIM_PAT[self.draw_count//15%len(self.ANIM_PAT)]
+        self.tile.draw_tile(self.x*16 + offset_x, self.y*16 + offset_y, pat)
 
 class NPC:
     npc_data = [
