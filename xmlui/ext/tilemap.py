@@ -13,12 +13,7 @@ class XUXTilemap:
         # 画像の左上の色をカラーキーとする
         self.color_key:int|None = pyxel.images[image_bank].pget(tile_area.x, tile_area.y)
 
-    def draw_tile(self, x:int, y:int, tile_no:int, *, rotate:float|None=None, scale:float|None=None):
-        tile_num = self.tile_area.w // self.tile_size
-        u = self.tile_size * (tile_no % tile_num)
-        v = self.tile_size * (tile_no // tile_num)
+    def draw_tile(self, x:int, y:int, tile_x:int, tile_y:int, *, rotate:float|None=None, scale:float|None=None):
+        u = self.tile_size * tile_x
+        v = self.tile_size * tile_y
         pyxel.blt(x, y, self.image_bank, u, v, self.tile_size, self.tile_size, self.color_key, rotate=rotate, scale=scale)
-
-    # グリッド位置からtile_no(通し番号)を取得する
-    def get_tile_no(self, x:int, y:int) -> int:
-        return y*self.tile_size + x

@@ -1,5 +1,8 @@
 import pyxel
+
+from xmlui.core import XURect
 from xmlui.ext.input import XUEInputInfo
+from xmlui.ext.tilemap import XUXTilemap
 from ui_common import xmlui
 
 import field.system.npc as npc
@@ -11,6 +14,9 @@ class Player:
         self.y = y*16
         self.move_x = 0
         self.move_y = 0
+
+        self.tile = XUXTilemap(1, 16, XURect(0, 0, 128, 128))
+        self.draw_count = 0
 
     def update(self, blocks:list[list[int]], npcs:list[npc.NPC_Data]):
         def _hitcheck(x, y):
@@ -69,5 +75,9 @@ class Player:
         return self.y // 16
 
     def draw(self):
-        pyxel.circ(128+8, 127, 7, 12)
+        self.draw_count += 1
+        tile_x= self.draw_count//15 % 2
+        self.tile.draw_tile(127, 127-8, tile_x, 2)
+
+        # pyxel.circ(128+8, 127, 7, 12)
 

@@ -4,7 +4,7 @@ import pyxel
 from field.system.player import Player
 from field.system.bg import BG
 from field.system.npc import NPC
-from field.system.treasure import Treasure
+from samples.DQ.field.system.objects import Treasure
 
 # UI
 from xmlui.core import XMLUI,XUEvent

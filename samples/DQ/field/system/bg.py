@@ -1,6 +1,7 @@
 import pyxel
 
-from xmlui.core import XUWinBase,XUElem
+from xmlui.core import XUWinBase,XUElem,XURect
+from xmlui.ext.tilemap import XUXTilemap
 from xmlui_modules import dq
 
 class BG:
@@ -22,7 +23,7 @@ class BG:
         [1,1,1,1,1,3,2,2,2,2,2,2,2,2,3,1,1,1,1,1],
         [1,1,1,1,1,3,2,2,2,2,2,2,2,2,3,1,1,1,1,1],
         [1,1,1,1,1,3,2,2,2,2,2,2,2,2,3,1,1,1,1,1],
-        [1,1,1,1,1,3,3,3,3,5,3,3,3,3,3,1,1,1,1,1],
+        [1,1,1,1,1,3,3,3,3,2,3,3,3,3,3,1,1,1,1,1],
         [1,1,1,1,1,3,2,2,2,2,2,2,2,6,3,1,1,1,1,1],
         [1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1],
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
@@ -36,21 +37,23 @@ class BG:
         pyxel.tri(x, y+14, x+7, y+1, x+14, y+14, color)
 
     def draw(self, scroll_x, scroll_y):
+        tile = XUXTilemap(1, 16, XURect(0, 0, 128, 128))
+
         for y,line in enumerate(self.blocks):
             for x,block in enumerate(line):
                 match block:
                     case 1:
-                        pyxel.rect(x*16+scroll_x, y*16+scroll_y, 15, 15, 13)
+                        tile.draw_tile(x*16+scroll_x, y*16+scroll_y, 6, 0)
                     case 2:
-                        pyxel.rect(x*16+scroll_x, y*16+scroll_y, 15, 15, 4)
+                        tile.draw_tile(x*16+scroll_x, y*16+scroll_y, 5, 0)
                     case 3:
-                        pyxel.rect(x*16+scroll_x, y*16+scroll_y, 15, 15, 15)
+                        tile.draw_tile(x*16+scroll_x, y*16+scroll_y, 7, 0)
                     case 4:
-                        pyxel.rect(x*16+scroll_x, y*16+scroll_y, 15, 15, 9)
+                        tile.draw_tile(x*16+scroll_x, y*16+scroll_y, 7, 1)
                     case 5:
                         self._draw_triangle(x*16+scroll_x, y*16+scroll_y, 1)
                     case 6:
-                        pyxel.rect(x*16+scroll_x, y*16+scroll_y, 15, 15, 1)
+                        tile.draw_tile(x*16+scroll_x, y*16+scroll_y, 5, 1)
 
     # とびらチェック
     def check_door(self, menu:XUElem, player):

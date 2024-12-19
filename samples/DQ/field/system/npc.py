@@ -11,27 +11,27 @@ class NPC_Data:
     name: str
     x: int
     y: int
-    anim_pat: list[int]
+    anim_pat: list[tuple[int,int]]
     talk: str
 
     SPEED = 15
 
     def setup(self):
-        self.tile = XUXTilemap(1, 16, XURect(0, 0, 48, 64))
+        self.tile = XUXTilemap(1, 16, XURect(0, 0, 128, 128))
         self.draw_count = 0
 
     def draw(self, offset_x:int, offset_y:int):
         self.draw_count += 1
-        pat = self.anim_pat[self.draw_count//self.SPEED % len(self.anim_pat)]
-        self.tile.draw_tile(self.x*16 + offset_x, self.y*16 + offset_y, pat)
+        tile_x,tile_y = self.anim_pat[self.draw_count//self.SPEED % len(self.anim_pat)]
+        self.tile.draw_tile(self.x*16 + offset_x, self.y*16 + offset_y, tile_x, tile_y)
 
 class NPC:
     npc_data = [
         # typ,   x, y, color, talk
-        NPC_Data("king", 8, 8, [3, 5], "{name}が　つぎのれべるになるには\nあと　{rem_exp}ポイントの\nけいけんが　ひつようじゃ\\pでは　また　あおう！\nゆうしゃ　{name}よ！"),
-        NPC_Data("knight1", 8, 11, [0, 2], "とびらのまえで　とびら　をせんたくしてね"),
-        NPC_Data("knight2", 10, 11, [0, 2], "とびらのさきに　かいだんがある"),
-        NPC_Data("knighg3", 12, 9, [0, 2], "たからばこ？\nとっちゃだめだだよ？"),
+        NPC_Data("king", 8, 8, [(0,1), (1,1)], "{name}が　つぎのれべるになるには\nあと　{rem_exp}ポイントの\nけいけんが　ひつようじゃ\\pでは　また　あおう！\nゆうしゃ　{name}よ！"),
+        NPC_Data("knight1", 8, 11, [(0,0), (1, 0)], "とびらのまえで　とびら　をせんたくしてね"),
+        NPC_Data("knight2", 10, 11, [(0,0), (1, 0)], "とびらのさきに　かいだんがある"),
+        NPC_Data("knighg3", 12, 9, [(0,0), (1, 0)], "たからばこ？\nとっちゃだめだだよ？"),
     ]
     def __init__(self):
         for npc in self.npc_data:
