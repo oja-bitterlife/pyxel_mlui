@@ -6,7 +6,7 @@ from xmlui.ext.input import XUXInput
 from xmlui.ext.timer import XUXTimer
 
 class XUXScene:
-    # フェードインアウト時間
+    # デフォルトフェードインアウト時間
     OPEN_COUNT = 15
     CLOSE_COUNT = 15
 
@@ -25,12 +25,14 @@ class XUXScene:
         self._state:XUXScene.State = self.State.OPENING
 
         # フェードインから
-        self._timer = XUXTimer(XUXTimer.Mode.COUNTDOWN, self._set_fade, open_count)
+        self._timer = XUXTimer(XUXTimer.Mode.COUNTDOWN, self._timer_fade_func, open_count)
         self.fade_alpha = 0
         self.fade_color = 0
 
     # フェードインアウト設定
-    def _set_fade(self, count, count_max):
+    def _timer_fade_func(self, count, count_max):
+        if count_max == 0:
+            return 1
         self.fade_alpha = count/count_max
 
     # mainから呼び出すもの
@@ -54,7 +56,7 @@ class XUXScene:
             self._draw_after()
 
     def end_scene(self, close_count=CLOSE_COUNT):
-        self._timer = XUXTimer(XUXTimer.Mode.COUNTUP, self._set_fade, close_count)
+        self._timer = XUXTimer(XUXTimer.Mode.COUNTUP, self._timer_fade_func, close_count)
         self._state = self.State.CLOSING
 
     # オーバーライドして使う物

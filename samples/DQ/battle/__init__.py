@@ -23,7 +23,7 @@ class Battle(XUXScene):
     battle_state = ST_MSG_DRAWING
 
     def __init__(self, xmlui:XMLUI):
-        self.__init__(xmlui)
+        super().__init__(xmlui)
 
         # UIの読み込み
         self.template = self.xmlui.load_template("assets/ui/battle.xml")
@@ -34,7 +34,7 @@ class Battle(XUXScene):
         msg_dq = dq.MsgDQ(self.battle.find_by_id("msg_text"))
         msg_dq.append_msg("{enemy}が　あらわれた！", battle_db)
 
-    def __del__(self):
+    def closed(self):
         # 読みこんだUIの削除
         self.template.remove()
 

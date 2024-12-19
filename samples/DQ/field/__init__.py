@@ -27,9 +27,9 @@ class Field(XUXScene):
         for module in [msg_win, menu, talk_dir, tools]:
             module.ui_init(self.template)
 
-    def __del__(self):
-        # 読みこんだUIの削除
-        self.template.remove()
+    def closed(self):
+        self.template.remove()  # 読みこんだUIの削除
+        XUXScene.current_scene = Battle(self.xmlui)
 
     def update(self):
         # UIメニューが開いていたらキャラが動かないように
@@ -52,9 +52,6 @@ class Field(XUXScene):
         # バトル開始
         if "start_battle" in self.xmlui.event.trg:
             self.end_scene()
-
-    def closed(self):
-        XUXScene.current_scene = Battle(self.xmlui)
 
     def draw(self):
         # プレイヤを中心に世界が動く。さす勇

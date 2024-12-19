@@ -11,7 +11,7 @@ class Title(XUXScene):
     NEXT_SCENE_EVENT = "game_start"
 
     def __init__(self, xmlui:XMLUI):
-        super().__init__(xmlui)
+        super().__init__(xmlui, 0)
 
         # XMLの読み込み
         self.template = self.xmlui.load_template("assets/ui/title.xml")
@@ -23,10 +23,9 @@ class Title(XUXScene):
 
         self.img = pyxel.Image.from_image(filename="assets/images/title.png")
 
-    def __del__(self):
-        # XMLの解放
+    def closed(self):
         self.template.remove()
-
+        XUXScene.current_scene = Field(self.xmlui)
 
     def draw(self):
         # 背景絵
@@ -36,7 +35,4 @@ class Title(XUXScene):
         self.xmlui.draw()
         if "start" in self.xmlui.event.trg:  # startが実行された
             super().end_scene()
-
-    def closed(self):
-        XUXScene.current_scene = Field(self.xmlui)
 
