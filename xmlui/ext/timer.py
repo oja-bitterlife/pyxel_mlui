@@ -64,8 +64,8 @@ class XUXTimer:
                 else:
                     self.stop()
                 return True
-
-            self.count -= 1
+            else:
+                self.count -= 1
 
         # イベントは発生しなかった
         return False
