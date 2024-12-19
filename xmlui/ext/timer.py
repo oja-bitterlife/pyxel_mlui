@@ -43,18 +43,19 @@ class XUXTimer:
             self.func(self.count, self.count_max)
 
             if self.mode == XUXTimer.Mode.COUNTUP:
+                self.count += 1
                 if self.count >= self.count_max:
                     self.stop()  # カウントアップ完了
                     return True
-                self.count += 1
             if self.mode == XUXTimer.Mode.COUNTDOWN:
                 if self.count <= 0:
                     self.stop()  # カウントダウン完了
                     return True
-                self.count -= 1
+                self.count -= 1  # 最大と0を含める
 
         # タイムアウト系
         else:
+            self.count -= 1
             if self.count <= 0:
                 self.func()
 
@@ -64,8 +65,6 @@ class XUXTimer:
                 else:
                     self.stop()
                 return True
-            else:
-                self.count -= 1
 
         # イベントは発生しなかった
         return False
