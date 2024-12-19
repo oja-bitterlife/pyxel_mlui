@@ -11,10 +11,9 @@ class NPC_Data:
     name: str
     x: int
     y: int
-    color: int
+    anim_pat: list[int]
     talk: str
 
-    ANIM_PAT = [0, 2, 0, 2]
     SPEED = 15
 
     def setup(self):
@@ -23,16 +22,16 @@ class NPC_Data:
 
     def draw(self, offset_x:int, offset_y:int):
         self.draw_count += 1
-        pat = self.ANIM_PAT[self.draw_count//self.SPEED % len(self.ANIM_PAT)]
+        pat = self.anim_pat[self.draw_count//self.SPEED % len(self.anim_pat)]
         self.tile.draw_tile(self.x*16 + offset_x, self.y*16 + offset_y, pat)
 
 class NPC:
     npc_data = [
         # typ,   x, y, color, talk
-        NPC_Data("king", 8, 8, 2, "{name}が　つぎのれべるになるには\nあと　{rem_exp}ポイントの\nけいけんが　ひつようじゃ\\pでは　また　あおう！\nゆうしゃ　{name}よ！"),
-        NPC_Data("knight1", 8, 11, 3, "とびらのまえで　とびら　をせんたくしてね"),
-        NPC_Data("knight2", 10, 11, 3, "とびらのさきに　かいだんがある"),
-        NPC_Data("knighg3", 12, 9, 3, "たからばこ？\nとっちゃだめだだよ？"),
+        NPC_Data("king", 8, 8, [3, 5], "{name}が　つぎのれべるになるには\nあと　{rem_exp}ポイントの\nけいけんが　ひつようじゃ\\pでは　また　あおう！\nゆうしゃ　{name}よ！"),
+        NPC_Data("knight1", 8, 11, [0, 2], "とびらのまえで　とびら　をせんたくしてね"),
+        NPC_Data("knight2", 10, 11, [0, 2], "とびらのさきに　かいだんがある"),
+        NPC_Data("knighg3", 12, 9, [0, 2], "たからばこ？\nとっちゃだめだだよ？"),
     ]
     def __init__(self):
         for npc in self.npc_data:
@@ -41,7 +40,6 @@ class NPC:
     def draw(self, scroll_x, scroll_y):
         for npc in self.npc_data:
             npc.draw(scroll_x, scroll_y)
-            # pyxel.circ(data.x*16+scroll_x+7, data.y*16+scroll_y+7, 6, data.color)
 
     # 会話チェック
     def _check(self, block_x, block_y) -> str:
