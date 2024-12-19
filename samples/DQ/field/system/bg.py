@@ -43,17 +43,15 @@ class BG:
             for x,block in enumerate(line):
                 match block:
                     case 1:
-                        tile.draw_tile(x*16+scroll_x, y*16+scroll_y, 6, 0)
+                        tile.draw_tile(x*16+scroll_x, y*16+scroll_y, 6)
                     case 2:
-                        tile.draw_tile(x*16+scroll_x, y*16+scroll_y, 5, 0)
+                        tile.draw_tile(x*16+scroll_x, y*16+scroll_y, 5)
                     case 3:
-                        tile.draw_tile(x*16+scroll_x, y*16+scroll_y, 7, 0)
+                        tile.draw_tile(x*16+scroll_x, y*16+scroll_y, 7)
                     case 4:
-                        tile.draw_tile(x*16+scroll_x, y*16+scroll_y, 7, 1)
-                    case 5:
-                        self._draw_triangle(x*16+scroll_x, y*16+scroll_y, 1)
+                        tile.draw_tile(x*16+scroll_x, y*16+scroll_y, 13)
                     case 6:
-                        tile.draw_tile(x*16+scroll_x, y*16+scroll_y, 5, 1)
+                        tile.draw_tile(x*16+scroll_x, y*16+scroll_y, 21)
 
     # とびらチェック
     def check_door(self, menu:XUElem, player):

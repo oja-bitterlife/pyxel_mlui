@@ -1,5 +1,6 @@
 import pyxel
 from xmlui.core import XURect
+from xmlui.ext.timer import XUXTimer
 
 # 車輪の再発明、するぞー
 class XUXTilemap:
@@ -10,10 +11,35 @@ class XUXTilemap:
         self.tile_size = tile_size
         self.tile_area = tile_area
 
+        # アニメーション用
+        self.timer = None
+        self.anim_no = 0  # アニメ時tile_no
+
         # 画像の左上の色をカラーキーとする
         self.color_key:int|None = pyxel.images[image_bank].pget(tile_area.x, tile_area.y)
 
-    def draw_tile(self, x:int, y:int, tile_x:int, tile_y:int, *, rotate:float|None=None, scale:float|None=None):
-        u = self.tile_size * tile_x
-        v = self.tile_size * tile_y
+    # anim_noをintervalごとに更新
+    def _anim_time_func(self):
+        self.anim_no += 1
+
+    # アニメーション開始
+    def start_anim(self, speed):
+        self.anim_no = 0
+        self.timer = XUXTimer(XUXTimer.Mode.INTERVAL, self._anim_time_func, speed)
+
+    # アニメーション更新
+    def update(self):
+        if self.timer is not None:
+            self.timer.update()
+
+    # tile描画
+    def draw_tile(self, x:int, y:int, tile_no:int, *, rotate:float|None=None, scale:float|None=None):
+        tile_num = self.tile_area.w // self.tile_size
+        u = self.tile_size * (tile_no % tile_num)
+        v = self.tile_size * (tile_no // tile_num)
         pyxel.blt(x, y, self.image_bank, u, v, self.tile_size, self.tile_size, self.color_key, rotate=rotate, scale=scale)
+
+    # tileアニメーション描画
+    def draw_anim(self, x:int, y:int, anim:list[int], *, rotate:float|None=None, scale:float|None=None):
+        tile_no = anim[self.anim_no % len(anim)]
+        self.draw_tile(x, y, tile_no, rotate=rotate, scale=scale)
