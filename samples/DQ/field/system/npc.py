@@ -39,7 +39,7 @@ class NPC:
 
     def draw(self, scroll_x, scroll_y):
         for npc in self.npc_data:
-            npc.draw(scroll_x, scroll_y)
+            npc.draw(scroll_x-1, scroll_y-1)
 
     # 会話チェック
     def _check(self, block_x, block_y) -> str:
