@@ -18,3 +18,7 @@ class XUXTilemap:
         u = self.tile_size * (tile_no % tile_num)
         v = self.tile_size * (tile_no // tile_num)
         pyxel.blt(x, y, self.image_bank, u, v, self.tile_size, self.tile_size, self.color_key, rotate=rotate, scale=scale)
+
+    # グリッド位置からtile_no(通し番号)を取得する
+    def get_tile_no(self, x:int, y:int) -> int:
+        return y*self.tile_size + x
