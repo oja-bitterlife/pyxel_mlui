@@ -75,4 +75,5 @@ class Player:
         return self.y // 16
 
     def draw(self):
-        self.tile.draw_anim(127, 127-8, [32, 33])
+        self.tile.update()
+        self.tile.draw_anim(127, 127-8, [16, 17])

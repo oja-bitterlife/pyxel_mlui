@@ -49,9 +49,9 @@ class BG:
                     case 3:
                         tile.draw_tile(x*16+scroll_x, y*16+scroll_y, 7)
                     case 4:
-                        tile.draw_tile(x*16+scroll_x, y*16+scroll_y, 13)
+                        tile.draw_tile(x*16+scroll_x, y*16+scroll_y, 15)
                     case 6:
-                        tile.draw_tile(x*16+scroll_x, y*16+scroll_y, 21)
+                        tile.draw_tile(x*16+scroll_x, y*16+scroll_y, 13)
 
     # とびらチェック
     def check_door(self, menu:XUElem, player):
