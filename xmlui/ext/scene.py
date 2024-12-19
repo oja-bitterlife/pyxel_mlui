@@ -3,11 +3,12 @@ import pyxel
 
 from xmlui.core import XMLUI
 from xmlui.ext.input import XUXInput
+from xmlui.ext.timer import XUXTimer
 
 class XUXScene:
     # フェードインアウト時間
-    OPEN_COUNT_MAX = 15
-    CLOSE_COUNT_MAX = 15
+    OPEN_COUNT = 15
+    CLOSE_COUNT = 15
 
     # シーン管理用
     current_scene:"XUXScene|None" = None
@@ -19,14 +20,18 @@ class XUXScene:
         CLOSING = "closing"
         CLOSED = "closed"
 
-    def __init__(self, xmlui:XMLUI):
+    def __init__(self, xmlui:XMLUI, open_count=OPEN_COUNT):
         self.xmlui = xmlui
         self._state:XUXScene.State = self.State.OPENING
 
-        # フェードインアウト設定
-        self.open_count = self.OPEN_COUNT_MAX
-        self.close_count = self.CLOSE_COUNT_MAX
+        # フェードインから
+        self._timer = XUXTimer(XUXTimer.Mode.COUNTDOWN, self._set_fade, open_count)
+        self.fade_alpha = 0
         self.fade_color = 0
+
+    # フェードインアウト設定
+    def _set_fade(self, count, count_max):
+        self.fade_alpha = count/count_max
 
     # mainから呼び出すもの
     # -----------------------------------------------------
@@ -48,7 +53,8 @@ class XUXScene:
             self.draw()
             self._draw_after()
 
-    def end_scene(self):
+    def end_scene(self, close_count=CLOSE_COUNT):
+        self._timer = XUXTimer(XUXTimer.Mode.COUNTUP, self._set_fade, close_count)
         self._state = self.State.CLOSING
 
     # オーバーライドして使う物
@@ -65,19 +71,14 @@ class XUXScene:
     # -----------------------------------------------------
     def _draw_after(self):
         if self._state == self.State.OPENING:
-            if self.open_count > 0:
-                pyxel.dither(self.open_count/self.OPEN_COUNT_MAX)
-                pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.fade_color)
-                self.open_count -= 1
-            else:
-                self._state = XUXScene.State.OPENED
+            if self._timer.update():
+                self._state = self.State.OPENED
+            pyxel.dither(self.fade_alpha)
+            pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.fade_color)
 
         if self._state == self.State.CLOSING:
-            if self.close_count > 0:
-                pyxel.dither((self.CLOSE_COUNT_MAX-self.close_count)/self.CLOSE_COUNT_MAX)
-                pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.fade_color)
-                self.close_count -= 1
-            else:
-                pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.fade_color)
-                self._state = XUXScene.State.CLOSED
+            if self._timer.update():
+                self._state = self.State.CLOSED
+            pyxel.dither(self.fade_alpha)
+            pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.fade_color)
 
