@@ -512,10 +512,6 @@ class XUTemplate(XUElem):
         # 処理関数の登録
         self._draw_funcs:dict[str, Callable[[XUElem, XUEvent], str|None]] = {}
 
-    def __del__(self):
-        if self.xmlui._debug.is_lib_debug:
-            print(f"Template was removed: {self.xml_filename}")
-
     # 登録を削除する
     def remove(self):
         self.xmlui._templates.remove(self)
