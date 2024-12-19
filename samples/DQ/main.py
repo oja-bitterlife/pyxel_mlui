@@ -14,8 +14,8 @@ from title import Title
 from field import Field
 from battle import Battle
 
-XUXScene.current_scene = Title(xmlui)
-#XUXScene.current_scene = Field(xmlui)
+#XUXScene.current_scene = Title(xmlui)
+XUXScene.current_scene = Field(xmlui)
 #XUXScene.current_scene = Battle(xmlui)
 
 # Main

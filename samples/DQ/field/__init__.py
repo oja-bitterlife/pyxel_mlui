@@ -1,3 +1,5 @@
+import pyxel
+
 # フィールド関係
 from field.system.player import Player
 from field.system.bg import BG
@@ -26,6 +28,9 @@ class Field(XUXScene):
         self.template = self.xmlui.load_template("assets/ui/field.xml")
         for module in [msg_win, menu, talk_dir, tools]:
             module.ui_init(self.template)
+
+        # 画像読み込み
+        pyxel.images[1].load(0, 0, "assets/images/field_tile.png" )
 
     def closed(self):
         self.template.remove()  # 読みこんだUIの削除

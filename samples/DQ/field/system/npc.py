@@ -1,7 +1,8 @@
 import dataclasses
 import pyxel
 
-from xmlui.core import XUElem
+from xmlui.core import XUElem,XURect
+from xmlui.ext.tilemap import XUXTilemap
 from xmlui_modules import dq
 import db
 
@@ -13,6 +14,15 @@ class NPC_Data:
     color: int
     talk: str
 
+    def setup(self):
+        self.tile = XUXTilemap(1, 16, XURect(0, 0, 48, 64))
+        self.draw_count = 0
+
+    def draw(self, offset_x:int, offset_y:int):
+        pat = [1, 0, 1, 2]
+        self.draw_count += 1
+        self.tile.draw_tile(self.x*16 + offset_x, self.y*16 + offset_y, pat[self.draw_count//10%len(pat)])
+
 class NPC:
     npc_data = [
         # typ,   x, y, color, talk
@@ -21,9 +31,14 @@ class NPC:
         NPC_Data("knight2", 10, 11, 3, "とびらのさきに　かいだんがある"),
         NPC_Data("knighg3", 12, 9, 3, "たからばこ？\nとっちゃだめだだよ？"),
     ]
+    def __init__(self):
+        for npc in self.npc_data:
+            npc.setup()
+
     def draw(self, scroll_x, scroll_y):
-        for data in self.npc_data:
-            pyxel.circ(data.x*16+scroll_x+7, data.y*16+scroll_y+7, 6, data.color)
+        for npc in self.npc_data:
+            npc.draw(scroll_x, scroll_y)
+            # pyxel.circ(data.x*16+scroll_x+7, data.y*16+scroll_y+7, 6, data.color)
 
     # 会話チェック
     def _check(self, block_x, block_y) -> str:
