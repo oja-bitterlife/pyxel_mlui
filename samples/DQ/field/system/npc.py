@@ -15,6 +15,7 @@ class NPC_Data:
     talk: str
 
     ANIM_PAT = [0, 2, 0, 2]
+    SPEED = 15
 
     def setup(self):
         self.tile = XUXTilemap(1, 16, XURect(0, 0, 48, 64))
@@ -22,7 +23,7 @@ class NPC_Data:
 
     def draw(self, offset_x:int, offset_y:int):
         self.draw_count += 1
-        pat = self.ANIM_PAT[self.draw_count//15%len(self.ANIM_PAT)]
+        pat = self.ANIM_PAT[self.draw_count//self.SPEED % len(self.ANIM_PAT)]
         self.tile.draw_tile(self.x*16 + offset_x, self.y*16 + offset_y, pat)
 
 class NPC:
