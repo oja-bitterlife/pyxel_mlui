@@ -47,10 +47,11 @@ class FieldObjData:
     y: int
     anim_pat: int
     movable: bool
+    visible: bool
     talk: str
 field_obj_data = [
-    FieldObjData("tresure1", 9, 9, 4, True, "やくそう"),
-    FieldObjData("tresure2", 10, 9, 4, True, "100G"),
-    FieldObjData("tresure3", 11, 6, 4, True, "10G"),
-    FieldObjData("door", 9, 12, 36, False, ""),
+    FieldObjData("tresure1", 9, 9, 4, True, True, "やくそう"),
+    FieldObjData("tresure2", 10, 9, 4, True, True, "100G"),
+    FieldObjData("tresure3", 11, 6, 4, True, True, "10G"),
+    FieldObjData("door", 9, 12, 36, False, True, ""),
 ]

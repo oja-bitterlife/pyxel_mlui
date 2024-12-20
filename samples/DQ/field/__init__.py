@@ -24,7 +24,7 @@ class Field(XUXScene):
         self.player = Player(10, 10)
         self.bg = BG()
         self.npc = NPCManager()
-        self.treasure = FieldObj()
+        self.field_obj = FieldObj()
 
         # UIの読み込み
         self.template = self.xmlui.load_template("assets/ui/field.xml")
@@ -46,7 +46,7 @@ class Field(XUXScene):
             self.menu_event(menu, self.xmlui.event)
         else:
             # プレイヤの移動
-            self.player.update([self.npc.hit_check, self.bg.hit_check])
+            self.player.update([self.npc.hit_check, self.bg.hit_check, self.field_obj.hit_check])
 
             # キャラが動いていなければメニューオープン可能
             if not self.player.is_moving:
@@ -60,7 +60,7 @@ class Field(XUXScene):
         # ゲーム画面構築
         self.bg.draw(scroll_x, scroll_y)
         self.npc.draw(scroll_x, scroll_y)
-        self.treasure.draw(scroll_x, scroll_y)
+        self.field_obj.draw(scroll_x, scroll_y)
         self.player.draw()
 
         # UIの描画(fieldとdefaultグループ)
@@ -90,4 +90,12 @@ class Field(XUXScene):
                 msg_text = dq.MsgDQ(menu.open("message").find_by_id("msg_text"))
                 msg_text.append_msg("かいだんがない")  # systemメッセージ
 
-        # self.bg.check_door(menu, self.player)
+        if "open_door" in menu.xmlui.event.trg:
+            door = self.field_obj.find_door(self.player.block_x, self.player.block_y)
+            if door != None:
+                db.field_obj_data[door].movable = True
+                db.field_obj_data[door].visible = False
+                XUWinBase(menu).start_close()
+            else:
+                msg_text = dq.MsgDQ(menu.open("message").find_by_id("msg_text"))
+                msg_text.append_msg("とびらがない")  # systemメッセージ

@@ -15,7 +15,7 @@ bgtype_data = [
     BGType('wall', False, 7),   # 2
     BGType('floor', True, 5),   # 3
     BGType('chair', False, 23), # 4
-    BGType('stair', False, 21), # 5
+    BGType('stair', True, 21), # 5
 ]
 
 class BG:
