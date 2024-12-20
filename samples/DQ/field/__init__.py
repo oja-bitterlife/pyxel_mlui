@@ -4,7 +4,7 @@ import pyxel
 from field.system.player import Player
 from field.system.bg import BG
 from field.system.npc import NPCManager
-from samples.DQ.field.system.field_obj import FieldObj
+from field.system.field_obj import FieldObj
 from xmlui_modules import dq
 import db
 
@@ -81,6 +81,7 @@ class Field(XUXScene):
                 else:
                     msg_text.append_msg("だれもいません")  # systemメッセージ
 
+        # かいだんチェック
         if "down_stairs" in menu.xmlui.event.trg:
             if self.bg.check_stairs(menu, self.player.block_x, self.player.block_y):
                 # バトル開始
@@ -90,6 +91,7 @@ class Field(XUXScene):
                 msg_text = dq.MsgDQ(menu.open("message").find_by_id("msg_text"))
                 msg_text.append_msg("かいだんがない")  # systemメッセージ
 
+        # とびらチェック
         if "open_door" in menu.xmlui.event.trg:
             door = self.field_obj.find_door(self.player.block_x, self.player.block_y)
             if door != None:
