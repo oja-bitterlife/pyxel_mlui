@@ -12,6 +12,7 @@ class Player:
         self.y = y*16
         self.move_x = 0
         self.move_y = 0
+        self.anim_pat = [16, 17]
 
         self.tile = XUXTilemap(1)
 
@@ -56,4 +57,4 @@ class Player:
 
     def draw(self):
         self.tile.update()
-        self.tile.draw(127, 127-8, [16, 17])
+        self.tile.draw(127, 127-8, self.anim_pat)

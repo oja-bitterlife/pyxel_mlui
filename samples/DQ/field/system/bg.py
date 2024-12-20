@@ -56,6 +56,7 @@ class BG:
                 data = bgtype_data[type_]
                 self.tile_anim.draw(x*16+scroll_x, y*16+scroll_y, data.anim_pat)
 
+    # ぶつかりチェック
     def hit_check(self, block_x:int, block_y:int) -> bool:
         type_ = self.blocks[block_y][block_x]
         data = bgtype_data[type_]

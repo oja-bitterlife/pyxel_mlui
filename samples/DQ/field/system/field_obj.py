@@ -12,6 +12,7 @@ class FieldObj:
             if field_obj.visible:
                 self.tile_anim.draw(field_obj.x*16+scroll_x, field_obj.y*16+scroll_y, field_obj.anim_pat)
 
+    # ぶつかりチェック
     def hit_check(self, block_x:int, block_y:int):
         for field_obj in db.field_obj_data:
             # 移動不可オブジェクトのみ当たる
@@ -20,6 +21,7 @@ class FieldObj:
                     return True
         return False
     
+    # 周りにドアがあるか調べる。鍵の数チェックは今回はナシで
     def find_door(self, block_x:int, block_y:int):
         for i,field_obj in enumerate(db.field_obj_data):
             if field_obj.x == block_x-1 and field_obj.y == block_y and field_obj.name == "door":
