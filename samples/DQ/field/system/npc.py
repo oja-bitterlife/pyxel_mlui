@@ -1,25 +1,19 @@
-import dataclasses
 from enum import StrEnum
 
 from xmlui.core import XMLUI
 from xmlui.ext.tilemap import XUXTilemap
+import db
 
-@dataclasses.dataclass
-class NPC_Data:
-    name: str
-    x: int
-    y: int
-    anim_pat: list[int]
-    talk: str
-
-    def setup(self):
+class NPC:
+    def __init__(self, data:db.NPCData):
+        self.data = data
         self.tile = XUXTilemap(1)
 
     def draw(self, offset_x:int, offset_y:int):
         self.tile.update()
-        self.tile.draw(self.x*16 + offset_x, self.y*16 + offset_y, self.anim_pat)
+        self.tile.draw(self.data.x*16 + offset_x, self.data.y*16 + offset_y, self.data.anim_pat)
 
-class NPC:
+class NPCManager:
     class TALK_EVENT(StrEnum):
         EAST = "start_talk_east"
         WEST = "start_talk_west"
@@ -28,37 +22,35 @@ class NPC:
     # 全方向定義
     TALK_EVENTS = [TALK_EVENT.EAST, TALK_EVENT.WEST, TALK_EVENT.SOUTH, TALK_EVENT.NORTH]
 
-    npc_data = [
-        # typ,   x, y, color, talk
-        NPC_Data("king", 8, 8, [8, 9], "{name}が　つぎのれべるになるには\nあと　{rem_exp}ポイントの\nけいけんが　ひつようじゃ\\pでは　また　あおう！\nゆうしゃ　{name}よ！"),
-        NPC_Data("knight1", 8, 11, [0, 1], "とびらのまえで　とびら　をせんたくしてね"),
-        NPC_Data("knight2", 10, 11, [0, 1], "とびらのさきに　かいだんがある"),
-        NPC_Data("knighg3", 12, 9, [0, 1], "たからばこ？\nとっちゃだめだだよ？"),
-    ]
     def __init__(self):
-        for npc in self.npc_data:
-            npc.setup()
+        self.npcs = [NPC(data) for data in db.npc_data]
 
-    def draw(self, scroll_x, scroll_y):
-        for npc in self.npc_data:
+    def draw(self, scroll_x:int, scroll_y:int):
+        for npc in self.npcs:
             npc.draw(scroll_x-1, scroll_y-1)
 
+    # ぶつかりチェック
+    def hit_check(self, block_x:int, block_y:int):
+        for npc in self.npcs:
+            if npc.data.x == block_x and npc.data.y == block_y:
+                return True
+        return False
+
     # 会話チェック
-    def _check(self, block_x, block_y) -> str|None:
-        for data in self.npc_data:
-            if data.x == block_x and data.y == block_y:
-                return data.talk
+    def _talk_check(self, block_x:int, block_y:int) -> str|None:
+        for npc in self.npcs:
+            if npc.data.x == block_x and npc.data.y == block_y:
+                return npc.data.talk
         return None
 
-
     # 会話イベントチェック
-    def check_talk(self, talk_event:TALK_EVENT, block_x, block_y) -> str | None:
+    def check_talk(self, talk_event:TALK_EVENT, block_x:int, block_y:int) -> str | None:
         match talk_event:
             case self.TALK_EVENT.EAST:
-                return self._check(block_x+1, block_y)
+                return self._talk_check(block_x+1, block_y)
             case self.TALK_EVENT.WEST:
-                return self._check(block_x-1, block_y)
+                return self._talk_check(block_x-1, block_y)
             case self.TALK_EVENT.SOUTH:
-                return self._check(block_x, block_y+1)
+                return self._talk_check(block_x, block_y+1)
             case self.TALK_EVENT.NORTH:
-                return self._check(block_x, block_y-1)
+                return self._talk_check(block_x, block_y-1)

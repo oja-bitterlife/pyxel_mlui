@@ -1,4 +1,5 @@
 # DBはサンプルでは使わないので固定値で
+import dataclasses
 
 class SystemInfoTable:
     def __init__(self):
@@ -24,3 +25,17 @@ class EnemyDataTable:
         self.gold = 1
         self.exp = 1
 enemy_data = UserDataTable()
+
+@dataclasses.dataclass
+class NPCData:
+    name: str
+    x: int
+    y: int
+    anim_pat: list[int]
+    talk: str
+npc_data = [
+    NPCData("king", 8, 8, [16, 17], "{name}が　つぎのれべるになるには\nあと　{rem_exp}ポイントの\nけいけんが　ひつようじゃ\\pでは　また　あおう！\nゆうしゃ　{name}よ！"),
+    NPCData("knight1", 8, 11, [0, 1], "とびらのまえで　とびら　をせんたくしてね"),
+    NPCData("knight2", 10, 11, [0, 1], "とびらのさきに　かいだんがある"),
+    NPCData("knighg3", 12, 9, [0, 1], "たからばこ？\nとっちゃだめだだよ？"),
+]

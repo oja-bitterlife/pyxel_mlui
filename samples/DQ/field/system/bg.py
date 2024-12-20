@@ -1,11 +1,9 @@
-from xmlui.core import XUWinBase,XUElem
+from xmlui.core import XUElem
 from xmlui.ext.tilemap import XUXTilemap
-from xmlui_modules import dq
 
 class BG:
-    FLOOR = 6
-    STAIRS = 13
-    DOOR = 1
+    STAIRS = ST = 21
+    FLOOR = FL =5
 
     # 背景
     blocks = [
@@ -15,14 +13,14 @@ class BG:
         [ 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
         [ 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
         [ 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6],
-        [ 6, 6, 6, 6, 6, 7, 5, 5, 5, 5, 5, 5, 5, 5, 7, 6, 6, 6, 6, 6],
-        [ 6, 6, 6, 6, 6, 7, 5,23,23,23,23,23,23, 5, 7, 6, 6, 6, 6, 6],
-        [ 6, 6, 6, 6, 6, 7, 5,23, 5,23,23, 5,23, 5, 7, 6, 6, 6, 6, 6],
-        [ 6, 6, 6, 6, 6, 7, 5, 5, 5, 5, 5, 5, 5, 5, 7, 6, 6, 6, 6, 6],
-        [ 6, 6, 6, 6, 6, 7, 5, 5, 5, 5, 5, 5, 5, 5, 7, 6, 6, 6, 6, 6],
-        [ 6, 6, 6, 6, 6, 7, 5, 5, 5, 5, 5, 5, 5, 5, 7, 6, 6, 6, 6, 6],
-        [ 6, 6, 6, 6, 6, 7, 7, 7, 7, 5, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6],
-        [ 6, 6, 6, 6, 6, 7, 5, 5, 5, 5, 5, 5, 5,21, 7, 6, 6, 6, 6, 6],
+        [ 6, 6, 6, 6, 6, 7,FL,FL,FL,FL,FL,FL,FL,FL, 7, 6, 6, 6, 6, 6],
+        [ 6, 6, 6, 6, 6, 7,FL,23,23,23,23,23,23,FL, 7, 6, 6, 6, 6, 6],
+        [ 6, 6, 6, 6, 6, 7,FL,23,FL,23,23,FL,23,FL, 7, 6, 6, 6, 6, 6],
+        [ 6, 6, 6, 6, 6, 7,FL,FL,FL,FL,FL,FL,FL,FL, 7, 6, 6, 6, 6, 6],
+        [ 6, 6, 6, 6, 6, 7,FL,FL,FL,FL,FL,FL,FL,FL, 7, 6, 6, 6, 6, 6],
+        [ 6, 6, 6, 6, 6, 7,FL,FL,FL,FL,FL,FL,FL,FL, 7, 6, 6, 6, 6, 6],
+        [ 6, 6, 6, 6, 6, 7, 7, 7, 7,FL, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6],
+        [ 6, 6, 6, 6, 6, 7,FL,FL,FL,FL,FL,FL,FL,ST, 7, 6, 6, 6, 6, 6],
         [ 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6],
         [ 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
         [ 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
@@ -64,12 +62,9 @@ class BG:
     #             msg_text = dq.MsgDQ(menu.open("message").find_by_id("msg_text"))
     #             msg_text.append_msg("とびらがない")  # systemメッセージ
 
+    def hit_check(self, block_x:int, block_y:int) -> bool:
+        return self.blocks[block_y][block_x] != self.FLOOR
+
     # 階段チェック
-    def check_stairs(self, menu:XUElem, player):
-            block_x, block_y = player.x//16, player.y//16
-            if self.blocks[block_y][block_x] == self.STAIRS:
-                XUWinBase(menu).start_close()
-                menu.xmlui.on("start_battle")
-            else:
-                msg_text = dq.MsgDQ(menu.open("message").find_by_id("msg_text"))
-                msg_text.append_msg("かいだんがない")  # systemメッセージ
+    def check_stairs(self, menu:XUElem, block_x:int, block_y:int) -> bool:
+        return self.blocks[block_y][block_x] == self.STAIRS
