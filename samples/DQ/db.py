@@ -9,7 +9,10 @@ class XUXDB:
         return XUXDB(":memory:")
 
     def __init__(self, db_path:str):
-        self.conn = sqlite3.connect(db_path)
+        with open(db_path, "rb") as f:
+            db_data = f.read()
+            self.conn = sqlite3.connect(":memory:")
+            self.conn.deserialize(db_data)
 
     def __del__(self):
         self.conn.close()
@@ -24,10 +27,15 @@ class XUXDB:
         return self
 
     def execute(self):
-        if self.params:
-            cur = self.conn.execute(self.sql, *self.params)
-        else:
-            cur = self.conn.execute(self.sql)
+        cur = self.conn.cursor()
+        try:
+            if self.params:
+                cur.execute(self.sql, *self.params)
+            else:
+                cur.conn.execute(self.sql)
+        except:
+            pass
+            # cur.rollback()
         data = cur.fetchall()
         cur.close()
         return data
