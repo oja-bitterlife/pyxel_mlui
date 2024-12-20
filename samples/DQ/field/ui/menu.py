@@ -3,7 +3,7 @@ import pyxel
 from xmlui.core import XUTemplate,XUEvent,XUWinBase,XUSelectItem
 from xmlui.lib import select,text
 from xmlui_modules import dq
-from ui_common import system_font,get_world_clip,draw_menu_cursor
+from ui_common import system_font,get_world_clip,draw_menu_cursor,KOJICHU_COL
 
 def ui_init(template:XUTemplate):
     field_select = select.Decorator(template)
@@ -14,7 +14,8 @@ def ui_init(template:XUTemplate):
     def menu_item(menu_item:XUSelectItem):
         # ウインドウのクリップ状態に合わせて表示する
         if menu_item.area.y < get_world_clip(XUWinBase.find_parent_win(menu_item)).bottom():
-            pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, 7, system_font.font)
+            col = KOJICHU_COL if menu_item.value == "工事中" else 7
+            pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, col, system_font.font)
 
             # カーソル表示
             if menu_item.selected and menu_item.enable:

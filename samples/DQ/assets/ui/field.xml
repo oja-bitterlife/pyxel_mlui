@@ -6,13 +6,13 @@
         <title x="36" y="0" w="52" h="12" align="center">コマンド</title>
         <menu_grid x="8" y="14" rows="2" item_w="58" item_h="16">
             <menu_item action="talk">はなす</menu_item>
-            <menu_item action="spel">じゅもん</menu_item>
-            <menu_item action="status">つよさ</menu_item>
+            <menu_item action="spel" value="工事中">じゅもん</menu_item>
+            <menu_item action="status" value="工事中">つよさ</menu_item>
             <menu_item action="tools">どうぐ</menu_item>
             <menu_item action="stairs">かいだん</menu_item>
-            <menu_item action="check">しらべる</menu_item>
+            <menu_item action="check" value="工事中">しらべる</menu_item>
             <menu_item action="door">とびら</menu_item>
-            <menu_item action="take">とる</menu_item>
+            <menu_item action="take" value="工事中">とる</menu_item>
         </menu_grid>
         <round_win abs_x="14" y="16" w="82" h="100" id="status">
             <status_title x="18" y="0" w="50" h="12"></status_title>
