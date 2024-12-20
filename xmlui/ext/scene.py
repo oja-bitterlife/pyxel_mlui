@@ -28,10 +28,6 @@ class XUXScene:
         self._timer = XUXCountDown(open_count)
         self.fade_color = 0
 
-    @property
-    def fade_alpha(self) -> float:
-        return self._timer.alpha
-
     # mainから呼び出すもの
     # -----------------------------------------------------
     def update_scene(self):
@@ -72,12 +68,12 @@ class XUXScene:
         if self._state == self.State.OPENING:
             if self._timer.update():
                 self._state = self.State.OPENED
-            pyxel.dither(self.fade_alpha)
+            pyxel.dither(self._timer.alpha)
             pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.fade_color)
 
         if self._state == self.State.CLOSING:
             if self._timer.update():
                 self._state = self.State.CLOSED
-            pyxel.dither(self.fade_alpha)
+            pyxel.dither(self._timer.alpha)
             pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.fade_color)
 
