@@ -51,7 +51,7 @@ class Field(XUXScene):
 
             # 会話イベントチェック
             self.npc.check_talk(menu, self.player)
-            self.bg.check_door(menu, self.player)
+            # self.bg.check_door(menu, self.player)
             self.bg.check_stairs(menu, self.player)
 
         # バトル開始

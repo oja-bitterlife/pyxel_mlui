@@ -10,8 +10,11 @@ class Treasure:
         ["tresure3", 11, 6, 4, "10G"],
         ["door", 9, 12, 20, "10G"],
     ]
+    def __init__(self):
+        self.tile_anim = XUXTilemap(1)
+
     def draw(self, scroll_x, scroll_y):
-        tile = XUXTilemap(1, 16, XURect(0, 0, 128, 128))
+        self.tile_anim.update()
 
         for treasure in self.treasure:
-            tile.draw_tile(treasure[1]*16+scroll_x, treasure[2]*16+scroll_y, treasure[3])
+            self.tile_anim.draw(treasure[1]*16+scroll_x, treasure[2]*16+scroll_y, treasure[3])

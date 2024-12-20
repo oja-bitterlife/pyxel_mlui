@@ -11,18 +11,15 @@ class NPC_Data:
     name: str
     x: int
     y: int
-    anim_pat: list[int,int]
+    anim_pat: list[int]
     talk: str
 
-    SPEED = 15
-
     def setup(self):
-        self.tile = XUXTilemap(1, 16, XURect(0, 0, 128, 128))
-        self.tile.start_anim(self.SPEED)
+        self.tile = XUXTilemap(1)
 
     def draw(self, offset_x:int, offset_y:int):
         self.tile.update()
-        self.tile.draw_anim(self.x*16 + offset_x, self.y*16 + offset_y, self.anim_pat)
+        self.tile.draw(self.x*16 + offset_x, self.y*16 + offset_y, self.anim_pat)
 
 class NPC:
     npc_data = [

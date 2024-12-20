@@ -1,70 +1,95 @@
-from enum import Enum,auto
-from typing import Callable,Any
+from typing import Callable,Self
 
 # タイマー管理
-class XUXTimer:
-    class Mode(Enum):
-        TIMEOUT = auto()
-        INTERVAL = auto()
-        COUNTUP = auto()
-        COUNTDOWN = auto()
-
+class _XUXTimerBase:
     # タイマー開始
-    def __init__(self, mode:"XUXTimer.Mode", func:Callable, count:int):
-        self.mode:XUXTimer.Mode|None = mode
-        self.func = func
+    def __init__(self, count:int):
+        if count < 0:
+            raise ValueError("count must be greater than 0")
+
+        self._count = 0
         self.count_max = count
 
-        if self.count_max < 0:
-            raise ValueError("count_max must be greater than 0")
-
-        match mode:
-            case XUXTimer.Mode.COUNTUP:
-                self.count = 0
-            case _:
-                self.count = count
-
     # タイマー停止
-    def stop(self):
-        self.mode = None
+    def finish(self) -> Self:
+        self._count = self.count_max
+        return self
 
     @property
-    def is_stop(self) -> bool:
-        return self.mode is None
+    def is_finish(self) -> bool:
+        return self._count >= self.count_max
+
+    @property
+    def count(self) -> int:
+        return self._count
 
     # タイマー更新
+    def update(self) -> bool:
+        raise NotImplementedError()
+
+    # タイマーアクション
+    def action(self):
+        pass
+
+
+# 指定時間後に発火
+class XUXTimeout(_XUXTimerBase):
     def update(self):
-        # タイマーは終了している
-        if self.mode is None:
+        # 1,2,3,4,...10
+        self._count += 1
+
+        # カウントアップ完了
+        if self._count >= self.count_max:
+            self.action()
+            self.finish()  
             return True
 
-        # カウントアップ・ダウン系
-        if self.mode == XUXTimer.Mode.COUNTUP or self.mode == XUXTimer.Mode.COUNTDOWN:
-            self.func(self.count, self.count_max)
-
-            if self.mode == XUXTimer.Mode.COUNTUP:
-                self.count += 1  # 0は数えない
-                if self.count >= self.count_max:
-                    self.stop()  # カウントアップ完了
-                    return True
-            if self.mode == XUXTimer.Mode.COUNTDOWN:
-                if self.count <= 0:
-                    self.stop()  # カウントダウン完了
-                    return True
-                self.count -= 1  # 0を含める
-
-        # タイムアウト系
-        else:
-            self.count -= 1  # 0は数えない
-            if self.count <= 0:
-                self.func()
-
-                # intervalはカウントし直し
-                if self.mode == XUXTimer.Mode.INTERVAL:
-                    self.count = self.count_max
-                else:
-                    self.stop()
-                return True
-
-        # イベントは発生しなかった
         return False
+
+
+# 指定時間毎に発火
+class XUXInterval(_XUXTimerBase):
+    def update(self):
+        # 1,2,3,4,...10
+        self._count += 1
+
+        # カウントアップ完了
+        if self.count >= self.count_max:
+            self.action()
+            self._count = 0  # intervalはカウントし直し
+            return True
+
+        return False
+
+
+# 指定時間までずっと発火(カウントアップ)
+class XUXCountUp(_XUXTimerBase):
+    def update(self) -> bool:
+        # 1,2,3,4,...10
+        self._count += 1
+        self.action()
+
+        if self._count >= self.count_max:
+            self.finish()  # カウントアップ完了
+            return True
+
+        return False
+
+
+# 指定時間までずっと発火(カウントダウン。0も含める)
+class XUXCountDown(_XUXTimerBase):
+    def update(self) -> bool:
+        # 10,9,8...1,0
+        self.action()
+
+        if self._count >= self.count_max:
+            self.finish()  # カウントダウン完了
+            return True
+
+        self._count += 1  # 0を含めるため最後に
+        return False
+
+    # カウントダウンにオーバーライド
+    @property
+    def count(self) -> int:
+        return self.count_max - self._count

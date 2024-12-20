@@ -15,8 +15,7 @@ class Player:
         self.move_x = 0
         self.move_y = 0
 
-        self.tile = XUXTilemap(1, 16, XURect(0, 0, 128, 128))
-        self.tile.start_anim(15)
+        self.tile = XUXTilemap(1)
 
     def update(self, blocks:list[list[int]], npcs:list[npc.NPC_Data]):
         def _hitcheck(x, y):
@@ -76,4 +75,4 @@ class Player:
 
     def draw(self):
         self.tile.update()
-        self.tile.draw_anim(127, 127-8, [16, 17])
+        self.tile.draw(127, 127-8, [16, 17])
