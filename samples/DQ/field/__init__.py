@@ -4,7 +4,7 @@ import pyxel
 from field.system.player import Player
 from field.system.bg import BG
 from field.system.npc import NPCManager
-from field.system.objects import Treasure
+from samples.DQ.field.system.field_obj import FieldObj
 from xmlui_modules import dq
 import db
 
@@ -24,7 +24,7 @@ class Field(XUXScene):
         self.player = Player(10, 10)
         self.bg = BG()
         self.npc = NPCManager()
-        self.treasure = Treasure()
+        self.treasure = FieldObj()
 
         # UIの読み込み
         self.template = self.xmlui.load_template("assets/ui/field.xml")

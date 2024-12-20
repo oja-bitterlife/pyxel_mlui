@@ -1,32 +1,46 @@
+import dataclasses
+
 from xmlui.core import XUElem
 from xmlui.ext.tilemap import XUXTilemap
 
-class BG:
-    STAIRS = ST = 21
-    FLOOR = FL =5
+@dataclasses.dataclass
+class BGType:
+    name: str
+    movable: bool
+    anim_pat: list[int]|int
 
+bgtype_data = [
+    BGType('none', False, 0),   # 0
+    BGType('roof', False, 6),   # 1
+    BGType('wall', False, 7),   # 2
+    BGType('floor', True, 5),   # 3
+    BGType('chair', False, 23), # 4
+    BGType('stair', False, 21), # 5
+]
+
+class BG:
     # 背景
     blocks = [
-        [ 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
-        [ 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
-        [ 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
-        [ 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
-        [ 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
-        [ 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6],
-        [ 6, 6, 6, 6, 6, 7,FL,FL,FL,FL,FL,FL,FL,FL, 7, 6, 6, 6, 6, 6],
-        [ 6, 6, 6, 6, 6, 7,FL,23,23,23,23,23,23,FL, 7, 6, 6, 6, 6, 6],
-        [ 6, 6, 6, 6, 6, 7,FL,23,FL,23,23,FL,23,FL, 7, 6, 6, 6, 6, 6],
-        [ 6, 6, 6, 6, 6, 7,FL,FL,FL,FL,FL,FL,FL,FL, 7, 6, 6, 6, 6, 6],
-        [ 6, 6, 6, 6, 6, 7,FL,FL,FL,FL,FL,FL,FL,FL, 7, 6, 6, 6, 6, 6],
-        [ 6, 6, 6, 6, 6, 7,FL,FL,FL,FL,FL,FL,FL,FL, 7, 6, 6, 6, 6, 6],
-        [ 6, 6, 6, 6, 6, 7, 7, 7, 7,FL, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6],
-        [ 6, 6, 6, 6, 6, 7,FL,FL,FL,FL,FL,FL,FL,ST, 7, 6, 6, 6, 6, 6],
-        [ 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6],
-        [ 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
-        [ 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
-        [ 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
-        [ 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
-        [ 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1],
+        [1,1,1,1,1,2,3,3,3,3,3,3,3,3,2,1,1,1,1,1],
+        [1,1,1,1,1,2,3,4,4,4,4,4,4,3,2,1,1,1,1,1],
+        [1,1,1,1,1,2,3,4,3,4,4,3,4,3,2,1,1,1,1,1],
+        [1,1,1,1,1,2,3,3,3,3,3,3,3,3,2,1,1,1,1,1],
+        [1,1,1,1,1,2,3,3,3,3,3,3,3,3,2,1,1,1,1,1],
+        [1,1,1,1,1,2,3,3,3,3,3,3,3,3,2,1,1,1,1,1],
+        [1,1,1,1,1,2,2,2,2,3,2,2,2,2,2,1,1,1,1,1],
+        [1,1,1,1,1,2,3,3,3,3,3,3,3,5,2,1,1,1,1,1],
+        [1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     ]
 
     def __init__(self) -> None:
@@ -38,33 +52,17 @@ class BG:
 
         # 地形描画
         for y,line in enumerate(self.blocks):
-            for x,block in enumerate(line):
-                self.tile_anim.draw(x*16+scroll_x, y*16+scroll_y, block)
-
-    # とびらチェック
-    # def check_door(self, menu:XUElem, player):
-    #     if "open_door" in menu.xmlui.event.trg:
-    #         block_x, block_y = player.x//16, player.y//16
-    #         door_x, door_y = -1, -1
-    #         if self.blocks[block_y-1][block_x] == self.DOOR:
-    #             door_x, door_y = block_x, block_y-1
-    #         if self.blocks[block_y+1][block_x] == self.DOOR:
-    #             door_x, door_y = block_x, block_y+1
-    #         if self.blocks[block_y][block_x-1] == self.DOOR:
-    #             door_x, door_y = block_x-1, block_y
-    #         if self.blocks[block_y][block_x+1] == self.DOOR:
-    #             door_x, door_y = block_x+1, block_y
-            
-    #         if door_x != -1:
-    #             self.blocks[door_y][door_x] = 2
-    #             XUWinBase(menu).start_close()
-    #         else:
-    #             msg_text = dq.MsgDQ(menu.open("message").find_by_id("msg_text"))
-    #             msg_text.append_msg("とびらがない")  # systemメッセージ
+            for x,type_ in enumerate(line):
+                data = bgtype_data[type_]
+                self.tile_anim.draw(x*16+scroll_x, y*16+scroll_y, data.anim_pat)
 
     def hit_check(self, block_x:int, block_y:int) -> bool:
-        return self.blocks[block_y][block_x] != self.FLOOR
+        type_ = self.blocks[block_y][block_x]
+        data = bgtype_data[type_]
+        return not data.movable
 
     # 階段チェック
     def check_stairs(self, menu:XUElem, block_x:int, block_y:int) -> bool:
-        return self.blocks[block_y][block_x] == self.STAIRS
+        type_ = self.blocks[block_y][block_x]
+        data = bgtype_data[type_]
+        return data.name == 'stair'

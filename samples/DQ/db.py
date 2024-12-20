@@ -39,3 +39,18 @@ npc_data = [
     NPCData("knight2", 10, 11, [0, 1], "とびらのさきに　かいだんがある"),
     NPCData("knighg3", 12, 9, [0, 1], "たからばこ？\nとっちゃだめだだよ？"),
 ]
+
+@dataclasses.dataclass
+class FieldObjData:
+    name: str
+    x: int
+    y: int
+    anim_pat: int
+    movable: bool
+    talk: str
+field_obj_data = [
+    FieldObjData("tresure1", 9, 9, 4, True, "やくそう"),
+    FieldObjData("tresure2", 10, 9, 4, True, "100G"),
+    FieldObjData("tresure3", 11, 6, 4, True, "10G"),
+    FieldObjData("door", 9, 12, 36, False, ""),
+]
