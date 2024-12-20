@@ -12,7 +12,7 @@ class Player:
         self.y = y*16
         self.move_x = 0
         self.move_y = 0
-        self.anim_pat = [16, 17]
+        self.anim_pat = [32, 33]
 
         self.tile = XUXTilemap(1)
 
