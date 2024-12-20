@@ -1,5 +1,36 @@
 # DBはサンプルでは使わないので固定値で
 import dataclasses
+import sqlite3
+from typing import Self
+
+class XUXDB:
+    @classmethod
+    def memory(cls) -> "XUXDB":
+        return XUXDB(":memory:")
+
+    def __init__(self, db_path:str):
+        self.conn = sqlite3.connect(db_path)
+
+    def __del__(self):
+        self.conn.close()
+
+    def prepare(self, sql:str) -> Self:
+        self.sql = sql
+        self.params = []
+        return self
+
+    def bind(self, **params) -> Self:
+        self.params = params
+        return self
+
+    def execute(self):
+        if self.params:
+            cur = self.conn.execute(self.sql, *self.params)
+        else:
+            cur = self.conn.execute(self.sql)
+        data = cur.fetchall()
+        cur.close()
+        return data
 
 class SystemInfoTable:
     def __init__(self):
@@ -55,3 +86,5 @@ field_obj_data = [
     FieldObjData("tresure3", 11, 6, 4, True, True, "10G"),
     FieldObjData("door", 9, 12, 36, False, True, ""),
 ]
+
+

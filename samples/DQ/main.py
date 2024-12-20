@@ -1,6 +1,11 @@
 # 今回はpyxel向けのライブラリを作るのです
 import pyxel
 
+from db import XUXDB
+data = XUXDB("assets/data.db")
+result = data.prepare("select * from data").execute()
+print(result)
+
 # ここからゲーム本体開始
 # *********************************************************
 pyxel.init(256, 256)
