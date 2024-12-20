@@ -1,10 +1,8 @@
 import dataclasses
-import pyxel
+from enum import StrEnum
 
-from xmlui.core import XUElem,XURect
+from xmlui.core import XMLUI
 from xmlui.ext.tilemap import XUXTilemap
-from xmlui_modules import dq
-import db
 
 @dataclasses.dataclass
 class NPC_Data:
@@ -22,6 +20,14 @@ class NPC_Data:
         self.tile.draw(self.x*16 + offset_x, self.y*16 + offset_y, self.anim_pat)
 
 class NPC:
+    class TALK_EVENT(StrEnum):
+        EAST = "start_talk_east"
+        WEST = "start_talk_west"
+        SOUTH = "start_talk_south"
+        NORTH = "start_talk_north"
+    # 全方向定義
+    TALK_EVENTS = [TALK_EVENT.EAST, TALK_EVENT.WEST, TALK_EVENT.SOUTH, TALK_EVENT.NORTH]
+
     npc_data = [
         # typ,   x, y, color, talk
         NPC_Data("king", 8, 8, [8, 9], "{name}が　つぎのれべるになるには\nあと　{rem_exp}ポイントの\nけいけんが　ひつようじゃ\\pでは　また　あおう！\nゆうしゃ　{name}よ！"),
@@ -38,29 +44,21 @@ class NPC:
             npc.draw(scroll_x-1, scroll_y-1)
 
     # 会話チェック
-    def _check(self, block_x, block_y) -> str:
+    def _check(self, block_x, block_y) -> str|None:
         for data in self.npc_data:
             if data.x == block_x and data.y == block_y:
                 return data.talk
-        return ""
+        return None
+
 
     # 会話イベントチェック
-    def check_talk(self, menu:XUElem, player):
-        talk = None
-        if "start_talk_east" in menu.xmlui.event.trg:
-            talk = self._check(player.block_x+1, player.block_y)
-        if "start_talk_west" in menu.xmlui.event.trg:
-            talk = self._check(player.block_x-1, player.block_y)
-        if "start_talk_south" in menu.xmlui.event.trg:
-            talk = self._check(player.block_x, player.block_y+1)
-        if "start_talk_north" in menu.xmlui.event.trg:
-            talk = self._check(player.block_x, player.block_y-1)
-
-        # 会話が発生した
-        if talk is not None:
-            # メッセージウインドウを開く
-            msg_text = dq.MsgDQ(menu.open("message").find_by_id("msg_text"))
-            if talk:
-                msg_text.append_talk(talk, vars(db.user_data))  # talkでテキスト開始
-            else:
-                msg_text.append_msg("だれもいません")  # systemメッセージ
+    def check_talk(self, talk_event:TALK_EVENT, block_x, block_y) -> str | None:
+        match talk_event:
+            case self.TALK_EVENT.EAST:
+                return self._check(block_x+1, block_y)
+            case self.TALK_EVENT.WEST:
+                return self._check(block_x-1, block_y)
+            case self.TALK_EVENT.SOUTH:
+                return self._check(block_x, block_y+1)
+            case self.TALK_EVENT.NORTH:
+                return self._check(block_x, block_y-1)

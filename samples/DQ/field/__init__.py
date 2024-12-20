@@ -5,9 +5,11 @@ from field.system.player import Player
 from field.system.bg import BG
 from field.system.npc import NPC
 from samples.DQ.field.system.objects import Treasure
+from xmlui_modules import dq
+import db
 
 # UI
-from xmlui.core import XMLUI,XUEvent
+from xmlui.core import XMLUI,XUElem,XUEvent
 from xmlui.ext.scene import XUXScene
 
 from field.ui import msg_win,menu,talk_dir,tools
@@ -38,25 +40,17 @@ class Field(XUXScene):
 
     def update(self):
         # UIメニューが開いていたらキャラが動かないように
-        if not self.xmlui.exists_id("menu"):
+        if self.xmlui.exists_id("menu"):
+            # メニューイベント処理
+            menu = self.xmlui.find_by_id("menu")
+            self.menu_event(menu, self.xmlui.event)
+        else:
             # プレイヤの移動
             self.player.update(self.bg.blocks, self.npc.npc_data)
 
             # キャラが動いていなければメニューオープン可能
             if not self.player.is_moving:
                 self.xmlui.open_by_event(XUEvent.Key.BTN_A, "menu")
-
-        else:
-            menu = self.xmlui.find_by_id("menu")
-
-            # 会話イベントチェック
-            self.npc.check_talk(menu, self.player)
-            # self.bg.check_door(menu, self.player)
-            self.bg.check_stairs(menu, self.player)
-
-        # バトル開始
-        if "start_battle" in self.xmlui.event.trg:
-            self.end_scene()
 
     def draw(self):
         # プレイヤを中心に世界が動く。さす勇
@@ -71,3 +65,28 @@ class Field(XUXScene):
 
         # UIの描画(fieldとdefaultグループ)
         self.xmlui.draw()
+
+
+    # メニューで起こったイベントの処理を行う
+    def menu_event(self, menu:XUElem, event:XUEvent):
+        # バトル開始
+        if "start_battle" in event.trg:
+            self.end_scene()
+            return
+
+        # 会話イベントチェック
+        for talk_event in self.npc.TALK_EVENTS:
+            if talk_event in event.trg:
+                # メッセージウインドウを開く
+                msg_text = dq.MsgDQ(menu.open("message").find_by_id("msg_text"))
+
+                talk = self.npc.check_talk(talk_event, self.player.block_x, self.player.block_y)
+                if talk is not None:
+                    msg_text.append_talk(talk, vars(db.user_data))  # talkでテキスト開始
+                else:
+                    msg_text.append_msg("だれもいません")  # systemメッセージ
+
+        # self.bg.check_door(menu, self.player)
+
+        if "down_stairs" in menu.xmlui.event.trg:
+            self.bg.check_stairs(menu, self.player)
