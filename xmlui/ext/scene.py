@@ -28,14 +28,9 @@ class XUXScene:
         self._timer = XUXCountDown(open_count)
         self.fade_color = 0
 
-    # # フェードインアウト設定
-    # def _timer_fade_func(self, count, count_max):
-    #     if count_max == 0:
-    #         return 1
-    #     self.fade_alpha = count/count_max
     @property
     def fade_alpha(self) -> float:
-        return self._timer._count/self._timer.count_max
+        return self._timer.alpha
 
     # mainから呼び出すもの
     # -----------------------------------------------------
