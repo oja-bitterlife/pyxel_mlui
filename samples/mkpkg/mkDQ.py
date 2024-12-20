@@ -8,6 +8,7 @@ if os.path.exists(target):
     shutil.rmtree(target)
 shutil.copytree(os.path.join("..", target), target)
 shutil.copytree(os.path.join("../..", "xmlui"), os.path.join(target, "xmlui"))
+shutil.copytree(os.path.join("../..", "xmlui_modules"), os.path.join(target, "xmlui_modules"))
 
 # clear cache
 for root, dirs, files in os.walk(target):
