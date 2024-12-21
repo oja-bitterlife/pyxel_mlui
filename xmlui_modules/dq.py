@@ -38,6 +38,7 @@ class MsgDQ(Msg):
             append_lines = self.pages[page_no].all_text.splitlines()
             text_lines = append_lines + text_lines
 
+            # ページインデントがENEMYの場合はページ全部ENEMYインデント。TALKのときは行頭だけTALKインデント
             page_indent = self.IndentType.from_str(self.pages[page_no].attr_str(MsgDQ.INDENT_TYPE_ATTR))
             normal_indent = self.IndentType.ENEMY if page_indent == self.IndentType.ENEMY else self.IndentType.NONE
             indent_type = [normal_indent if i == 0 else page_indent for i in range(len(append_lines))] + indent_type
@@ -46,6 +47,7 @@ class MsgDQ(Msg):
         for line in self.current_page.text.splitlines():
             text_lines.append(line)
         for i in range(len(self.current_page.all_text.splitlines())):
+            # ページインデントがENEMYの場合はページ全部ENEMYインデント。TALKのときは行頭だけTALKインデント
             page_indent = self.IndentType.from_str(self.current_page.attr_str(MsgDQ.INDENT_TYPE_ATTR))
             normal_indent = self.IndentType.ENEMY if page_indent == self.IndentType.ENEMY else self.IndentType.NONE
             indent_type.append(normal_indent if i == 0 else page_indent)
