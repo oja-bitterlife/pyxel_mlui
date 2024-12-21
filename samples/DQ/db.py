@@ -12,7 +12,7 @@ user_db = XUXMemoryDB.load("assets/data/user.db")
 # システムインフォ。コンフィグがメイン
 class SystemInfoTable:
     def __init__(self):
-        self.msg_spd = 1.0
+        self.msg_spd = 65535
 system_info = SystemInfoTable()
 
 
