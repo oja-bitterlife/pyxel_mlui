@@ -7,7 +7,7 @@ from xmlui.lib import text,win
 from xmlui_modules import dq
 
 from xmlui.ext.pyxel_util import PyxelFont,PyxelPalette
-import db
+from db import system_info, user_data
 
 system_font = PyxelFont("assets/font/b12.bdf")
 system_palette = PyxelPalette()
@@ -108,8 +108,8 @@ def common_msg_text(msg_dq:dq.MsgDQ, event:XUEvent, cursor_visible:bool):
 
     # カウンタ操作
     # ---------------------------------------------------------
-    msg_dq.current_page.draw_count += 65535
-    is_fast_page = True
+    msg_dq.current_page.draw_count += system_info.msg_spd
+    is_fast_page = system_info.msg_spd >= 65535
 
     # 表示バッファ
     # ---------------------------------------------------------
@@ -139,15 +139,18 @@ def common_msg_text(msg_dq:dq.MsgDQ, event:XUEvent, cursor_visible:bool):
 
     # テキスト描画
     for i,info in enumerate(scroll_info):
-        # xはインデント
+        # yはスクロール考慮
+        y = area.y + i*line_height - shift_y
+        clip = get_world_clip(XUWinBase.find_parent_win(msg_dq)).intersect(msg_dq.area)
+        if y+system_font.size >= clip.bottom():  # メッセージもクリップ対応
+            break
+
+        # インデント計算
         x = area.x
         if info.indent_type == dq.MsgDQ.IndentType.TALK:
             x += system_font.text_width(dq.MsgDQ.TALK_START)
         elif info.indent_type == dq.MsgDQ.IndentType.ENEMY:
             x += system_font.size
-
-        # yはスクロール
-        y = area.y + i*line_height - shift_y
 
         pyxel.text(x, y, info.line_text, 7, system_font.font)
 
@@ -171,7 +174,7 @@ def common_msg_text(msg_dq:dq.MsgDQ, event:XUEvent, cursor_visible:bool):
 @common_text.label("status_item")
 def status_item(status_item:text.Label, event:XUEvent):
     # 値の取得
-    text = XUTextUtil.format_zenkaku(XUTextUtil.format_dict(status_item.text, db.user_data.data))
+    text = XUTextUtil.format_zenkaku(XUTextUtil.format_dict(status_item.text, user_data.data))
 
     # テキストは右寄せ
     area = status_item.area
@@ -188,4 +191,4 @@ def status_title(status_title:text.Label, event:XUEvent):
     # テキストは左寄せ
     if status_title.area.y < clip.bottom():  # world座標で比較
         x, y = status_title.aligned_pos(system_font)
-        pyxel.text(x+1, y-1, db.user_data.data["name"], 7, system_font.font)
+        pyxel.text(x+1, y-1, user_data.data["name"], 7, system_font.font)

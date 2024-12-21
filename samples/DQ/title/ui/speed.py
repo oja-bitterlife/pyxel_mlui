@@ -6,9 +6,9 @@ from title.ui.item import menu_item
 from db import system_info
 
 class MSG_SPEED(StrEnum):
-    SLOW = "change_slow"
-    NORMAL = "change_slow"
-    FAST = "change_slow"
+    SLOW = "slow"
+    NORMAL = "normal"
+    FAST = "fast"
 
 from ui_common import draw_menu_cursor
 def ui_init(template:XUTemplate):
