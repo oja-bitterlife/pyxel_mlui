@@ -28,6 +28,9 @@ class UserSave:
         level_data = dict(game_db.execute("SELECT * from level_data where level=?", [self.level]).fetchone())
         self.hp = level_data["max_hp"]
         self.mp = level_data["max_mp"]
+
+        self.tools = ["やくそう", "やくそう", "やくそう", "きぬらのつばさ"]
+
 user_save = UserSave()
 
 # ユーザーステータスデータアクセス
@@ -37,14 +40,13 @@ class UserData:
         level_data = dict(game_db.execute("SELECT * from level_data where level=?", [user_data["level"]]).fetchone())
         self.data = user_data | level_data
 
-        self.tools = [dict(data) for data in user_db.execute("SELECT * from tools_stock").fetchall()]
-
         # 残り経験値
         self.data["rem_exp"] = self.data["need_exp"] - self.data["exp"]
 
     def __init__(self):
         # セーブデータからの復帰
         user_db.execute("UPDATE user_data SET name=?,level=?,hp=?,mp=?", [user_save.name, user_save.level, user_save.hp, user_save.mp])
+        self.tools = user_save.tools
         self.reload_db()
 
     @property
@@ -130,7 +132,6 @@ class FieldObjData:
         self.reload()
 
 fieldobj_data = FieldObjData(1)
-
 
 
 # アイテムデータ
