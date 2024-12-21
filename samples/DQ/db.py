@@ -77,7 +77,7 @@ class EnemyData:
     def reload(self):
         self.data = dict(game_db.execute("SELECT * from enemy_data where id=?", [self.id]).fetchone())
 
-    def __init__(self, id:int) -> None:
+    def __init__(self, id:int):
         self.id = id
         self.reload()
 
@@ -86,20 +86,28 @@ enemy_data = EnemyData(1)
 
 # NPCデータ
 # *****************************************************************************
-@dataclasses.dataclass
 class NPCData:
-    name: str
-    x: int
-    y: int
-    anim_pat: list[int]
-    talk: str
-npc_data = [
-    NPCData("king", 8, 8, [16, 17], "{name}が　つぎのれべるになるには\nあと　{rem_exp}ポイントの\nけいけんが　ひつようじゃ\\pでは　また　あおう！\nゆうしゃ　{name}よ！"),
-    NPCData("knight1", 8, 11, [0, 1], "とびらのまえで　とびら　をせんたくしてね"),
-    NPCData("knight2", 10, 11, [0, 1], "とびらのさきに　かいだんがある"),
-    NPCData("knighg3", 12, 9, [0, 1], "たからばこ？\nとっちゃだめだだよ？"),
-]
+    def reload(self):
+        sql = """SELECT * from npc_place_data
+                    INNER JOIN npc_data ON npc_place_data.npc_id = npc_data.npc_id
+                    INNER JOIN npc_graph_data ON npc_data.npc_graph_id = npc_graph_data.npc_graph_id
+                    where field_id=?"""
+        self.data = [dict(row) for row in game_db.execute(sql, [self.field_id]).fetchall()]
 
+        for data in self.data:
+            data["anim_pat"] = list(map(int, data["anim_pat"].split(",")))
+            data["talk"] = data["talk"].replace("\r\n", "\n")
+        print(self.data)
+
+    def __init__(self, field_id:int):
+        self.field_id = field_id
+        self.reload()
+
+npc_data = NPCData(1)
+
+
+# フィールドオブジェクトデータ
+# *****************************************************************************
 @dataclasses.dataclass
 class FieldObjData:
     name: str

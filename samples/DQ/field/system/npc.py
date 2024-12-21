@@ -5,13 +5,13 @@ from xmlui.ext.tilemap import XUXTilemap
 import db
 
 class NPC:
-    def __init__(self, data:db.NPCData):
+    def __init__(self, data:dict):
         self.data = data
         self.tile = XUXTilemap(1)
 
     def draw(self, offset_x:int, offset_y:int):
         self.tile.update()
-        self.tile.draw(self.data.x*16 + offset_x, self.data.y*16 + offset_y, self.data.anim_pat)
+        self.tile.draw(self.data["block_x"]*16 + offset_x, self.data["block_y"]*16 + offset_y, self.data["anim_pat"])
 
 class NPCManager:
     class TALK_EVENT(StrEnum):
@@ -23,7 +23,7 @@ class NPCManager:
     TALK_EVENTS = [TALK_EVENT.EAST, TALK_EVENT.WEST, TALK_EVENT.SOUTH, TALK_EVENT.NORTH]
 
     def __init__(self):
-        self.npcs = [NPC(data) for data in db.npc_data]
+        self.npcs = [NPC(data) for data in db.npc_data.data]
 
     def draw(self, scroll_x:int, scroll_y:int):
         for npc in self.npcs:
@@ -32,15 +32,15 @@ class NPCManager:
     # ぶつかりチェック
     def hit_check(self, block_x:int, block_y:int):
         for npc in self.npcs:
-            if npc.data.x == block_x and npc.data.y == block_y:
+            if npc.data["block_x"] == block_x and npc.data["block_y"] == block_y:
                 return True
         return False
 
     # 会話チェック
     def _talk_check(self, block_x:int, block_y:int) -> str|None:
         for npc in self.npcs:
-            if npc.data.x == block_x and npc.data.y == block_y:
-                return npc.data.talk
+            if npc.data["block_x"] == block_x and npc.data["block_y"] == block_y:
+                return npc.data["talk"]
         return None
 
     # 会話イベントチェック
