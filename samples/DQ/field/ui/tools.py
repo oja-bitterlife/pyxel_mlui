@@ -26,10 +26,8 @@ def ui_init(template:XUTemplate):
         # アイテム表示の準備
         if event.on_init:
             tools_list.clear_children()
-            tools_list.add_child(XUElem(tools_list.xmlui, Element("tools_item")))
-            # for 
-            #             <tools_item action="やくそう">やくそう</tools_item>
-
+            for tools in user_data.tools:
+                tools_list.add_child(XUElem.new(tools_list.xmlui, "tools_item").set_text(tools["type"]).set_attr("action", tools["type"]))
 
         # 各アイテムの描画
         for item in tools_list.items:
@@ -45,7 +43,7 @@ def ui_init(template:XUTemplate):
                 return
 
             # 効果発現
-            msg = tools_effect(data)
+            msg = tools_effect(tools_list, tools_list.selected_no, data)
 
             # メッセージウインドウを開く
             XUWinBase.find_parent_win(tools_list).start_close()
@@ -59,11 +57,16 @@ def ui_init(template:XUTemplate):
 
     # どうぐ処理
     # ---------------------------------------------------------
-    def tools_effect(data) -> str:
+    def tools_effect(tools_list:select.List, selected_no:int, data) -> str:
         match data["type"]:
             case "やくそう":
                 value = data["value"]
                 user_data.hp += value
+                tools_remove(tools_list, selected_no, data)
                 return XUTextUtil.format_zenkaku(data["msg"], {"value":value})
 
         return "なにもおこらなかった"
+
+    # 消費
+    def tools_remove(tools_list:select.List, selected_no:int, data):
+        tools_list.children[selected_no].remove()

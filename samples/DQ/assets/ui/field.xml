@@ -47,10 +47,7 @@
     <info>どうぐ</info>
     <round_win x="22" y="17" w="108" h="192" id="tools">
         <child_menu_title x="34" y="0" w="52" h="12" align="center">どうぐ</child_menu_title>
-        <tools_list x="10" y="14" item_h="16">
-            <tools_item action="やくそう">やくそう</tools_item>
-            <tools_item action="きめらのつばさ">きめらのつばさ</tools_item>
-        </tools_list>
+        <tools_list x="10" y="14" item_h="16"/>
     </round_win>
 
 

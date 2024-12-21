@@ -37,7 +37,7 @@ class UserData:
         level_data = dict(game_db.execute("SELECT * from level_data where level=?", [user_data["level"]]).fetchone())
         self.data = user_data | level_data
 
-        self.tools = dict(user_db.execute("SELECT * from tools_stock").fetchone())
+        self.tools = [dict(data) for data in user_db.execute("SELECT * from tools_stock").fetchall()]
 
         # 残り経験値
         self.data["rem_exp"] = self.data["need_exp"] - self.data["exp"]
