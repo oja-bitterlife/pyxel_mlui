@@ -104,42 +104,57 @@ def round_win(round_win:win.RoundFrame, event:XUEvent):
 def common_msg_text(msg_dq:dq.MsgDQ, event:XUEvent, cursor_visible:bool):
     area = msg_dq.area  # areaは重いので必ずキャッシュ
 
-    # テキスト表示
+    # カウンタ操作
     # ---------------------------------------------------------
     msg_dq.current_page.draw_count += 0.5
 
-    # スクロール表示
+    # 表示バッファ
     # ---------------------------------------------------------
-    # スクロールバッファサイズはページサイズ+2(待機中は+1)
-    idle_scroll_size = msg_dq.attr_int(msg_dq.PAGE_LINE_NUM_ATTR) + 1
-    anim_scroll_size = msg_dq.attr_int(msg_dq.PAGE_LINE_NUM_ATTR) + 2
-    scroll_size = idle_scroll_size if msg_dq.current_page.is_finish else anim_scroll_size
+    # スクロールバッファサイズはページサイズ+1
+    scroll_size = msg_dq.attr_int(msg_dq.PAGE_LINE_NUM_ATTR) + 1
     scroll_info =  msg_dq.get_scroll_lines(scroll_size)
 
-    # アニメーション用表示位置ずらし。スクロール時半文字ずれる
-    shift_y = -3 if not msg_dq.current_page.is_finish and len(scroll_info) >= anim_scroll_size else 5
+    # 行が完了してからの経過時間
+    if msg_dq.is_line_end and len(scroll_info) >= scroll_size:
+        msg_dq.set_attr("_over_count", msg_dq.attr_int("_over_count")+1)
+    else:
+        msg_dq.set_attr("_over_count", 0)
+
+    # 行間設定
+    line_height = system_font.size + 6
+
+    # スクロール
+    scroll_split = 3
+    if msg_dq.attr_int("_over_count") > 0:
+        shift_y = min(scroll_split, msg_dq.attr_int("_over_count"))*line_height*0.8/scroll_split
+        # スクロールが終わったら1行減らす(＝行待機解除)
+        if msg_dq.attr_int("_over_count") >= scroll_split:
+            shift_y = 0
+            scroll_info = scroll_info[1:]
+    else:
+        shift_y = 0
 
     # テキスト描画
-    line_height = system_font.size + 3  # 行間設定
     for i,info in enumerate(scroll_info):
         # xはインデント
         x = area.x
-        if info.mark_type == dq.MsgDQ.Mark.TALK:
+        if info.mark_type == dq.MsgDQ.IndentType.TALK:
             x += system_font.text_width(dq.MsgDQ.TALK_START)
-        elif info.mark_type == dq.MsgDQ.Mark.ENEMY:
+        elif info.mark_type == dq.MsgDQ.IndentType.ENEMY:
             x += system_font.size
 
         # yはスクロール
-        y = shift_y + area.y + i*line_height
+        y = area.y + i*line_height - shift_y
 
         pyxel.text(x, y, info.line_text, 7, system_font.font)
 
+
     # カーソル表示
     # ---------------------------------------------------------
-    if cursor_visible and msg_dq.is_next_wait:
+    if cursor_visible and msg_dq.is_next_wait and shift_y == 0:  # ページ送り待ち中でスクロール中でない
         cursor_count = msg_dq.current_page.draw_count - msg_dq.current_page.length
         if cursor_count//7 % 2 == 0:
-            draw_msg_cursor(msg_dq, 0, scroll_size*line_height + shift_y-3)
+            draw_msg_cursor(msg_dq, 0, (scroll_size-1)*line_height-4)
 
     # 表示途中のアクション
     if not msg_dq.is_next_wait:

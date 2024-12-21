@@ -53,7 +53,7 @@
 
     <info>メッセージウインドウ</info>
     <round_win abs_x="28" abs_y="160" w="200" h="88" id="message">
-        <msg_text x="10" y="8" w="184" page_line_num="3" wrap="12" id="msg_text">
+        <msg_text x="10" y="14" w="184" page_line_num="3" wrap="12" id="msg_text">
             サンプルテキスト１\p
             サンプルテキスト１-2
             サンプルテキスト２\nサンプルテキスト３\nサンプルテキスト４

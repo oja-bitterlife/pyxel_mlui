@@ -7,73 +7,63 @@ from xmlui.lib.text import Msg
 # #############################################################################
 class MsgDQ(Msg):
     TALK_START = "＊「"
-    MARK_ATTR = "_xmlui_talk_mark"
+    TALK_TYPE_ATTR = "_xmlui_talk_type"
 
-    class Mark(StrEnum):
+    class IndentType(StrEnum):
         NONE = auto()
         TALK = auto()
         ENEMY = auto()
 
         @classmethod
-        def from_str(cls, type_:str) -> "MsgDQ.Mark":
+        def from_str(cls, type_:str) -> "MsgDQ.IndentType":
             for v in cls.__members__.values():
                 if v == type_:
                     return v
             raise Exception(f"Invalid mark type: {type_}")
 
-    # インデント用
-    # -----------------------------------------------------
-    class PageItemDQ(XUPageItem):
-        def __init__(self, page_item:XUElem):
-            super().__init__(page_item)
-
-        def set_mark(self, mark:"MsgDQ.Mark") -> Self:
-            self.set_attr(MsgDQ.MARK_ATTR, mark)
-            return self
-
-        def get_lines_mark(self) -> "list[MsgDQ.Mark]":
-            out:list[MsgDQ.Mark] = []
-            for line in self.all_text.splitlines():
-                mark = self.attr_str(MsgDQ.MARK_ATTR, MsgDQ.Mark.NONE)
-                # 会話開始時はマークなしに
-                if mark == MsgDQ.Mark.TALK and line.startswith(MsgDQ.TALK_START):
-                     mark = MsgDQ.Mark.NONE
-                out.append(MsgDQ.Mark.from_str(mark))
-            return out
-
     # スクロール用
     # -----------------------------------------------------
     class ScrollInfo:
-        def __init__(self, line_text:str, mark_type:"MsgDQ.Mark"):
-            self.line_text:str = line_text
-            self.mark_type:MsgDQ.Mark = mark_type
+        def __init__(self, line_text:str, mark_type:"MsgDQ.IndentType"):
+            self.line_text = line_text
+            self.mark_type = mark_type
 
     # 必要な行だけ返す(アニメーション対応)
     def get_scroll_lines(self, scroll_size:int) -> list[ScrollInfo]:
-        # スクロール枠の中に収まる前のページを取得する
-        all_lines = []
-        mark_type = []
-        for i in range(self.page_no-1, -1, -1):  # 現在より前へ戻りながら追加
-            page_item = self.PageItemDQ(self.pages[i])
+        # 前ページのテキストを行ごとに保存
+        text_lines = []
+        indent_type = []
+        for page_no in range(self.page_no-1, -1, -1):
+            append_lines = self.pages[page_no].all_text.splitlines()
+            text_lines = append_lines + text_lines
+            indent_type = [self.IndentType.NONE if i == 0 else self.IndentType.TALK for i in range(len(append_lines))] + indent_type
 
-            all_lines = page_item.all_text.splitlines() + all_lines
-            mark_type = page_item.get_lines_mark() + mark_type
-
-            if len(all_lines) >= scroll_size:
-                break
-
-        # 現在のページの情報を追加
-        page_item = self.PageItemDQ(self.current_page)
-        all_lines += page_item.text.splitlines()
-        mark_type += page_item.get_lines_mark()
+        # 現在のページの表示できるところまで
+        for line in self.current_page.text.splitlines():
+            text_lines.append(line)
+        for i in range(len(self.current_page.all_text.splitlines())):
+            indent_type.append(self.IndentType.NONE if i == 0 else self.IndentType.TALK)
 
         # オーバーした行を削除
-        over_line = max(0, len(all_lines) - scroll_size)
-        all_lines = all_lines[over_line:]
-        mark_type = mark_type[over_line:]
+        over_line = max(0, len(text_lines) - scroll_size)
+        text_lines = text_lines[over_line:]
+        indent_type = indent_type[over_line:]
 
         # scroll枠に収まるlineリストを返す
-        return [self.ScrollInfo(line, mark_type[i]) for i,line in enumerate(all_lines)]
+        return [self.ScrollInfo(line, indent_type[i]) for i,line in enumerate(text_lines)]
+
+    @property
+    def is_line_end(self) -> bool:
+        # 現在表示中の行を取得
+        anim_last_line = len(self.current_page.text.splitlines())-1
+        if(anim_last_line < 0):  # まだ最初
+            return False
+
+        # アニメテキストの行の文字数とアニメしないテキストの行の文字数が一致すれば行末
+        anim_last_count = self.current_page.text.splitlines()[anim_last_line]
+        all_text_count = self.current_page.all_text.splitlines()[anim_last_line]
+        return anim_last_count == all_text_count
+
 
     # ページ登録
     # -----------------------------------------------------
@@ -81,14 +71,14 @@ class MsgDQ(Msg):
     def append_talk(self, text:str, all_params:dict[str,Any]={}):
         for page in self.append_msg(text, all_params):
             # 追加されたページにTALKをマーキング
-            page_item = self.PageItemDQ(page).set_mark(MsgDQ.Mark.TALK)
+            page_item = XUPageItem(page).set_attr(MsgDQ.TALK_TYPE_ATTR, MsgDQ.IndentType.TALK)
             page._element.text = self.TALK_START + page_item.all_text
 
     # Enemyマークを追加して格納
     def append_enemy(self, text:str, all_params:dict[str,Any]={}):
         for page in self.append_msg(text, all_params):
             # 追加されたページにTALKをマーキング
-            page_item = self.PageItemDQ(page).set_mark(MsgDQ.Mark.ENEMY)
+            page_item = XUPageItem(page).set_attr(MsgDQ.TALK_TYPE_ATTR, MsgDQ.IndentType.ENEMY)
             page._element.text = page_item.all_text
 
 
