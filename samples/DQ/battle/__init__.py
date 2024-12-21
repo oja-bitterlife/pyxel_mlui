@@ -7,11 +7,7 @@ from xmlui.lib import select,text
 from xmlui.ext.scene import XUXScene
 from ui_common import system_font
 from xmlui_modules import dq
-import db
-
-battle_db: dict[str, str] = {
-    "enemy": "なにか",
-}
+from db import user_data, enemy_data
 
 class Battle(XUXScene):
     UI_TEMPLATE_BATTLE = "ui_battle"
@@ -30,9 +26,10 @@ class Battle(XUXScene):
         ui_init(self.template)
 
         # バトル開始UI初期化
+        print(enemy_data.data)
         self.battle = self.xmlui.open("battle")
         msg_dq = dq.MsgDQ(self.battle.find_by_id("msg_text"))
-        msg_dq.append_msg("{enemy}が　あらわれた！", battle_db)
+        msg_dq.append_msg("{name}が　あらわれた！", enemy_data.data)
 
     def closed(self):
         # 読みこんだUIの削除
@@ -52,20 +49,18 @@ class Battle(XUXScene):
             case Battle.ST_CMD_WAIT:
                 menu = dq.MsgDQ(self.battle.find_by_id("menu"))
                 if "attack" in self.xmlui.event.trg:
-                    battle_db["hit"] = XUTextUtil.format_zenkaku(random.randint(1, 100))
-                    marge_db = vars(db.user_data) | battle_db
+                    enemy_data.data["hit"] = XUTextUtil.format_zenkaku(random.randint(1, 100))
 
-                    msg_dq.append_msg("{name}の　こうげき！", marge_db)
-                    msg_dq.append_msg("{enemy}に　{hit}ポイントの\nダメージを　あたえた！", marge_db)
+                    msg_dq.append_msg("{name}の　こうげき！", user_data.data)
+                    msg_dq.append_msg("{name}に　{hit}ポイントの\nダメージを　あたえた！", enemy_data.data)
                     XUWinBase(menu).start_close()
                     self.battle_state = Battle.ST_ENEMY_TURN
 
             case Battle.ST_ENEMY_TURN:
-                battle_db["damage"] = XUTextUtil.format_zenkaku(random.randint(1, 10))
-                marge_db = vars(db.user_data)  | battle_db
+                user_data.data["damage"] = XUTextUtil.format_zenkaku(random.randint(1, 10))
 
-                msg_dq.append_enemy("{enemy}の　こうげき！", marge_db)
-                msg_dq.append_enemy("{name}は　{damage}ポイントの\nだめーじを　うけた", marge_db)
+                msg_dq.append_enemy("{name}の　こうげき！", enemy_data.data)
+                msg_dq.append_enemy("{name}は　{damage}ポイントの\nだめーじを　うけた", user_data.data)
                 self.battle_state = Battle.ST_MSG_DRAWING
 
 
