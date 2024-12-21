@@ -19,12 +19,12 @@ class UserData:
 
         # 残り経験値
         self.data["rem_exp"] = self.data["need_exp"] - self.data["exp"]
+        print(self.data)
 
     def __init__(self):
-        # セーブデータからの復帰
-        user_db.execute("UPDATE user_data SET name=?", ["おじゃ　"])
-        self.hp = 15
-        self.mp = 0
+        # セーブデータからの復帰。といいつつサンプルではセーブしないので適当で
+        user_db.execute("UPDATE user_data SET name=?,level=?,hp=?,mp=?", ["おじゃ　", 1, 15, 0])
+        self.reload_db()
 
     @property
     def hp(self):

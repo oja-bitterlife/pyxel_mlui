@@ -77,7 +77,7 @@ class Field(XUXScene):
 
                 talk = self.npc.check_talk(talk_event, self.player.block_x, self.player.block_y)
                 if talk is not None:
-                    msg_text.append_talk(talk, vars(db.user_data))  # talkでテキスト開始
+                    msg_text.append_talk(talk, db.user_data.data)  # talkでテキスト開始
                 else:
                     msg_text.append_msg("だれもいません")  # systemメッセージ
 
