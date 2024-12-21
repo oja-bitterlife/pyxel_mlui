@@ -6,7 +6,7 @@ from field.system.bg import BG
 from field.system.npc import NPCManager
 from field.system.field_obj import FieldObj
 from xmlui_modules import dq
-import db
+from db import user_data
 
 # UI
 from xmlui.core import XMLUI,XUElem,XUEvent,XUWinBase
@@ -77,7 +77,7 @@ class Field(XUXScene):
 
                 talk = self.npc.check_talk(talk_event, self.player.block_x, self.player.block_y)
                 if talk is not None:
-                    msg_text.append_talk(talk, db.user_data.data)  # talkでテキスト開始
+                    msg_text.append_talk(talk, user_data.data)  # talkでテキスト開始
                 else:
                     msg_text.append_msg("だれもいません")  # systemメッセージ
 
@@ -95,8 +95,7 @@ class Field(XUXScene):
         if "open_door" in menu.xmlui.event.trg:
             door = self.field_obj.find_door(self.player.block_x, self.player.block_y)
             if door != None:
-                db.field_obj_data[door].movable = True
-                db.field_obj_data[door].visible = False
+                self.field_obj.open(door)
                 XUWinBase(menu).start_close()
             else:
                 msg_text = dq.MsgDQ(menu.open("message").find_by_id("msg_text"))

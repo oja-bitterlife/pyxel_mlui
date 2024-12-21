@@ -88,16 +88,15 @@ enemy_data = EnemyData(1)
 # *****************************************************************************
 class NPCData:
     def reload(self):
-        sql = """SELECT * from npc_place_data
-                    INNER JOIN npc_data ON npc_place_data.npc_id = npc_data.npc_id
-                    INNER JOIN npc_graph_data ON npc_data.npc_graph_id = npc_graph_data.npc_graph_id
+        sql = """SELECT * from npc_place
+                    INNER JOIN npc_data ON npc_place.npc_id = npc_data.id
+                    INNER JOIN npc_graph ON npc_data.graph_id = npc_graph.id
                     where field_id=?"""
         self.data = [dict(row) for row in game_db.execute(sql, [self.field_id]).fetchall()]
 
         for data in self.data:
             data["anim_pat"] = list(map(int, data["anim_pat"].split(",")))
             data["talk"] = data["talk"].replace("\r\n", "\n")
-        print(self.data)
 
     def __init__(self, field_id:int):
         self.field_id = field_id
@@ -108,20 +107,25 @@ npc_data = NPCData(1)
 
 # フィールドオブジェクトデータ
 # *****************************************************************************
-@dataclasses.dataclass
 class FieldObjData:
-    name: str
-    x: int
-    y: int
-    anim_pat: int
-    movable: bool
-    visible: bool
-    talk: str
-field_obj_data = [
-    FieldObjData("tresure1", 9, 9, 4, True, True, "やくそう"),
-    FieldObjData("tresure2", 10, 9, 4, True, True, "100G"),
-    FieldObjData("tresure3", 11, 6, 4, True, True, "10G"),
-    FieldObjData("door", 9, 12, 36, False, True, ""),
-]
+    def reload(self):
+        sql = """SELECT * from fieldobj_place
+                    INNER JOIN fieldobj_data ON fieldobj_place.fieldobj_id = fieldobj_data.id
+                    where field_id=?"""
+        self.data = [dict(row) for row in game_db.execute(sql, [self.field_id]).fetchall()]
 
+        for i,data in enumerate(self.data):
+            data["closed"] = i not in self.opened_ids
+
+    def __init__(self, field_id:int):
+        self.field_id = field_id
+        self.opened_ids = []
+        self.reload()
+
+    # 宝箱やとびらを開く
+    def open(self, id):
+        self.opened_ids.append(id)
+        self.reload()
+
+fieldobj_data = FieldObjData(1)
 
