@@ -103,7 +103,7 @@ def round_win(round_win:win.RoundFrame, event:XUEvent):
 # ---------------------------------------------------------
 def common_msg_text(msg_dq:dq.MsgDQ, event:XUEvent, cursor_visible:bool):
     area = msg_dq.area  # areaは重いので必ずキャッシュ
-    line_height = system_font.size + 6  # 行間設定
+    line_height = system_font.size + 5  # 行間設定
     scroll_size = msg_dq.attr_int(msg_dq.PAGE_LINE_NUM_ATTR) + 1  # スクロールバッファサイズはページサイズ+1
 
     # カウンタ操作

@@ -5,7 +5,7 @@
     <battle id="battle">
         <info>バトルメッセージウインドウ</info>
         <round_win abs_x="28" abs_y="160" w="200" h="88">
-            <msg_text x="10" y="8" w="184" page_line_num="3" wrap="14" id="msg_text"/>
+            <msg_text x="12" y="14" w="184" page_line_num="3" wrap="14" id="msg_text"/>
         </round_win>
 
         <info>ステータスウインドウ</info>
