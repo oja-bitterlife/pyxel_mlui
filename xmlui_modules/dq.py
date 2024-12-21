@@ -24,9 +24,9 @@ class MsgDQ(Msg):
     # スクロール用
     # -----------------------------------------------------
     class ScrollInfo:
-        def __init__(self, line_text:str, mark_type:"MsgDQ.IndentType"):
+        def __init__(self, line_text:str, indent_type:"MsgDQ.IndentType"):
             self.line_text = line_text
-            self.mark_type = mark_type
+            self.indent_type = indent_type
 
     # 必要な行だけ返す(アニメーション対応)
     def get_scroll_lines(self, scroll_size:int) -> list[ScrollInfo]:
@@ -59,7 +59,7 @@ class MsgDQ(Msg):
         if(anim_last_line < 0):  # まだ最初
             return False
 
-        # アニメテキストの行の文字数とアニメしないテキストの行の文字数が一致すれば行末
+        # アニメテキストの行の文字数とアニメしないテキストのおなじ行の文字数が一致すれば行末
         anim_last_count = self.current_page.text.splitlines()[anim_last_line]
         all_text_count = self.current_page.all_text.splitlines()[anim_last_line]
         return anim_last_count == all_text_count

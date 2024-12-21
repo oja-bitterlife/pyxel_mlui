@@ -138,9 +138,9 @@ def common_msg_text(msg_dq:dq.MsgDQ, event:XUEvent, cursor_visible:bool):
     for i,info in enumerate(scroll_info):
         # xはインデント
         x = area.x
-        if info.mark_type == dq.MsgDQ.IndentType.TALK:
+        if info.indent_type == dq.MsgDQ.IndentType.TALK:
             x += system_font.text_width(dq.MsgDQ.TALK_START)
-        elif info.mark_type == dq.MsgDQ.IndentType.ENEMY:
+        elif info.indent_type == dq.MsgDQ.IndentType.ENEMY:
             x += system_font.size
 
         # yはスクロール
