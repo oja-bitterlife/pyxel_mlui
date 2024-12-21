@@ -7,7 +7,7 @@ from xmlui.lib.text import Msg
 # #############################################################################
 class MsgDQ(Msg):
     TALK_START = "＊「"
-    TALK_TYPE_ATTR = "_xmlui_talk_type"
+    INDENT_TYPE_ATTR = "_xmlui_indent_type"
 
     class IndentType(StrEnum):
         NONE = auto()
@@ -19,7 +19,7 @@ class MsgDQ(Msg):
             for v in cls.__members__.values():
                 if v == type_:
                     return v
-            raise Exception(f"Invalid mark type: {type_}")
+            return cls.NONE
 
     # スクロール用
     # -----------------------------------------------------
@@ -30,19 +30,25 @@ class MsgDQ(Msg):
 
     # 必要な行だけ返す(アニメーション対応)
     def get_scroll_lines(self, scroll_size:int) -> list[ScrollInfo]:
+
         # 前ページのテキストを行ごとに保存
         text_lines = []
         indent_type = []
         for page_no in range(self.page_no-1, -1, -1):
             append_lines = self.pages[page_no].all_text.splitlines()
             text_lines = append_lines + text_lines
-            indent_type = [self.IndentType.NONE if i == 0 else self.IndentType.TALK for i in range(len(append_lines))] + indent_type
+
+            page_indent = self.IndentType.from_str(self.pages[page_no].attr_str(MsgDQ.INDENT_TYPE_ATTR))
+            normal_indent = self.IndentType.ENEMY if page_indent == self.IndentType.ENEMY else self.IndentType.NONE
+            indent_type = [normal_indent if i == 0 else page_indent for i in range(len(append_lines))] + indent_type
 
         # 現在のページの表示できるところまで
         for line in self.current_page.text.splitlines():
             text_lines.append(line)
         for i in range(len(self.current_page.all_text.splitlines())):
-            indent_type.append(self.IndentType.NONE if i == 0 else self.IndentType.TALK)
+            page_indent = self.IndentType.from_str(self.current_page.attr_str(MsgDQ.INDENT_TYPE_ATTR))
+            normal_indent = self.IndentType.ENEMY if page_indent == self.IndentType.ENEMY else self.IndentType.NONE
+            indent_type.append(normal_indent if i == 0 else page_indent)
 
         # オーバーした行を削除
         over_line = max(0, len(text_lines) - scroll_size)
@@ -71,14 +77,14 @@ class MsgDQ(Msg):
     def append_talk(self, text:str, all_params:dict[str,Any]={}):
         for page in self.append_msg(text, all_params):
             # 追加されたページにTALKをマーキング
-            page_item = XUPageItem(page).set_attr(MsgDQ.TALK_TYPE_ATTR, MsgDQ.IndentType.TALK)
+            page_item = XUPageItem(page).set_attr(MsgDQ.INDENT_TYPE_ATTR, MsgDQ.IndentType.TALK)
             page._element.text = self.TALK_START + page_item.all_text
 
     # Enemyマークを追加して格納
     def append_enemy(self, text:str, all_params:dict[str,Any]={}):
         for page in self.append_msg(text, all_params):
             # 追加されたページにTALKをマーキング
-            page_item = XUPageItem(page).set_attr(MsgDQ.TALK_TYPE_ATTR, MsgDQ.IndentType.ENEMY)
+            page_item = XUPageItem(page).set_attr(MsgDQ.INDENT_TYPE_ATTR, MsgDQ.IndentType.ENEMY)
             page._element.text = page_item.all_text
 
 
