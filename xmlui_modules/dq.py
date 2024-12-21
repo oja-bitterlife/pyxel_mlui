@@ -30,6 +30,11 @@ class MsgDQ(Msg):
 
     # 必要な行だけ返す(アニメーション対応)
     def get_scroll_lines(self, scroll_size:int) -> list[ScrollInfo]:
+        # ページインデントがENEMYの場合はページ全部ENEMYインデント。TALKのときは行頭だけTALKインデント
+        def getPageIndentType(indent_type:str):
+            page_indent = self.IndentType.from_str(indent_type)
+            normal_indent = self.IndentType.ENEMY if page_indent == self.IndentType.ENEMY else self.IndentType.NONE
+            return page_indent, normal_indent
 
         # 前ページのテキストを行ごとに保存
         text_lines = []
@@ -38,18 +43,14 @@ class MsgDQ(Msg):
             append_lines = self.pages[page_no].all_text.splitlines()
             text_lines = append_lines + text_lines
 
-            # ページインデントがENEMYの場合はページ全部ENEMYインデント。TALKのときは行頭だけTALKインデント
-            page_indent = self.IndentType.from_str(self.pages[page_no].attr_str(MsgDQ.INDENT_TYPE_ATTR))
-            normal_indent = self.IndentType.ENEMY if page_indent == self.IndentType.ENEMY else self.IndentType.NONE
+            page_indent, normal_indent = getPageIndentType(self.pages[page_no].attr_str(MsgDQ.INDENT_TYPE_ATTR))
             indent_type = [normal_indent if i == 0 else page_indent for i in range(len(append_lines))] + indent_type
 
         # 現在のページの表示できるところまで
         for line in self.current_page.text.splitlines():
             text_lines.append(line)
         for i in range(len(self.current_page.all_text.splitlines())):
-            # ページインデントがENEMYの場合はページ全部ENEMYインデント。TALKのときは行頭だけTALKインデント
-            page_indent = self.IndentType.from_str(self.current_page.attr_str(MsgDQ.INDENT_TYPE_ATTR))
-            normal_indent = self.IndentType.ENEMY if page_indent == self.IndentType.ENEMY else self.IndentType.NONE
+            page_indent, normal_indent = getPageIndentType(self.current_page.attr_str(MsgDQ.INDENT_TYPE_ATTR))
             indent_type.append(normal_indent if i == 0 else page_indent)
 
         # オーバーした行を削除
