@@ -1,60 +1,53 @@
 # DBはサンプルでは使わないので固定値で
 import dataclasses
-import sqlite3
-from typing import Self
 
-class XUXDB:
-    @classmethod
-    def memory(cls) -> "XUXDB":
-        return XUXDB(":memory:")
+from xmlui.ext.db import XUXMemoryDB
 
-    def __init__(self, db_path:str):
-        with open(db_path, "rb") as f:
-            db_data = f.read()
-            self.conn = sqlite3.connect(":memory:")
-            self.conn.deserialize(db_data)
-
-    def __del__(self):
-        self.conn.close()
-
-    def prepare(self, sql:str) -> Self:
-        self.sql = sql
-        self.params = []
-        return self
-
-    def bind(self, **params) -> Self:
-        self.params = params
-        return self
-
-    def execute(self):
-        cur = self.conn.cursor()
-        try:
-            if self.params:
-                cur.execute(self.sql, *self.params)
-            else:
-                cur.conn.execute(self.sql)
-        except:
-            pass
-            # cur.rollback()
-        data = cur.fetchall()
-        cur.close()
-        return data
+game_db = XUXMemoryDB.load("assets/data/game.db").cursor()
+user_db = XUXMemoryDB.load("assets/data/user.db").cursor()
 
 class SystemInfoTable:
     def __init__(self):
         self.msg_spd = 1.0
 system_info = SystemInfoTable()
 
-class UserDataTable:
+class UserData:
+    def reload_db(self):
+        user_data = dict(user_db.execute("SELECT * from user_data").fetchone())
+        level_data = dict(game_db.execute("SELECT * from level_data where level=?", [user_data["level"]]).fetchone())
+        self.data = user_data | level_data
+
+        # 残り経験値
+        self.data["rem_exp"] = self.data["need_exp"] - self.data["exp"]
+
     def __init__(self):
-        self.name = "おじゃ　"
-        self.lv = 1
-        self.hp = 12
-        self.mp = 123
-        self.gold = 1234
-        self.exp = 12345
-        self.rem_exp = 10
-user_data = UserDataTable()
+        # セーブデータからの復帰
+        user_db.execute("UPDATE user_data SET name=?", ["おじゃ　"])
+        self.hp = 15
+        self.mp = 0
+
+    @property
+    def hp(self):
+        return self.data["hp"]
+    @hp.setter
+    def hp(self, value):
+        user_db.execute("UPDATE user_data SET hp=?", [value])
+        self.reload_db()
+
+    @property
+    def mp(self):
+        return self.data["mp"]
+    @mp.setter
+    def mp(self, value):
+        user_db.execute("UPDATE user_data SET mp=?", [value])
+        self.reload_db()
+
+    def set_level(self, level):
+        user_db.execute("UPDATE user_data SET level=?", [level])
+        self.reload_db()
+
+
+user_data = UserData()
 
 class EnemyDataTable:
     def __init__(self):
@@ -63,7 +56,7 @@ class EnemyDataTable:
         self.atk = 1
         self.gold = 1
         self.exp = 1
-enemy_data = UserDataTable()
+enemy_data = EnemyDataTable()
 
 @dataclasses.dataclass
 class NPCData:
