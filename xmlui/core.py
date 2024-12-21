@@ -200,6 +200,10 @@ class XUElem:
         else:
             return super().__eq__(other)
 
+    @classmethod
+    def new(cls, xmlui:'XMLUI', tag_name:str) -> "XUElem":
+        return XUElem(xmlui, Element(tag_name))
+
     # attribアクセス用
     # *************************************************************************
     def attr_int(self, key:str, default:int=0) -> int:
@@ -579,8 +583,8 @@ class XMLUI(XUElem):
         self.event = XUEvent(True)  # 唯一のactiveとする
 
         # 描画ツリー構築
-        self._base = XUElem(self, Element("base")).set_attr("id", "base")
-        self._over = XUElem(self, Element("oevr")).set_attr("id", "over")
+        self._base = XUElem.new(self, "base").set_attr("id", "base")
+        self._over = XUElem.new(self, "oevr").set_attr("id", "over")
         self.add_child(self._base)  # 普通に使うもの
         self.add_child(self._over)  # 上に強制で出す物
 
@@ -680,7 +684,7 @@ class _XUUtilBase(XUElem):
         if elem.exists_tag(root_tag):
             self._util_info = elem.find_by_tagall(root_tag)[0]
         else:
-            self._util_info = XUElem(elem.xmlui, Element(root_tag))
+            self._util_info = XUElem.new(elem.xmlui, root_tag)
             elem.add_child(self._util_info)
 
 # メニュー系
@@ -1029,7 +1033,7 @@ class XUPageInfo(XUSelectBase):
     def add_pages(self, text:str, page_line_num:int, wrap:int) -> list[XUPageItem]:
         pages:list[XUPageItem] = []
         for page_text in XUPageText.split_page_texts(text, page_line_num, wrap):
-            page_item = XUPageItem(XUElem(self.xmlui, Element(self.ITEM_TAG)))
+            page_item = XUPageItem(XUElem.new(self.xmlui, self.ITEM_TAG))
             self._util_info.add_child(page_item.set_text(page_text))
 
             pages.append(page_item)  # return用

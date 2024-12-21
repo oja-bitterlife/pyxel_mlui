@@ -37,6 +37,8 @@ class UserData:
         level_data = dict(game_db.execute("SELECT * from level_data where level=?", [user_data["level"]]).fetchone())
         self.data = user_data | level_data
 
+        self.tools = dict(user_db.execute("SELECT * from tools_stock").fetchone())
+
         # 残り経験値
         self.data["rem_exp"] = self.data["need_exp"] - self.data["exp"]
 
@@ -129,3 +131,20 @@ class FieldObjData:
 
 fieldobj_data = FieldObjData(1)
 
+
+
+# アイテムデータ
+class ToolsData:
+    def reload_db(self):
+        self.data = [dict(row) for row in game_db.execute("SELECT * from tools_data").fetchall()]
+
+    def __init__(self):
+        self.reload_db()
+
+    def get_data(self, type_:str):
+        for data in self.data:
+            if data["type"] == type_:
+                return data
+        raise Exception(f"not found type:{type_}")
+
+tools_data = ToolsData()
