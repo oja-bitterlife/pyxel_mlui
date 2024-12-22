@@ -115,22 +115,30 @@ def common_msg_text(msg_dq:dq.MsgDQ, event:XUEvent, cursor_visible:bool):
     # ---------------------------------------------------------
     scroll_info =  msg_dq.dq_scroll_lines(scroll_size)
 
-    # 行が完了してからの経過時間
-    if msg_dq.is_line_end and len(scroll_info) >= scroll_size:
-        msg_dq.set_attr("_over_count", msg_dq.attr_int("_over_count")+1)
-    else:
-        msg_dq.set_attr("_over_count", 0)
-
     # スクロール
     scroll_split = 3
-    if msg_dq.attr_int("_over_count") > 0:
-        shift_y = min(scroll_split, msg_dq.attr_int("_over_count"))*line_height*0.8/scroll_split
-        # スクロールが終わったら1行減らす(＝行待機解除)
-        if msg_dq.attr_int("_over_count") >= scroll_split:
-            shift_y = 0
-            scroll_info = scroll_info[1:]
+    shift_y = 0
+    if msg_dq.is_line_end:  # 行が完了している
+        # 行が完了してからの経過時間
+        over_count = msg_dq.attr_int("_over_count") + 1
+        msg_dq.set_attr("_over_count", min(over_count, scroll_split))  # clamp付き
+
+        # 行が足りない
+        if len(scroll_info) < scroll_size:
+            # 一瞬待機
+            if msg_dq.attr_int("_over_count") >= 2:
+                msg_dq.current_page.draw_count += system_info.msg_spd  # 次の行へ
+        # スクロールが必要
+        else:
+            # スクロールが終わった
+            if msg_dq.attr_int("_over_count") >= scroll_split:
+                scroll_info = scroll_info[1:]
+                msg_dq.current_page.draw_count += system_info.msg_spd  # 次の行へ
+            # スクロール
+            else:
+                shift_y = over_count * line_height*0.8 / scroll_split
     else:
-        shift_y = 0
+        msg_dq.set_attr("_over_count", 0)
 
     # テキスト描画
     for i,info in enumerate(scroll_info):
@@ -140,7 +148,7 @@ def common_msg_text(msg_dq:dq.MsgDQ, event:XUEvent, cursor_visible:bool):
         if y+system_font.size >= clip.bottom():  # メッセージもクリップ対応
             break
 
-        # インデント計算
+        # インデント設定
         x = area.x
         if info.indent_type == dq.MsgDQ.IndentType.TALK:
             x += system_font.text_width(dq.MsgDQ.TALK_START)
