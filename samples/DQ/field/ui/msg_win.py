@@ -1,14 +1,15 @@
 from xmlui.core import XUTemplate,XUEvent,XUWinBase
-from xmlui_modules import dq
+from msg_dq import Decorator as DQDecorator
+from msg_dq import MsgDQ
 from ui_common import common_msg_text
 
 def ui_init(template:XUTemplate):
-    field_dq = dq.Decorator(template)
+    field_dq = DQDecorator(template)
 
     # フィールド画面のメッセージウインドウ
     # ---------------------------------------------------------
     @field_dq.msg_dq("msg_text")
-    def msg_text(msg_text:dq.MsgDQ, event:XUEvent):
+    def msg_text(msg_text:MsgDQ, event:XUEvent):
         # メッセージ共通処理
         common_msg_text(msg_text, event, True)
 

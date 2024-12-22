@@ -9,9 +9,9 @@ from xmlui.lib import select,text
 from xmlui.ext.scene import XUXScene
 from xmlui.ext.timer import XUXTimeout
 from ui_common import system_font
-from xmlui_modules import dq
+from msg_dq import MsgDQ
+from msg_dq import Decorator as DQDecorator
 from db import user_data, enemy_data
-from timeit import default_timer as timer
 
 class Battle(XUXScene):
     UI_TEMPLATE_BATTLE = "ui_battle"
@@ -57,7 +57,7 @@ class Battle(XUXScene):
         # バトル開始UI初期化
         print(enemy_data.data)
         self.battle = self.xmlui.open("battle")
-        msg_dq = dq.MsgDQ(self.battle.find_by_id("msg_text"))
+        msg_dq = MsgDQ(self.battle.find_by_id("msg_text"))
         msg_dq.append_msg("{name}が　あらわれた！", enemy_data.data)
 
     def closed(self):
@@ -68,7 +68,7 @@ class Battle(XUXScene):
         if self.timer is not None:
             self.timer.update()
 
-        msg_dq = dq.MsgDQ(self.battle.find_by_id("msg_text"))
+        msg_dq = MsgDQ(self.battle.find_by_id("msg_text"))
         match self.turn_state:
             case Battle.TurnState.MSG_DRAWING:
                 # メッセージ表示完了
@@ -79,7 +79,7 @@ class Battle(XUXScene):
                     self.turn_state = Battle.TurnState.CMD_WAIT
 
             case Battle.TurnState.CMD_WAIT:
-                menu = dq.MsgDQ(self.battle.find_by_id("menu"))
+                menu = MsgDQ(self.battle.find_by_id("menu"))
                 if "attack" in self.xmlui.event.trg:
                     XUWinBase(menu).start_close()
                     self.turn_state = Battle.TurnState.ATK_START
@@ -131,7 +131,7 @@ def ui_init(template):
     # fieldグループ用デコレータを作る
     battle_select = select.Decorator(template)
     battle_text = text.Decorator(template)
-    battle_dq = dq.Decorator(template)
+    battle_dq = DQDecorator(template)
 
     # コマンドメニューのタイトル
     @battle_text.label("title")
@@ -172,7 +172,7 @@ def ui_init(template):
 
 
     @battle_dq.msg_dq("msg_text")
-    def msg_text(msg_text:dq.MsgDQ, event:XUEvent):
+    def msg_text(msg_text:MsgDQ, event:XUEvent):
         # メッセージ共通処理
         common_msg_text(msg_text, event, False)
 

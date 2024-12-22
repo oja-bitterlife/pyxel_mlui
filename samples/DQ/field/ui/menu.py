@@ -2,7 +2,6 @@ import pyxel
 
 from xmlui.core import XUTemplate,XUEvent,XUWinBase,XUSelectItem
 from xmlui.lib import select,text
-from xmlui_modules import dq
 from ui_common import system_font,get_world_clip,draw_menu_cursor,KOJICHU_COL
 
 def ui_init(template:XUTemplate):

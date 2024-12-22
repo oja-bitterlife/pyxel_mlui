@@ -2,7 +2,7 @@ import pyxel
 
 from xmlui.core import XUTemplate,XUEvent,XUWinBase,XUSelectItem,XUTextUtil,XUElem
 from xmlui.lib import select
-from xmlui_modules import dq
+from msg_dq import MsgDQ
 from ui_common import system_font,get_world_clip,draw_menu_cursor
 
 from db import user_data,tools_data
@@ -53,7 +53,7 @@ def ui_init(template:XUTemplate):
             # メッセージウインドウを開く
             XUWinBase.find_parent_win(tools_list).start_close()
             msg_win = tools_list.xmlui.find_by_id("menu").open("message")
-            msg_text = dq.MsgDQ(msg_win.find_by_id("msg_text"))
+            msg_text = MsgDQ(msg_win.find_by_id("msg_text"))
             msg_text.append_msg(msg)  # systemメッセージ
 
         # 閉じる

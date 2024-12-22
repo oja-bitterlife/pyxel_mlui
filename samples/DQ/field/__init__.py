@@ -5,7 +5,7 @@ from field.system.player import Player
 from field.system.bg import BG
 from field.system.npc import NPCManager
 from field.system.field_obj import FieldObj
-from xmlui_modules import dq
+from msg_dq import MsgDQ
 from db import user_data
 
 # UI
@@ -73,7 +73,7 @@ class Field(XUXScene):
         for talk_event in self.npc.TALK_EVENTS:
             if talk_event in event.trg:
                 # メッセージウインドウを開く
-                msg_text = dq.MsgDQ(menu.open("message").find_by_id("msg_text"))
+                msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
 
                 talk = self.npc.check_talk(talk_event, self.player.block_x, self.player.block_y)
                 if talk is not None:
@@ -88,7 +88,7 @@ class Field(XUXScene):
                 XUWinBase(menu).start_close()
                 self.end_scene()
             else:
-                msg_text = dq.MsgDQ(menu.open("message").find_by_id("msg_text"))
+                msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
                 msg_text.append_msg("かいだんがない")  # systemメッセージ
 
         # とびらチェック
@@ -98,5 +98,5 @@ class Field(XUXScene):
                 self.field_obj.open(door)
                 XUWinBase(menu).start_close()
             else:
-                msg_text = dq.MsgDQ(menu.open("message").find_by_id("msg_text"))
+                msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
                 msg_text.append_msg("とびらがない")  # systemメッセージ

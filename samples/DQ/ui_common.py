@@ -4,7 +4,7 @@ import pyxel
 # *****************************************************************************
 from xmlui.core import XMLUI,XUDebug,XUElem,XUEvent,XUWinBase,XURect,XUTextUtil
 from xmlui.lib import text,win
-from xmlui_modules import dq
+from msg_dq import MsgDQ
 
 from xmlui.ext.pyxel_util import PyxelFont,PyxelPalette
 from db import system_info, user_data
@@ -101,7 +101,7 @@ def round_win(round_win:win.RoundFrame, event:XUEvent):
 
 # メッセージウインドウ
 # ---------------------------------------------------------
-def common_msg_text(msg_dq:dq.MsgDQ, event:XUEvent, cursor_visible:bool):
+def common_msg_text(msg_dq:MsgDQ, event:XUEvent, cursor_visible:bool):
     area = msg_dq.area  # areaは重いので必ずキャッシュ
     line_height = system_font.size + 5  # 行間設定
     page_line_num = msg_dq.attr_int(msg_dq.PAGE_LINE_NUM_ATTR)
@@ -177,9 +177,9 @@ def common_msg_text(msg_dq:dq.MsgDQ, event:XUEvent, cursor_visible:bool):
 
         # インデント設定
         x = area.x
-        if info.indent_type == dq.MsgDQ.IndentType.TALK:
-            x += system_font.text_width(dq.MsgDQ.TALK_START)
-        elif info.indent_type == dq.MsgDQ.IndentType.ENEMY:
+        if info.indent_type == MsgDQ.IndentType.TALK:
+            x += system_font.text_width(MsgDQ.TALK_START)
+        elif info.indent_type == MsgDQ.IndentType.ENEMY:
             x += system_font.size
 
         pyxel.text(x, y, info.line_text, 7, system_font.font)
