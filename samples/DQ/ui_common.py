@@ -132,47 +132,19 @@ def common_msg_text(msg_dq:dq.MsgDQ, event:XUEvent, cursor_visible:bool):
 
     # スクロール
     shift_y = 0
-    if msg_dq.is_all_finish:
-        # スクロールが必要
+    # ページが完了している
+    if msg_dq.current_page.is_finish:
+        # スクロールが必要？
         if len(scroll_info) > page_line_num:
-            # 行が完了してからの経過時間
-            over_count = msg_dq.attr_int("_over_count") + 1
-            msg_dq.set_attr("_over_count", over_count)
-
-            # スクロールが終わった
-            if over_count >= scroll_split:
+            if over_count >= scroll_split:  # スクロールが終わった
                 scroll_info = scroll_info[1:]
-            # スクロール
-            else:
+            else:  # スクロール
                 shift_y = min(over_count,scroll_split) * line_height*0.8 / scroll_split
 
-    elif msg_dq.is_next_wait:
-        if not msg_dq.is_line_end:
-            print("error!")
-
-        # スクロールが必要
+    # 行だけが完了している
+    elif msg_dq.is_line_end:
+        # スクロールが必要？
         if len(scroll_info) > page_line_num:
-            # 行が完了してからの経過時間
-            over_count = msg_dq.attr_int("_over_count") + 1
-            msg_dq.set_attr("_over_count", over_count)
-
-            # スクロールが終わった
-            if over_count >= scroll_split:
-                scroll_info = scroll_info[1:]
-            # スクロール
-            else:
-                shift_y = min(over_count,scroll_split) * line_height*0.8 / scroll_split
-    elif msg_dq.is_line_end:  # 行が完了している
-
-        # 行が足りない
-        if len(scroll_info) < scroll_line_num:
-            # 一瞬待機
-            if over_count >= scroll_split:
-                msg_dq.current_page.draw_count += 1  # 次の文字へ
-                msg_dq.set_attr("_over_count", 0)
-
-        # スクロールが必要
-        else:
             # スクロールが終わった
             if over_count >= scroll_split:
                 scroll_info = scroll_info[1:]
@@ -181,9 +153,10 @@ def common_msg_text(msg_dq:dq.MsgDQ, event:XUEvent, cursor_visible:bool):
             # スクロール
             else:
                 shift_y = min(over_count,scroll_split) * line_height*0.8 / scroll_split
-
-
-
+        # スクロールが不要でも一瞬待機
+        elif over_count >= scroll_split:
+            msg_dq.current_page.draw_count += 1  # 次の文字へ
+            msg_dq.set_attr("_over_count", 0)
 
     # テキスト描画
     for i,info in enumerate(scroll_info):
