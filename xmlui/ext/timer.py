@@ -24,9 +24,7 @@ class _XUXTimerBase:
     # 現在カウントの進捗具合
     @property
     def alpha(self) -> float:
-        if self.is_finish:  # _count_maxが0のときもここではじく
-            return 1
-        return float(self.count)/float(self._count_max)
+        return max(0, min(1, float(self.count)/float(self._count_max)))
 
     # タイマー更新
     def update(self) -> bool:
@@ -104,24 +102,17 @@ class XUXCountDown(_XUXTimerBase):
         if self.is_finish:
             return False
 
-        # 10,9,8...1,0
+        # 0,9,8...1,0
+        self._count += 1
         self.action()
 
         if self._count >= self._count_max:
             self.finish()  # カウントダウン完了
             return True
 
-        self._count += 1  # 0を含めるため最後に
         return False
 
     # カウントダウンにオーバーライド
     @property
     def count(self) -> int:
-        return self._count_max - self._count
-
-    # 完了時は0になるのでオーバーライド
-    @property
-    def alpha(self) -> float:
-        if self.is_finish:  # _count_maxが0のときもここではじく
-            return 0
-        return float(self.count)/float(self._count_max)
+        return max(0, self._count_max - self._count)
