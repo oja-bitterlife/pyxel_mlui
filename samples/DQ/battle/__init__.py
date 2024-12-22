@@ -11,6 +11,7 @@ from xmlui.ext.timer import XUXTimeout
 from ui_common import system_font
 from xmlui_modules import dq
 from db import user_data, enemy_data
+from timeit import default_timer as timer
 
 class Battle(XUXScene):
     UI_TEMPLATE_BATTLE = "ui_battle"
@@ -87,35 +88,35 @@ class Battle(XUXScene):
             case Battle.TurnState.ATK_START:
                 enemy_data.data["hit"] = XUTextUtil.format_zenkaku(random.randint(1, 100))
                 msg_dq.append_msg("{name}の　こうげき！", user_data.data)
-
                 self.turn_state = Battle.TurnState.ATK_WAIT
-                self.timer = Battle.StateTimer(self, 30, Battle.TurnState.ATK_RESULT)
+                self.timer = None
             case Battle.TurnState.ATK_WAIT:
-                    pass
+                if msg_dq.is_all_finish and self.timer is None:
+                    self.timer = Battle.StateTimer(self, 30, Battle.TurnState.ATK_RESULT)
             case Battle.TurnState.ATK_RESULT:
                 msg_dq.append_msg("{name}に　{hit}ポイントの\nダメージを　あたえた！", enemy_data.data)
-
                 self.turn_state = Battle.TurnState.ATK_END
-                self.timer = Battle.StateTimer(self, 15, Battle.TurnState.ENEMY_START)
+                self.timer = None
             case Battle.TurnState.ATK_END:
-                    pass
+                if msg_dq.is_all_finish and self.timer is None:
+                    self.timer = Battle.StateTimer(self, 15, Battle.TurnState.ENEMY_START)
 
             # 敵の攻撃
             case Battle.TurnState.ENEMY_START:
                 user_data.data["damage"] = XUTextUtil.format_zenkaku(random.randint(1, 10))
                 msg_dq.append_enemy("{name}の　こうげき！", enemy_data.data)
-
                 self.turn_state = Battle.TurnState.ENEMY_WAIT
-                self.timer = Battle.StateTimer(self, 30, Battle.TurnState.ENEMY_RESULT)
-
+                self.timer = None
             case Battle.TurnState.ENEMY_WAIT:
-                    pass
+                if msg_dq.is_all_finish and self.timer is None:
+                    self.timer = Battle.StateTimer(self, 30, Battle.TurnState.ENEMY_RESULT)
             case Battle.TurnState.ENEMY_RESULT:
                 msg_dq.append_enemy("{name}は　{damage}ポイントの\nだめーじを　うけた", user_data.data)
                 self.turn_state = Battle.TurnState.ENEMY_END
-                self.timer = Battle.StateTimer(self, 15, Battle.TurnState.MSG_DRAWING)
+                self.timer = None
             case Battle.TurnState.ENEMY_END:
-                    pass
+                if msg_dq.is_all_finish and self.timer is None:
+                    self.timer = Battle.StateTimer(self, 15, Battle.TurnState.MSG_DRAWING)
 
 
     def draw(self):

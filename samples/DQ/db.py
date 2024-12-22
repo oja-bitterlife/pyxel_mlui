@@ -12,7 +12,18 @@ user_db = XUXMemoryDB.load("assets/data/user.db")
 # システムインフォ。コンフィグがメイン
 class SystemInfoTable:
     def __init__(self):
-        self.msg_spd =  65535
+        self.change_speed("normal")
+
+    def change_speed(self, speed:str):
+        self.speed = speed
+        match speed:
+            case "slow":
+                self.msg_spd =  1.0/3
+            case "normal":
+                self.msg_spd =  1
+            case "fast":
+                self.msg_spd =  3
+
 system_info = SystemInfoTable()
 
 
