@@ -1023,7 +1023,7 @@ class XUPageInfo(XUSelectBase):
     # -----------------------------------------------------
     # 現在ページ番号
     @property
-    def page_no(self) -> int:
+    def current_page_no(self) -> int:
         return self.selected_no
 
     # ページテキスト
@@ -1031,7 +1031,7 @@ class XUPageInfo(XUSelectBase):
     # 現在ページのアニメーション情報アクセス
     @property
     def current_page(self):
-        return XUPageItem(self.items[self.page_no])
+        return XUPageItem(self.items[self.current_page_no])
 
     # ただの型キャスト。中身はitems
     @property
@@ -1046,7 +1046,7 @@ class XUPageInfo(XUSelectBase):
     # 次ページあり
     @property
     def is_next_wait(self):
-        return self.current_page.is_finish and self.page_no < self.item_num-1
+        return self.current_page.is_finish and self.current_page_no < self.item_num-1
 
     # ツリー操作
     # -----------------------------------------------------
@@ -1102,7 +1102,7 @@ class XUPageText(XUPageInfo):
     # ページ設定
     def set_page_no(self, no:int=0) -> Self:
         # ページを切り替えたときはカウンタをリセット
-        if self.page_no != no:
+        if self.current_page_no != no:
             self.current_page.draw_count = 0
         self.select(no)
         return self

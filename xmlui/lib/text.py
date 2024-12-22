@@ -86,14 +86,14 @@ class MsgScr(Msg):
     def get_scroll_lines(self, scroll_line_num:int) -> list[LineInfo]:
         # 各ページの全体行中の位置を記録
         total_line_no = {0: 0}
-        for page_no in range(self.page_no):
+        for page_no in range(self.current_page_no):
             total_line_no[page_no+1] = total_line_no[page_no] + len(self.pages[page_no].all_text.splitlines())
 
         # 現在ページを表示位置まで登録
-        out = self.LineInfo.from_page(self.current_page, total_line_no[self.page_no], self.current_page.text)
+        out = self.LineInfo.from_page(self.current_page, total_line_no[self.current_page_no], self.current_page.text)
     
         # 前ページを巻き戻しながら保存
-        for page_no in range(self.page_no-1, -1, -1):
+        for page_no in range(self.current_page_no-1, -1, -1):
             out = self.LineInfo.from_page(self.pages[page_no], total_line_no[page_no], self.pages[page_no].all_text) + out
             # バッファを満たした
             if len(out) >= scroll_line_num:

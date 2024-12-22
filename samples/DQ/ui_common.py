@@ -104,29 +104,70 @@ def round_win(round_win:win.RoundFrame, event:XUEvent):
 def common_msg_text(msg_dq:dq.MsgDQ, event:XUEvent, cursor_visible:bool):
     area = msg_dq.area  # areaは重いので必ずキャッシュ
     line_height = system_font.size + 5  # 行間設定
-    scroll_size = msg_dq.attr_int(msg_dq.PAGE_LINE_NUM_ATTR) + 1  # スクロールバッファサイズはページサイズ+1
-    scroll_split = 30  # スクロールアニメ分割数
+    page_line_num = msg_dq.attr_int(msg_dq.PAGE_LINE_NUM_ATTR)
+    scroll_line_num = page_line_num + 1  # スクロールバッファサイズはページサイズ+1
+    scroll_split = 3  # スクロールアニメ分割数
 
     # カウンタ操作
     # ---------------------------------------------------------
     remain_count = msg_dq.current_page.current_line_length - len(msg_dq.current_page.current_line)
     msg_dq.current_page.draw_count += min(remain_count, system_info.msg_spd)  # 必ず行端で一旦止まる
 
+    # 行が完了してからの経過時間
+    if msg_dq.is_line_end:
+        over_count = msg_dq.attr_int("_over_count") + 1
+        # ページ切り替えがあったらリセット
+        if msg_dq.current_page_no != msg_dq.attr_int("_old_page", -1):
+            over_count = 0
+    else:
+        over_count = 0
+
+    # 更新
+    msg_dq.set_attr("_over_count", over_count)
+    msg_dq.set_attr("_old_page", msg_dq.current_page_no)
+
     # 表示バッファ
     # ---------------------------------------------------------
-    scroll_info =  msg_dq.dq_scroll_lines(scroll_size)
+    scroll_info =  msg_dq.dq_scroll_lines(scroll_line_num)
 
     # スクロール
     shift_y = 0
-    if msg_dq.is_line_end:  # 行が完了している
-        # 行が完了してからの経過時間
-        over_count = msg_dq.attr_int("_over_count") + 1
-        msg_dq.set_attr("_over_count", over_count)
+    if msg_dq.is_all_finish:
+        # スクロールが必要
+        if len(scroll_info) > page_line_num:
+            # 行が完了してからの経過時間
+            over_count = msg_dq.attr_int("_over_count") + 1
+            msg_dq.set_attr("_over_count", over_count)
+
+            # スクロールが終わった
+            if over_count >= scroll_split:
+                scroll_info = scroll_info[1:]
+            # スクロール
+            else:
+                shift_y = min(over_count,scroll_split) * line_height*0.8 / scroll_split
+
+    elif msg_dq.is_next_wait:
+        if not msg_dq.is_line_end:
+            print("error!")
+
+        # スクロールが必要
+        if len(scroll_info) > page_line_num:
+            # 行が完了してからの経過時間
+            over_count = msg_dq.attr_int("_over_count") + 1
+            msg_dq.set_attr("_over_count", over_count)
+
+            # スクロールが終わった
+            if over_count >= scroll_split:
+                scroll_info = scroll_info[1:]
+            # スクロール
+            else:
+                shift_y = min(over_count,scroll_split) * line_height*0.8 / scroll_split
+    elif msg_dq.is_line_end:  # 行が完了している
 
         # 行が足りない
-        if len(scroll_info) < scroll_size:
+        if len(scroll_info) < scroll_line_num:
             # 一瞬待機
-            if over_count >= 30:
+            if over_count >= scroll_split:
                 msg_dq.current_page.draw_count += 1  # 次の文字へ
                 msg_dq.set_attr("_over_count", 0)
 
@@ -135,11 +176,14 @@ def common_msg_text(msg_dq:dq.MsgDQ, event:XUEvent, cursor_visible:bool):
             # スクロールが終わった
             if over_count >= scroll_split:
                 scroll_info = scroll_info[1:]
+                msg_dq.current_page.draw_count += 1  # 次の文字へ
+                msg_dq.set_attr("_over_count", 0)
             # スクロール
             else:
                 shift_y = min(over_count,scroll_split) * line_height*0.8 / scroll_split
-    else:
-        msg_dq.set_attr("_over_count", 0)
+
+
+
 
     # テキスト描画
     for i,info in enumerate(scroll_info):
@@ -164,7 +208,7 @@ def common_msg_text(msg_dq:dq.MsgDQ, event:XUEvent, cursor_visible:bool):
     if cursor_visible and msg_dq.is_next_wait and shift_y == 0:  # ページ送り待ち中でスクロール中でない
         cursor_count = msg_dq.current_page.draw_count - msg_dq.current_page.length
         if cursor_count//7 % 2 == 0:
-            draw_msg_cursor(msg_dq, 0, (scroll_size-1)*line_height-4)
+            draw_msg_cursor(msg_dq, 0, (scroll_line_num-1)*line_height-4)
 
     # 表示途中のアクション
     # if not msg_dq.is_next_wait:

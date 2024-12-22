@@ -25,5 +25,5 @@ def ui_init(template:XUTemplate):
 
         if XUEvent.Key.BTN_A in event.trg or XUEvent.Key.BTN_B in event.now:
             if msg_text.is_next_wait:
-                msg_text.set_page_no(msg_text.page_no+1)  # 次ページへ
+                msg_text.set_page_no(msg_text.current_page_no+1)  # 次ページへ
                 return

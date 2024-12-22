@@ -30,8 +30,8 @@ class MsgDQ(MsgScr):
             self.indent_type = indent_type
 
     # 必要な行だけ返す(アニメーション対応)
-    def dq_scroll_lines(self, scroll_size:int) -> list[DQLineInfo]:
-        line_info_list = super().get_scroll_lines(scroll_size)
+    def dq_scroll_lines(self, scroll_line_num:int) -> list[DQLineInfo]:
+        line_info_list = super().get_scroll_lines(scroll_line_num)
 
         # scroll枠に収まるlineリストを返す
         out = []
