@@ -136,9 +136,11 @@ def common_msg_text(msg_dq:dq.MsgDQ, event:XUEvent, cursor_visible:bool):
     if msg_dq.current_page.is_finish:
         # スクロールが必要？
         if len(scroll_info) > page_line_num:
-            if over_count >= scroll_split:  # スクロールが終わった
+            # スクロールが終わった
+            if over_count >= scroll_split:
                 scroll_info = scroll_info[1:]
-            else:  # スクロール
+            # スクロール
+            else:
                 shift_y = min(over_count,scroll_split) * line_height*0.8 / scroll_split
 
     # 行だけが完了している
@@ -149,14 +151,15 @@ def common_msg_text(msg_dq:dq.MsgDQ, event:XUEvent, cursor_visible:bool):
             if over_count >= scroll_split:
                 scroll_info = scroll_info[1:]
                 msg_dq.current_page.draw_count += 1  # 次の文字へ
-                msg_dq.set_attr("_over_count", 0)
+                msg_dq.set_attr("_over_count", 0)  # 最速表示対応
             # スクロール
             else:
                 shift_y = min(over_count,scroll_split) * line_height*0.8 / scroll_split
+
         # スクロールが不要でも一瞬待機
         elif over_count >= scroll_split:
             msg_dq.current_page.draw_count += 1  # 次の文字へ
-            msg_dq.set_attr("_over_count", 0)
+            msg_dq.set_attr("_over_count", 0)  # 最速表示対応
 
     # テキスト描画
     for i,info in enumerate(scroll_info):
