@@ -1020,7 +1020,7 @@ class XUPageInfo(XUSelectBase):
 
     # ページ操作
     # -----------------------------------------------------
-    # 現在ページ
+    # 現在ページ番号
     @property
     def page_no(self) -> int:
         return self.selected_no

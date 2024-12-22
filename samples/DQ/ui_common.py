@@ -113,29 +113,24 @@ def common_msg_text(msg_dq:dq.MsgDQ, event:XUEvent, cursor_visible:bool):
 
     # 表示バッファ
     # ---------------------------------------------------------
-    # 最速はページごと
-    if is_fast_page:
-        scroll_info = [msg_dq.ScrollInfo(line, dq.MsgDQ.IndentType.NONE if i == 0 else dq.MsgDQ.IndentType.TALK) for i,line in enumerate(msg_dq.current_page.all_text.splitlines())]
-        shift_y = 0
+    scroll_info =  msg_dq.get_scroll_lines(scroll_size)
+
+    # 行が完了してからの経過時間
+    if msg_dq.is_line_end and len(scroll_info) >= scroll_size:
+        msg_dq.set_attr("_over_count", msg_dq.attr_int("_over_count")+1)
     else:
-        scroll_info =  msg_dq.get_scroll_lines(scroll_size)
+        msg_dq.set_attr("_over_count", 0)
 
-        # 行が完了してからの経過時間
-        if msg_dq.is_line_end and len(scroll_info) >= scroll_size:
-            msg_dq.set_attr("_over_count", msg_dq.attr_int("_over_count")+1)
-        else:
-            msg_dq.set_attr("_over_count", 0)
-
-        # スクロール
-        scroll_split = 3
-        if msg_dq.attr_int("_over_count") > 0:
-            shift_y = min(scroll_split, msg_dq.attr_int("_over_count"))*line_height*0.8/scroll_split
-            # スクロールが終わったら1行減らす(＝行待機解除)
-            if msg_dq.attr_int("_over_count") >= scroll_split:
-                shift_y = 0
-                scroll_info = scroll_info[1:]
-        else:
+    # スクロール
+    scroll_split = 3
+    if msg_dq.attr_int("_over_count") > 0:
+        shift_y = min(scroll_split, msg_dq.attr_int("_over_count"))*line_height*0.8/scroll_split
+        # スクロールが終わったら1行減らす(＝行待機解除)
+        if msg_dq.attr_int("_over_count") >= scroll_split:
             shift_y = 0
+            scroll_info = scroll_info[1:]
+    else:
+        shift_y = 0
 
     # テキスト描画
     for i,info in enumerate(scroll_info):

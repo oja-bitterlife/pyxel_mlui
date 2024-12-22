@@ -59,6 +59,40 @@ class Msg(XUPageText):
     def append_msg(self, text:str, all_params:dict[str,Any]={}) -> list[XUPageItem]:
         return self.add_pages(XUTextUtil.format_zenkaku(text, all_params), self.page_line_num, self.wrap)
 
+# スクロールメッセージ
+class MsgScr(Msg):
+    class LineInfo:
+        def __init__(self, no:int, text:str):
+            self.no = no
+            self.text = text
+
+        @classmethod
+        def fromPage(cls, page_line_no:int, page_text:str) -> list["MsgScr.LineInfo"]:
+            out:list[MsgScr.LineInfo] = []
+            for i,line in enumerate(page_text.splitlines()):
+                out.append(MsgScr.LineInfo(page_line_no + i, line))
+            return out
+
+    def get_scroll_lines(self, scroll_line_num:int) -> list[LineInfo]:
+        # 各ページの全体行中の位置を記録
+        page_line_no = {self.pages[0]._element: 0}
+        for i in range(1, self.page_no):
+            page_line_no[self.pages[i]._element] = page_line_no[self.pages[i-1]._element] + len(self.pages[i-1].all_text.splitlines())
+
+        # 現在ページを表示位置まで登録
+        out = self.LineInfo.fromPage(page_line_no[self.current_page._element], self.current_page.text)
+    
+        # 前ページを巻き戻しながら保存
+        for page_no in range(self.page_no-1, -1, -1):
+            out = self.LineInfo.fromPage(page_line_no[self.pages[page_no]._element], self.pages[page_no].all_text) + out
+            # バッファを満たした
+            if len(out) >= scroll_line_num:
+                break
+
+        # オーバー分切り捨て
+        over = max(0, len(out) - scroll_line_num)
+        return out[over:]
+
 
 # デコレータを用意
 # *****************************************************************************
@@ -77,6 +111,15 @@ class Decorator(XUTemplate.HasRef):
             # 登録用関数をジェネレート
             def draw(elem:XUElem, event:XUEvent):
                 return bind_func(Msg(elem), event)
+            # 関数登録
+            self.template.set_drawfunc(tag_name, draw)
+        return wrapper
+
+    def msg_scr(self, tag_name:str):
+        def wrapper(bind_func:Callable[[MsgScr,XUEvent], str|None]):
+            # 登録用関数をジェネレート
+            def draw(elem:XUElem, event:XUEvent):
+                return bind_func(MsgScr(elem), event)
             # 関数登録
             self.template.set_drawfunc(tag_name, draw)
         return wrapper

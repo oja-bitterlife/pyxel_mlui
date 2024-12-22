@@ -23,6 +23,7 @@ class MsgDQ(Msg):
 
     # スクロール用
     # -----------------------------------------------------
+    # 各行とその行のインデントタイプを対で保存する
     class ScrollInfo:
         def __init__(self, line_text:str, indent_type:"MsgDQ.IndentType"):
             self.line_text = line_text
