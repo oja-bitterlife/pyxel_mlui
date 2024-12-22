@@ -1,11 +1,11 @@
 from enum import StrEnum,auto
 
 from xmlui.core import *
-from xmlui.lib.text import Msg
+from xmlui.lib.text import MsgScr
 
 # テキストを扱う
 # #############################################################################
-class MsgDQ(Msg):
+class MsgDQ(MsgScr):
     TALK_START = "＊「"
     INDENT_TYPE_ATTR = "_xmlui_indent_type"
 
@@ -24,56 +24,34 @@ class MsgDQ(Msg):
     # スクロール用
     # -----------------------------------------------------
     # 各行とその行のインデントタイプを対で保存する
-    class ScrollInfo:
+    class DQLineInfo:
         def __init__(self, line_text:str, indent_type:"MsgDQ.IndentType"):
             self.line_text = line_text
             self.indent_type = indent_type
 
     # 必要な行だけ返す(アニメーション対応)
-    def get_scroll_lines(self, scroll_size:int) -> list[ScrollInfo]:
-        # ページインデントがENEMYの場合はページ全部ENEMYインデント。TALKのときは行頭だけTALKインデント
-        def getPageIndentType(indent_type:str):
-            page_indent = self.IndentType.from_str(indent_type)
-            normal_indent = self.IndentType.ENEMY if page_indent == self.IndentType.ENEMY else self.IndentType.NONE
-            return page_indent, normal_indent
-
-        # 前ページのテキストを行ごとに保存
-        text_lines = []
-        indent_type = []
-        for page_no in range(self.page_no-1, -1, -1):
-            append_lines = self.pages[page_no].all_text.splitlines()
-            text_lines = append_lines + text_lines
-
-            page_indent, normal_indent = getPageIndentType(self.pages[page_no].attr_str(MsgDQ.INDENT_TYPE_ATTR))
-            indent_type = [normal_indent if i == 0 else page_indent for i in range(len(append_lines))] + indent_type
-
-        # 現在のページの表示できるところまで
-        for line in self.current_page.text.splitlines():
-            text_lines.append(line)
-        for i in range(len(self.current_page.all_text.splitlines())):
-            page_indent, normal_indent = getPageIndentType(self.current_page.attr_str(MsgDQ.INDENT_TYPE_ATTR))
-            indent_type.append(normal_indent if i == 0 else page_indent)
-
-        # オーバーした行を削除
-        over_line = max(0, len(text_lines) - scroll_size)
-        text_lines = text_lines[over_line:]
-        indent_type = indent_type[over_line:]
+    def dq_scroll_lines(self, scroll_size:int) -> list[DQLineInfo]:
+        line_info_list = super().get_scroll_lines(scroll_size)
 
         # scroll枠に収まるlineリストを返す
-        return [self.ScrollInfo(line, indent_type[i]) for i,line in enumerate(text_lines)]
+        out = []
+        for line_info in line_info_list:
+            page_indent = self.IndentType.from_str(line_info.attr_str(self.INDENT_TYPE_ATTR))
+
+            # ENEMYのときは全行ENEMY
+            if page_indent == self.IndentType.ENEMY:
+                out.append(MsgDQ.DQLineInfo(line_info.text, self.IndentType.ENEMY))
+            # TALKの時は行頭以外をTALK
+            elif page_indent == self.IndentType.TALK and line_info.page_line_no != 0:
+                out.append(MsgDQ.DQLineInfo(line_info.text, self.IndentType.TALK))
+            else:
+                out.append(MsgDQ.DQLineInfo(line_info.text, self.IndentType.NONE))
+
+        return out
 
     @property
     def is_line_end(self) -> bool:
-        # 現在表示中の行を取得
-        anim_last_line = len(self.current_page.text.splitlines())-1
-        if(anim_last_line < 0):  # まだ最初
-            return False
-
-        # アニメテキストの行の文字数とアニメしないテキストのおなじ行の文字数が一致すれば行末
-        anim_last_count = self.current_page.text.splitlines()[anim_last_line]
-        all_text_count = self.current_page.all_text.splitlines()[anim_last_line]
-        return anim_last_count == all_text_count
-
+        return len(self.current_page.current_line) == self.current_page.current_line_length
 
     # ページ登録
     # -----------------------------------------------------

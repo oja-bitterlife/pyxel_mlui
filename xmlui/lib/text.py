@@ -61,30 +61,40 @@ class Msg(XUPageText):
 
 # スクロールメッセージ
 class MsgScr(Msg):
-    class LineInfo:
-        def __init__(self, no:int, text:str):
-            self.no = no
-            self.text = text
+    # 現在ページはアニメ対応。前ページは常に全体
+    class LineInfo(XUElem):
+        def __init__(self, page:XUPageItem, total_line_no:int, page_line_no:int, text:str):
+            super().__init__(page.xmlui, page._element)
+            self.total_line_no = total_line_no  #  全体行中のページ開始行番号
+            self.page_line_no = page_line_no  # ページ中の行番号
+            self._text = text  # テキスト
 
+        # override
+        @property
+        def text(self) -> str:
+            return self._text
+
+        # ページ内の各行を分解してLineInfoを作ってリストで返す
         @classmethod
-        def fromPage(cls, page_line_no:int, page_text:str) -> list["MsgScr.LineInfo"]:
+        def from_page(cls, page:XUPageItem, total_line_no:int, page_text:str) -> list["MsgScr.LineInfo"]:
             out:list[MsgScr.LineInfo] = []
             for i,line in enumerate(page_text.splitlines()):
-                out.append(MsgScr.LineInfo(page_line_no + i, line))
+                out.append(MsgScr.LineInfo(page, total_line_no + i, i, line))
             return out
 
+    # スクロールバッファを行単位で返す
     def get_scroll_lines(self, scroll_line_num:int) -> list[LineInfo]:
         # 各ページの全体行中の位置を記録
-        page_line_no = {self.pages[0]._element: 0}
-        for i in range(1, self.page_no):
-            page_line_no[self.pages[i]._element] = page_line_no[self.pages[i-1]._element] + len(self.pages[i-1].all_text.splitlines())
+        total_line_no = {0: 0}
+        for page_no in range(self.page_no):
+            total_line_no[page_no+1] = total_line_no[page_no] + len(self.pages[page_no].all_text.splitlines())
 
         # 現在ページを表示位置まで登録
-        out = self.LineInfo.fromPage(page_line_no[self.current_page._element], self.current_page.text)
+        out = self.LineInfo.from_page(self.current_page, total_line_no[self.page_no], self.current_page.text)
     
         # 前ページを巻き戻しながら保存
         for page_no in range(self.page_no-1, -1, -1):
-            out = self.LineInfo.fromPage(page_line_no[self.pages[page_no]._element], self.pages[page_no].all_text) + out
+            out = self.LineInfo.from_page(self.pages[page_no], total_line_no[page_no], self.pages[page_no].all_text) + out
             # バッファを満たした
             if len(out) >= scroll_line_num:
                 break

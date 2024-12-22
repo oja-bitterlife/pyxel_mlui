@@ -1005,7 +1005,8 @@ class XUPageItem(XUSelectItem):
     # 現在の行テキスト
     @property
     def current_line(self) -> str:
-        return self.text.splitlines()[self.current_line_no]
+        lines = self.text.splitlines()
+        return lines[self.current_line_no] if lines else ""
 
     # 現在の行の全体の長さ
     @property

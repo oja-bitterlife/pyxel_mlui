@@ -108,12 +108,12 @@ def common_msg_text(msg_dq:dq.MsgDQ, event:XUEvent, cursor_visible:bool):
 
     # カウンタ操作
     # ---------------------------------------------------------
-    msg_dq.current_page.draw_count += system_info.msg_spd
-    is_fast_page = system_info.msg_spd >= 65535
+    remain_count = msg_dq.current_page.current_line_length - len(msg_dq.current_page.current_line)
+    msg_dq.current_page.draw_count += min(remain_count, system_info.msg_spd)  # 必ず行端で一旦止まる
 
     # 表示バッファ
     # ---------------------------------------------------------
-    scroll_info =  msg_dq.get_scroll_lines(scroll_size)
+    scroll_info =  msg_dq.dq_scroll_lines(scroll_size)
 
     # 行が完了してからの経過時間
     if msg_dq.is_line_end and len(scroll_info) >= scroll_size:
