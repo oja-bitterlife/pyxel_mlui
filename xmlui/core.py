@@ -983,6 +983,8 @@ class XUPageItem(XUSelectItem):
     def zenkaku(self) -> str:
         return XUTextUtil.format_zenkaku(self.text)
 
+    # テキスト全体
+    # -----------------------------------------------------
     # 全体テキストを受け取る
     @property
     def all_text(self) -> str:
@@ -992,6 +994,24 @@ class XUPageItem(XUSelectItem):
     @property
     def length(self) -> int:
         return XUTextUtil.length(super().text)
+
+    # 行
+    # -----------------------------------------------------
+    # 現在の行番号
+    @property
+    def current_line_no(self) -> int:
+        return max(0, len(self.text.splitlines())-1)
+
+    # 現在の行テキスト
+    @property
+    def current_line(self) -> str:
+        return self.text.splitlines()[self.current_line_no]
+
+    # 現在の行の全体の長さ
+    @property
+    def current_line_length(self):
+        return len(self.all_text.splitlines()[self.current_line_no])
+
 
 # ページをセレクトアイテムで管理
 class XUPageInfo(XUSelectBase):
