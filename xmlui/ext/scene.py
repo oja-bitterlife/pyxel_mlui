@@ -14,7 +14,7 @@ class XUXScene:
     current_scene:"XUXScene|None" = None
 
     # Sceneのopen/close状態
-    class State(StrEnum):
+    class OpenCloseState(StrEnum):
         OPENING = "opening"
         OPENED = "opened"
         CLOSING = "closing"
@@ -22,7 +22,7 @@ class XUXScene:
 
     def __init__(self, xmlui:XMLUI, open_count=OPEN_COUNT):
         self.xmlui = xmlui
-        self._state:XUXScene.State = self.State.OPENING
+        self._state:XUXScene.OpenCloseState = self.OpenCloseState.OPENING
 
         # フェードインから
         self._timer = XUXCountDown(open_count)
@@ -32,7 +32,7 @@ class XUXScene:
     # -----------------------------------------------------
     def update_scene(self):
         # open/close中はupdateを呼び出さない
-        if self._state == self.State.OPENED:
+        if self._state == self.OpenCloseState.OPENED:
             # 更新処理呼び出し
             XUXInput(self.xmlui).check()  # UI用キー入力
             self.update()
@@ -41,7 +41,7 @@ class XUXScene:
         pyxel.dither(1.0)  # 戻しておく
 
         # シーン終了後はdrawも呼び出さない
-        if self._state == self.State.CLOSED:
+        if self._state == self.OpenCloseState.CLOSED:
             pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.fade_color)
             self.closed()  # 代わりにclosedを呼び出す
         else:
@@ -50,7 +50,7 @@ class XUXScene:
 
     def end_scene(self, close_count=CLOSE_COUNT):
         self._timer = XUXCountUp(close_count)
-        self._state = self.State.CLOSING
+        self._state = self.OpenCloseState.CLOSING
 
     # オーバーライドして使う物
     # これらはsceneの中から呼び出すように(自分で呼び出さない)
@@ -65,15 +65,15 @@ class XUXScene:
     # 内部処理用。オーバーライドして使ってもいい
     # -----------------------------------------------------
     def _draw_after(self):
-        if self._state == self.State.OPENING:
+        if self._state == self.OpenCloseState.OPENING:
             if self._timer.update():
-                self._state = self.State.OPENED
+                self._state = self.OpenCloseState.OPENED
             pyxel.dither(self._timer.alpha)
             pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.fade_color)
 
-        if self._state == self.State.CLOSING:
+        if self._state == self.OpenCloseState.CLOSING:
             if self._timer.update():
-                self._state = self.State.CLOSED
+                self._state = self.OpenCloseState.CLOSED
             pyxel.dither(self._timer.alpha)
             pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.fade_color)
 

@@ -9,16 +9,12 @@ class _XUXTimerBase:
 
         self._count = 0
         self._count_max = count
+        self.is_finish = False  # 完了済みフラグ
 
     # タイマー完了
     def finish(self) -> Self:
-        self._count = self._count_max
+        self.is_finish = True
         return self
-
-    # タイマー完了済みかどうか
-    @property
-    def is_finish(self) -> bool:
-        return self._count >= self._count_max
 
     # 現在カウント。基本はカウントアップ
     @property
@@ -48,6 +44,10 @@ class _XUXTimerBase:
 # 時間がきたら一度きりの実行
 class XUXTimeout(_XUXTimerBase):
     def update(self):
+        # 完了済み
+        if self.is_finish:
+            return False
+
         # 1,2,3,4,...10
         self._count += 1
 
@@ -62,6 +62,10 @@ class XUXTimeout(_XUXTimerBase):
 # 時間ごとに何度も実行
 class XUXInterval(_XUXTimerBase):
     def update(self):
+        # 完了済み
+        if self.is_finish:
+            return False
+
         # 1,2,3,4,...10
         self._count += 1
 
@@ -79,6 +83,10 @@ class XUXInterval(_XUXTimerBase):
 # カウントアップ
 class XUXCountUp(_XUXTimerBase):
     def update(self) -> bool:
+        # 完了済み
+        if self.is_finish:
+            return False
+
         # 1,2,3,4,...10
         self._count += 1
         self.action()
@@ -92,6 +100,10 @@ class XUXCountUp(_XUXTimerBase):
 # カウントダウン。0も含める
 class XUXCountDown(_XUXTimerBase):
     def update(self) -> bool:
+        # 完了済み
+        if self.is_finish:
+            return False
+
         # 10,9,8...1,0
         self.action()
 
