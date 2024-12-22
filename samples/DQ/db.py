@@ -1,5 +1,5 @@
 # DBはサンプルでは使わないので固定値で
-import dataclasses
+from enum import Enum
 
 from xmlui.ext.db import XUXMemoryDB
 
@@ -11,19 +11,12 @@ user_db = XUXMemoryDB.load("assets/data/user.db")
 # *****************************************************************************
 # システムインフォ。コンフィグがメイン
 class SystemInfoTable:
+    class MsgSpd(Enum):
+        SLOW = 1.0/3
+        NORMAL = 1.0
+        FAST = 3
     def __init__(self):
-        self.change_speed("normal")
-
-    def change_speed(self, speed:str):
-        self.speed = speed
-        match speed:
-            case "slow":
-                self.msg_spd =  1.0/3
-            case "normal":
-                self.msg_spd =  1
-            case "fast":
-                self.msg_spd =  3
-
+        self.msg_spd:SystemInfoTable.MsgSpd = self.MsgSpd.NORMAL
 system_info = SystemInfoTable()
 
 

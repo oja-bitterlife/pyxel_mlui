@@ -110,8 +110,12 @@ def common_msg_text(msg_dq:dq.MsgDQ, event:XUEvent, cursor_visible:bool):
 
     # カウンタ操作
     # ---------------------------------------------------------
+    speed = system_info.msg_spd
+    if XUEvent.Key.BTN_A in event.now or XUEvent.Key.BTN_B in event.now:
+        speed = system_info.MsgSpd.FAST
+
     remain_count = msg_dq.current_page.current_line_length - len(msg_dq.current_page.current_line)
-    msg_dq.current_page.draw_count += min(remain_count, system_info.msg_spd)  # 必ず行端で一旦止まる
+    msg_dq.current_page.draw_count += min(remain_count, speed.value)  # 必ず行端で一旦止まる
 
     # 行が完了してからの経過時間
     if msg_dq.is_line_end:
@@ -150,7 +154,7 @@ def common_msg_text(msg_dq:dq.MsgDQ, event:XUEvent, cursor_visible:bool):
             # スクロールが終わった
             if over_count >= scroll_split:
                 scroll_info = scroll_info[1:]
-                msg_dq.current_page.draw_count += 1  # 次の文字へ
+                msg_dq.current_page.draw_count = int(msg_dq.current_page.draw_count) + 1  # 次の文字へ
                 msg_dq.set_attr("_over_count", 0)  # 最速表示対応
             # スクロール
             else:
@@ -158,7 +162,7 @@ def common_msg_text(msg_dq:dq.MsgDQ, event:XUEvent, cursor_visible:bool):
 
         # スクロールが不要でも一瞬待機
         elif over_count >= scroll_split:
-            msg_dq.current_page.draw_count += 1  # 次の文字へ
+            msg_dq.current_page.draw_count = int(msg_dq.current_page.draw_count) + 1  # 次の文字へ
             msg_dq.set_attr("_over_count", 0)  # 最速表示対応
 
     # テキスト描画
@@ -185,11 +189,6 @@ def common_msg_text(msg_dq:dq.MsgDQ, event:XUEvent, cursor_visible:bool):
         cursor_count = msg_dq.current_page.draw_count - msg_dq.current_page.length
         if cursor_count//7 % 2 == 0:
             draw_msg_cursor(msg_dq, 0, (scroll_line_num-1)*line_height-4)
-
-    # 表示途中のアクション
-    # if not msg_dq.is_next_wait:
-    #     if XUEvent.Key.BTN_A in event.now or XUEvent.Key.BTN_B in event.now:
-    #         msg_dq.current_page.draw_count += 2  # 素早く表示
 
 
 # ステータスウインドウ( ｰ`дｰ´)ｷﾘｯ
