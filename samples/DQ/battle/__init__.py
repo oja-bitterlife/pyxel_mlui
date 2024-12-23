@@ -21,6 +21,9 @@ class BattleActWait(XUXActWait):
         super().__init__(battle.xmlui)
         self.battle = battle
 
+sway_x = 0
+sway_y = 0
+
 # バトルシーン
 # *****************************************************************************
 class Battle(XUXScene):
@@ -99,7 +102,9 @@ class Battle(XUXScene):
         def init(self):
             self.set_wait(20)  # エフェクトはないので適当待ち
         def waiting(self):
-            # 画面ゆらしとか……
+            global sway_x, sway_y
+            sway_x = random.randint(-3, 3)
+            sway_y = random.randint(-3, 3)
             return False
 
     class RunWait(BattleActWait):
@@ -200,6 +205,7 @@ def ui_init(template):
     def msg_text(msg_text:MsgDQ, event:XUEvent):
         # メッセージ共通処理
         common_msg_text(msg_text, event, False)
+
 
         # 自動テキスト送り
         if msg_text.is_next_wait:
