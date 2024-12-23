@@ -85,7 +85,7 @@ class MsgScr(Msg):
     # スクロールバッファを行単位で返す
     def get_scroll_lines(self, scroll_line_num:int) -> list[LineInfo]:
         # テキストがない
-        if not self.pages or scroll_line_num == 0:
+        if not self.pages or scroll_line_num <= 0:
             return []
 
         # 各ページの全体行中の位置を記録
