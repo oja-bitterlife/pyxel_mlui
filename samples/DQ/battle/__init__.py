@@ -136,10 +136,10 @@ class Battle(XUXScene):
 
     class CmdStart(BattleActItem):
         def init(self):
-            self.xmlui.open("menu")
-            self.set_wait(WIN_OPEN_SPEED)
+            self.set_wait(15)  # コマンド？を出すのにちょっと溜める
 
         def action(self):
+            self.xmlui.open("menu")
             self.msg_dq = MsgDQ(self.xmlui.find_by_id("msg_text"))
             self.msg_dq.append_msg("コマンド？")
             self.battle.act.add(Battle.CmdWait(self.battle))
@@ -171,13 +171,16 @@ class Battle(XUXScene):
         def init(self):
             self.set_wait(30)  # エフェクトはないので適当待ち
 
-    class AtkEnd(BattleActItem):
+    class AtkEnd(BattleActWait):
         def init(self):
-            msg_dq = MsgDQ(self.xmlui.find_by_id("msg_text"))
-            msg_dq.append_msg("{name}に　{hit}ポイントの\nダメージを　あたえた！", enemy_data.data)
-            self.battle.act.add(Battle.CmdStart(self.battle))
-            self.set_wait(15)
+            self.msg_dq = MsgDQ(self.xmlui.find_by_id("msg_text"))
+            self.msg_dq.append_msg("{name}に　{hit}ポイントの\nダメージを　あたえた！", enemy_data.data)
 
+        def waiting(self):
+            if self.msg_dq.is_all_finish:
+                self.battle.act.add(Battle.CmdStart(self.battle))
+                return True
+            return False
 
     def __init__(self, xmlui:XMLUI):
         super().__init__(xmlui)
@@ -198,8 +201,7 @@ class Battle(XUXScene):
         self.template.remove()
 
     def update(self):
-        pass
-        # self.act.update()
+        self.act.update()
 
             # case Battle.TurnState.ATK_RESULT:
             #     self.turn_state = Battle.TurnState.ATK_END
@@ -282,8 +284,8 @@ def ui_init(template):
         # メッセージ共通処理
         common_msg_text(msg_text, event, False)
 
-        # # メッセージウインドウがアクティブの時は自動テキスト送り
-        if event.is_active and msg_text.is_next_wait:
+        # 自動テキスト送り
+        if msg_text.is_next_wait:
             msg_text.next()
 
         if msg_text.is_all_finish:

@@ -111,7 +111,7 @@ def common_msg_text(msg_dq:MsgDQ, event:XUEvent, cursor_visible:bool):
     # テキストが空
     if not msg_dq.pages:
         return
-
+    
     # カウンタ操作
     # ---------------------------------------------------------
     # ボタンを押している間は速度MAX
@@ -170,6 +170,7 @@ def common_msg_text(msg_dq:MsgDQ, event:XUEvent, cursor_visible:bool):
         elif over_count >= scroll_split:
             msg_dq.current_page.draw_count = int(msg_dq.current_page.draw_count) + 1  # 次の文字へ
             msg_dq.set_attr("_over_count", 0)  # 最速表示対応
+
 
     # テキスト描画
     for i,info in enumerate(scroll_info):
