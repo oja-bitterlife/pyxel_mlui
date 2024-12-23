@@ -13,13 +13,15 @@ from db import user_data, enemy_data
 # バトル用シーン遷移ベース
 class BattleActItem(XUXActItem):
     def __init__(self, battle:"Battle"):
-        super().__init__(battle.xmlui)
+        super().__init__()
         self.battle = battle
+        self.xmlui = battle.xmlui
 
 class BattleActWait(XUXActWait):
     def __init__(self, battle:"Battle"):
-        super().__init__(battle.xmlui)
+        super().__init__()
         self.battle = battle
+        self.xmlui = battle.xmlui
 
 sway_x = 0
 sway_y = 0
@@ -128,7 +130,7 @@ class Battle(XUXScene):
 
     def __init__(self, xmlui:XMLUI):
         super().__init__(xmlui)
-        self.act = XUXAct(xmlui)
+        self.act = XUXAct()
 
         # UIの読み込み
         self.template = self.xmlui.load_template("assets/ui/battle.xml")

@@ -41,7 +41,7 @@ class _XUXTimerBase:
 # ---------------------------------------------------------
 # 時間がきたら一度きりの実行
 class XUXTimeout(_XUXTimerBase):
-    def update(self):
+    def update(self) -> bool:
         # 完了済み
         if self.is_finish:
             return False
@@ -59,7 +59,7 @@ class XUXTimeout(_XUXTimerBase):
 
 # 時間ごとに何度も実行
 class XUXInterval(_XUXTimerBase):
-    def update(self):
+    def update(self) -> bool:
         # 完了済み
         if self.is_finish:
             return False

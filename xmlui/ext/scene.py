@@ -11,9 +11,8 @@ from xmlui.ext.timer import XUXCountUp,XUXCountDown,XUXTimeout
 # *****************************************************************************
 class XUXActItem(XUXTimeout):
     # デフォルトはすぐ実行
-    def __init__(self, xmlui:XMLUI):
+    def __init__(self):
         super().__init__(0)
-        self.xmlui = xmlui
         self._init_func:Callable|None = self.init
 
     # コンストラクタではなくinit()の中で時間を設定する。
@@ -28,8 +27,8 @@ class XUXActWait(XUXActItem):
     WAIT_FOREVER = 2**31-1
 
     # デフォルトは無限待機
-    def __init__(self, xmlui:XMLUI):
-        super().__init__(xmlui)
+    def __init__(self):
+        super().__init__()
         self.set_wait(self.WAIT_FOREVER)
 
     # override
@@ -38,7 +37,7 @@ class XUXActWait(XUXActItem):
         if self._count_max == self.WAIT_FOREVER:
             return 1
         else:
-            return self.alpha
+            return super().alpha
 
     # override
     def update(self) -> bool:
@@ -53,8 +52,7 @@ class XUXActWait(XUXActItem):
         return False
 
 class XUXAct:
-    def __init__(self, xmlui:XMLUI):
-        self.xmlui = xmlui
+    def __init__(self):
         self.queue:list[XUXActItem] = []
 
     def add(self, *items:XUXActItem):
@@ -62,11 +60,12 @@ class XUXAct:
             self.queue.append(item)
 
     def next(self):
-        self.queue.pop(0)
+        if not self.is_empty:
+            self.queue.pop(0)
 
     def update(self):
-        if self.queue:
-            act = self.queue[0]
+        if not self.is_empty:
+            act = self.current_act
             if act._init_func:
                 act._init_func()  # 初回はinitも実行
                 act._init_func = None
@@ -76,6 +75,14 @@ class XUXAct:
             if act.is_finish:
                 self.next()
 
+    @property
+    def current_act(self):
+        return self.queue[0]
+
+    @property
+    def is_empty(self) -> bool:
+        return len(self.queue) == 0
+
 
 # シーン管理(フェードイン・フェードアウト)用
 # *****************************************************************************
@@ -84,47 +91,82 @@ class XUXScene:
     OPEN_COUNT = 15
     CLOSE_COUNT = 15
 
+    # デフォルトフェードカラー
+    FADE_COLOR = 0
+
     # シーン管理用
     current_scene:"XUXScene|None" = None
 
-    # Sceneのopen/close状態
-    class OpenCloseState(StrEnum):
-        OPENING = "opening"
-        OPENED = "opened"
-        CLOSING = "closing"
-        CLOSED = "closed"
+    class FadeAct(XUXAct):
+        def __init__(self):
+            super().__init__()
+            self.alpha = 0.0
+
+    class _FadeActItem(XUXActWait):
+        def __init__(self, fade_act:"XUXScene.FadeAct"):
+            super().__init__()
+            self.fade_act = fade_act
+
+    class FadeIn(_FadeActItem):
+        def __init__(self, fade_act:"XUXScene.FadeAct", open_count:int):
+            super().__init__(fade_act)
+            self.set_wait(open_count)
+
+        def waiting(self) -> bool:
+            self.fade_act.alpha = 1-self.alpha
+            return self.is_finish
+
+    class FadeOut(_FadeActItem):
+        def waiting(self) -> bool:
+            self.fade_act.alpha = self.alpha
+            return False
+
+    class FadeNone(_FadeActItem):
+        def waiting(self) -> bool:
+            self.fade_act.alpha = 0
+            return False
 
     def __init__(self, xmlui:XMLUI, open_count=OPEN_COUNT):
         self.xmlui = xmlui
-        self._state:XUXScene.OpenCloseState = self.OpenCloseState.OPENING
 
         # フェードインから
-        self._timer = XUXCountDown(open_count)
-        self.fade_color = 0
+        self.fade_act = XUXScene.FadeAct()
+        self.fade_act.add(
+            XUXScene.FadeIn(self.fade_act, open_count),
+            XUXScene.FadeNone(self.fade_act),
+            XUXScene.FadeOut(self.fade_act))
 
     # mainから呼び出すもの
     # -----------------------------------------------------
     def update_scene(self):
-        # open/close中はupdateを呼び出さない
-        if self._state == self.OpenCloseState.OPENED:
+        # シーンは終了している
+        if self.fade_act.is_empty:
+            self.closed()
+            return
+
+        if not isinstance(self.fade_act.current_act, XUXScene.FadeOut):
             # 更新処理呼び出し
             XUXInput(self.xmlui).check()  # UI用キー入力
             self.update()
 
+        self.fade_act.update()
+
     def draw_scene(self):
         pyxel.dither(1.0)  # 戻しておく
 
-        # シーン終了後はdrawも呼び出さない
-        if self._state == self.OpenCloseState.CLOSED:
-            pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.fade_color)
-            self.closed()  # 代わりにclosedを呼び出す
-        else:
+        # フェード描画
+        if not self.fade_act.is_empty:
+            # シーン終了後はdrawも呼び出さない
             self.draw()
-            self._draw_after()
+            pyxel.dither(self.fade_act.alpha)
+
+        pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.FADE_COLOR)
 
     def end_scene(self, close_count=CLOSE_COUNT):
-        self._timer = XUXCountUp(close_count)
-        self._state = self.OpenCloseState.CLOSING
+        if isinstance(self.fade_act.current_act, XUXScene.FadeNone):
+            self.fade_act.next()
+            if isinstance(self.fade_act.current_act, XUXScene.FadeOut):
+                self.fade_act.current_act.set_wait(close_count)
 
     # オーバーライドして使う物
     # これらはsceneの中から呼び出すように(自分で呼び出さない)
@@ -135,19 +177,4 @@ class XUXScene:
         pass
     def closed(self):
         pass
-
-    # 内部処理用。オーバーライドして使ってもいい
-    # -----------------------------------------------------
-    def _draw_after(self):
-        if self._state == self.OpenCloseState.OPENING:
-            if self._timer.update():
-                self._state = self.OpenCloseState.OPENED
-            pyxel.dither(self._timer.alpha)
-            pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.fade_color)
-
-        if self._state == self.OpenCloseState.CLOSING:
-            if self._timer.update():
-                self._state = self.OpenCloseState.CLOSED
-            pyxel.dither(self._timer.alpha)
-            pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.fade_color)
-
+ 
