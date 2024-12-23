@@ -1041,11 +1041,15 @@ class XUPageInfo(XUSelectBase):
     # 次ページがなくテキストは表示完了 = 完全に終了
     @property
     def is_all_finish(self):
+        if not self.items:  # テキストがない
+            return True
         return not self.is_next_wait and self.current_page.is_finish
 
     # 次ページあり
     @property
     def is_next_wait(self):
+        if not self.items:  # テキストがない
+            return False
         return self.current_page.is_finish and self.current_page_no < self.item_num-1
 
     # ツリー操作

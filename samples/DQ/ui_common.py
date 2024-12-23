@@ -108,6 +108,10 @@ def common_msg_text(msg_dq:MsgDQ, event:XUEvent, cursor_visible:bool):
     scroll_line_num = page_line_num + 1  # スクロールバッファサイズはページサイズ+1
     scroll_split = 3  # スクロールアニメ分割数
 
+    # テキストが空
+    if not msg_dq.pages:
+        return
+
     # カウンタ操作
     # ---------------------------------------------------------
     # ボタンを押している間は速度MAX

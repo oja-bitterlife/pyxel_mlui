@@ -198,7 +198,8 @@ class Battle(XUXScene):
         self.template.remove()
 
     def update(self):
-        self.act.update()
+        pass
+        # self.act.update()
 
             # case Battle.TurnState.ATK_RESULT:
             #     self.turn_state = Battle.TurnState.ATK_END
@@ -281,10 +282,7 @@ def ui_init(template):
         # メッセージ共通処理
         common_msg_text(msg_text, event, False)
 
-        # メッセージウインドウの無効化(カーソル用)
-        # msg_text.enable = False
-
-        # メッセージウインドウがアクティブの時は自動テキスト送り
+        # # メッセージウインドウがアクティブの時は自動テキスト送り
         if event.is_active and msg_text.is_next_wait:
             msg_text.next()
 
