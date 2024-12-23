@@ -144,9 +144,9 @@ class Battle(XUXScene):
             Battle.PlayerMsg(self, "{name}が　あらわれた！", enemy_data.data),
             Battle.CmdStart(self))
 
-    def closed(self):
-        # 読みこんだUIの削除
-        self.template.remove()
+    # def closed(self):
+    #     # 読みこんだUIの削除
+    #     self.template.remove()
 
     def update(self):
         self.act.update()

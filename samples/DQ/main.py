@@ -7,16 +7,16 @@ pyxel.init(256, 256)
 
 from xmlui.core import XUEvent
 from ui_common import xmlui
-from xmlui.ext.scene import XUXScene
+from xmlui.ext.scene import XUXScene,XUXSceneManager
 
 # 最初はタイトル
 from title import Title
 from field import Field
 from battle import Battle
 
-XUXScene.current_scene = Title(xmlui)
-# XUXScene.current_scene = Field(xmlui)
-#XUXScene.current_scene = Battle(xmlui)
+scene_manager = XUXSceneManager(Title(xmlui))
+#scene_manager = XUXSceneManager(Field(xmlui))
+#scene_manager = XUXSceneManager(Battle(xmlui))
 
 # Main
 def update(): # フレームの更新処理
@@ -27,17 +27,14 @@ def update(): # フレームの更新処理
         xmlui.reload_templates()
 
     # シーン更新
-    if XUXScene.current_scene:
-        XUXScene.current_scene.update_scene()
-
+    scene_manager.update()
 
 def draw(): # 描画処理
     # ゲームの描画コード
     pyxel.cls(0)
 
     # シーン描画
-    if XUXScene.current_scene:
-        XUXScene.current_scene.draw_scene()
+    scene_manager.draw()
 
 # アプリケーションの実行
 pyxel.run(update, draw)
