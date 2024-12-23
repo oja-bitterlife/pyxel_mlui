@@ -1,5 +1,6 @@
 import random
 from enum import StrEnum
+from typing import Callable
 
 import pyxel
 
@@ -8,116 +9,220 @@ from xmlui.core import XMLUI,XUEvent,XUWinBase,XUSelectItem,XUTextUtil
 from xmlui.lib import select,text
 from xmlui.ext.scene import XUXScene
 from xmlui.ext.timer import XUXTimeout
-from ui_common import system_font
+from ui_common import system_font,WIN_OPEN_SPEED
 from msg_dq import MsgDQ
 from msg_dq import Decorator as DQDecorator
 from db import user_data, enemy_data
 
+
+class XUXActItem(XUXTimeout):
+    # デフォルトはすぐ実行
+    def __init__(self, xmlui:XMLUI):
+        super().__init__(0)
+        self.xmlui = xmlui
+        self._init_func:Callable|None = self.init
+
+    # コンストラクタではなくinit()の中で時間を設定する。
+    def set_wait(self, wait:int):
+        self._count_max = wait
+
+    # オーバーライドして使う物
+    def init(self):
+        pass
+
+class XUXActWait(XUXActItem):
+    WAIT_FOREVER = 2**31-1
+
+    # デフォルトは無限待機
+    def __init__(self, xmlui:XMLUI):
+        super().__init__(xmlui)
+        self.set_wait(self.WAIT_FOREVER)
+
+    # override
+    @property
+    def alpha(self):
+        if self._count_max == self.WAIT_FOREVER:
+            return 1
+        else:
+            return self.alpha
+
+    # override
+    def update(self) -> bool:
+        update_result = super().update()
+        if not self.is_finish:
+            if self.waiting():
+                self.finish()
+        return update_result
+
+    # オーバーライドして使う物
+    def waiting(self) -> bool:
+        return False
+
+class XUXAct:
+    def __init__(self, xmlui:XMLUI):
+        self.xmlui = xmlui
+        self.queue:list[XUXActItem] = []
+
+    def add(self, item:XUXActItem):
+        self.queue.append(item)
+
+    def next(self):
+        self.queue.pop(0)
+
+    def update(self):
+        if self.queue:
+            act = self.queue[0]
+            if act._init_func:
+                act._init_func()  # 初回はinitも実行
+                act._init_func = None
+            act.update()
+
+            # 完了したら次のAct
+            if act.is_finish:
+                self.next()
+
 class Battle(XUXScene):
     UI_TEMPLATE_BATTLE = "ui_battle"
 
-    # バトルの状態遷移
-    class TurnState(StrEnum):
-        MSG_DRAWING = "msg_drawing"
-        CMD_WAIT = "command_wait"
+    # # バトルの状態遷移
+    # class TurnState(StrEnum):
+    #     MSG_DRAWING = "msg_drawing"
+    #     CMD_WAIT = "command_wait"
 
-        ATK_START = "attack_start"
-        ATK_WAIT = "attack_wait"
-        ATK_RESULT = "attack_result"
-        ATK_END = "attack_end"
+    #     ATK_START = "attack_start"
+    #     ATK_WAIT = "attack_wait"
+    #     ATK_RESULT = "attack_result"
+    #     ATK_END = "attack_end"
 
-        ENEMY_START = "enemy_start"
-        ENEMY_WAIT = "enemy_wait"
-        ENEMY_RESULT = "enemy_result"
-        ENEMY_END = "enemy_end"
+    #     ENEMY_START = "enemy_start"
+    #     ENEMY_WAIT = "enemy_wait"
+    #     ENEMY_RESULT = "enemy_result"
+    #     ENEMY_END = "enemy_end"
 
-    turn_state = TurnState.MSG_DRAWING
+    # turn_state = TurnState.MSG_DRAWING
 
-    # 一定時間後にステートを変更する
-    class StateTimer(XUXTimeout):
-        def __init__(self, battle:"Battle", timeout, next_state:"Battle.TurnState"):
-            super().__init__(timeout)
+    # # 一定時間後にステートを変更する
+    # class StateTimer(XUXTimeout):
+    #     def __init__(self, battle:"Battle", timeout, next_state:"Battle.TurnState"):
+    #         super().__init__(timeout)
+    #         self.battle = battle
+    #         self.next_state = next_state
+
+    #         self.battle.turn_state = self.next_state
+    #         print("action")
+
+
+    # バトル用Actベース
+    class BattleActItem(XUXActItem):
+        def __init__(self, battle:"Battle"):
+            super().__init__(battle.xmlui)
             self.battle = battle
-            self.next_state = next_state
+    class BattleActWait(XUXActWait):
+        def __init__(self, battle:"Battle"):
+            super().__init__(battle.xmlui)
+            self.battle = battle
+
+    # 個々のAct
+    class BattleStart(BattleActWait):
+        def init(self):
+            self.msg_dq = MsgDQ(self.xmlui.find_by_id("msg_text"))
+            self.msg_dq.append_msg("{name}が　あらわれた！", enemy_data.data)
+
+        def waiting(self):
+            if self.msg_dq.is_all_finish:
+                self.battle.act.add(Battle.CmdStart(self.battle))
+                return True
+            return False
+
+    class CmdStart(BattleActItem):
+        def init(self):
+            self.xmlui.open("menu")
+            self.set_wait(WIN_OPEN_SPEED)
 
         def action(self):
-            self.battle.turn_state = self.next_state
-            print("action")
+            self.msg_dq = MsgDQ(self.xmlui.find_by_id("msg_text"))
+            self.msg_dq.append_msg("コマンド？")
+            self.battle.act.add(Battle.CmdWait(self.battle))
+
+    class CmdWait(BattleActWait):
+        def waiting(self):
+            if "attack" in self.xmlui.event.trg:
+                menu = MsgDQ(self.xmlui.find_by_id("menu"))
+                XUWinBase(menu).start_close()
+                self.battle.act.add(Battle.AtkStart(self.battle))
+                return True
+            return False
+
+    class AtkStart(BattleActWait):
+        def init(self):
+            enemy_data.data["hit"] = XUTextUtil.format_zenkaku(random.randint(1, 100))
+
+            self.msg_dq = MsgDQ(self.xmlui.find_by_id("msg_text"))
+            self.msg_dq.append_msg("{name}の　こうげき！", user_data.data)
+
+        def waiting(self):
+            if self.msg_dq.is_all_finish:
+                self.battle.act.add(Battle.EffectWait(self.battle))
+                self.battle.act.add(Battle.AtkEnd(self.battle))
+                return True
+            return False
+
+    class EffectWait(BattleActItem):
+        def init(self):
+            self.set_wait(30)  # エフェクトはないので適当待ち
+
+    class AtkEnd(BattleActItem):
+        def init(self):
+            msg_dq = MsgDQ(self.xmlui.find_by_id("msg_text"))
+            msg_dq.append_msg("{name}に　{hit}ポイントの\nダメージを　あたえた！", enemy_data.data)
+            self.battle.act.add(Battle.CmdStart(self.battle))
+            self.set_wait(15)
+
 
     def __init__(self, xmlui:XMLUI):
         super().__init__(xmlui)
-
-        # なにかと使うタイマー
-        self.timer = None
+        self.act = XUXAct(xmlui)
 
         # UIの読み込み
         self.template = self.xmlui.load_template("assets/ui/battle.xml")
         ui_init(self.template)
 
         # バトル開始UI初期化
-        print(enemy_data.data)
         self.battle = self.xmlui.open("battle")
-        msg_dq = MsgDQ(self.battle.find_by_id("msg_text"))
-        msg_dq.append_msg("{name}が　あらわれた！", enemy_data.data)
+
+        # 最初のAct
+        self.act.add(Battle.BattleStart(self))
 
     def closed(self):
         # 読みこんだUIの削除
         self.template.remove()
 
     def update(self):
-        if self.timer is not None:
-            self.timer.update()
+        self.act.update()
 
-        msg_dq = MsgDQ(self.battle.find_by_id("msg_text"))
-        match self.turn_state:
-            case Battle.TurnState.MSG_DRAWING:
-                # メッセージ表示完了
-                if msg_dq.is_all_finish:
-                    # コマンド入力開始
-                    msg_dq.append_msg("コマンド？")
-                    self.battle.open("menu")
-                    self.turn_state = Battle.TurnState.CMD_WAIT
+            # case Battle.TurnState.ATK_RESULT:
+            #     self.turn_state = Battle.TurnState.ATK_END
+            #     self.timer = None
+            # case Battle.TurnState.ATK_END:
+            #     if msg_dq.is_all_finish and self.timer is None:
+            #         self.timer = Battle.StateTimer(self, 15, Battle.TurnState.ENEMY_START)
 
-            case Battle.TurnState.CMD_WAIT:
-                menu = MsgDQ(self.battle.find_by_id("menu"))
-                if "attack" in self.xmlui.event.trg:
-                    XUWinBase(menu).start_close()
-                    self.turn_state = Battle.TurnState.ATK_START
-
-            # 自分の攻撃
-            case Battle.TurnState.ATK_START:
-                enemy_data.data["hit"] = XUTextUtil.format_zenkaku(random.randint(1, 100))
-                msg_dq.append_msg("{name}の　こうげき！", user_data.data)
-                self.turn_state = Battle.TurnState.ATK_WAIT
-                self.timer = None
-            case Battle.TurnState.ATK_WAIT:
-                if msg_dq.is_all_finish and self.timer is None:
-                    self.timer = Battle.StateTimer(self, 30, Battle.TurnState.ATK_RESULT)
-            case Battle.TurnState.ATK_RESULT:
-                msg_dq.append_msg("{name}に　{hit}ポイントの\nダメージを　あたえた！", enemy_data.data)
-                self.turn_state = Battle.TurnState.ATK_END
-                self.timer = None
-            case Battle.TurnState.ATK_END:
-                if msg_dq.is_all_finish and self.timer is None:
-                    self.timer = Battle.StateTimer(self, 15, Battle.TurnState.ENEMY_START)
-
-            # 敵の攻撃
-            case Battle.TurnState.ENEMY_START:
-                user_data.data["damage"] = XUTextUtil.format_zenkaku(random.randint(1, 10))
-                msg_dq.append_enemy("{name}の　こうげき！", enemy_data.data)
-                self.turn_state = Battle.TurnState.ENEMY_WAIT
-                self.timer = None
-            case Battle.TurnState.ENEMY_WAIT:
-                if msg_dq.is_all_finish and self.timer is None:
-                    self.timer = Battle.StateTimer(self, 30, Battle.TurnState.ENEMY_RESULT)
-            case Battle.TurnState.ENEMY_RESULT:
-                msg_dq.append_enemy("{name}は　{damage}ポイントの\nだめーじを　うけた", user_data.data)
-                self.turn_state = Battle.TurnState.ENEMY_END
-                self.timer = None
-            case Battle.TurnState.ENEMY_END:
-                if msg_dq.is_all_finish and self.timer is None:
-                    self.timer = Battle.StateTimer(self, 15, Battle.TurnState.MSG_DRAWING)
-
+            # # 敵の攻撃
+            # case Battle.TurnState.ENEMY_START:
+            #     user_data.data["damage"] = XUTextUtil.format_zenkaku(random.randint(1, 10))
+            #     msg_dq.append_enemy("{name}の　こうげき！", enemy_data.data)
+            #     self.turn_state = Battle.TurnState.ENEMY_WAIT
+            #     self.timer = None
+            # case Battle.TurnState.ENEMY_WAIT:
+            #     if msg_dq.is_all_finish and self.timer is None:
+            #         self.timer = Battle.StateTimer(self, 30, Battle.TurnState.ENEMY_RESULT)
+            # case Battle.TurnState.ENEMY_RESULT:
+            #     msg_dq.append_enemy("{name}は　{damage}ポイントの\nだめーじを　うけた", user_data.data)
+            #     self.turn_state = Battle.TurnState.ENEMY_END
+            #     self.timer = None
+            # case Battle.TurnState.ENEMY_END:
+            #     if msg_dq.is_all_finish and self.timer is None:
+            #         self.timer = Battle.StateTimer(self, 15, Battle.TurnState.MSG_DRAWING)
 
     def draw(self):
         # UIの描画(fieldとdefaultグループ)

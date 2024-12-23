@@ -52,7 +52,7 @@ class XUXTimeout(_XUXTimerBase):
         # カウントアップ完了
         if self._count >= self._count_max:
             self.action()
-            self.finish()  
+            self.finish()
             return True
 
         return False
