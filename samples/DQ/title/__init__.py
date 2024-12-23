@@ -25,7 +25,7 @@ class Title(XUXScene):
 
     def closed(self):
         self.template.remove()
-        return Field(self.xmlui)
+        self.set_next_scene(Field(self.xmlui))
 
     def draw(self):
         # 背景絵

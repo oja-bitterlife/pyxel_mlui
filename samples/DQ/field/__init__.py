@@ -36,7 +36,7 @@ class Field(XUXScene):
 
     def closed(self):
         self.template.remove()  # 読みこんだUIの削除
-        return Battle(self.xmlui)
+        self.set_next_scene(Battle(self.xmlui))
 
     def update(self):
         # UIメニューが開いていたらキャラが動かないように

@@ -1,4 +1,4 @@
-from typing import Callable,Self
+from typing import Callable
 import pyxel
 
 from xmlui.core import XMLUI
@@ -7,7 +7,7 @@ from xmlui.ext.timer import XUXTimeout
 
 
 # ステータス遷移管理用。NPCの寸劇とかで使うやつ
-# *****************************************************************************
+# #############################################################################
 class XUXActItem(XUXTimeout):
     # デフォルトはすぐ実行
     def __init__(self):
@@ -83,14 +83,31 @@ class XUXAct:
 
 
 # シーン管理(フェードイン・フェードアウト)用
-# *****************************************************************************
-class XUXScene:
+# #############################################################################
+# シーン管理用仕込み
+class XUXSceneManagerItem:
+    def __init__(self):
+        self._next_scene:XUXScene|None = None
+        self.is_scene_closed = False
+
+    # シーン遷移
+    def set_next_scene(self, scene:"XUXScene"):
+        self._next_scene = scene
+
+    # オーバーライドして使う物
+    def update_scene(self):
+        pass
+    def draw_scene(self):
+        pass
+
+# シーンクラス。継承して使おう
+class XUXScene(XUXSceneManagerItem):
     # デフォルトフェードカラー
-    FADE_COLOR = 2
+    FADE_COLOR = 0
 
     # デフォルトフェードインアウト時間
     OPEN_COUNT = 15
-    CLOSE_COUNT = 15
+    CLOSE_COUNT = 30
 
     # フェード管理
     # -----------------------------------------------------
@@ -134,7 +151,6 @@ class XUXScene:
     def __init__(self, xmlui:XMLUI, open_count=OPEN_COUNT):
         super().__init__()
         self.xmlui = xmlui
-        self._next_scene:XUXScene|None = None
 
         # フェードインから
         self.fade_act = XUXScene.FadeAct(1.0)
@@ -146,10 +162,10 @@ class XUXScene:
     # mainから呼び出すもの
     # -----------------------------------------------------
     def update_scene(self):
-        # シーンは終了している
+        # フェードアウトが終わった
         if self.fade_act.is_empty:
-            if self._next_scene is None:
-                self._next_scene = self.closed()
+            self.closed()
+            self.is_scene_finish = True  # シーン完了。closedでシーン遷移しておくように
             return
 
         if not isinstance(self.fade_act.current_act, XUXScene.FadeOut):
@@ -191,23 +207,27 @@ class XUXScene:
         pass
     def draw(self):
         pass
-    def closed(self) -> "XUXScene":
-        return self  # 次のシーンを戻す
+    def closed(self):
+        pass
 
- # シーン管理用
+
+# シーン管理用
+# *****************************************************************************
 class XUXSceneManager:
-    def __init__(self, start_scene:XUXScene):
-        self._scene:XUXScene = start_scene
+    def __init__(self, start_scene:XUXSceneManagerItem):
+        self._scene:XUXSceneManagerItem = start_scene
 
     @property
-    def current_scene(self) -> XUXScene:
+    def current_scene(self) -> XUXSceneManagerItem:
         # 次のシーンがあれば次へ
         if self._scene._next_scene is not None:
             self._scene = self._scene._next_scene
         return self._scene
 
     def update(self):
-        self.current_scene.update_scene()
+        if not self.current_scene.is_scene_closed:
+            self.current_scene.update_scene()
 
     def draw(self):
-        self.current_scene.draw_scene()
+        if not self.current_scene.is_scene_closed:
+            self.current_scene.draw_scene()
