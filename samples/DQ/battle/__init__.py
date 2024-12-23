@@ -1,99 +1,30 @@
 import random
-from enum import StrEnum
-from typing import Callable
-
 import pyxel
 
 # タイトル画面
 from xmlui.core import XMLUI,XUEvent,XUWinBase,XUSelectItem,XUTextUtil
 from xmlui.lib import select,text
-from xmlui.ext.scene import XUXScene
-from xmlui.ext.timer import XUXTimeout
-from ui_common import system_font,WIN_OPEN_SPEED
+from xmlui.ext.scene import XUXScene,XUXAct,XUXActItem,XUXActWait
+from ui_common import system_font
 from msg_dq import MsgDQ
 from msg_dq import Decorator as DQDecorator
 from db import user_data, enemy_data
 
+# バトル用シーン遷移ベース
+class BattleActItem(XUXActItem):
+    def __init__(self, battle:"Battle"):
+        super().__init__(battle.xmlui)
+        self.battle = battle
 
-class XUXActItem(XUXTimeout):
-    # デフォルトはすぐ実行
-    def __init__(self, xmlui:XMLUI):
-        super().__init__(0)
-        self.xmlui = xmlui
-        self._init_func:Callable|None = self.init
+class BattleActWait(XUXActWait):
+    def __init__(self, battle:"Battle"):
+        super().__init__(battle.xmlui)
+        self.battle = battle
 
-    # コンストラクタではなくinit()の中で時間を設定する。
-    def set_wait(self, wait:int):
-        self._count_max = wait
-
-    # オーバーライドして使う物
-    def init(self):
-        pass
-
-class XUXActWait(XUXActItem):
-    WAIT_FOREVER = 2**31-1
-
-    # デフォルトは無限待機
-    def __init__(self, xmlui:XMLUI):
-        super().__init__(xmlui)
-        self.set_wait(self.WAIT_FOREVER)
-
-    # override
-    @property
-    def alpha(self):
-        if self._count_max == self.WAIT_FOREVER:
-            return 1
-        else:
-            return self.alpha
-
-    # override
-    def update(self) -> bool:
-        update_result = super().update()
-        if not self.is_finish:
-            if self.waiting():
-                self.finish()
-        return update_result
-
-    # オーバーライドして使う物
-    def waiting(self) -> bool:
-        return False
-
-class XUXAct:
-    def __init__(self, xmlui:XMLUI):
-        self.xmlui = xmlui
-        self.queue:list[XUXActItem] = []
-
-    def add(self, *items:XUXActItem):
-        for item in items:
-            self.queue.append(item)
-
-    def next(self):
-        self.queue.pop(0)
-
-    def update(self):
-        if self.queue:
-            act = self.queue[0]
-            if act._init_func:
-                act._init_func()  # 初回はinitも実行
-                act._init_func = None
-            act.update()
-
-            # 完了したら次のAct
-            if act.is_finish:
-                self.next()
-
+# バトルシーン
+# *****************************************************************************
 class Battle(XUXScene):
     UI_TEMPLATE_BATTLE = "ui_battle"
-
-    # バトル用Actベース
-    class BattleActItem(XUXActItem):
-        def __init__(self, battle:"Battle"):
-            super().__init__(battle.xmlui)
-            self.battle = battle
-    class BattleActWait(XUXActWait):
-        def __init__(self, battle:"Battle"):
-            super().__init__(battle.xmlui)
-            self.battle = battle
 
     # 個々のAct
     class _MsgBase(BattleActWait):
@@ -101,9 +32,11 @@ class Battle(XUXScene):
             super().__init__(battle)
             self.text = text
             self.params = params
-            self.next = next
+
+            # メッセージウインドウアクセス
             self.msg_dq = MsgDQ(self.xmlui.find_by_id("msg_text"))
 
+        # メッセージ表示完了待ち
         def waiting(self):
             if self.msg_dq.is_all_finish:
                 return True
@@ -128,6 +61,7 @@ class Battle(XUXScene):
             self.battle.act.add(Battle.CmdCheck(self.battle))
 
     class CmdCheck(BattleActWait):
+        # メニュー選択待ち
         def waiting(self):
             if "attack" in self.xmlui.event.trg:
                 # 選択されたらメニューは閉じる
@@ -142,8 +76,17 @@ class Battle(XUXScene):
                     Battle.EffectWait(self.battle),
                     Battle.PlayerMsg(self.battle, "{name}に　{hit}ポイントの\nダメージを　あたえた！", enemy_data.data),
                     Battle.EnemyStart(self.battle))
-
                 return True
+
+            if "run" in self.xmlui.event.trg:
+                # 逃げる
+                self.battle.act.add(
+                    Battle.PlayerMsg(self.battle, "{name}は　にげだした", user_data.data),
+                    Battle.EffectWait(self.battle),
+                    Battle.PlayerMsg(self.battle, "しかし まわりこまれて\nしまった!", {}),
+                    Battle.EnemyStart(self.battle))
+                return True
+
             return False
 
     class EffectWait(BattleActWait):
