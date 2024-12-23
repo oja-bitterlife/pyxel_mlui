@@ -24,6 +24,9 @@ class _XUXTimerBase:
     # 現在カウントの進捗具合
     @property
     def alpha(self) -> float:
+        # 一瞬で終わる場合常に1(完了)
+        if self._count_max == 0:
+            return 1.0
         return max(0, min(1, float(self.count)/float(self._count_max)))
 
     # タイマー更新

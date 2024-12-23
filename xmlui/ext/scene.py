@@ -41,11 +41,10 @@ class XUXActWait(XUXActItem):
 
     # override
     def update(self) -> bool:
-        update_result = super().update()
         if not self.is_finish:
             if self.waiting():
                 self.finish()
-        return update_result
+        return super().update()
 
     # オーバーライドして使う物
     def waiting(self) -> bool:
@@ -100,7 +99,7 @@ class XUXScene:
     class FadeAct(XUXAct):
         def __init__(self):
             super().__init__()
-            self.alpha = 0.0
+            self.alpha = 1.0
 
     class _FadeActItem(XUXActWait):
         def __init__(self, fade_act:"XUXScene.FadeAct"):
