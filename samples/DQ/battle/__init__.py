@@ -82,9 +82,15 @@ class Battle(XUXScene):
                 # 逃げる
                 self.battle.act.add(
                     Battle.PlayerMsg(self.battle, "{name}は　にげだした", user_data.data),
-                    Battle.EffectWait(self.battle),
+                    Battle.RunWait(self.battle),
                     Battle.PlayerMsg(self.battle, "しかし まわりこまれて\nしまった!", {}),
                     Battle.EnemyStart(self.battle))
+                return True
+
+            if "spel" in self.xmlui.event.trg:
+                self.battle.act.add(
+                    Battle.PlayerMsg(self.battle, "じゅもんを　おぼえていない", {}),
+                    Battle.CmdStart(self.battle))
                 return True
 
             return False
@@ -95,6 +101,10 @@ class Battle(XUXScene):
         def waiting(self):
             # 画面ゆらしとか……
             return False
+
+    class RunWait(BattleActWait):
+        def init(self):
+            self.set_wait(20)  # SE待ち
 
     class EnemyStart(BattleActItem):
         def init(self):
