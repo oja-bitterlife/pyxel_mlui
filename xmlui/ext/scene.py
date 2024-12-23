@@ -86,50 +86,60 @@ class XUXAct:
 # シーン管理(フェードイン・フェードアウト)用
 # *****************************************************************************
 class XUXScene:
-    # デフォルトフェードインアウト時間
-    OPEN_COUNT = 15
-    CLOSE_COUNT = 15
+    # シーン管理用
+    current_scene:"XUXScene|None" = None
 
     # デフォルトフェードカラー
     FADE_COLOR = 0
 
-    # シーン管理用
-    current_scene:"XUXScene|None" = None
+    # デフォルトフェードインアウト時間
+    OPEN_COUNT = 15
+    CLOSE_COUNT = 15
 
+    # フェード管理
+    # -----------------------------------------------------
     class FadeAct(XUXAct):
-        def __init__(self):
+        def __init__(self, start_alpha:float):
             super().__init__()
-            self.alpha = 1.0
+            self.alpha = start_alpha
 
+    # 各フェードパート
+    # -----------------------------------------------------
+    # パートベース。fade_actのalphaを書き換える
     class _FadeActItem(XUXActWait):
         def __init__(self, fade_act:"XUXScene.FadeAct"):
             super().__init__()
             self.fade_act = fade_act
 
+    # フェードイン
     class FadeIn(_FadeActItem):
         def __init__(self, fade_act:"XUXScene.FadeAct", open_count:int):
             super().__init__(fade_act)
             self.set_wait(open_count)
 
         def waiting(self) -> bool:
-            self.fade_act.alpha = 1-self.alpha
+            self.fade_act.alpha = 1-self.alpha  # 黒から
             return self.is_finish
 
+    # フェードアウト
     class FadeOut(_FadeActItem):
         def waiting(self) -> bool:
             self.fade_act.alpha = self.alpha
             return False
 
+    # フェードなし(シーンメイン)
     class FadeNone(_FadeActItem):
         def waiting(self) -> bool:
             self.fade_act.alpha = 0
             return False
 
+    # 初期化
+    # -----------------------------------------------------
     def __init__(self, xmlui:XMLUI, open_count=OPEN_COUNT):
         self.xmlui = xmlui
 
         # フェードインから
-        self.fade_act = XUXScene.FadeAct()
+        self.fade_act = XUXScene.FadeAct(1.0)
         self.fade_act.add(
             XUXScene.FadeIn(self.fade_act, open_count),
             XUXScene.FadeNone(self.fade_act),
@@ -154,18 +164,26 @@ class XUXScene:
         pyxel.dither(1.0)  # 戻しておく
 
         # フェード描画
-        if not self.fade_act.is_empty:
-            # シーン終了後はdrawも呼び出さない
-            self.draw()
-            pyxel.dither(self.fade_act.alpha)
+        # -------------------------------------------------
+        # Actがない(=シーン切り替え中)
+        if self.fade_act.is_empty:
+            self.fade_act.alpha = 1  # 常に塗りつぶす
+            pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.FADE_COLOR)
 
-        pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.FADE_COLOR)
+        # Actがある(=シーン中)
+        else:
+            self.draw()
+
+            # 無駄な描画をしないよう
+            if self.fade_act.alpha > 0:
+                pyxel.dither(self.fade_act.alpha)  # フェードで
+                pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.FADE_COLOR)
 
     def end_scene(self, close_count=CLOSE_COUNT):
+        # シーン中以外から呼び出されたらなにもしないように
         if isinstance(self.fade_act.current_act, XUXScene.FadeNone):
             self.fade_act.next()
-            if isinstance(self.fade_act.current_act, XUXScene.FadeOut):
-                self.fade_act.current_act.set_wait(close_count)
+            self.fade_act.current_act.set_wait(close_count)
 
     # オーバーライドして使う物
     # これらはsceneの中から呼び出すように(自分で呼び出さない)
