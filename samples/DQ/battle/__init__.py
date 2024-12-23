@@ -63,8 +63,9 @@ class XUXAct:
         self.xmlui = xmlui
         self.queue:list[XUXActItem] = []
 
-    def add(self, item:XUXActItem):
-        self.queue.append(item)
+    def add(self, *items:XUXActItem):
+        for item in items:
+            self.queue.append(item)
 
     def next(self):
         self.queue.pop(0)
@@ -123,14 +124,19 @@ class Battle(XUXScene):
             self.battle = battle
 
     # 個々のAct
-    class BattleStart(BattleActWait):
+    class MsgWait(BattleActWait):
+        def __init__(self, battle:"Battle", text:str, params:dict):
+            super().__init__(battle)
+            self.text = text
+            self.params = params
+            self.next = next
+
         def init(self):
             self.msg_dq = MsgDQ(self.xmlui.find_by_id("msg_text"))
-            self.msg_dq.append_msg("{name}が　あらわれた！", enemy_data.data)
+            self.msg_dq.append_msg(self.text, self.params)
 
         def waiting(self):
             if self.msg_dq.is_all_finish:
-                self.battle.act.add(Battle.CmdStart(self.battle))
                 return True
             return False
 
@@ -162,8 +168,10 @@ class Battle(XUXScene):
 
         def waiting(self):
             if self.msg_dq.is_all_finish:
-                self.battle.act.add(Battle.EffectWait(self.battle))
-                self.battle.act.add(Battle.AtkEnd(self.battle))
+                self.battle.act.add(
+                    Battle.EffectWait(self.battle),
+                    Battle.MsgWait(self.battle, "{name}に　{hit}ポイントの\nダメージを　あたえた！", enemy_data.data),
+                    Battle.CmdStart(self.battle))
                 return True
             return False
 
@@ -171,16 +179,6 @@ class Battle(XUXScene):
         def init(self):
             self.set_wait(30)  # エフェクトはないので適当待ち
 
-    class AtkEnd(BattleActWait):
-        def init(self):
-            self.msg_dq = MsgDQ(self.xmlui.find_by_id("msg_text"))
-            self.msg_dq.append_msg("{name}に　{hit}ポイントの\nダメージを　あたえた！", enemy_data.data)
-
-        def waiting(self):
-            if self.msg_dq.is_all_finish:
-                self.battle.act.add(Battle.CmdStart(self.battle))
-                return True
-            return False
 
     def __init__(self, xmlui:XMLUI):
         super().__init__(xmlui)
@@ -194,7 +192,9 @@ class Battle(XUXScene):
         self.battle = self.xmlui.open("battle")
 
         # 最初のAct
-        self.act.add(Battle.BattleStart(self))
+        self.act.add(
+            Battle.MsgWait(self, "{name}が　あらわれた！", enemy_data.data),
+            Battle.CmdStart(self))
 
     def closed(self):
         # 読みこんだUIの削除
