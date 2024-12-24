@@ -562,9 +562,9 @@ class XMLUI(XUElem):
     # 初期化。<xmlui>を持つXMLを突っ込む
     def __init__(self, screen_w:int, screen_h:int, debug_level=0):
         # rootを作って自分自身に設定
-        root = Element("root")
-        root.attrib["id"] = "root"
-        super().__init__(self, root)
+        xmlui = Element("xmlui")
+        xmlui.attrib["id"] = "xmlui"
+        super().__init__(self, xmlui)
 
         # ウインドウサイズを記憶
         self.screen_w = screen_w
@@ -583,17 +583,10 @@ class XMLUI(XUElem):
         self.event = XUEvent(True)  # 唯一のactiveとする
 
         # 描画ツリー構築
-        self._base = XUElem.new(self, "base").set_attr("id", "base")
+        self.root = XUElem.new(self, "root").set_attr("id", "root")
         self._over = XUElem.new(self, "oevr").set_attr("id", "over")
-        self.add_child(self._base)  # 普通に使うもの
+        self.add_child(self.root)  # 普通に使うもの
         self.add_child(self._over)  # 上に強制で出す物
-
-
-    # xmluiを操作するのではなく_baseを操作する
-    # -----------------------------------------------------
-    # override
-    def clear_children(self):
-        self._base.clear_children()
 
     # template操作
     # *************************************************************************
@@ -663,12 +656,12 @@ class XMLUI(XUElem):
             event_names = [event_names]  # 配列で統一
         for event_name in event_names:
             if event_name in self.event.trg:
-                return self._base.open(id, id_alias)
+                return self.root.open(id, id_alias)
         return None
 
     # override
     def open(self, id:str, id_alias:str|None=None) -> XUElem:
-        return self._base.open(id, id_alias)
+        return self.root.open(id, id_alias)
 
     # over側で開く
     def popup(self, id:str, id_alias:str|None=None) -> XUElem:
