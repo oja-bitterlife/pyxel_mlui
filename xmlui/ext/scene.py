@@ -8,6 +8,7 @@ from xmlui.ext.timer import XUXTimeout
 
 # ステータス遷移管理用。NPCの寸劇とかで使うやつ
 # #############################################################################
+# 一定時間後に1つのaction。アクションをつなげて実行する場合は主にこちら
 class XUXActItem(XUXTimeout):
     # デフォルトはすぐ実行
     def __init__(self):
@@ -22,6 +23,7 @@ class XUXActItem(XUXTimeout):
     def init(self):
         pass
 
+# 一定時間内ずっとwaigingが実行され、最後にaction。
 class XUXActWait(XUXActItem):
     WAIT_FOREVER = 2**31-1
 

@@ -35,7 +35,7 @@
             <menu_item action="attack">たたかう</menu_item>
             <menu_item action="spel">じゅもん</menu_item>
             <menu_item action="run">にげる</menu_item>
-            <menu_item action="tools">どうぐ</menu_item>
+            <menu_item action="tools" value="工事中">どうぐ</menu_item>
         </menu_grid>
     </round_win>
 
