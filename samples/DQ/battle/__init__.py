@@ -8,9 +8,8 @@ from db import enemy_data
 from battle.ui.menu import ui_init
 from battle.act import *
 
-# 死に戻り
-import field
-
+# 死に戻り先
+import scenes
 
 # バトルシーン
 # #############################################################################
@@ -44,7 +43,7 @@ class Battle(XUXFadeScene):
     def closed(self):
         # 読みこんだUIの削除
         self.template.remove()
-        self.set_next_scene(field.Field(self.xmlui))
+        self.set_next_scene(scenes.Field(self.xmlui))
 
     def update(self):
         self.act.update()

@@ -9,13 +9,11 @@ from ui_common import xmlui
 from xmlui.ext.scene import XUXSceneManager
 
 # 最初はタイトル
-from samples.DQ.title import Title
-from field import Field
-from battle import Battle
+import scenes
 
-#scene_manager = XUXSceneManager(Title(xmlui))
-#scene_manager = XUXSceneManager(Field(xmlui))
-scene_manager = XUXSceneManager(Battle(xmlui))
+scene_manager = XUXSceneManager(scenes.Title(xmlui))
+#scene_manager = XUXSceneManager(scenes.Field(xmlui))
+#scene_manager = XUXSceneManager(scenes.Battle(xmlui))
 
 # Main
 def update(): # フレームの更新処理

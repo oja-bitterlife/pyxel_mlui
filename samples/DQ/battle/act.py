@@ -5,19 +5,19 @@ from xmlui.ext.scene import XUXActItem,XUXActWait
 from msg_dq import MsgDQ
 from db import user_data, enemy_data
 
-from samples.DQ.battle import Battle
+import scenes
 
 
 # バトル用シーン遷移ベース
 # #############################################################################
 class BattleActItem(XUXActItem):
-    def __init__(self, battle:Battle):
+    def __init__(self, battle:"scenes.Battle"):
         super().__init__()
         self.battle = battle
         self.xmlui = battle.xmlui
 
 class BattleActWait(XUXActWait):
-    def __init__(self, battle:Battle):
+    def __init__(self, battle:"scenes.Battle"):
         super().__init__()
         self.battle = battle
         self.xmlui = battle.xmlui
@@ -29,7 +29,7 @@ class BattleActWait(XUXActWait):
 # *****************************************************************************
 # 設定済みメッセージ表示完了待機
 class _MsgBase(BattleActWait):
-    def __init__(self, battle:Battle, text:str, params:dict):
+    def __init__(self, battle:"scenes.Battle", text:str, params:dict):
         super().__init__(battle)
         self.text = text
         self.params = params
@@ -141,7 +141,7 @@ class EnemyStart(BattleActItem):
 # ウェイト系
 # *****************************************************************************
 class DamageEffect(BattleActWait):
-    def __init__(self, battle:Battle, damage:int):
+    def __init__(self, battle:"scenes.Battle", damage:int):
         super().__init__(battle)
         self.damage = damage
         self.set_wait(15)  # 適当時間

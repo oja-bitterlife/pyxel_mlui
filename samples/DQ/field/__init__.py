@@ -13,7 +13,7 @@ from xmlui.core import XMLUI,XUElem,XUEvent,XUWinBase
 from xmlui.ext.scene import XUXFadeScene
 
 from field.ui import msg_win,menu,talk_dir,tools
-from battle import Battle  # 次シーン
+import scenes
 
 
 class Field(XUXFadeScene):
@@ -36,7 +36,7 @@ class Field(XUXFadeScene):
 
     def closed(self):
         self.template.remove()  # 読みこんだUIの削除
-        self.set_next_scene(Battle(self.xmlui))
+        self.set_next_scene(scenes.Battle(self.xmlui))
 
     def update(self):
         # UIメニューが開いていたらキャラが動かないように

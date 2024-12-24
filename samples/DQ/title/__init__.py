@@ -5,7 +5,7 @@ from xmlui.core import XMLUI
 from xmlui.ext.scene import XUXFadeScene
 
 from title.ui import start,speed
-from field import Field  # 次シーン
+import scenes
 
 class Title(XUXFadeScene):
     NEXT_SCENE_EVENT = "game_start"
@@ -25,7 +25,7 @@ class Title(XUXFadeScene):
 
     def closed(self):
         self.template.remove()
-        self.set_next_scene(Field(self.xmlui))
+        self.set_next_scene(scenes.Field(self.xmlui))
 
     def update(self):
         if "start" in self.xmlui.event.trg:  # startが実行された
