@@ -11,9 +11,9 @@ from xmlui.ext.scene import XUXSceneManager
 # 最初はタイトル
 import scenes
 
-scene_manager = XUXSceneManager(scenes.Title(xmlui))
+#scene_manager = XUXSceneManager(scenes.Title(xmlui))
 #scene_manager = XUXSceneManager(scenes.Field(xmlui))
-#scene_manager = XUXSceneManager(scenes.Battle(xmlui))
+scene_manager = XUXSceneManager(scenes.Battle(xmlui))
 
 # Main
 def update(): # フレームの更新処理
