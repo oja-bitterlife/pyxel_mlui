@@ -9,7 +9,7 @@ from ui_common import xmlui
 from xmlui.ext.scene import XUXSceneManager
 
 # 最初はタイトル
-from title import Title
+from samples.DQ.title import Title
 from field import Field
 from battle import Battle
 

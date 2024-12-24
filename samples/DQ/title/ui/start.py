@@ -1,7 +1,6 @@
 from xmlui.core import XUTemplate,XUEvent
 from xmlui.lib import select
 from title.ui.item import menu_item
-import title
 
 # タイトル画面UI
 # ---------------------------------------------------------

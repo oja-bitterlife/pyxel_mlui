@@ -5,7 +5,7 @@ from xmlui.ext.scene import XUXActItem,XUXActWait
 from msg_dq import MsgDQ
 from db import user_data, enemy_data
 
-from DQ.battle import Battle
+from samples.DQ.battle import Battle
 
 
 # バトル用シーン遷移ベース
@@ -121,19 +121,30 @@ class EnemyStart(BattleActItem):
 
     def action(self):
         # ダメージ計算
-        user_data.data["damage"] = XUTextUtil.format_zenkaku(random.randint(1, 10))
+        damage = random.randint(1, 10)
+        damage = 100
+        user_data.data["damage"] = XUTextUtil.format_zenkaku(damage)
 
         self.battle.act.add(
             EnemyMsg(self.battle, "{name}の　こうげき！", enemy_data.data),
-            ShakeEffect(self.battle),
-            EnemyMsg(self.battle, "{name}は　{damage}ポイントの\nだめーじを　うけた", user_data.data),
-            CmdStart(self.battle))
+            DamageEffect(self.battle, damage),
+            EnemyMsg(self.battle, "{name}は　{damage}ポイントの\nだめーじを　うけた", user_data.data))
+        
+        if user_data.hp > damage:
+            self.battle.act.add(CmdStart(self.battle))
+        else:
+            self.battle.act.add(
+                DeadWait(self.battle),
+                PlayerMsg(self.battle, "{name}は　しんでしまった", user_data.data),
+                ReturnKing(self.battle))
 
 # ウェイト系
 # *****************************************************************************
-class ShakeEffect(BattleActWait):
-    def init(self):
-        self.set_wait(15)  # エフェクトはないので適当待ち
+class DamageEffect(BattleActWait):
+    def __init__(self, battle:Battle, damage:int):
+        super().__init__(battle)
+        self.damage = damage
+        self.set_wait(15)  # 適当時間
     def waiting(self):
         # とりあえず画面揺らし
         self.battle.sway_x = random.randint(-3, 3)
@@ -142,6 +153,7 @@ class ShakeEffect(BattleActWait):
     def action(self):
         self.battle.sway_x = 0
         self.battle.sway_y = 0
+        user_data.hp = max(0, user_data.hp - self.damage)
 
 class BlinkEffect(BattleActWait):
     def init(self):
@@ -155,3 +167,16 @@ class BlinkEffect(BattleActWait):
 class RunWait(BattleActWait):
     def init(self):
         self.set_wait(15)  # SE待ち
+
+class DeadWait(BattleActWait):
+    def init(self):
+        self.set_wait(15)  # SE待ち
+
+# 死に戻り
+# *****************************************************************************
+class ReturnKing(BattleActItem):
+    def init(self):
+        self.set_wait(60)  # ちょっと待機
+        print("wait")
+    def action(self):
+        self.battle.close()
