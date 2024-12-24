@@ -34,7 +34,9 @@ class Battle(XUXFadeScene):
             PlayerMsg(self, "{name}が　あらわれた！", enemy_data.data),
             CmdStart(self))
 
-        self.img = pyxel.Image.from_image(filename="assets/images/slime.png")
+        self.enemy_img = pyxel.Image.from_image(filename="assets/images/slime.png")
+        self.enemy_bg = pyxel.Image.from_image(filename="assets/images/enemy_bg.png")
+        self.field_img = pyxel.Image.from_image(filename="assets/images/field.png")
 
     def closed(self):
         # 読みこんだUIの削除
@@ -44,9 +46,13 @@ class Battle(XUXFadeScene):
         self.act.update()
 
     def draw(self):
+        # 背景
+        pyxel.blt(-32+self.sway_x, -32+self.sway_y, self.field_img, 0, 0, self.field_img.width, self.field_img.height)
+        pyxel.blt(64+self.sway_x, 64+self.sway_y, self.enemy_bg, 0, 0, self.enemy_bg.width, self.enemy_bg.height)
+
         # 敵の絵
         if not self.blink:
-            pyxel.blt(-64+self.sway_x, -80+self.sway_y, self.img, 0, 0, self.img.width, self.img.height, scale=0.2)
+            pyxel.blt(-70+self.sway_x, -70+self.sway_y, self.enemy_img, 0, 0, self.enemy_img.width, self.enemy_img.height, 0, scale=0.2)
 
         # UIの描画
         self.xmlui.draw()

@@ -86,6 +86,10 @@ class CmdCheck(BattleActWait):
             return True
 
         if "run" in self.xmlui.event.trg:
+            # 選択されたらメニューは閉じる
+            menu = MsgDQ(self.xmlui.find_by_id("menu"))
+            XUWinBase(menu).start_close()
+
             # 逃げる
             self.battle.act.add(
                 PlayerMsg(self.battle, "{name}は　にげだした", user_data.data),
@@ -95,6 +99,10 @@ class CmdCheck(BattleActWait):
             return True
 
         if "spel" in self.xmlui.event.trg:
+            # 選択されたらメニューは閉じる
+            menu = MsgDQ(self.xmlui.find_by_id("menu"))
+            XUWinBase(menu).start_close()
+
             self.battle.act.add(
                 PlayerMsg(self.battle, "じゅもんを　おぼえていない", {}),
                 CmdStart(self.battle))  # コマンド選択に戻る
