@@ -592,10 +592,6 @@ class XMLUI(XUElem):
     # xmluiを操作するのではなく_baseを操作する
     # -----------------------------------------------------
     # override
-    def close(self):
-        self._base.close()
-
-    # override
     def clear_children(self):
         self._base.clear_children()
 
