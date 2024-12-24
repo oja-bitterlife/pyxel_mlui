@@ -34,7 +34,7 @@ class Field(XUXScene):
         # 画像読み込み
         pyxel.images[1].load(0, 0, "assets/images/field_tile.png" )
 
-    def end(self):
+    def closed(self):
         self.template.remove()  # 読みこんだUIの削除
         self.set_next_scene(Battle(self.xmlui))
 

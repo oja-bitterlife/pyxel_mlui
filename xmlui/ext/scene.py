@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable,Self
 import pyxel
 
 from xmlui.core import XMLUI
@@ -166,10 +166,11 @@ class XUXScene(_XUXSceneBase):
     # mainから呼び出すもの
     # -----------------------------------------------------
     def update_scene(self):
-        # フェードアウトが終わった
+        # フェードアウト(close)が終わった
         if self.fade_act.is_empty:
-            self.is_end = True  # シーン完了。endでシーン遷移しておくように
-            self.end()
+            # シーン完了。closed()内で次シーンを設定しておくように
+            self.closed()
+            self.is_end = True
             return
 
         if not isinstance(self.fade_act.current_act, XUXScene.FadeOut):
@@ -198,11 +199,12 @@ class XUXScene(_XUXSceneBase):
                 pyxel.dither(self.fade_act.alpha)  # フェードで
                 pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.FADE_COLOR)
 
-    def end_scene(self, close_count=CLOSE_COUNT):
+    # フェードアウトを開始する
+    def close(self):
         # シーンメイン時以外から呼び出されたらなにもしないように
         if isinstance(self.fade_act.current_act, XUXScene.SceneMain):
             self.fade_act.next()
-            self.fade_act.current_act.set_wait(close_count)
+            self.fade_act.current_act.set_wait(self.CLOSE_COUNT)
 
     # オーバーライドして使う物
     # これらはsceneの中から呼び出すように(自分で呼び出さない)
@@ -211,11 +213,13 @@ class XUXScene(_XUXSceneBase):
         pass
     def draw(self):
         pass
-    def end(self):
+
+    # フェードアウト完了時に呼ばれる。主に次シーン設定を行う
+    def closed(self):
         pass
 
 
-# シーン管理用
+# シーン管理。mainの中で各シーンを実行する
 # *****************************************************************************
 class XUXSceneManager:
     def __init__(self, start_scene:_XUXSceneBase):

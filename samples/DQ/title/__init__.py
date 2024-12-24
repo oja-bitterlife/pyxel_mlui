@@ -23,9 +23,13 @@ class Title(XUXScene):
 
         self.img = pyxel.Image.from_image(filename="assets/images/title.png")
 
-    def end(self):
+    def closed(self):
         self.template.remove()
         self.set_next_scene(Field(self.xmlui))
+
+    def update(self):
+        if "start" in self.xmlui.event.trg:  # startが実行された
+            self.close()
 
     def draw(self):
         # 背景絵
@@ -33,6 +37,3 @@ class Title(XUXScene):
 
         # UIの表示
         self.xmlui.draw()
-        if "start" in self.xmlui.event.trg:  # startが実行された
-            super().end_scene()
-
