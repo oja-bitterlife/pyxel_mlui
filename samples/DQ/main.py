@@ -5,9 +5,8 @@ import pyxel
 # *********************************************************
 pyxel.init(256, 256)
 
-from xmlui.core import XUEvent
 from ui_common import xmlui
-from xmlui.ext.scene import XUXScene,XUXSceneManager
+from xmlui.ext.scene import XUXSceneManager
 
 # 最初はタイトル
 from title import Title

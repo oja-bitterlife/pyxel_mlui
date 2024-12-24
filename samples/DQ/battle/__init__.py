@@ -1,9 +1,8 @@
 
 # タイトル画面
-from xmlui.core import XMLUI,XUWinBase,XUTextUtil
-from xmlui.ext.scene import XUXScene,XUXAct,XUXActItem,XUXActWait
-from msg_dq import MsgDQ
-from db import user_data, enemy_data
+from xmlui.core import XMLUI
+from xmlui.ext.scene import XUXFadeScene,XUXAct
+from db import enemy_data
 
 from battle.ui.menu import ui_init
 from battle.act import *
@@ -14,7 +13,7 @@ sway_y = 0
 
 # バトルシーン
 # #############################################################################
-class Battle(XUXScene):
+class Battle(XUXFadeScene):
     UI_TEMPLATE_BATTLE = "ui_battle"
 
     def __init__(self, xmlui:XMLUI):

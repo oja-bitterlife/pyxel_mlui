@@ -10,13 +10,13 @@ from db import user_data
 
 # UI
 from xmlui.core import XMLUI,XUElem,XUEvent,XUWinBase
-from xmlui.ext.scene import XUXScene
+from xmlui.ext.scene import XUXFadeScene
 
 from field.ui import msg_win,menu,talk_dir,tools
 from battle import Battle  # 次シーン
 
 
-class Field(XUXScene):
+class Field(XUXFadeScene):
     def __init__(self, xmlui:XMLUI):
         super().__init__(xmlui)
 
@@ -86,7 +86,7 @@ class Field(XUXScene):
             if self.bg.check_stairs(menu, self.player.block_x, self.player.block_y):
                 # バトル開始
                 XUWinBase(menu).start_close()
-                self.end_scene()
+                self.close()
             else:
                 msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
                 msg_text.append_msg("かいだんがない")  # systemメッセージ

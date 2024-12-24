@@ -2,12 +2,12 @@ import pyxel
 
 # タイトル画面
 from xmlui.core import XMLUI
-from xmlui.ext.scene import XUXScene
+from xmlui.ext.scene import XUXFadeScene
 
 from title.ui import start,speed
 from field import Field  # 次シーン
 
-class Title(XUXScene):
+class Title(XUXFadeScene):
     NEXT_SCENE_EVENT = "game_start"
 
     def __init__(self, xmlui:XMLUI):
