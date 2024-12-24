@@ -4,7 +4,7 @@ from xmlui.core import XUEvent,XUWinBase,XUSelectItem
 from xmlui.lib import select,text
 from msg_dq import Decorator as DQDecorator
 
-from ui_common import system_font
+from ui_common import system_font,KOJICHU_COL
 from msg_dq import MsgDQ
 
 
@@ -34,7 +34,8 @@ def ui_init(template):
     def menu_item(menu_item:XUSelectItem):
         # ウインドウのクリップ状態に合わせて表示する
         if menu_item.area.y < get_world_clip(XUWinBase.find_parent_win(menu_item)).bottom():
-            pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, 7, system_font.font)
+            col = KOJICHU_COL if menu_item.value == "工事中" else 7
+            pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, col, system_font.font)
 
             # カーソル表示
             if menu_item.selected and menu_item.enable:
@@ -60,7 +61,6 @@ def ui_init(template):
     def msg_text(msg_text:MsgDQ, event:XUEvent):
         # メッセージ共通処理
         common_msg_text(msg_text, event, False)
-
 
         # 自動テキスト送り
         if msg_text.is_next_wait:

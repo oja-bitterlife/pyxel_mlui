@@ -99,6 +99,9 @@ class CmdCheck(BattleActWait):
                 CmdStart(self.battle))  # コマンド選択に戻る
             return True
 
+        if "tools" in self.xmlui.event.trg:
+            self.battle.xmlui.popup("under_construct")
+
         return False
 
 # 敵の行動
