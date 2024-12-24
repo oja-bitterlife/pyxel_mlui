@@ -13,9 +13,9 @@ from title import Title
 from field import Field
 from battle import Battle
 
-#scene_manager = XUXSceneManager(Title(xmlui))
+scene_manager = XUXSceneManager(Title(xmlui))
 #scene_manager = XUXSceneManager(Field(xmlui))
-scene_manager = XUXSceneManager(Battle(xmlui))
+#scene_manager = XUXSceneManager(Battle(xmlui))
 
 # Main
 def update(): # フレームの更新処理
