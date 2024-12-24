@@ -191,6 +191,7 @@ class XUXFadeScene(_XUXSceneBase):
         if self.fade_act.is_empty:
             # シーン完了。closed()内で次シーンを設定しておくように
             self.closed()
+            self.xmlui.close()  # 忘れることもあるので、ここでついでに
             self.is_end = True
             return
 

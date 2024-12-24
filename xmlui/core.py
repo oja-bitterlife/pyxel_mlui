@@ -588,6 +588,17 @@ class XMLUI(XUElem):
         self.add_child(self._base)  # 普通に使うもの
         self.add_child(self._over)  # 上に強制で出す物
 
+
+    # xmluiを操作するのではなく_baseを操作する
+    # -----------------------------------------------------
+    # override
+    def close(self):
+        self._base.close()
+
+    # override
+    def clear_children(self):
+        self._base.clear_children()
+
     # template操作
     # *************************************************************************
     def load_template(self, xml_filename:str) -> XUTemplate:

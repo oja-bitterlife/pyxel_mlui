@@ -177,6 +177,5 @@ class DeadWait(BattleActWait):
 class ReturnKing(BattleActItem):
     def init(self):
         self.set_wait(60)  # ちょっと待機
-        print("wait")
     def action(self):
         self.battle.close()
