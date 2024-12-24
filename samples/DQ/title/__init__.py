@@ -23,7 +23,7 @@ class Title(XUXScene):
 
         self.img = pyxel.Image.from_image(filename="assets/images/title.png")
 
-    def closed(self):
+    def end(self):
         self.template.remove()
         self.set_next_scene(Field(self.xmlui))
 

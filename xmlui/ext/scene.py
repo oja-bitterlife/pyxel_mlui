@@ -51,6 +51,8 @@ class XUXActWait(XUXActItem):
     def waiting(self) -> bool:
         return False
 
+# Act管理クラス。各Itemをコレに登録していく
+# *****************************************************************************
 class XUXAct:
     def __init__(self):
         self.queue:list[XUXActItem] = []
@@ -87,10 +89,10 @@ class XUXAct:
 # シーン管理(フェードイン・フェードアウト)用
 # #############################################################################
 # シーン管理用仕込み
-class XUXSceneManagerItem:
+class _XUXSceneBase:
     def __init__(self):
         self._next_scene:XUXScene|None = None
-        self.is_scene_closed = False
+        self.is_end = False
 
     # シーン遷移
     def set_next_scene(self, scene:"XUXScene"):
@@ -103,7 +105,7 @@ class XUXSceneManagerItem:
         pass
 
 # シーンクラス。継承して使おう
-class XUXScene(XUXSceneManagerItem):
+class XUXScene(_XUXSceneBase):
     # デフォルトフェードカラー
     FADE_COLOR = 0
 
@@ -114,9 +116,9 @@ class XUXScene(XUXSceneManagerItem):
     # フェード管理
     # -----------------------------------------------------
     class FadeAct(XUXAct):
-        def __init__(self, start_alpha:float):
+        def __init__(self):
             super().__init__()
-            self.alpha = start_alpha
+            self.alpha:float = 0.0
 
     # 各フェードパート
     # -----------------------------------------------------
@@ -142,8 +144,8 @@ class XUXScene(XUXSceneManagerItem):
             self.fade_act.alpha = self.alpha
             return False
 
-    # フェードなし(シーンメイン)
-    class FadeNone(_FadeActItem):
+    # シーンメイン
+    class SceneMain(_FadeActItem):
         def waiting(self) -> bool:
             self.fade_act.alpha = 0
             return False
@@ -155,10 +157,10 @@ class XUXScene(XUXSceneManagerItem):
         self.xmlui = xmlui
 
         # フェードインから
-        self.fade_act = XUXScene.FadeAct(1.0)
+        self.fade_act = XUXScene.FadeAct()
         self.fade_act.add(
             XUXScene.FadeIn(self.fade_act, open_count),
-            XUXScene.FadeNone(self.fade_act),
+            XUXScene.SceneMain(self.fade_act),
             XUXScene.FadeOut(self.fade_act))
 
     # mainから呼び出すもの
@@ -166,8 +168,8 @@ class XUXScene(XUXSceneManagerItem):
     def update_scene(self):
         # フェードアウトが終わった
         if self.fade_act.is_empty:
-            self.closed()
-            self.is_scene_finish = True  # シーン完了。closedでシーン遷移しておくように
+            self.is_end = True  # シーン完了。endでシーン遷移しておくように
+            self.end()
             return
 
         if not isinstance(self.fade_act.current_act, XUXScene.FadeOut):
@@ -197,8 +199,8 @@ class XUXScene(XUXSceneManagerItem):
                 pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.FADE_COLOR)
 
     def end_scene(self, close_count=CLOSE_COUNT):
-        # シーン中以外から呼び出されたらなにもしないように
-        if isinstance(self.fade_act.current_act, XUXScene.FadeNone):
+        # シーンメイン時以外から呼び出されたらなにもしないように
+        if isinstance(self.fade_act.current_act, XUXScene.SceneMain):
             self.fade_act.next()
             self.fade_act.current_act.set_wait(close_count)
 
@@ -209,27 +211,26 @@ class XUXScene(XUXSceneManagerItem):
         pass
     def draw(self):
         pass
-    def closed(self):
+    def end(self):
         pass
 
 
 # シーン管理用
 # *****************************************************************************
 class XUXSceneManager:
-    def __init__(self, start_scene:XUXSceneManagerItem):
-        self._scene:XUXSceneManagerItem = start_scene
-
-    @property
-    def current_scene(self) -> XUXSceneManagerItem:
-        # 次のシーンがあれば次へ
-        if self._scene._next_scene is not None:
-            self._scene = self._scene._next_scene
-        return self._scene
+    def __init__(self, start_scene:_XUXSceneBase):
+        self.current_scene:_XUXSceneBase = start_scene
 
     def update(self):
-        if not self.current_scene.is_scene_closed:
+        # next_sceneが設定されていたら
+        if self.current_scene._next_scene is not None:
+            self.current_scene = self.current_scene._next_scene
+            self.current_scene._next_scene = None
+
+        # updateはend以降は呼ばない
+        if not self.current_scene.is_end:
             self.current_scene.update_scene()
 
     def draw(self):
-        if not self.current_scene.is_scene_closed:
-            self.current_scene.draw_scene()
+        # drawはend以降も呼ぶ(endの状態を描画)
+        self.current_scene.draw_scene()

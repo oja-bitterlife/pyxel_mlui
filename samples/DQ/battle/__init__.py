@@ -33,7 +33,7 @@ class Battle(XUXScene):
             PlayerMsg(self, "{name}が　あらわれた！", enemy_data.data),
             CmdStart(self))
 
-    def closed(self):
+    def end(self):
         # 読みこんだUIの削除
         self.template.remove()
 
