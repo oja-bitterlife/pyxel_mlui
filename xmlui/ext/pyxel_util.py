@@ -45,6 +45,7 @@ class PyxelPalette:
                     self.palette.append(r<<16 | g<<8 | b)
 
         # 16+15+15+14+180 = 240
+        self.free_offset = len(self.palette)
         self.reset()
 
     # システムにパレットを設定する
