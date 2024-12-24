@@ -6,14 +6,7 @@ import pyxel
 pyxel.init(256, 256)
 
 from ui_common import xmlui
-from xmlui.ext.scene import XUXSceneManager
-
-# 最初はタイトル
-import scenes
-
-#scene_manager = XUXSceneManager(scenes.Title(xmlui))
-#scene_manager = XUXSceneManager(scenes.Field(xmlui))
-scene_manager = XUXSceneManager(scenes.Battle(xmlui))
+from scenes import scene_manager
 
 # Main
 def update(): # フレームの更新処理
