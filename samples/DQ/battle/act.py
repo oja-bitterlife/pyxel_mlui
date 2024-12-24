@@ -90,7 +90,7 @@ class CmdCheck(BattleActWait):
             self.battle.act.add(
                 PlayerMsg(self.battle, "{name}は　にげだした", user_data.data),
                 RunWait(self.battle),
-                PlayerMsg(self.battle, "しかし まわりこまれて\nしまった!", {}),
+                PlayerMsg(self.battle, "しかし　まわりこまれて\nしまった!", {}),
                 EnemyStart(self.battle))
             return True
 
@@ -125,7 +125,7 @@ class EnemyStart(BattleActItem):
 # *****************************************************************************
 class ShakeEffect(BattleActWait):
     def init(self):
-        self.set_wait(20)  # エフェクトはないので適当待ち
+        self.set_wait(15)  # エフェクトはないので適当待ち
     def waiting(self):
         # とりあえず画面揺らし
         self.battle.sway_x = random.randint(-3, 3)
@@ -137,13 +137,13 @@ class ShakeEffect(BattleActWait):
 
 class BlinkEffect(BattleActWait):
     def init(self):
-        self.set_wait(20)  # エフェクトはないので適当待ち
+        self.set_wait(10)  # エフェクトはないので適当待ち
     def waiting(self):
-        self.battle.blink = self.count % 10 < 5
+        self.battle.blink = self.count % 2 < 1
         return False
     def action(self):
         self.battle.blink = False
 
 class RunWait(BattleActWait):
     def init(self):
-        self.set_wait(20)  # SE待ち
+        self.set_wait(15)  # SE待ち
