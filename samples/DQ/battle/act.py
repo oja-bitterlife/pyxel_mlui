@@ -7,6 +7,7 @@ from db import user_data, enemy_data
 
 from DQ.battle import Battle
 
+
 # バトル用シーン遷移ベース
 # #############################################################################
 class BattleActItem(XUXActItem):
@@ -79,7 +80,7 @@ class CmdCheck(BattleActWait):
 
             self.battle.act.add(
                 PlayerMsg(self.battle, "{name}の　こうげき！", user_data.data),
-                EffectWait(self.battle),
+                BlinkEffect(self.battle),
                 PlayerMsg(self.battle, "{name}に　{hit}ポイントの\nダメージを　あたえた！", enemy_data.data),
                 EnemyStart(self.battle))
             return True
@@ -116,21 +117,32 @@ class EnemyStart(BattleActItem):
 
         self.battle.act.add(
             EnemyMsg(self.battle, "{name}の　こうげき！", enemy_data.data),
-            EffectWait(self.battle),
+            ShakeEffect(self.battle),
             EnemyMsg(self.battle, "{name}は　{damage}ポイントの\nだめーじを　うけた", user_data.data),
             CmdStart(self.battle))
 
 # ウェイト系
 # *****************************************************************************
-class EffectWait(BattleActWait):
+class ShakeEffect(BattleActWait):
     def init(self):
         self.set_wait(20)  # エフェクトはないので適当待ち
     def waiting(self):
         # とりあえず画面揺らし
-        global sway_x, sway_y
-        sway_x = random.randint(-3, 3)
-        sway_y = random.randint(-3, 3)
+        self.battle.sway_x = random.randint(-3, 3)
+        self.battle.sway_y = random.randint(-3, 3)
         return False
+    def action(self):
+        self.battle.sway_x = 0
+        self.battle.sway_y = 0
+
+class BlinkEffect(BattleActWait):
+    def init(self):
+        self.set_wait(20)  # エフェクトはないので適当待ち
+    def waiting(self):
+        self.battle.blink = self.count % 10 < 5
+        return False
+    def action(self):
+        self.battle.blink = False
 
 class RunWait(BattleActWait):
     def init(self):
