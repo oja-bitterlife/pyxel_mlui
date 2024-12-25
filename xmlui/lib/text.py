@@ -35,12 +35,12 @@ class Label(XUElem):
 
     def __init__(self, elem:XUElem):
         super().__init__(elem.xmlui, elem._element)
-        self.align = elem.attr_str(self.ALIGN_ATTR, XURect.Align.LEFT)
-        self.valign = elem.attr_str(self.VALIGN_ATTR, XURect.Align.TOP)
+        self.align = XURect.Align.from_str(elem.attr_str(self.ALIGN_ATTR, XURect.Align.LEFT))
+        self.valign = XURect.Align.from_str(elem.attr_str(self.VALIGN_ATTR, XURect.Align.TOP))
 
     def aligned_pos(self, font:FontBase) -> tuple[int, int]:
         area = self.area
-        return area.aligned_pos(font.text_width(self.text), font.size, XURect.Align.from_str(self.align), XURect.Align.from_str(self.valign))
+        return area.aligned_pos(font.text_width(self.text), font.size, self.align, self.valign)
 
 # メッセージ(ページつきアニメテキスト)
 class Msg(XUPageText):

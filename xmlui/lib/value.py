@@ -16,6 +16,10 @@ class Dial(XUSelectNum):
     #     area = self.area  # 低速なので使うときは必ず一旦ローカルに
     #     return area.aligned_pos(font.text_width(self.digits), font.size, self.align, self.valign)
 
+# ゲージサポート
+class Gauge:
+    pass
+
 
 # デコレータを用意
 # *****************************************************************************
