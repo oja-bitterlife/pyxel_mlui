@@ -1,3 +1,5 @@
+from enum import StrEnum
+
 # XMLを使うよ
 import xml.etree.ElementTree
 from xml.etree.ElementTree import Element
@@ -15,11 +17,19 @@ from typing import Callable,Any,Self  # 型を使うよ
 # 描画領域計算用
 # #############################################################################
 class XURect:
-    ALIGN_CENTER = "center"
-    ALIGN_LEFT = "left"
-    ALIGN_RIGHT = "right"
-    ALIGN_TOP = "top"
-    ALIGN_BOTTOM = "bottom"
+    class Align(StrEnum):
+        CENTER = "center"
+        LEFT = "left"
+        RIGHT = "right"
+        TOP = "top"
+        BOTTOM = "bottom"
+
+        @classmethod
+        def from_str(cls, type_:str) -> "XURect.Align":
+            for v in cls.__members__.values():
+                if v == type_:
+                    return v
+            raise Exception(f"Invalid Align type: {type_}")
 
     def __init__(self, x:int, y:int, w:int, h:int):
         self.x = x
@@ -75,30 +85,30 @@ class XURect:
 
     # 座標取得
     @classmethod
-    def align_offset(cls, area_w:int, area_h:int, w:int=0, h:int=0, align:str=ALIGN_CENTER, valign:str=ALIGN_CENTER) -> tuple[int, int]:
+    def align_offset(cls, area_w:int, area_h:int, w:int=0, h:int=0, align:Align=Align.CENTER, valign:Align=Align.CENTER) -> tuple[int, int]:
         area = XURect(0, 0, area_w, area_h)
         match align:
-            case cls.ALIGN_LEFT:
+            case cls.Align.LEFT:
                 x = 0
-            case cls.ALIGN_CENTER:
+            case cls.Align.CENTER:
                 x = area.center_x(w)
-            case cls.ALIGN_RIGHT:
+            case cls.Align.RIGHT:
                 x = area.right(w)
             case _:
                 raise ValueError(f"align:{align} is not supported.")
 
         match valign:
-            case cls.ALIGN_TOP:
+            case cls.Align.TOP:
                 y = 0
-            case cls.ALIGN_CENTER:
+            case cls.Align.CENTER:
                 y = area.center_y(h)
-            case cls.ALIGN_BOTTOM:
+            case cls.Align.BOTTOM:
                 y = area.bottom(h)
             case _:
                 raise ValueError(f"align:{valign} is not supported.")
         return x,y
 
-    def aligned_pos(self, w:int=0, h:int=0, align=ALIGN_CENTER, valign=ALIGN_CENTER) -> tuple[int, int]:
+    def aligned_pos(self, w:int=0, h:int=0, align:Align=Align.CENTER, valign:Align=Align.CENTER) -> tuple[int, int]:
         offset_x, offset_y = self.align_offset(self.w, self.h, w, h, align, valign)
         return self.x + offset_x, self.y + offset_y
 
