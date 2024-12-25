@@ -13,6 +13,7 @@ class BattleAct(XUXAct):
         super().__init__()
         self.xmlui = xmlui
 
+        # データ受け渡しをここでやってみる
         self.sway_x = 0
         self.sway_y = 0
         self.blink = False
@@ -154,11 +155,13 @@ class DamageEffect(BattleActWait):
         super().__init__()
         self.damage = damage
         self.set_wait(15)  # 適当時間
+
     def waiting(self):
         # とりあえず画面揺らし
         self.sway_x = random.randint(-3, 3)
         self.sway_y = random.randint(-3, 3)
         return False
+
     def action(self):
         self.sway_x = 0
         self.sway_y = 0
@@ -167,9 +170,11 @@ class DamageEffect(BattleActWait):
 class BlinkEffect(BattleActWait):
     def init(self):
         self.set_wait(10)  # エフェクトはないので適当待ち
+
     def waiting(self):
         self.blink = self.count % 2 < 1
         return False
+
     def action(self):
         self.blink = False
 
