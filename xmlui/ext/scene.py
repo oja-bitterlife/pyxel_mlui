@@ -5,11 +5,11 @@ from xmlui.core import XMLUI
 from xmlui.ext.input import XUXInput
 from xmlui.ext.timer import XUXTimeout
 
-T = TypeVar('T')
-
 
 # ステータス遷移管理用。NPCの寸劇とかで使うやつ
 # #############################################################################
+T = TypeVar('T')
+
 # 一定時間後に1つのaction。アクションをつなげて実行する場合は主にこちら
 class XUXActItem(XUXTimeout, Generic[T]):
     # デフォルトはすぐ実行
@@ -81,7 +81,6 @@ class XUXAct:
     def next(self):
         if self.queue:
             self.queue.pop(0)
-
 
     # 状態更新
     # -----------------------------------------------------
