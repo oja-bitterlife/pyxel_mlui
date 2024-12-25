@@ -66,15 +66,14 @@ def draw():
 pyxel.run(update, draw)
 ```
 
-### ウインドウを描画してみよう
+### ラベルを描画してみよう
 
 XMLベースということで、UIを記述したXMLファイルが必要です。
 
 ```XML
 <?xml version="1.0" encoding="utf-8"?>
 <xmlui id="test_ui">
-    <window x="16" y="16", w="64" h="32">
-    </window>
+    <label x="16" y="16", w="64" h="32">てきすと！</label>
 </xmlui>
 ```
 
@@ -101,32 +100,14 @@ def draw():
 # 描画用関数を用意する(デコレータ方式)
 # デコレータの引数にタグ名を書く
 # 関数名はかぶらなければなんでもいい
-@test_template.tag_draw("window")
-def window(window:XUState, event:XUEvent):  
+@test_template.tag_draw("label")
+def label(label:XUState, event:XUEvent):
     # 第一パラメータのareaにUIのスクリーン座標
-    area = window.area
+    area = label.area
     # pyxelで好きに描画
-    pyxel.rectb(area.x, area.y, area.w, area.h, 7)
+    pyxel.text(area.x, area.y, label.text, 7)
 
 pyxel.run(update, draw)
-```
-
-### ウインドウを増やす
-
-XMLに新しいウインドウ情報を追加します。
-
-タグが同じであれば先程のpythonプログラムが処理するので、新たに描画コードを書く必要はありません。
-
-```XML
-<?xml version="1.0" encoding="utf-8"?>
-<xmlui id="test_win">
-    <window x="16" y="16", w="64" h="32">
-    </window>
-
-    <info>新しいウインドウ</info>
-    <window x="16" y="100", w="64" h="32">
-    </window>
-</xmlui>
 ```
 
 以下工事中
