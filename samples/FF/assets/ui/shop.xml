@@ -8,14 +8,18 @@
                 <label w="72" h="24" align="center" valign="bottom">どうぐや</label>
             </round_win>
             <round_win y="32" w="112" h="32">
-                <shop_act_lst item_w="36">
+                <shop_act_lst x="15" y="16" item_w="32">
                     <shop_act_item>かう</shop_act_item>
                     <shop_act_item>うる</shop_act_item>
                     <shop_act_item>でる</shop_act_item>
                 </shop_act_lst>
             </round_win>
             <round_win x="112" y="32" w="112" h="32">
-                <label w="96" h="24" align="right" valign="bottom">{gil}　ギル</label>
+                <label w="92" h="24" align="right" valign="bottom">{gil}　ギル</label>
+            </round_win>
+
+            <round_win x="56" w="168" h="32">
+                <label x="10" w="124" h="24" valign="bottom">いらっしゃい どのようなごようけんで？</label>
             </round_win>
         </offset>
     </ui_shop>

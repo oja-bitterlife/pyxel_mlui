@@ -5,7 +5,7 @@ from xmlui.core import XMLUI,XUDebug
 from xmlui.ext.scene import XUXFadeScene
 
 from ui_common import ui_common_init
-from shop.ui import label
+from shop.ui import label,menu
 
 class Shop(XUXFadeScene):
     def __init__(self):
@@ -17,6 +17,7 @@ class Shop(XUXFadeScene):
 
         ui_common_init(self.xmlui)
         label.ui_init(self.template)
+        menu.ui_init(self.template)
 
     def closed(self):
         self.template.remove()
