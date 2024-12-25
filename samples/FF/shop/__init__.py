@@ -4,6 +4,8 @@ import pyxel
 from xmlui.core import XMLUI,XUDebug
 from xmlui.ext.scene import XUXFadeScene
 
+from shop.ui import label
+
 class Shop(XUXFadeScene):
     def __init__(self):
         super().__init__(XMLUI(pyxel.width, pyxel.height, XUDebug.DEBUGLEVEL_LIB))
@@ -11,6 +13,8 @@ class Shop(XUXFadeScene):
         # XMLの読み込み
         self.template = self.xmlui.load_template("assets/ui/shop.xml")
         self.xmlui.open("ui_shop")
+
+        label.ui_init(self.template)
 
     def closed(self):
         self.template.remove()
