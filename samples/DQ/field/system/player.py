@@ -1,20 +1,39 @@
 import pyxel
-from typing import Callable,Any
+from typing import Callable
 
-from xmlui.core import XURect
 from xmlui.ext.input import XUEInputInfo
 from xmlui.ext.tilemap import XUXTilemap
 from ui_common import xmlui
 
+from msg_dq import MsgDQ
+from db import user_data,npc_data
+
 class Player:
-    def __init__(self, x, y):
+    def __init__(self, x:int, y:int):
+        user_data.hp = 0
+
+        # 座標
         self.x = x*16
         self.y = y*16
         self.move_x = 0
         self.move_y = 0
-        self.anim_pat = [32, 33]
 
+        # 表示イメージ設定
+        self.anim_pat = [32, 33]
         self.tile = XUXTilemap(1)
+
+        # 死亡時
+        self.is_dead = user_data.hp <= 0
+        if self.is_dead:
+            user_data.hp = 1
+            self.x = 8*16
+            self.y = 9*16
+
+            # メッセージウインドウを開く
+            menu = xmlui.open("menu")
+            msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
+            talk = "おお　{name}！\nしんでしまうとは　なにごとだ！\p…………\pちょっと　いってみたかったの"
+            msg_text.append_talk(talk, user_data.data)  # talkでテキスト開始
 
     def update(self, hitcheck_funcs:list[Callable[[int,int],bool]]):
         # キー入力チェック

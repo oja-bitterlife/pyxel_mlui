@@ -42,7 +42,6 @@ class Battle(XUXFadeScene):
         # 王様の前に戻る
         from field import Field
         self.set_next_scene(Field(self.xmlui))
-        user_data.hp = max(1, user_data.hp)
 
     def update(self):
         self.act.update()
