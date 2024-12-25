@@ -190,6 +190,6 @@ class DeadWait(BattleActWait):
 # *****************************************************************************
 class ReturnKing(BattleActItem):
     def init(self):
-        self.set_wait(60)  # ちょっと待機
+        self.set_wait(45)  # ちょっと待機
     def action(self):
         self.act.is_dead = True

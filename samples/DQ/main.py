@@ -1,12 +1,22 @@
 # 今回はpyxel向けのライブラリを作るのです
 import pyxel
+# initを呼ぶまでWebでファイルシステムが使えないことに注意
+pyxel.init(256, 256)
 
 # ここからゲーム本体開始
 # *********************************************************
-pyxel.init(256, 256)
-
 from ui_common import xmlui
-from scenes import scene_manager
+
+from xmlui.ext.scene import XUXSceneManager
+
+from title import Title
+from field import Field
+from battle import Battle
+
+# 最初はタイトル
+#scene_manager = XUXSceneManager(scenes.Title(xmlui))
+#scene_manager = XUXSceneManager(scenes.Field(xmlui))
+scene_manager = XUXSceneManager(Battle(xmlui))
 
 # Main
 def update(): # フレームの更新処理
