@@ -8,9 +8,6 @@ from db import enemy_data
 from battle.ui.menu import ui_init
 from battle.act import *
 
-# 死に戻り先
-import scenes
-
 
 # バトルシーン
 # #############################################################################
@@ -20,6 +17,7 @@ class Battle(XUXFadeScene):
     def __init__(self, xmlui:XMLUI):
         super().__init__(xmlui)
         self.act = BattleAct(xmlui)
+        self.is_close = False
 
         # UIの読み込み
         self.template = self.xmlui.load_template("assets/ui/battle.xml")
@@ -40,12 +38,17 @@ class Battle(XUXFadeScene):
     def closed(self):
         # 読みこんだUIの削除
         self.template.remove()
-        self.set_next_scene(scenes.Field(self.xmlui))
+
+        # 王様の前に戻る
+        from field import Field
+        self.set_next_scene(Field(self.xmlui))
 
     def update(self):
         self.act.update()
-        if self.act.is_dead:
+
+        if self.act.is_dead and not self.is_close:
             self.close()
+            self.is_close = True
 
     def draw(self):
         # 背景
