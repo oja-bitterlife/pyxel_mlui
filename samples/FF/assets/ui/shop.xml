@@ -3,7 +3,9 @@
 <xmlui>
     <info>ショップ用</info>
     <ui_shop w="256" h="256" id="ui_shop">
-        <label w="256" h="256" align="center" valign="center">ショップ　かいし</label>
+        <round_win w="100" h="100">
+            <label w="256" h="256" align="center" valign="center">ショップ　かいし</label>
+        </round_win>
     </ui_shop>
 </xmlui>
 

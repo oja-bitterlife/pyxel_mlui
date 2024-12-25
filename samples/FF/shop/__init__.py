@@ -4,6 +4,7 @@ import pyxel
 from xmlui.core import XMLUI,XUDebug
 from xmlui.ext.scene import XUXFadeScene
 
+from ui_common import ui_common_init
 from shop.ui import label
 
 class Shop(XUXFadeScene):
@@ -14,6 +15,7 @@ class Shop(XUXFadeScene):
         self.template = self.xmlui.load_template("assets/ui/shop.xml")
         self.xmlui.open("ui_shop")
 
+        ui_common_init(self.xmlui)
         label.ui_init(self.template)
 
     def closed(self):
