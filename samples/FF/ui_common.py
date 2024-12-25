@@ -78,9 +78,8 @@ def ui_common_init(xmlui:XMLUI):
         
         # 背景
         pyxel.rect(area.x, area.y, area.w, min(area.h, clip.h+2), 0)
-        bg_area = area.inflate(-2, -2)
-        print(area.h, bg_area.h)
-        pyxel.rect(bg_area.x, bg_area.y, bg_area.w, min(bg_area.h, clip.h+2), FRAME_BG_COL)
+        inside_area = area.inflate(-2, -2)
+        pyxel.rect(inside_area.x, inside_area.y, inside_area.w, min(inside_area.h, clip.h-1), FRAME_BG_COL)
 
         # フレーム
         round_win.draw_frame(pyxel.screen.data_ptr(), [FRAME_OUT, FRAME_COL, FRAME_SHADOW_COL, FRAME_SHADOW_COL], area.inflate(-1, -1), clip)
