@@ -34,7 +34,7 @@ class PyxelPalette:
         self.gray_offset = len(self.palette)
         self.palette += [c<<16|c<<8|c for c in [17, 34, 51, 68, 85, 102, 119, 136, 153, 170, 187, 204, 221, 238]]
 
-        # 180
+        # 180-1
         self.colors_offset = len(self.palette)
         for r in [0, 60, 120, 180, 240]:  # 5
             for g in [0, 48, 96, 144, 192, 240]:  # 6
@@ -44,7 +44,7 @@ class PyxelPalette:
                         continue
                     self.palette.append(r<<16 | g<<8 | b)
 
-        # 16+15+15+14+180 = 240
+        # 16+15+15+14+179 = 239
         self.free_offset = len(self.palette)
         self.reset()
 
