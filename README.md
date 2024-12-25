@@ -1,7 +1,7 @@
 # XMLでUIを構築しようライブラリ for Pyxel
 
 ## 動機
-UI構築、面倒ですか？
+UI構築、面倒ですかー？
 
 ゲームの遊びの部分を楽しく作ってある程度までできてくると、ぼちぼちUIも作らなきゃなーってなりますよね。<br>
 そこでだいたい手が止まる_(:3」∠)_
@@ -32,6 +32,7 @@ pipでpyxelを入れたら最低限のpyxelアプリを作ってしまいます�
 
 ```python
 import pyxel
+pyxel.init(256, 256)
 
 def update():
     pass
@@ -50,6 +51,8 @@ pyxel_xmluiのリポジトリをcloneやzipで取得したら、中のxmluiと�
 
 ```python
 import pyxel
+pyxel.init(256, 256)
+
 # ライブラリのimport
 from xmlui import XMLUI
 
@@ -81,6 +84,8 @@ XMLベースということで、UIを記述したXMLファイルが必要です
 
 ```python
 import pyxel
+pyxel.init(256, 256)
+
 from xmlui import XMLUI
 # タグ処理コールバック関数のパラメータ用
 from xmlui import XUState,XUEvent
