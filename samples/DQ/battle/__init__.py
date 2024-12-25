@@ -2,7 +2,7 @@ import pyxel
 
 # タイトル画面
 from xmlui.core import XMLUI
-from xmlui.ext.scene import XUXFadeScene,XUXAct
+from xmlui.ext.scene import XUXFadeScene
 from db import enemy_data
 
 from battle.ui.menu import ui_init
@@ -11,6 +11,7 @@ from battle.act import *
 # 死に戻り先
 import scenes
 
+
 # バトルシーン
 # #############################################################################
 class Battle(XUXFadeScene):
@@ -18,11 +19,7 @@ class Battle(XUXFadeScene):
 
     def __init__(self, xmlui:XMLUI):
         super().__init__(xmlui)
-        self.act = XUXAct()
-
-        self.sway_x = 0
-        self.sway_y = 0
-        self.blink = False
+        self.act = BattleAct(xmlui)
 
         # UIの読み込み
         self.template = self.xmlui.load_template("assets/ui/battle.xml")
@@ -33,8 +30,8 @@ class Battle(XUXFadeScene):
 
         # 最初のAct
         self.act.add(
-            PlayerMsg(self, "{name}が　あらわれた！", enemy_data.data),
-            CmdStart(self))
+            PlayerMsg("{name}が　あらわれた！", enemy_data.data),
+            CmdStart())
 
         self.enemy_img = pyxel.Image.from_image(filename="assets/images/slime.png")
         self.enemy_bg = pyxel.Image.from_image(filename="assets/images/enemy_bg.png")
@@ -47,15 +44,17 @@ class Battle(XUXFadeScene):
 
     def update(self):
         self.act.update()
+        if self.act.is_dead:
+            self.close()
 
     def draw(self):
         # 背景
-        pyxel.blt(-16+self.sway_x, -16+self.sway_y, self.field_img, 0, 0, self.field_img.width, self.field_img.height)
-        pyxel.blt(64+self.sway_x, 64+self.sway_y, self.enemy_bg, 0, 0, self.enemy_bg.width, self.enemy_bg.height)
+        pyxel.blt(-16+self.act.sway_x, -16+self.act.sway_y, self.field_img, 0, 0, self.field_img.width, self.field_img.height)
+        pyxel.blt(64+self.act.sway_x, 64+self.act.sway_y, self.enemy_bg, 0, 0, self.enemy_bg.width, self.enemy_bg.height)
 
         # 敵の絵
-        if not self.blink:
-            pyxel.blt(-70+self.sway_x, -70+self.sway_y, self.enemy_img, 0, 0, self.enemy_img.width, self.enemy_img.height, 0, scale=0.2)
+        if not self.act.blink:
+            pyxel.blt(-70+self.act.sway_x, -70+self.act.sway_y, self.enemy_img, 0, 0, self.enemy_img.width, self.enemy_img.height, 0, scale=0.2)
 
         # UIの描画
         self.xmlui.draw()

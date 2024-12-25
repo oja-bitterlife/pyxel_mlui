@@ -1,19 +1,22 @@
-from typing import Callable,Self
+from typing import Callable,Generic,TypeVar
 import pyxel
 
 from xmlui.core import XMLUI
 from xmlui.ext.input import XUXInput
 from xmlui.ext.timer import XUXTimeout
 
+T = TypeVar('T')
+
 
 # ステータス遷移管理用。NPCの寸劇とかで使うやつ
 # #############################################################################
 # 一定時間後に1つのaction。アクションをつなげて実行する場合は主にこちら
-class XUXActItem(XUXTimeout):
+class XUXActItem(XUXTimeout, Generic[T]):
     # デフォルトはすぐ実行
     def __init__(self):
         super().__init__(0)
         self._init_func:Callable|None = self.init
+        self._act:T|None = None  # 呼び出しActへの参照
 
     # コンストラクタではなくinit()の中で時間を設定する。
     def set_wait(self, wait:int):
@@ -23,8 +26,16 @@ class XUXActItem(XUXTimeout):
     def init(self):
         pass
 
+    # 呼び出しActを返す
+    # Genericsで、XUXActではなくnewしたクラスそのものを返す
+    @property
+    def act(self) -> T:
+        if self._act is None:
+            raise Exception("act is not set")
+        return self._act
+
 # 一定時間内ずっとwaigingが実行され、最後にaction。
-class XUXActWait(XUXActItem):
+class XUXActWait(XUXActItem[T]):
     WAIT_FOREVER = 2**31-1
 
     # デフォルトは無限待機
@@ -61,6 +72,7 @@ class XUXAct:
     # -----------------------------------------------------
     def add(self, *items:XUXActItem):
         for item in items:
+            item._act = self  # 自分を登録しておく
             self.queue.append(item)
 
     def clear(self):
@@ -69,6 +81,7 @@ class XUXAct:
     def next(self):
         if self.queue:
             self.queue.pop(0)
+
 
     # 状態更新
     # -----------------------------------------------------
