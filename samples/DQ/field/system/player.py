@@ -10,8 +10,6 @@ from db import user_data,npc_data
 
 class Player:
     def __init__(self, x:int, y:int):
-        user_data.hp = 0
-
         # 座標
         self.x = x*16
         self.y = y*16
@@ -32,7 +30,7 @@ class Player:
             # メッセージウインドウを開く
             menu = xmlui.open("menu")
             msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
-            talk = "おお　{name}！\nしんでしまうとは　なにごとだ！\\p…………\\pちょっと　いってみたかったの"
+            talk = "おお　{name}！\nしんでしまうとは　なにごとだ！\\p…………\\pちょっと　いってみたかったの\\pがんばってね"
             msg_text.append_talk(talk, user_data.data)  # talkでテキスト開始
 
     def update(self, hitcheck_funcs:list[Callable[[int,int],bool]]):

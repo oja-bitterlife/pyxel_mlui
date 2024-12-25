@@ -131,8 +131,7 @@ class EnemyStart(BattleActItem):
 
     def action(self):
         # ダメージ計算
-        damage = random.randint(1, 10)
-        damage = 100
+        damage = random.randint(5, 10)
         user_data.data["damage"] = XUTextUtil.format_zenkaku(damage)
 
         self.act.add(
@@ -158,13 +157,13 @@ class DamageEffect(BattleActWait):
 
     def waiting(self):
         # とりあえず画面揺らし
-        self.sway_x = random.randint(-3, 3)
-        self.sway_y = random.randint(-3, 3)
+        self.act.sway_x = random.randint(-3, 3)
+        self.act.sway_y = random.randint(-3, 3)
         return False
 
     def action(self):
-        self.sway_x = 0
-        self.sway_y = 0
+        self.act.sway_x = 0
+        self.act.sway_y = 0
         user_data.hp = max(0, user_data.hp - self.damage)
 
 class BlinkEffect(BattleActWait):
@@ -172,7 +171,7 @@ class BlinkEffect(BattleActWait):
         self.set_wait(10)  # エフェクトはないので適当待ち
 
     def waiting(self):
-        self.blink = self.count % 2 < 1
+        self.act.blink = self.count % 2 < 1
         return False
 
     def action(self):
