@@ -8,7 +8,7 @@
                 <label w="72" h="24" align="center" valign="bottom">どうぐや</label>
             </round_win>
             <round_win y="32" w="112" h="32">
-                <shop_act_lst x="15" y="16" item_w="32">
+                <shop_act_lst x="16" y="16" item_w="32">
                     <shop_act_item>かう</shop_act_item>
                     <shop_act_item>うる</shop_act_item>
                     <shop_act_item>でる</shop_act_item>
