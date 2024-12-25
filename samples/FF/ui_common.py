@@ -3,7 +3,7 @@ import pyxel
 from xmlui.core import *
 from xmlui.lib import win,text
 
-from system import system_font
+from system import system_font,system_palette
 
 # 共通定義
 # *****************************************************************************
@@ -14,7 +14,7 @@ KOJICHU_COL = 15
 FRAME_OUT = 51
 FRAME_COL = 7
 FRAME_SHADOW_COL = 53
-FRAME_BG_COL = 62
+FRAME_BG_COL = system_palette.colors_offset+39
 
 def ui_common_init(xmlui:XMLUI):
     common_template = xmlui.load_template("assets/ui/common.xml")
@@ -63,10 +63,6 @@ def ui_common_init(xmlui:XMLUI):
     # *****************************************************************************
     # 角丸ウインドウ
     # ---------------------------------------------------------
-    # openで値をセットをした後closeされる、closingなのに値はopningになっちゃうので別々に保存する
-    CLOSING_CLIP_SIZE="_xmlui_closing_clip_size"
-    OPENING_CLIP_SIZE="_xmlui_opening_clip_size"
-
     @common_win.round_frame("round_win")
     def round_win(round_win:win.RoundFrame, event:XUEvent):
         area = round_win.area

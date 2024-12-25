@@ -3,9 +3,21 @@
 <xmlui>
     <info>ショップ用</info>
     <ui_shop w="256" h="256" id="ui_shop">
-        <round_win w="100" h="100">
-            <label w="256" h="256" align="center" valign="center">ショップ　かいし</label>
-        </round_win>
+        <offset x="16" y="8">
+            <round_win w="72" h="32">
+                <label w="72" h="24" align="center" valign="bottom">どうぐや</label>
+            </round_win>
+            <round_win y="32" w="112" h="32">
+                <shop_act_lst item_w="36">
+                    <shop_act_item>かう</shop_act_item>
+                    <shop_act_item>うる</shop_act_item>
+                    <shop_act_item>でる</shop_act_item>
+                </shop_act_lst>
+            </round_win>
+            <round_win x="112" y="32" w="112" h="32">
+                <label w="96" h="24" align="right" valign="bottom">{gil}　ギル</label>
+            </round_win>
+        </offset>
     </ui_shop>
 </xmlui>
 
