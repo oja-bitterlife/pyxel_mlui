@@ -29,7 +29,6 @@ def ui_init(template:XUTemplate):
     def tools_list(tools_list:select.List, event:XUEvent):
         # アイテム表示の準備
         if event.on_init:  # 開く度毎回
-            print(user_data.tools)
             for tools in user_data.tools:
                 tools_list.add_child(XUElem.new(tools_list.xmlui, "tools_item").set_text(tools).set_attr("action", tools))
 
