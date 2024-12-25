@@ -1,5 +1,3 @@
-from enum import StrEnum
-
 # XMLを使うよ
 import xml.etree.ElementTree
 from xml.etree.ElementTree import Element
@@ -8,10 +6,10 @@ from xml.etree.ElementTree import Element
 import unicodedata
 
 # その他よく使う奴
-import re
-import math
-import copy
+import re,math
+from copy import deepcopy
 from typing import Callable,Any,Self  # 型を使うよ
+from enum import StrEnum
 
 
 # 描画領域計算用
@@ -539,7 +537,7 @@ class XUTemplate(XUElem):
     # *************************************************************************
     # Elmentを複製して取り出す
     def duplicate(self, id:str) -> XUElem:
-        return XUElem(self.xmlui, copy.deepcopy(self.find_by_id(id)._element))
+        return XUElem(self.xmlui, deepcopy(self.find_by_id(id)._element))
 
     # 処理関数登録
     # *************************************************************************
@@ -635,7 +633,7 @@ class XMLUI(XUElem):
         # 更新処理
         for elem in self.children:  # 中でTreeを変えたいのでイテレータではなくリストで
             # active/inactiveどちらのeventを使うか決定
-            event = copy.deepcopy(self.event) if elem in self.active_elems else XUEvent()
+            event = deepcopy(self.event) if elem in self.active_elems else XUEvent()
 
             # updateカウンタ更新
             event.on_init = elem.update_count == 0  # やっぱりinitialize情報がどこかに欲しい
@@ -758,7 +756,7 @@ class XUSelectBase(XUSelectInfo):
         if not self.items and item_tag:
             for i,child in enumerate([child for child in self._element if child.tag == item_tag]):
                 # タグ名は専用のものに置き換え
-                item = XUSelectItem(XUElem(elem.xmlui, copy.deepcopy(child)))
+                item = XUSelectItem(XUElem(elem.xmlui, deepcopy(child)))
                 item._element.tag = self.ITEM_TAG
                 self._util_info.add_child(item)
 
