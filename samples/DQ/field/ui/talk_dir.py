@@ -2,7 +2,7 @@ import pyxel
 
 from xmlui.core import XUTemplate,XUEvent,XUWinBase,XUSelectItem
 from xmlui.lib import select
-from ui_common import system_font,get_world_clip,draw_menu_cursor
+from ui_common import system_font,get_world_clip,draw_menu_cursor,get_text_color
 
 def ui_init(template:XUTemplate):
     field_select = select.Decorator(template)
@@ -10,9 +10,11 @@ def ui_init(template:XUTemplate):
     # 会話方向
     # ---------------------------------------------------------
     def dir_item(dir_item:XUSelectItem):
+        col = get_text_color()
+
         # ウインドウのクリップ状態に合わせて表示する
         if dir_item.area.y < get_world_clip(XUWinBase.find_parent_win(dir_item)).bottom():
-            pyxel.text(dir_item.area.x, dir_item.area.y, dir_item.text, 7, system_font.font)
+            pyxel.text(dir_item.area.x, dir_item.area.y, dir_item.text, col, system_font.font)
 
         # カーソル表示
         if dir_item.selected and dir_item.enable:

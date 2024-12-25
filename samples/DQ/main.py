@@ -14,8 +14,8 @@ from field import Field
 from battle import Battle
 
 # 最初はタイトル
-#scene_manager = XUXSceneManager(scenes.Title(xmlui))
-#scene_manager = XUXSceneManager(scenes.Field(xmlui))
+#scene_manager = XUXSceneManager(Title(xmlui))
+#scene_manager = XUXSceneManager(Field(xmlui))
 scene_manager = XUXSceneManager(Battle(xmlui))
 
 # Main

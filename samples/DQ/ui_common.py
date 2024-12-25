@@ -28,16 +28,20 @@ KOJICHU_COL = 15
 # *****************************************************************************
 # カーソル描画
 def draw_menu_cursor(state:XUElem, x:int, y:int):
+    col = get_text_color()
+
     tri_size = 6
     left = state.area.x + x
     top = state.area.y+2 + y
-    pyxel.tri(left, top, left, top+tri_size, left+tri_size//2, top+tri_size//2, 7)
+    pyxel.tri(left, top, left, top+tri_size, left+tri_size//2, top+tri_size//2, col)
 
 def draw_msg_cursor(state:XUElem, x:int, y:int):
+    col = get_text_color()
+
     tri_size = 6
     center_x = 127-tri_size//2+x  # Xはど真ん中固定で
     y = state.area.y + tri_size - 3 + y
-    pyxel.tri(center_x, y, center_x+tri_size, y, center_x+tri_size//2, y+tri_size//2, 7)
+    pyxel.tri(center_x, y, center_x+tri_size, y, center_x+tri_size//2, y+tri_size//2, col)
 
 def get_world_clip(win:XUWinBase) -> XURect:
     area = win.area
@@ -48,6 +52,15 @@ def get_world_clip(win:XUWinBase) -> XURect:
         clip_size = max(int(win.closing_count * WIN_CLOSE_SPEED), 0)
         area.h -= clip_size
     return area
+
+# テキストカラー
+def get_text_color() -> int:
+    return 8 if user_data.hp <= 1 else 7
+
+# テキストカラー
+def get_shadow_color() -> int:
+    return 2 if user_data.hp <= 1 else 13
+
 
 common_win = win.Decorator(common_template)
 common_text = text.Decorator(common_template)
@@ -96,8 +109,11 @@ def round_win(round_win:win.RoundFrame, event:XUEvent):
     # 背景
     pyxel.rect(area.x, area.y, area.w, min(area.h, clip.h+2), 0)
 
+    col = get_text_color()
+    shadow_col = get_shadow_color()
+
     # フレーム
-    round_win.draw_frame(pyxel.screen.data_ptr(), [7, 13], area.inflate(-2, -2), clip)
+    round_win.draw_frame(pyxel.screen.data_ptr(), [col, shadow_col], area.inflate(-2, -2), clip)
 
 # メッセージウインドウ
 # ---------------------------------------------------------
@@ -187,7 +203,8 @@ def common_msg_text(msg_dq:MsgDQ, event:XUEvent, cursor_visible:bool):
         elif info.indent_type == MsgDQ.IndentType.ENEMY:
             x += system_font.size
 
-        pyxel.text(x, y, info.line_text, 7, system_font.font)
+        col = get_text_color()
+        pyxel.text(x, y, info.line_text, col, system_font.font)
 
 
     # カーソル表示
@@ -206,11 +223,13 @@ def status_item(status_item:text.Label, event:XUEvent):
     # 値の取得
     text = XUTextUtil.format_zenkaku(XUTextUtil.format_dict(status_item.text, user_data.data))
 
+    col = get_text_color()
+
     # テキストは右寄せ
     area = status_item.area
     x, y = XURect.align_offset(area.w, area.h, system_font.text_width(text) + 5, 0, status_item.align, status_item.valign)
     if area.y+y < get_world_clip(XUWinBase.find_parent_win(status_item)).bottom():
-        pyxel.text(area.x + x, area.y + y, text, 7, system_font.font)
+        pyxel.text(area.x + x, area.y + y, text, col, system_font.font)
 
 # ステータスタイトル(名前)
 @common_text.label("status_title")
@@ -218,7 +237,9 @@ def status_title(status_title:text.Label, event:XUEvent):
     clip = get_world_clip(XUWinBase.find_parent_win(status_title)).intersect(status_title.area)
     pyxel.rect(status_title.area.x, status_title.area.y, status_title.area.w, clip.h, 0)  # タイトルの下地
 
+    col = get_text_color()
+
     # テキストは左寄せ
     if status_title.area.y < clip.bottom():  # world座標で比較
         x, y = status_title.aligned_pos(system_font)
-        pyxel.text(x+1, y-1, user_data.data["name"], 7, system_font.font)
+        pyxel.text(x+1, y-1, user_data.data["name"], col, system_font.font)

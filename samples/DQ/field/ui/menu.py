@@ -2,7 +2,7 @@ import pyxel
 
 from xmlui.core import XUTemplate,XUEvent,XUWinBase,XUSelectItem
 from xmlui.lib import select,text
-from ui_common import system_font,get_world_clip,draw_menu_cursor,KOJICHU_COL
+from ui_common import system_font,get_world_clip,draw_menu_cursor,KOJICHU_COL,get_text_color
 
 def ui_init(template:XUTemplate):
     field_select = select.Decorator(template)
@@ -13,7 +13,7 @@ def ui_init(template:XUTemplate):
     def menu_item(menu_item:XUSelectItem):
         # ウインドウのクリップ状態に合わせて表示する
         if menu_item.area.y < get_world_clip(XUWinBase.find_parent_win(menu_item)).bottom():
-            col = KOJICHU_COL if menu_item.value == "工事中" else 7
+            col = KOJICHU_COL if menu_item.value == "工事中" else get_text_color()
             pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, col, system_font.font)
 
             # カーソル表示
@@ -59,10 +59,12 @@ def ui_init(template:XUTemplate):
         clip = get_world_clip(XUWinBase.find_parent_win(title)).intersect(title.area)
         pyxel.rect(title.area.x, title.area.y, title.area.w, clip.h, 0)  # タイトルの下地
 
+        col = get_text_color()
+
         # テキストはセンタリング
         if title.area.y < clip.bottom():  # world座標で比較
             x, y = title.aligned_pos(system_font)
-            pyxel.text(x, y-1, title.text, 7, system_font.font)
+            pyxel.text(x, y-1, title.text, col, system_font.font)
 
 
     # 子メニューごとのタイトル(コマンドメニューと少し場所がずれる)
@@ -73,6 +75,8 @@ def ui_init(template:XUTemplate):
         clip.h = max(clip.h, 4)  # フレームを隠すように
         pyxel.rect(child_menu_title.area.x, child_menu_title.area.y, child_menu_title.area.w, clip.h, 0)  # タイトルの下地
 
+        col = get_text_color()
+
         # テキストはセンタリングで常に表示
         x, y = child_menu_title.aligned_pos(system_font)
-        pyxel.text(x, y-1, child_menu_title.text, 7, system_font.font)
+        pyxel.text(x, y-1, child_menu_title.text, col, system_font.font)

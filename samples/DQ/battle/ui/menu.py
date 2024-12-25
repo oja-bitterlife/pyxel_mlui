@@ -4,7 +4,7 @@ from xmlui.core import XUEvent,XUWinBase,XUSelectItem
 from xmlui.lib import select,text
 from msg_dq import Decorator as DQDecorator
 
-from ui_common import system_font,KOJICHU_COL
+from ui_common import system_font,KOJICHU_COL,get_text_color
 from msg_dq import MsgDQ
 
 
@@ -24,17 +24,19 @@ def ui_init(template):
         clip = get_world_clip(XUWinBase.find_parent_win(title)).intersect(title.area)
         pyxel.rect(title.area.x, title.area.y, title.area.w, clip.h, 0)  # タイトルの下地
 
+        col = get_text_color()
+
         # テキストはセンタリング
         if title.area.y < clip.bottom():  # world座標で比較
             x, y = title.aligned_pos(system_font)
-            pyxel.text(x, y-1, title.text, 7, system_font.font)
+            pyxel.text(x, y-1, title.text, col, system_font.font)
 
     # メニューアイテム
     # ---------------------------------------------------------
     def menu_item(menu_item:XUSelectItem):
         # ウインドウのクリップ状態に合わせて表示する
         if menu_item.area.y < get_world_clip(XUWinBase.find_parent_win(menu_item)).bottom():
-            col = KOJICHU_COL if menu_item.value == "工事中" else 7
+            col = KOJICHU_COL if menu_item.value == "工事中" else get_text_color()
             pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, col, system_font.font)
 
             # カーソル表示
