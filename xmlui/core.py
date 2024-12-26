@@ -847,48 +847,6 @@ class XUSelectList(XUSelectBase):
     def select_no_wrap(self, input:set[XUEventItem], prev_event:XUEventItem, next_event:XUEventItem) -> bool:
         return self._select_by_event(input, prev_event, next_event, False)
 
-# ダイアル選択用
-class XUSelectNum(XUSelectList):
-    def __init__(self, elem:XUElem, item_tag:str, item_w:int):
-        super().__init__(elem, item_tag, item_w, 0)
-
-    # 各桁のitemに数値を設定
-    def set_digits(self, num:int) -> Self:
-        num = min(max(0, num), self.max)
-        for item in reversed(self.items):
-            item.set_text(str(num % 10))
-            num //= 10
-        return self
-
-    # 数値として取得
-    @property
-    def number(self) -> int:
-        return int("".join([item.text for item in self.items]))
-
-    # 最大値
-    @property
-    def max(self) -> int:
-        return pow(10, self.item_num)-1
-
-    # 入力に応じた挙動一括。変更があった場合はTrue
-    def change_by_event(self, input:set[XUEventItem], left_event:XUEventItem, right_event:XUEventItem, up_event:XUEventItem, down_event:XUEventItem) -> bool:
-        # 左右逆でイベントを使う
-        changed = self.select_by_event(input, right_event, left_event)
-
-        # 数値の変更
-        number = self.number
-        new_num = number
-        if up_event in input:
-            new_num = number + pow(10, self.selected_no)
-        if down_event in input:
-            new_num = number - pow(10, self.selected_no)
-
-        # 数値に変更があったら反映
-        if number != new_num:
-            self.set_digits(new_num)
-            changed = True
-        
-        return changed
 
 # テキスト系
 # *****************************************************************************
