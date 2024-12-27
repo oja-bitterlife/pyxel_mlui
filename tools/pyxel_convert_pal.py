@@ -8,7 +8,7 @@
 
 import argparse, os.path
 
-parser = argparse.ArgumentParser(description="フルカラー画像を256パレットpngに変換するツール")
+parser = argparse.ArgumentParser(description="pyxelで出力されたパレット画像(フルカラー)をパレットpngに変換するツール")
 parser.add_argument("input_file", help="変換元画像ファイル名") 
 parser.add_argument("--out", metavar="output_file", help="出力ファイル名。未指定時はinput_fileの拡張子を.pal.pngとして出力") 
 args = parser.parse_args()
@@ -27,7 +27,7 @@ w, h = img.size
 
 # pxelの出力形式変更に備えておく
 if not img.mode.startswith("RGB") or h != 16 or not isinstance(img.getpixel((0, 0)), tuple):
-    print("未対応の画像形式です")
+    print("あれ？Pyxelのパレット出力画像じゃないような")
     sys.exit(1)
 
 # 元の並びを取得する
