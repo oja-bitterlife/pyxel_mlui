@@ -23,7 +23,6 @@ def ui_common_init(xmlui:XMLUI):
 
     # 共通で使える関数
     # *****************************************************************************
-
     def get_world_clip(win:XUWinBase) -> XURect:
         area = win.area
         if win.is_opening:
@@ -33,7 +32,6 @@ def ui_common_init(xmlui:XMLUI):
             clip_size = max(int(win.closing_count * WIN_CLOSE_SPEED), 0)
             area.h -= clip_size
         return area
-
 
     # 工事中表示用
     # *****************************************************************************
