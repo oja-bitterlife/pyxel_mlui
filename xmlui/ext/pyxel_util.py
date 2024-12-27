@@ -59,7 +59,6 @@ class PyxelPalette:
 
     @property
     def pal_digital8(self) -> list[int]:
-        add_index = [36*5, 6*5, 36*5+6*5, 5, 36*5+5, 6*5+5, 36*5+6*5+5]
         return [0] + self.pal_digital16[9:]
 
     # モノクロパレット取得
