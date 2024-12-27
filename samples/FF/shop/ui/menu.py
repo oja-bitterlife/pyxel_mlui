@@ -2,7 +2,7 @@ import pyxel
 
 from xmlui.core import XUTemplate,XUEvent,XUSelectItem
 from xmlui.lib import select
-from system import system_font, draw_hand_cursor
+from system import system_font, hand_cursor
 
 def ui_init(template:XUTemplate):
     shop = select.Decorator(template)
@@ -12,7 +12,7 @@ def ui_init(template:XUTemplate):
         pyxel.text(area.x, area.y, shop_act_item.text, 7, system_font.font)
 
         if shop_act_item.selected:
-            draw_hand_cursor(area.x, area.y+4)
+            hand_cursor.draw(area.x, area.y+4)
 
     @shop.list("shop_act_lst", "shop_act_item")
     def shop_act_lst(shop_act_lst:select.List, event:XUEvent):
