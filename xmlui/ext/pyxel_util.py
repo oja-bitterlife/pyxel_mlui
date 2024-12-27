@@ -67,6 +67,11 @@ class PyxelPalette:
     def pal_gray16(self) -> list[int]:
         return [0] + [self.gray_offset + i for i in range(13)] + [7] + [self.pal_white]
 
+    # カラーパレット取得
+    @property
+    def pal_colors(self) -> list[int]:
+        return [0] + [self.colors_offset + i for i in range(6*6*6-1)]
+
     # 単色
     # -----------------------------------------------------
     # 海外フリーゲームでよく使われるカラーキー(Magenta)
