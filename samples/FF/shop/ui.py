@@ -4,6 +4,7 @@ from xmlui.core import XUElem,XUTemplate,XUEvent,XUSelectItem,XUWinBase,XUSelect
 from xmlui.lib import select,text
 from system import system_font, hand_cursor
 
+from db import user_data
 from shop.buy_list import BuyList
 
 def ui_init(template:XUTemplate):
@@ -12,7 +13,7 @@ def ui_init(template:XUTemplate):
 
     @shot_text.label("label")
     def label(label:text.Label, event:XUEvent):
-        text = XUTextUtil.format_zenkaku(label.text, {"gil":123456})
+        text = XUTextUtil.format_zenkaku(label.text, {"gil":user_data.gil})
         x, y = label.aligned_pos(system_font, text)
         pyxel.text(x, y, text, 7, system_font.font)
 
@@ -26,22 +27,26 @@ def ui_init(template:XUTemplate):
         if shop_ui_item.selected:
             hand_cursor.draw(area.x, area.y+4)
 
+    def get_price(buy_menu:XUElem, buy_item:XUElem) -> int:
+        buy_num = XUSelectInfo(buy_menu.find_by_id("buy_num"))
+
+        price = int(buy_item.value) * int(buy_num.action)
+        match buy_num.action:  # 割引
+            case "4":
+                price -= price * 26 // 256
+            case "10":
+                price -= price * 51 // 256
+        return price
+
     def shop_buy_item(shop_buy_item:XUSelectItem, parent_enable:bool):
         buy_menu = shop_buy_item.find_parent_by_id("buy_menu")
-        buy_num = XUSelectInfo(buy_menu.find_by_id("buy_num"))
 
         # 商品名
         area = shop_buy_item.area
         pyxel.text(area.x, area.y, shop_buy_item.text, 7, system_font.font)
 
         # お値段
-        price = int(shop_buy_item.value) * int(buy_num.action)
-        match buy_num.action:  # 割引
-            case "4":
-                price -= price * 26 // 256
-            case "10":
-                price -= price * 51 // 256
-        price_text = XUTextUtil.format_zenkaku(price)
+        price_text = XUTextUtil.format_zenkaku(get_price(buy_menu, shop_buy_item))
         x,y = area.aligned_pos(system_font.text_width(price_text)+8, 0, XURect.Align.RIGHT)
         pyxel.text(x, area.y, price_text, 7, system_font.font)
 
@@ -114,6 +119,10 @@ def ui_init(template:XUTemplate):
             shop_buy_item(item, buy_list.enable)
 
         buy_list.select_by_event(event.trg, *XUEvent.Key.UP_DOWN())
+        if XUEvent.Key.BTN_A in event.trg:
+            buy_menu = buy_list.find_parent_by_id("buy_menu")
+            price = get_price(buy_menu, buy_list.selected_item)
+            user_data.gil -= price
 
         # 戻る
         if XUEvent.Key.BTN_B in event.trg:

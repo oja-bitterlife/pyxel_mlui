@@ -12,4 +12,3 @@ class HandCursor:
         pyxel.blt(x-16, y-5, self.img, 0, 0, 16, 16, system_palette.pal_magenta)
 hand_cursor = HandCursor()
 
-
