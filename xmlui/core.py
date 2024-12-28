@@ -476,7 +476,7 @@ class XUElem:
         return self.attr_int("update_count", 0)
 
     @property
-    def use_event(self) -> str:  # eventの検知方法, listener or absorber or ""
+    def use_event(self) -> str:  # eventの検知方法, listener or absorber or none or ""
         return self.attr_str("use_event", "")
 
     @property
@@ -689,7 +689,7 @@ class _XUUtilBase(XUElem):
         super().__init__(elem.xmlui, elem._element)
 
         # 自前設定が無ければabsorberにしておく
-        if not self.use_event:
+        if not self.has_attr("use_event"):
             self.set_attr("use_event", XUEvent.UseEvent.Absorber)
 
         # UtilBase用ルートの作成(状態保存先)

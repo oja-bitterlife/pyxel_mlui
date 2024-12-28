@@ -19,7 +19,7 @@
             </round_win>
 
             <round_win x="56" w="168" h="32">
-                <shop_msg x="10" w="124" h="24" valign="bottom" speed="2" id="shop_msg">いらっしゃい どのようなごようけんで？</shop_msg>
+                <shop_msg x="10" w="124" h="24" valign="bottom" speed="2" use_event="none" id="shop_msg">いらっしゃい どのようなごようけんで？</shop_msg>
             </round_win>
         </offset>
     </ui_shop>
