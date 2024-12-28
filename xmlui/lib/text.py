@@ -58,8 +58,12 @@ class Msg(XUPageText):
 
         super().__init__(elem, page_line_num, wrap)
 
-    # 全角にして登録
+    # 半角のまま登録
     def append_msg(self, text:str, all_params:dict[str,Any]={}) -> list[XUPageItem]:
+        return self.add_pages(XUTextUtil.format_dict(text, all_params), self.page_line_num, self.wrap)
+
+    # 全角にして登録
+    def append_zenkaku(self, text:str, all_params:dict[str,Any]={}) -> list[XUPageItem]:
         return self.add_pages(XUTextUtil.format_zenkaku(text, all_params), self.page_line_num, self.wrap)
 
 # スクロールメッセージ
