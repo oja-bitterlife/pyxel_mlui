@@ -57,6 +57,12 @@ def ui_init(template:XUTemplate):
                         item.set_text(data["name"])
                         item.value = data["buy"]
                         buy_list.add_child(item)
+
+                    # メッセージ更新
+                    msg = text.Msg(buy_list.xmlui.find_by_id("shop_msg"))
+                    msg.clear_pages()
+                    msg.append_msg("なににいたしましょうか？")
+
                 case "sell":
                     pass
                 case "exit":
@@ -88,6 +94,12 @@ def ui_init(template:XUTemplate):
             win = XUWinBase.find_parent_win(buy_num)
             shop_act_list = win.find_by_id("shop_act_list")
             shop_act_list.enable = True
+
+            # メッセージ更新
+            msg = text.Msg(buy_num.xmlui.find_by_id("shop_msg"))
+            msg.clear_pages()
+            msg.append_msg("いらっしゃい どのようなごようけんで？")
+
 
     # 購入できるアイテムのリスト
     # -----------------------------------------------------
@@ -140,6 +152,10 @@ def ui_init(template:XUTemplate):
         if XUEvent.Key.BTN_B in event.trg:
             buy_list.enable = False
 
+            # メッセージ更新
+            msg = text.Msg(buy_list.xmlui.find_by_id("shop_msg"))
+            msg.clear_pages()
+            msg.append_msg("なににいたしましょうか？")
 
     @shop_text.msg("shop_msg", "speed")
     def shop_msg(shop_msg:text.Msg, event:XUEvent):
