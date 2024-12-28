@@ -142,6 +142,6 @@ def ui_init(template:XUTemplate):
     @shop_text.msg("shop_msg", "speed")
     def shop_msg(shop_msg:text.Msg, event:XUEvent):
         area = shop_msg.area
-        x, y = area.aligned_pos(0, 16, XURect.Align.LEFT, XURect.Align.from_str(shop_msg.attr_str("valign", "center")))
+        x, y = area.aligned_pos(0, system_font.size, XURect.Align.LEFT, XURect.Align.from_str(shop_msg.attr_str("valign", "center")))
         pyxel.text(x, y, shop_msg.current_page.text, 7, system_font.font)
 
