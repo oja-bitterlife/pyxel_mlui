@@ -1041,7 +1041,7 @@ class XUPageText(XUPageInfo):
         self.wrap = wrap
 
         # ページ未登録なら登録しておく
-        if not self.pages and not self.text.strip():
+        if not self.pages and self.text.strip():
             self.add_pages(self.text, page_line_num, wrap)
 
     # ページごとに行・ワードラップ分割

@@ -53,7 +53,7 @@ def ui_init(template:XUTemplate):
                     buy_list.enable = False  # イベントはNumが決まってから
                     buy_list_db = BuyList(1)
                     for data in buy_list_db.data:
-                        item = XUElem.new(template.xmlui, "shop_buy_item")
+                        item = XUElem.new(shop_act_list.xmlui, "shop_buy_item")
                         item.set_text(data["name"])
                         item.value = data["buy"]
                         buy_list.add_child(item)
@@ -131,7 +131,17 @@ def ui_init(template:XUTemplate):
             price = get_price(buy_menu, buy_list.selected_item)
             user_data.gil -= price
 
+            # メッセージ更新
+            msg = buy_list.xmlui.find_by_id("shop_msg")
+
         # 戻る
         if XUEvent.Key.BTN_B in event.trg:
             buy_list.enable = False
+
+
+    @shop_text.msg("shop_msg", "speed")
+    def shop_msg(shop_msg:text.Msg, event:XUEvent):
+        area = shop_msg.area
+        x, y = area.aligned_pos(0, 16, XURect.Align.LEFT, XURect.Align.from_str(shop_msg.attr_str("valign", "center")))
+        pyxel.text(x, y, shop_msg.current_page.text, 7, system_font.font)
 

@@ -123,19 +123,25 @@ class Decorator(XUTemplate.HasRef):
             self.template.set_drawfunc(tag_name, draw)
         return wrapper
 
-    def msg(self, tag_name:str):
+    def msg(self, tag_name:str, speed_attr:str|None=None):
         def wrapper(bind_func:Callable[[Msg,XUEvent], str|None]):
             # 登録用関数をジェネレート
             def draw(elem:XUElem, event:XUEvent):
-                return bind_func(Msg(elem), event)
+                msg = Msg(elem)
+                if speed_attr and msg.pages:
+                    msg.current_page.draw_count += msg.attr_float(speed_attr, 0)
+                return bind_func(msg, event)
             # 関数登録
             self.template.set_drawfunc(tag_name, draw)
         return wrapper
 
-    def msg_scr(self, tag_name:str):
+    def msg_scr(self, tag_name:str, speed_attr:str|None=None):
         def wrapper(bind_func:Callable[[MsgScr,XUEvent], str|None]):
             # 登録用関数をジェネレート
             def draw(elem:XUElem, event:XUEvent):
+                msg = MsgScr(elem)
+                if speed_attr and msg.pages:
+                    msg.current_page.draw_count += msg.attr_float(speed_attr, 0)
                 return bind_func(MsgScr(elem), event)
             # 関数登録
             self.template.set_drawfunc(tag_name, draw)
