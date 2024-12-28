@@ -32,7 +32,7 @@
             <shop_ui_item action="10">１０</shop_ui_item>
         </buy_num>
         <round_win y="32" w="176" h="160">
-            <buy_list x="56" y="16" item_h="16" id="buy_list"/>
+            <buy_list x="30" y="16" item_h="16" id="buy_list"/>
         </round_win>
     </buy_menu>
 

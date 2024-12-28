@@ -1,6 +1,6 @@
 import pyxel
 
-from xmlui.core import XUElem,XUTemplate,XUEvent,XUSelectItem,XUWinBase,XUSelectInfo
+from xmlui.core import XUElem,XUTemplate,XUEvent,XUSelectItem,XUWinBase,XUSelectInfo,XUTextUtil,XURect
 from xmlui.lib import select,text
 from system import system_font, hand_cursor
 
@@ -12,8 +12,9 @@ def ui_init(template:XUTemplate):
 
     @shot_text.label("label")
     def label(label:text.Label, event:XUEvent):
-        x, y = label.aligned_pos(system_font)
-        pyxel.text(x, y, label.text, 7, system_font.font)
+        text = XUTextUtil.format_zenkaku(label.text, {"gil":123456})
+        x, y = label.aligned_pos(system_font, text)
+        pyxel.text(x, y, text, 7, system_font.font)
 
 
     # ショップ選択
@@ -29,8 +30,20 @@ def ui_init(template:XUTemplate):
         buy_menu = shop_buy_item.find_parent_by_id("buy_menu")
         buy_num = XUSelectInfo(buy_menu.find_by_id("buy_num"))
 
+        # 商品名
         area = shop_buy_item.area
         pyxel.text(area.x, area.y, shop_buy_item.text, 7, system_font.font)
+
+        # お値段
+        price = int(shop_buy_item.value) * int(buy_num.action)
+        match buy_num.action:  # 割引
+            case "4":
+                price -= price * 26 // 256
+            case "10":
+                price -= price * 51 // 256
+        price_text = XUTextUtil.format_zenkaku(price)
+        x,y = area.aligned_pos(system_font.text_width(price_text)+8, 0, XURect.Align.RIGHT)
+        pyxel.text(x, area.y, price_text, 7, system_font.font)
 
         if shop_buy_item.selected and parent_enable:
             hand_cursor.draw(area.x, area.y+4)

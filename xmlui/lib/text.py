@@ -38,9 +38,12 @@ class Label(XUElem):
         self.align = XURect.Align.from_str(elem.attr_str(self.ALIGN_ATTR, XURect.Align.LEFT))
         self.valign = XURect.Align.from_str(elem.attr_str(self.VALIGN_ATTR, XURect.Align.TOP))
 
-    def aligned_pos(self, font:FontBase) -> tuple[int, int]:
+    def aligned_pos(self, font:FontBase, text:str|None=None) -> tuple[int, int]:
+        # 引数があればそちらを
+        if text is None:
+            text = self.text
         area = self.area
-        return area.aligned_pos(font.text_width(self.text), font.size, self.align, self.valign)
+        return area.aligned_pos(font.text_width(text), font.size, self.align, self.valign)
 
 # メッセージ(ページつきアニメテキスト)
 class Msg(XUPageText):
