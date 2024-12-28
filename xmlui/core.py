@@ -122,9 +122,10 @@ class XUEventItem(str):
 
 class XUEvent:
     # 綴り間違いをしないようuse_eventをチェックする時は定数を使うようにする
-    ABSORBER = "absorber"
-    LISTENER = "listener"
-    NONE = ""  # ifでチェックしやすいようemptyで
+    class UseEvent(StrEnum):
+        Absorber = "absorber"
+        Listener = "listener"
+        NONE = "none"
 
     def __init__(self, init_active=False):
         self.is_active = init_active  # アクティブなイベントかどうか
@@ -476,7 +477,7 @@ class XUElem:
 
     @property
     def use_event(self) -> str:  # eventの検知方法, listener or absorber or ""
-        return self.attr_str("use_event", XUEvent.NONE)
+        return self.attr_str("use_event", "")
 
     @property
     def enable(self) -> bool:  # イベント有効フラグ(表示は使う側でどうするか決める)
@@ -622,9 +623,12 @@ class XMLUI(XUElem):
 
         # ActiveStateの取得。Active=最後、なので最後から確認
         self.active_elems:list[XUElem] = []
-        for event in reversed([elem for elem in self._rec_iter() if elem.use_event and elem.enable]):
+        for event in reversed([elem for elem in self._rec_iter()
+                                if elem.enable
+                                    and (elem.use_event == XUEvent.UseEvent.Absorber
+                                    or elem.use_event == XUEvent.UseEvent.Listener)]):
             self.active_elems.append(event)  # イベントを使うelemを回収
-            if event.use_event == XUEvent.ABSORBER:  # イベント通知終端
+            if event.use_event == XUEvent.UseEvent.Absorber:  # イベント通知終端
                 break
 
         # 親情報の更新
@@ -685,8 +689,8 @@ class _XUUtilBase(XUElem):
         super().__init__(elem.xmlui, elem._element)
 
         # 自前設定が無ければabsorberにしておく
-        if self.use_event == XUEvent.NONE:
-            self.set_attr("use_event", XUEvent.ABSORBER)
+        if not self.use_event:
+            self.set_attr("use_event", XUEvent.UseEvent.Absorber)
 
         # UtilBase用ルートの作成(状態保存先)
         if elem.exists_tag(root_tag):

@@ -132,7 +132,9 @@ def ui_init(template:XUTemplate):
             user_data.gil -= price
 
             # メッセージ更新
-            msg = buy_list.xmlui.find_by_id("shop_msg")
+            msg = text.Msg(buy_list.xmlui.find_by_id("shop_msg"))
+            msg.clear_pages()
+            msg.append_msg("ありがとうございます ほかには？")
 
         # 戻る
         if XUEvent.Key.BTN_B in event.trg:
