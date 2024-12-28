@@ -39,7 +39,7 @@ class Label(XUElem):
         self.valign = XURect.Align.from_str(elem.attr_str(self.VALIGN_ATTR, XURect.Align.TOP))
 
     def aligned_pos(self, font:FontBase, text:str|None=None) -> tuple[int, int]:
-        # 引数があればそちらを
+        # 引数があればそちらを(置換文字列対応)
         if text is None:
             text = self.text
         area = self.area
