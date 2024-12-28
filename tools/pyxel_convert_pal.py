@@ -30,11 +30,20 @@ if not img.mode.startswith("RGB") or h != 16 or not isinstance(img.getpixel((0, 
     print("あれ？Pyxelのパレット出力画像じゃないような")
     sys.exit(1)
 
-# 元の並びを取得する
+# 元の並びを元にパレットを取得する
 pal_img = Image.new("P", (w//16, 1))
+palettes = []
 for x in range(w//16):
     rgb = img.getpixel((x*16, 0))
     if isinstance(rgb, tuple):
-        pal_img.putpixel((x, 0), rgb)
+        palettes.append(list(rgb))
+
+# 出力ファイルにパレットの設定
+pal_img.putpalette(sum([pal for pal in palettes], []))
+
+# 出力ファイルにピクセル打ち(パレット順)
+for x in range(w//16):
+    pal_img.putpixel((x, 0), x)
+
 
 pal_img.save(output_file)
