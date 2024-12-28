@@ -123,8 +123,8 @@ class XUEventItem(str):
 class XUEvent:
     # 綴り間違いをしないようuse_eventをチェックする時は定数を使うようにする
     class UseEvent(StrEnum):
-        Absorber = "absorber"
-        Listener = "listener"
+        ABSORBER = "absorber"
+        LISTENER = "listener"
         NONE = "none"
 
     def __init__(self, init_active=False):
@@ -476,8 +476,8 @@ class XUElem:
         return self.attr_int("update_count", 0)
 
     @property
-    def use_event(self) -> str:  # eventの検知方法, listener or absorber or none or ""
-        return self.attr_str("use_event", "")
+    def use_event(self) -> str:  # eventの検知方法, listener or absorber or none
+        return self.attr_str("use_event", XUEvent.UseEvent.NONE)
 
     @property
     def enable(self) -> bool:  # イベント有効フラグ(表示は使う側でどうするか決める)
@@ -625,10 +625,10 @@ class XMLUI(XUElem):
         self.active_elems:list[XUElem] = []
         for event in reversed([elem for elem in self._rec_iter()
                                 if elem.enable
-                                    and (elem.use_event == XUEvent.UseEvent.Absorber
-                                    or elem.use_event == XUEvent.UseEvent.Listener)]):
+                                    and (elem.use_event == XUEvent.UseEvent.ABSORBER
+                                    or elem.use_event == XUEvent.UseEvent.LISTENER)]):
             self.active_elems.append(event)  # イベントを使うelemを回収
-            if event.use_event == XUEvent.UseEvent.Absorber:  # イベント通知終端
+            if event.use_event == XUEvent.UseEvent.ABSORBER:  # イベント通知終端
                 break
 
         # 親情報の更新
@@ -690,7 +690,7 @@ class _XUUtilBase(XUElem):
 
         # 自前設定が無ければabsorberにしておく
         if not self.has_attr("use_event"):
-            self.set_attr("use_event", XUEvent.UseEvent.Absorber)
+            self.set_attr("use_event", XUEvent.UseEvent.ABSORBER)
 
         # UtilBase用ルートの作成(状態保存先)
         if elem.exists_tag(root_tag):

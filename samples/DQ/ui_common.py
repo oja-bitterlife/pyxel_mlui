@@ -85,7 +85,7 @@ def popup_text(popup_text:text.Msg, event:XUEvent):
 
     for i,page in enumerate(popup_text.text.split()):
         area = popup_text.area
-        x, y = area.aligned_pos(system_font.text_width(page), h, XURect.ALIGN_CENTER, XURect.ALIGN_CENTER)
+        x, y = area.aligned_pos(system_font.text_width(page), h, XURect.Align.CENTER, XURect.Align.CENTER)
         pyxel.text(x, y + i*system_font.size, page, 7, system_font.font)
 
 
