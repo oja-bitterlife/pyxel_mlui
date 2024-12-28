@@ -36,6 +36,11 @@
         </round_win>
     </buy_menu>
 
+    <sell_menu id="sell_menu">
+        <round_win y="32" w="176" h="160">
+            <buy_list x="30" y="16" item_h="16" id="sell_list"/>
+        </round_win>
+    </sell_menu>
 
 </xmlui>
 

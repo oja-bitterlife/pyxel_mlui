@@ -62,7 +62,7 @@ def ui_init(template:XUTemplate):
                     set_shop_msg(buy_list.xmlui, "なににいたしましょうか？")
 
                 case "sell":
-                    pass
+                    sell_menu= shop_act_win.open("sell_menu")
                 case "exit":
                     # バトルへ
                     pass
