@@ -744,8 +744,8 @@ class XUSelectInfo(_XUUtilBase):
 
     # __eq__だとpylanceの型認識がおかしくなるのでactionを使う
     @property
-    def action(self) -> str:
-        return self.selected_item.action
+    def action(self) -> XUEventItem:
+        return XUEventItem(self.selected_item.action)
 
 # XUSelectBase書き込み用
 class XUSelectBase(XUSelectInfo):
