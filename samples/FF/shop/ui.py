@@ -1,6 +1,6 @@
 import pyxel
 
-from xmlui.core import XUElem,XUTemplate,XUEvent,XUSelectItem,XUWinBase,XUSelectInfo,XUTextUtil,XURect
+from xmlui.core import XMLUI,XUElem,XUTemplate,XUEvent,XUSelectItem,XUWinBase,XUSelectInfo,XUTextUtil,XURect
 from xmlui.lib import select,text
 from system import system_font, hand_cursor
 
@@ -42,26 +42,24 @@ def ui_init(template:XUTemplate):
 
         shop_act_list.select_by_event(event.trg, *XUEvent.Key.LEFT_RIGHT())
         if XUEvent.Key.BTN_A in event.trg:
+            shop_act_win = XUWinBase.find_parent_win(shop_act_list)
+            shop_act_list.enable = False
             match shop_act_list.action:
                 case "buy":
-                    win = XUWinBase.find_parent_win(shop_act_list)
-                    shop_act_list.enable = False
-                    buy_menu= win.open("buy_menu")
+                    buy_menu= shop_act_win.open("buy_menu")
 
                     # 販売アイテム設定
                     buy_list = buy_menu.find_by_id("buy_list")
-                    buy_list.enable = False  # イベントはNumが決まってから
+                    buy_list.enable = False  # カーソル移動は個数を決定したあと
                     buy_list_db = BuyList(1)
                     for data in buy_list_db.data:
                         item = XUElem.new(shop_act_list.xmlui, "shop_buy_item")
                         item.set_text(data["name"])
-                        item.value = data["buy"]
+                        item.value = data["buy"]  # 価格
                         buy_list.add_child(item)
 
                     # メッセージ更新
-                    msg = text.Msg(buy_list.xmlui.find_by_id("shop_msg"))
-                    msg.clear_pages()
-                    msg.append_msg("なににいたしましょうか？")
+                    set_shop_msg(buy_list.xmlui, "なににいたしましょうか？")
 
                 case "sell":
                     pass
@@ -96,10 +94,7 @@ def ui_init(template:XUTemplate):
             shop_act_list.enable = True
 
             # メッセージ更新
-            msg = text.Msg(buy_num.xmlui.find_by_id("shop_msg"))
-            msg.clear_pages()
-            msg.append_msg("いらっしゃい どのようなごようけんで？")
-
+            set_shop_msg(buy_num.xmlui, "いらっしゃい どのようなごようけんで？")
 
     # 購入できるアイテムのリスト
     # -----------------------------------------------------
@@ -153,9 +148,15 @@ def ui_init(template:XUTemplate):
             buy_list.enable = False
 
             # メッセージ更新
-            msg = text.Msg(buy_list.xmlui.find_by_id("shop_msg"))
-            msg.clear_pages()
-            msg.append_msg("なににいたしましょうか？")
+            set_shop_msg(buy_list.xmlui, "なににいたしましょうか？")
+
+    # メッセージ
+    # *************************************************************************
+    # メッセージ設定
+    def set_shop_msg(xmlui:XMLUI, text_:str):
+        msg = text.Msg(xmlui.find_by_id("shop_msg"))
+        msg.clear_pages()
+        msg.append_msg(text_)
 
     @shop_text.msg("shop_msg", "speed")
     def shop_msg(shop_msg:text.Msg, event:XUEvent):

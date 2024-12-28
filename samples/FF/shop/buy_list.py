@@ -2,7 +2,6 @@ from db import game_db
 
 # ユーザーデータ
 # *****************************************************************************
-# セーブデータ。といいつつサンプルではセーブしないので適当で
 class BuyList:
     def __init__(self, shop_id:int):
         self.shop_id = shop_id
