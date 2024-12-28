@@ -8,10 +8,10 @@
                 <label w="72" h="24" align="center" valign="bottom">どうぐや</label>
             </round_win>
             <round_win y="32" w="112" h="32">
-                <shop_act_list x="16" y="16" item_w="32">
-                    <shop_sel_item action="buy">かう</shop_sel_item>
-                    <shop_sel_item action="sell">うる</shop_sel_item>
-                    <shop_sel_item action="exit">でる</shop_sel_item>
+                <shop_act_list x="16" y="16" item_w="32" id="shop_act_list">
+                    <shop_ui_item action="buy">かう</shop_ui_item>
+                    <shop_ui_item action="sell">うる</shop_ui_item>
+                    <shop_ui_item action="exit">でる</shop_ui_item>
                 </shop_act_list>
             </round_win>
             <round_win x="112" y="32" w="112" h="32">
@@ -24,16 +24,17 @@
         </offset>
     </ui_shop>
 
-    <buy_list id="buy_list">
+    <buy_menu id="buy_menu">
         <label w="72" h="24" align="center" valign="bottom">いくつ？</label>
-        <buy_num x="56" y="16" item_w="16">
-            <shop_sel_item action="1">１</shop_sel_item>
-            <shop_sel_item action="4">４</shop_sel_item>
-            <shop_sel_item action="10">１０</shop_sel_item>
+        <buy_num x="56" y="16" item_w="16" id="buy_num">
+            <shop_ui_item action="1">１</shop_ui_item>
+            <shop_ui_item action="4">４</shop_ui_item>
+            <shop_ui_item action="10">１０</shop_ui_item>
         </buy_num>
         <round_win y="32" w="176" h="160">
+            <buy_list x="56" y="16" item_h="16" id="buy_list"/>
         </round_win>
-    </buy_list>
+    </buy_menu>
 
 
 </xmlui>

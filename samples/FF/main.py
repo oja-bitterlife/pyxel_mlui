@@ -15,7 +15,7 @@ scene_manager = XUXSceneManager(Shop())
 def update(): # フレームの更新処理
     # デバッグ用
     if pyxel.btnp(pyxel.KEY_TAB):
-        scene_manager.current_scene.xmlui.strtree() # type: ignore
+        print(scene_manager.current_scene.xmlui.strtree()) # type: ignore
     if pyxel.btnp(pyxel.KEY_F5):
         scene_manager.current_scene.xmlui.reload_templates() # type: ignore
 
