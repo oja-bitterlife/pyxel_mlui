@@ -810,7 +810,7 @@ class XUSelectBase(XUSelectInfo):
         if next_y >= cols[next_x]:
             next_y = 0 if x_wrap else y
 
-        self.select(no)
+        self.select(next_y*self.rows + next_x)
 
 # グリッド選択
 class XUSelectGrid(XUSelectBase):
