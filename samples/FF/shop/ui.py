@@ -217,12 +217,12 @@ def ui_init(template:XUTemplate):
             hand_cursor.draw(area.x, area.y+4)
 
     # 売却アイテム選択
-    @shop_select.list("sell_list", "shop_buy_item")
-    def sell_list(sell_list:select.List, event:XUEvent):
+    @shop_select.grid("sell_list", "shop_buy_item")
+    def sell_list(sell_list:select.Grid, event:XUEvent):
         for item in sell_list.items:
             shop_sell_item(item, sell_list.enable)
 
-        sell_list.select_by_event(event.trg, *XUEvent.Key.UP_DOWN())
+        sell_list.select_by_event(event.trg, *XUEvent.Key.CURSOR())
         if XUEvent.Key.BTN_A in event.trg:
             sell_menu = sell_list.find_parent_by_id("sell_menu")
             price = get_buy_price(sell_menu, sell_list.selected_item)

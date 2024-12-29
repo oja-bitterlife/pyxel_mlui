@@ -43,7 +43,7 @@
             <shop_ui_item action="all">ぜんぶ</shop_ui_item>
         </sell_num>
         <round_win x="-8" y="32" w="240" h="160">
-            <sell_list x="18" y="16" item_h="16" id="sell_list"/>
+            <sell_list x="16" y="16" rows="2" item_w="112" item_h="16" id="sell_list"/>
         </round_win>
     </sell_menu>
 
