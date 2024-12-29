@@ -5,7 +5,7 @@ from xmlui.lib import select,text
 from system import system_font, hand_cursor
 
 from db import user_data
-from shop.buy_list import BuyList
+from FF.shop.shop_list import BuyList,SellList
 
 def ui_init(template:XUTemplate):
     shop_select = select.Decorator(template)
@@ -48,7 +48,7 @@ def ui_init(template:XUTemplate):
                 case "buy":
                     init_buy_list(shop_act_win.open("buy_menu"))  # 販売アイテム設定
                 case "sell":
-                    sell_menu= shop_act_win.open("sell_menu")
+                    init_sell_list(shop_act_win.open("sell_menu"))  # 買い取りアイテム設定
                 case "exit":
                     # バトルへ
                     pass
@@ -151,6 +151,20 @@ def ui_init(template:XUTemplate):
 
     # うるメニュー
     # *************************************************************************
+    def init_sell_list(buy_menu:XUElem):
+        sell_list = buy_menu.find_by_id("sell_list")
+        sell_list.enable = False  # イベントはNumが決まってから
+        sell_list_db = SellList(1)
+        for data in sell_list_db.data:
+            item = XUElem.new(buy_menu.xmlui, "shop_buy_item")
+            if data != None:
+                item.set_text(data["name"])
+                item.value = data["buy"]
+            sell_list.add_child(item)
+
+        # メッセージ更新
+        set_shop_msg(buy_menu.xmlui, "なにを うりますか？")
+
     # 個数を選択
     # -----------------------------------------------------
     @shop_select.list("sell_num", "shop_ui_item")
@@ -177,6 +191,30 @@ def ui_init(template:XUTemplate):
 
             # メッセージ更新
             set_shop_msg(sell_num.xmlui, "いらっしゃい どのようなごようけんで？")
+
+    # 売却アイテム選択
+    @shop_select.list("sell_list", "shop_buy_item")
+    def sell_list(sell_list:select.List, event:XUEvent):
+        for item in sell_list.items:
+            shop_buy_item(item, sell_list.enable)
+
+        sell_list.select_by_event(event.trg, *XUEvent.Key.UP_DOWN())
+        if XUEvent.Key.BTN_A in event.trg:
+            sell_menu = sell_list.find_parent_by_id("sell_menu")
+            price = get_price(sell_menu, sell_list.selected_item)
+            user_data.gil -= price
+
+            # メッセージ更新
+            msg = text.Msg(sell_list.xmlui.find_by_id("shop_msg"))
+            msg.clear_pages()
+            msg.append_msg("ありがとうございます ほかには？")
+
+        # 戻る
+        if XUEvent.Key.BTN_B in event.trg:
+            sell_list.enable = False
+
+            # メッセージ更新
+            set_shop_msg(sell_list.xmlui, "なににいたしましょうか？")
 
 
     # メッセージ

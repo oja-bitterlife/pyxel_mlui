@@ -5,7 +5,7 @@ from xmlui.core import XMLUI,XUDebug
 from xmlui.ext.scene import XUXFadeScene
 
 from ui_common import ui_common_init
-from samples.FF.shop import ui
+from FF.shop import ui
 
 class Shop(XUXFadeScene):
     def __init__(self):
