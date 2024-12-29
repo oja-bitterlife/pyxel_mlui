@@ -21,8 +21,11 @@ user_save = UserSave("おじゃ１")
 # ユーザーステータスデータアクセス
 class UserData:
     def reload_db(self):
-        self.user_data = [dict(data) for data in user_db.execute("SELECT * from user_data").fetchall()]
-        # level_data = dict(game_db.execute("SELECT * from level_data where level=?", [user_data["lv"]]).fetchone())
+        sql = """
+            SELECT * from user_data
+            INNER JOIN _level_data ON user_data.lv == _level_data.lv
+        """
+        self.user_data = [dict(data) for data in user_db.execute(sql).fetchall()]
         self.party_data = dict(user_db.execute("SELECT * from party_data").fetchone())
 
     def __init__(self):

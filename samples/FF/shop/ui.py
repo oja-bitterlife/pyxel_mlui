@@ -46,21 +46,7 @@ def ui_init(template:XUTemplate):
             shop_act_list.enable = False
             match shop_act_list.action:
                 case "buy":
-                    buy_menu= shop_act_win.open("buy_menu")
-
-                    # 販売アイテム設定
-                    buy_list = buy_menu.find_by_id("buy_list")
-                    buy_list.enable = False  # カーソル移動は個数を決定したあと
-                    buy_list_db = BuyList(1)
-                    for data in buy_list_db.data:
-                        item = XUElem.new(shop_act_list.xmlui, "shop_buy_item")
-                        item.set_text(data["name"])
-                        item.value = data["buy"]  # 価格
-                        buy_list.add_child(item)
-
-                    # メッセージ更新
-                    set_shop_msg(buy_list.xmlui, "なににいたしましょうか？")
-
+                    init_buy_list(shop_act_win.open("buy_menu"))  # 販売アイテム設定
                 case "sell":
                     sell_menu= shop_act_win.open("sell_menu")
                 case "exit":
@@ -69,6 +55,19 @@ def ui_init(template:XUTemplate):
 
     # かうメニュー
     # *************************************************************************
+    def init_buy_list(buy_menu:XUElem):
+        buy_list = buy_menu.find_by_id("buy_list")
+        buy_list.enable = False  # イベントはNumが決まってから
+        buy_list_db = BuyList(1)
+        for data in buy_list_db.data:
+            item = XUElem.new(buy_menu.xmlui, "shop_buy_item")
+            item.set_text(data["name"])
+            item.value = data["buy"]
+            buy_list.add_child(item)
+
+        # メッセージ更新
+        set_shop_msg(buy_menu.xmlui, "なににいたしましょうか？")
+
     # 個数を選択
     # -----------------------------------------------------
     @shop_select.list("buy_num", "shop_ui_item")
@@ -149,6 +148,36 @@ def ui_init(template:XUTemplate):
 
             # メッセージ更新
             set_shop_msg(buy_list.xmlui, "なににいたしましょうか？")
+
+    # うるメニュー
+    # *************************************************************************
+    # 個数を選択
+    # -----------------------------------------------------
+    @shop_select.list("sell_num", "shop_ui_item")
+    def sell_num(sell_num:select.List, event:XUEvent):
+        for item in sell_num.items:
+            shop_ui_item(item)
+
+        # 価格を変動させる
+        sell_num.select_by_event(event.trg, *XUEvent.Key.LEFT_RIGHT())
+
+        if XUEvent.Key.BTN_A in event.trg:
+            buy_menu = sell_num.find_parent_by_id("sell_menu")
+            buy_list = buy_menu.find_by_id("sell_list")
+            buy_list.enable = True
+
+        # 戻る
+        if XUEvent.Key.BTN_B in event.trg:
+            sell_num.close()
+
+            # enableにしていたメニューを元に戻す
+            win = XUWinBase.find_parent_win(sell_num)
+            shop_act_list = win.find_by_id("shop_act_list")
+            shop_act_list.enable = True
+
+            # メッセージ更新
+            set_shop_msg(sell_num.xmlui, "いらっしゃい どのようなごようけんで？")
+
 
     # メッセージ
     # *************************************************************************

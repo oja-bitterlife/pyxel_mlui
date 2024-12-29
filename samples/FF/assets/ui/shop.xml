@@ -37,10 +37,14 @@
     </buy_menu>
 
     <sell_menu id="sell_menu">
+        <label w="72" h="24" align="center" valign="bottom">いくつ？</label>
+        <sell_num x="60" y="16" item_w="16" id="sell_num">
+            <shop_ui_item action="1">１</shop_ui_item>
+            <shop_ui_item action="all">ぜんぶ</shop_ui_item>
+        </sell_num>
         <round_win y="32" w="176" h="160">
-            <buy_list x="30" y="16" item_h="16" id="sell_list"/>
+            <sell_list x="30" y="16" item_h="16" id="sell_list"/>
         </round_win>
     </sell_menu>
 
 </xmlui>
-
