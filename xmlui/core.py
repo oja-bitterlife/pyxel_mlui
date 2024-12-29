@@ -781,22 +781,36 @@ class XUSelectBase(XUSelectInfo):
             item.set_attr("selected", i == no)
 
     # 選択を移動させる
-    def next(self, add:int=1, x_wrap=False, y_wrap=False):
+    def next(self, add_x:int, add_y:int, x_wrap=False, y_wrap=False):
         # キャッシュ
         no = self.selected_no
-        cols = max(self.item_num//self.rows, 1)
+        item_num = self.item_num
 
+        # 行と列の状態取得(半端グリッド対応)
+        rows = [self.rows for _ in range(item_num // self.rows)]
+        if item_num % self.rows != 0:
+            rows.append(item_num % self.rows)
+        cols = [item_num//self.rows for i in range(self.rows)]
+        for i in range(item_num % self.rows):
+            cols[i] += 1
+
+        # 更新
         x = no % self.rows
         y = no // self.rows
-        sign = 1 if add >= 0 else -1
-        add_x = abs(add) % self.rows * sign
-        add_y = abs(add) // self.rows * sign
+        next_x = x + add_x
+        next_y = y + add_y
 
-        # wrapモードとmin/maxモードそれぞれで設定
-        x = (x + self.rows + add_x) % self.rows if x_wrap else min(max(x + add_x, 0), self.rows-1)
-        y = (y + cols + add_y) % cols if y_wrap else min(max(y + add_y, 0), cols-1)
+        # wrapモードとmin/maxモードそれぞれで更新後状態調整
+        if next_x < 0:
+            next_x = rows[y]-1 if x_wrap else x
+        if next_x >= rows[y]:
+            next_x = 0 if x_wrap else x
+        if next_y < 0:
+            next_y = cols[next_x]-1 if y_wrap else y
+        if next_y >= cols[next_x]:
+            next_y = 0 if x_wrap else y
 
-        self.select(y*self.rows + x)
+        self.select(no)
 
 # グリッド選択
 class XUSelectGrid(XUSelectBase):
@@ -808,13 +822,13 @@ class XUSelectGrid(XUSelectBase):
         old_no = self.selected_no
 
         if left_event in input:
-            self.next(-1, x_wrap, y_wrap)
+            self.next(-1, 0, x_wrap, y_wrap)
         elif right_event in input:
-            self.next(1, x_wrap, y_wrap)
+            self.next(1, 0, x_wrap, y_wrap)
         elif up_event in input:
-            self.next(-self.rows, x_wrap, y_wrap)
+            self.next(0, -1, x_wrap, y_wrap)
         elif down_event in input:
-            self.next(self.rows, x_wrap, y_wrap)
+            self.next(0, 1, x_wrap, y_wrap)
 
         return self.selected_no != old_no
 
@@ -837,9 +851,9 @@ class XUSelectList(XUSelectBase):
         old_no = self.selected_no
 
         if prev_event in input:
-            self.next(-1, wrap, wrap)
+            self.next(-1, 0, wrap, wrap)
         elif next_event in input:
-            self.next(1, wrap, wrap)
+            self.next(1, 0, wrap, wrap)
 
         return self.selected_no != old_no
 
