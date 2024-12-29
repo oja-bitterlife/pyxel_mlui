@@ -45,5 +45,14 @@ class UserData:
         user_db.connection.commit()
         self.reload_db()
 
-
 user_data = UserData()
+
+
+# ユーザー所持アイテム
+class UserItem:
+    def __init__(self):
+        ids = [id["item_id"] for id in user_db.execute("SELECT item_id from has_items").fetchall()]
+        params = ",".join(["?"]*len(ids))
+        self.items = [dict(item) for item in game_db.execute(f"SELECT * from item_data WHERE id IN ({params})", ids).fetchall()]
+
+user_item = UserItem()

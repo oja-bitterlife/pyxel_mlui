@@ -7,7 +7,7 @@ class BuyList:
         self.shop_id = shop_id
         sql = """
             SELECT * from shop_item
-            INNER JOIN item ON shop_item.item_id = item.id
+            INNER JOIN item_data ON shop_item.item_id = item_data.id
             WHERE shop_id = ?
         """
         self.data = [dict(row) for row in game_db.execute(sql, [self.shop_id]).fetchall()]
