@@ -3,23 +3,33 @@ from db import game_db,user_db
 # アイテムデータ
 # *****************************************************************************
 class BuyList:
-    def __init__(self, shop_id:int):
-        self.shop_id = shop_id
+    @classmethod
+    def get(cls, shop_id:int) -> list[dict]:
         sql = """
             SELECT name,buy from shop_item
             INNER JOIN item_data ON shop_item.item_id = item_data.id
             WHERE shop_id = ?
         """
-        self.data = [dict(row) for row in game_db.execute(sql, [self.shop_id]).fetchall()]
+        return [dict(row) for row in game_db.execute(sql, [shop_id]).fetchall()]
 
 class SellList:
     # 空欄にはNoneが入る
-    def __init__(self, shop_id:int):
+    @classmethod
+    def get(cls, shop_id:int) -> list[dict]:
         sql = """
             SELECT item_id,COUNT(item_id) as num FROM has_items GROUP BY item_id
         """
-        self.data = [dict(data) for data in user_db.execute(sql).fetchall()]
-        for data in self.data:
-            data |= dict(game_db.execute("SELECT name,sell FROM item_data WHERE id = ?", [data["item_id"]]).fetchone())
+        data = [dict(data) for data in user_db.execute(sql).fetchall()]
+        for item in data:
+            item |= dict(game_db.execute("SELECT name,sell FROM item_data WHERE id = ?", [item["item_id"]]).fetchone())
 
-print(SellList(1))
+        return data
+
+    @classmethod
+    def set(cls, shop_id:int, data:list):
+        user_db.execute("DELETE FROM has_items")  # 一旦allクリア
+        # insertで入れ直す
+        for item_id, num in data:
+            for _ in range(num):
+                user_db.execute("INSERT INTO has_items (item_id) VALUES (?)", [item_id])
+ 

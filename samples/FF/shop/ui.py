@@ -58,8 +58,8 @@ def ui_init(template:XUTemplate):
     def init_buy_list(buy_menu:XUElem):
         buy_list = buy_menu.find_by_id("buy_list")
         buy_list.enable = False  # イベントはNumが決まってから
-        buy_list_db = BuyList(1)
-        for data in buy_list_db.data:
+        buy_list_data = BuyList.get(1)
+        for data in buy_list_data:
             item = XUElem.new(buy_menu.xmlui, "shop_buy_item")
             item.set_text(data["name"])
             item.value = data["buy"]
@@ -154,14 +154,16 @@ def ui_init(template:XUTemplate):
     def init_sell_list(buy_menu:XUElem):
         sell_list = buy_menu.find_by_id("sell_list")
         sell_list.enable = False  # イベントはNumが決まってから
-        sell_list_db = SellList(1)
-        for data in sell_list_db.data:
+        sell_list_data = SellList.get(1)
+        for data in sell_list_data:
             item = XUElem.new(buy_menu.xmlui, "shop_sell_item")
+            item.set_attr("item_id", data["item_id"])
             item.set_text(data["name"])
-            item.value = data["sell"]
+            item.value = data["sell"]  # 売却価格
             item.set_attr("num", data["num"])
             sell_list.add_child(item)
-        for _ in range(8*2-len(sell_list_db.data)):
+
+        for _ in range(8*2-len(sell_list_data)):
             item = XUElem.new(buy_menu.xmlui, "shop_sell_item")
             sell_list.add_child(item)
 
@@ -179,15 +181,19 @@ def ui_init(template:XUTemplate):
         sell_num.select_by_event(event.trg, *XUEvent.Key.LEFT_RIGHT())
 
         if XUEvent.Key.BTN_A in event.trg:
-            buy_menu = sell_num.find_parent_by_id("sell_menu")
-            buy_list = buy_menu.find_by_id("sell_list")
-            buy_list.enable = True
+            sell_menu = sell_num.find_parent_by_id("sell_menu")
+            sell_list = sell_menu.find_by_id("sell_list")
+            sell_list.enable = True
 
         # 戻る
         if XUEvent.Key.BTN_B in event.trg:
+            # DBの更新
+            sell_menu = sell_num.find_parent_by_id("sell_menu")
+            sell_list = XUSelectInfo(sell_menu.find_by_id("sell_list"))
+            sell_list_db = SellList.set(1, [(item.attr_int("item_id"), item.attr_int("num")) for item in sell_list.items if item.attr_int("num") > 0])
             sell_num.close()
 
-            # enableにしていたメニューを元に戻す
+            # disableにしていたメニューを元に戻す
             win = XUWinBase.find_parent_win(sell_num)
             shop_act_list = win.find_by_id("shop_act_list")
             shop_act_list.enable = True
@@ -207,7 +213,7 @@ def ui_init(template:XUTemplate):
         value = selected_item.attr_int("value")
         return get_sell_num(selected_item) * value
 
-    # 売却アイテムリスト
+    # 売却アイテムリスト表示
     def shop_sell_item(shop_sell_item:XUSelectItem, parent_enable:bool):
         area = shop_sell_item.area
 
@@ -257,8 +263,6 @@ def ui_init(template:XUTemplate):
             if num > 0:
                 price_text = XUTextUtil.format_zenkaku(get_sell_price(sell_list.selected_item))
                 price_text = "　"*(7-len(price_text)) + price_text
-
-                # メッセージ更新
                 msg = text.Msg(sell_list.xmlui.find_by_id("shop_msg"))
                 msg.clear_pages()
                 msg.append_msg(f"それなら {price_text}ギルになります")
@@ -269,8 +273,6 @@ def ui_init(template:XUTemplate):
         # 戻る
         if XUEvent.Key.BTN_B in event.trg:
             sell_list.enable = False
-
-            # メッセージ更新
             set_shop_msg(sell_list.xmlui, "なににいたしましょうか？")
 
 
