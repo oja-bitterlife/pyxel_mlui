@@ -841,19 +841,19 @@ class XUSelectGrid(XUSelectBase):
         return self._select_by_event(input, left_event, right_event, up_event, down_event, False, False)
 
 # リスト選択
-class XUSelectList(XUSelectBase):
-    def __init__(self, elem:XUElem, item_tag:str, item_w:int, item_h:int):
-        rows = len(elem.find_by_tagall(item_tag)) if item_w > item_h else 1  # 横並びかどうか
+class _XUSelectListBase(XUSelectBase):
+    def __init__(self, elem:XUElem, item_tag:str, rows:int, item_w:int, item_h:int):
         super().__init__(elem, item_tag, rows, item_w, item_h)
-  
+        self.next_move = [0, 0]
+
     # 入力に応じた挙動一括。変更があった場合はTrue
     def _select_by_event(self, input:set[XUEventItem], prev_event:XUEventItem, next_event:XUEventItem, wrap:bool) -> bool:
         old_no = self.selected_no
 
         if prev_event in input:
-            self.next(-1, 0, wrap, wrap)
+            self.next(-self.next_move[0], -self.next_move[1], wrap, wrap)
         elif next_event in input:
-            self.next(1, 0, wrap, wrap)
+            self.next(self.next_move[0], self.next_move[1], wrap, wrap)
 
         return self.selected_no != old_no
 
@@ -864,6 +864,16 @@ class XUSelectList(XUSelectBase):
     # 選択一括処理NoWrap版
     def select_no_wrap(self, input:set[XUEventItem], prev_event:XUEventItem, next_event:XUEventItem) -> bool:
         return self._select_by_event(input, prev_event, next_event, False)
+
+class XUSelectList(_XUSelectListBase):
+    def __init__(self, elem:XUElem, item_tag:str, item_h:int):
+        super().__init__(elem, item_tag, 1, 0, item_h)
+        self.next_move = [0, 1]
+  
+class XUSelectRowList(_XUSelectListBase):
+    def __init__(self, elem:XUElem, item_tag:str, item_w:int):
+        super().__init__(elem, item_tag, len(elem.find_by_tagall(item_tag)), item_w, 0)
+        self.next_move = [1, 0]
 
 
 # テキスト系

@@ -30,8 +30,8 @@ def ui_init(template:XUTemplate):
 
     # かう・うる・でるの選択
     # -----------------------------------------------------
-    @shop_select.list("shop_act_list", "shop_ui_item")
-    def shop_act_list(shop_act_list:select.List, event:XUEvent):
+    @shop_select.row_list("shop_act_list", "shop_ui_item")
+    def shop_act_list(shop_act_list:select.RowList, event:XUEvent):
         # 一時的にdisableになることがある
         if shop_act_list.enable == False:
             return
@@ -71,8 +71,8 @@ def ui_init(template:XUTemplate):
 
     # 個数を選択
     # -----------------------------------------------------
-    @shop_select.list("buy_num", "shop_ui_item")
-    def buy_num(buy_num:select.List, event:XUEvent):
+    @shop_select.row_list("buy_num", "shop_ui_item")
+    def buy_num(buy_num:select.RowList, event:XUEvent):
         for item in buy_num.items:
             shop_ui_item(item)
 
@@ -177,8 +177,8 @@ def ui_init(template:XUTemplate):
 
     # 個数を選択
     # -----------------------------------------------------
-    @shop_select.list("sell_num", "shop_ui_item")
-    def sell_num(sell_num:select.List, event:XUEvent):
+    @shop_select.row_list("sell_num", "shop_ui_item")
+    def sell_num(sell_num:select.RowList, event:XUEvent):
         for item in sell_num.items:
             shop_ui_item(item)
 
