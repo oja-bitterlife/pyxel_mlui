@@ -865,15 +865,17 @@ class _XUSelectListBase(XUSelectBase):
     def select_no_wrap(self, input:set[XUEventItem], prev_event:XUEventItem, next_event:XUEventItem) -> bool:
         return self._select_by_event(input, prev_event, next_event, False)
 
+# 縦方向リスト
 class XUSelectList(_XUSelectListBase):
     def __init__(self, elem:XUElem, item_tag:str, item_h:int):
         super().__init__(elem, item_tag, 1, 0, item_h)
-        self.next_move = [0, 1]
-  
+        self.next_move = [0, 1]  # 上下で動く
+
+# 横方向リスト
 class XUSelectRowList(_XUSelectListBase):
     def __init__(self, elem:XUElem, item_tag:str, item_w:int):
         super().__init__(elem, item_tag, len(elem.find_by_tagall(item_tag)), item_w, 0)
-        self.next_move = [1, 0]
+        self.next_move = [1, 0]  # 左右で動く
 
 
 # テキスト系
