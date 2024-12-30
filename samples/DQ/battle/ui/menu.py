@@ -66,7 +66,7 @@ def ui_init(template):
 
         # 自動テキスト送り
         if msg_text.is_next_wait:
-            msg_text.next()
+            msg_text.next_page()
 
         if msg_text.is_all_finish:
             return "finish_msg"

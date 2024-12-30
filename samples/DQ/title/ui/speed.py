@@ -15,8 +15,8 @@ def ui_init(template:XUTemplate):
     title_select = select.Decorator(template)
 
     # メッセージスピード選択
-    @title_select.list("game_speed", "menu_item")
-    def game_speed(game_speed:select.List, event:XUEvent):
+    @title_select.row_list("game_speed", "menu_item")
+    def game_speed(game_speed:select.RowList, event:XUEvent):
         for item in game_speed.items:
             menu_item(item)
 

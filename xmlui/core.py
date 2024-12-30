@@ -1107,6 +1107,10 @@ class XUPageText(XUPageInfo):
         self.select(no)
         return self
 
+    # 次のページへ
+    def next_page(self):
+        self.set_page_no(self.current_page_no+1)
+
 
 # ウインドウサポート
 # *****************************************************************************
