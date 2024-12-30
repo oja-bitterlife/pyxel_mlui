@@ -25,10 +25,18 @@ class SellList:
             SELECT item_id,COUNT(item_id) as num FROM has_items GROUP BY item_id
         """
         data = [dict(data) for data in user_db.execute(sql).fetchall()]
+
+        # 重複除外した基本データに詳細データをくっつける
         for item in data:
             item |= dict(game_db.execute("SELECT name,sell FROM item_data WHERE id = ?", [item["item_id"]]).fetchone())
 
-        return data
+        # 格納順にソートし直す
+        sort_table = []
+        for item_id in [data[0] for data in user_db.execute("SELECT item_id FROM has_items").fetchall()]:
+            if item_id not in sort_table:
+                sort_table.append(item_id)
+        return sorted(data, key=lambda item: sort_table.index(item["item_id"]))
+
 
     @classmethod
     def set(cls, shop_id:int, data:list):
