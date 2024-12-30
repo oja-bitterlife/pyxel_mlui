@@ -6,16 +6,21 @@ class BuyList:
     @classmethod
     def get(cls, shop_id:int) -> list[dict]:
         sql = """
-            SELECT name,buy from shop_item
+            SELECT name,buy,item_data.id as item_id FROM shop_item
             INNER JOIN item_data ON shop_item.item_id = item_data.id
             WHERE shop_id = ?
         """
         return [dict(row) for row in game_db.execute(sql, [shop_id]).fetchall()]
 
+    @classmethod
+    def add(cls, item_id:int, num:int):
+        for _ in range(num):
+            user_db.execute("INSERT INTO has_items (item_id) VALUES (?)", [item_id])
+
 class SellList:
     # 空欄にはNoneが入る
     @classmethod
-    def get(cls, shop_id:int) -> list[dict]:
+    def get(cls) -> list[dict]:
         sql = """
             SELECT item_id,COUNT(item_id) as num FROM has_items GROUP BY item_id
         """
