@@ -20,30 +20,30 @@ def ui_init(template:XUTemplate):
     # ショップ選択
     # *************************************************************************
     # 基本選択物
-    def shop_ui_item(shop_ui_item:XUSelectItem):
-        area = shop_ui_item.area
-        pyxel.text(area.x, area.y, shop_ui_item.text, 7, system_font.font)
+    def shop_act_item(shop_act_item:XUSelectItem):
+        area = shop_act_item.area
+        pyxel.text(area.x, area.y, shop_act_item.text, 7, system_font.font)
 
-        if shop_ui_item.selected:
+        if shop_act_item.selected:
             hand_cursor.draw(area.x, area.y+4)
 
     # かう・うる・でるの選択
     # -----------------------------------------------------
     @shop_select.row_list("shop_act_list", "shop_ui_item")
-    def shop_act_list(shop_act_list:select.RowList, event:XUEvent):
+    def shop_act(shop_act:select.RowList, event:XUEvent):
         # 一時的にdisableになることがある
-        if shop_act_list.enable == False:
+        if shop_act.enable == False:
             return
 
         # メニューアイテム表示
-        for item in shop_act_list.items:
-            shop_ui_item(item)
+        for item in shop_act.items:
+            shop_act_item(item)
 
-        shop_act_list.select_by_event(event.trg, *XUEvent.Key.LEFT_RIGHT())
+        shop_act.select_by_event(event.trg, *XUEvent.Key.LEFT_RIGHT())
         if XUEvent.Key.BTN_A in event.trg:
-            shop_act_win = XUWinBase.find_parent_win(shop_act_list)
-            shop_act_list.enable = False
-            match shop_act_list.action:
+            shop_act_win = XUWinBase.find_parent_win(shop_act)
+            shop_act.enable = False
+            match shop_act.action:
                 case "buy":
                     return "start_buy"
                 case "sell":

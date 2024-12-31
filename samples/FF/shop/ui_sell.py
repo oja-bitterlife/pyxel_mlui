@@ -10,19 +10,11 @@ from FF.shop.ui_shop import set_shop_msg
 
 def ui_init(template:XUTemplate):
     shop_select = select.Decorator(template)
-    shop_text = text.Decorator(template)
 
-    # 基本ラベル
-    @shop_text.label("label")
-    def label(label:text.Label, event:XUEvent):
-        text = XUTextUtil.format_zenkaku(label.text, {"gil":user_data.gil})
-        x, y = label.aligned_pos(system_font, text)
-        pyxel.text(x, y, text, 7, system_font.font)
-
-    # ショップ選択
+    # 個数選択
     # *************************************************************************
     # 基本選択物
-    def shop_ui_item(shop_ui_item:XUSelectItem):
+    def sell_num_item(shop_ui_item:XUSelectItem):
         area = shop_ui_item.area
         pyxel.text(area.x, area.y, shop_ui_item.text, 7, system_font.font)
 
@@ -34,7 +26,7 @@ def ui_init(template:XUTemplate):
     @shop_select.row_list("sell_num", "shop_ui_item")
     def sell_num(sell_num:select.RowList, event:XUEvent):
         for item in sell_num.items:
-            shop_ui_item(item)
+            sell_num_item(item)
 
         # 価格を変動させる
         sell_num.select_by_event(event.trg, *XUEvent.Key.LEFT_RIGHT())
@@ -74,21 +66,21 @@ def ui_init(template:XUTemplate):
         return get_sell_num(selected_item) * value
 
     # 売却アイテムリスト表示
-    def shop_sell_item(shop_sell_item:XUSelectItem, parent_enable:bool):
-        area = shop_sell_item.area
+    def sell_item(sell_item:XUSelectItem, parent_enable:bool):
+        area = sell_item.area
 
         # カーソルは常に表示
-        if shop_sell_item.selected and parent_enable:
+        if sell_item.selected and parent_enable:
             hand_cursor.draw(area.x, area.y+4)
 
         # 個数(0の場合は空欄)
-        num = shop_sell_item.attr_int("num")
+        num = sell_item.attr_int("num")
         if num == 0:
             return
 
         # 商品名
         num_text = ("　" if num < 10 else "") + XUTextUtil.format_zenkaku(num)
-        pyxel.text(area.x+8, area.y, shop_sell_item.text, 7, system_font.font)
+        pyxel.text(area.x+8, area.y, sell_item.text, 7, system_font.font)
         pyxel.text(area.x+8+9*system_font.size, area.y, "：", 7, system_font.font)
         pyxel.text(area.x+8+9*system_font.size+8, area.y, num_text, 7, system_font.font)
 
@@ -97,7 +89,7 @@ def ui_init(template:XUTemplate):
     @shop_select.grid("sell_list", "shop_sell_item")
     def sell_list(sell_list:select.Grid, event:XUEvent):
         for item in sell_list.items:
-            shop_sell_item(item, sell_list.enable)
+            sell_item(item, sell_list.enable)
 
         # 決定待ち
         if sell_list.attr_bool(SELL_WAIT_ATTR):

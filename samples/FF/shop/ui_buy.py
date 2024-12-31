@@ -13,7 +13,7 @@ def ui_init(template:XUTemplate):
     buy_select = select.Decorator(template)
 
     # 基本選択物
-    def shop_ui_item(shop_ui_item:XUSelectItem):
+    def buy_num_item(shop_ui_item:XUSelectItem):
         area = shop_ui_item.area
         pyxel.text(area.x, area.y, shop_ui_item.text, 7, system_font.font)
 
@@ -25,7 +25,7 @@ def ui_init(template:XUTemplate):
     @buy_select.row_list("buy_num", "shop_ui_item")
     def buy_num(buy_num:select.RowList, event:XUEvent):
         for item in buy_num.items:
-            shop_ui_item(item)
+            buy_num_item(item)
 
         # 価格を変動させる
         buy_num.select_by_event(event.trg, *XUEvent.Key.LEFT_RIGHT())
@@ -62,26 +62,26 @@ def ui_init(template:XUTemplate):
         return price
 
     # 購入アイテムリスト
-    def shop_buy_item(shop_buy_item:XUSelectItem, parent_enable:bool):
-        buy_menu = shop_buy_item.find_parent_by_id("buy_menu")
+    def buy_item(buy_item:XUSelectItem, parent_enable:bool):
+        buy_menu = buy_item.find_parent_by_id("buy_menu")
 
         # 商品名
-        area = shop_buy_item.area
-        pyxel.text(area.x, area.y, shop_buy_item.text, 7, system_font.font)
+        area = buy_item.area
+        pyxel.text(area.x, area.y, buy_item.text, 7, system_font.font)
 
         # お値段
-        price_text = XUTextUtil.format_zenkaku(get_buy_price(buy_menu, shop_buy_item))
+        price_text = XUTextUtil.format_zenkaku(get_buy_price(buy_menu, buy_item))
         x,y = area.aligned_pos(system_font.text_width(price_text)+8, 0, XURect.Align.RIGHT)
         pyxel.text(x, area.y, price_text, 7, system_font.font)
 
-        if shop_buy_item.selected and parent_enable:
+        if buy_item.selected and parent_enable:
             hand_cursor.draw(area.x, area.y+4)
 
     # 購入アイテム選択
     @buy_select.list("buy_list", "shop_buy_item")
     def buy_list(buy_list:select.List, event:XUEvent):
         for item in buy_list.items:
-            shop_buy_item(item, buy_list.enable)
+            buy_item(item, buy_list.enable)
 
         buy_list.select_by_event(event.trg, *XUEvent.Key.UP_DOWN())
         if XUEvent.Key.BTN_A in event.trg:
