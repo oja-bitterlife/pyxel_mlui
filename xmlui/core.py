@@ -597,6 +597,14 @@ class XMLUI(XUElem):
         self.add_child(self.root)  # 普通に使うもの
         self.add_child(self._over)  # 上に強制で出す物
 
+    # XMLUIそのものを閉じる
+    def close(self):
+        for template in self._templates:
+            template.remove()
+        # XMLツリーのclose
+        self.root.close()
+        self._over.close()
+
     # template操作
     # *************************************************************************
     def load_template(self, xml_filename:str) -> XUTemplate:
