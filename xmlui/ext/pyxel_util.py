@@ -8,8 +8,19 @@ from xmlui.lib.text import FontBase
 class PyxelFont(FontBase):
     def __init__(self, font_path:str):
         self.font_path = font_path
-        super().__init__(pyxel.Font(font_path), FontBase.get_bdf_size(font_path))
+        super().__init__(pyxel.Font(font_path), PyxelFont.get_bdf_size(font_path))
  
+     # フォントサイズ算出
+    @classmethod
+    def get_bdf_size(cls, bdf_font_path):
+        with open(bdf_font_path, "r") as f:
+            for i, line in enumerate(f.readlines()):
+                if i > 100:  # 100行も見りゃええじゃろ...
+                    raise Exception(f"{bdf_font_path} has not PIXEL_SIZE")
+                if line.startswith("PIXEL_SIZE"):
+                    return int(line.split()[-1])
+        raise Exception(f"{bdf_font_path} has not PIXEL_SIZE")
+
     def text_width(self, text:str) -> int:
         return self.font.text_width(text)
 
@@ -39,10 +50,6 @@ class PyxelPalette:
         # 16+13+215 = 244
         self.free_offset = len(self.palette)
         self.reset()
-
-        # # チェック
-        # for i in range(8):
-        #     print(format(self.palette[self.pal_digital8[i]], "08x"))
 
     # システムにパレットを設定する
     def reset(self) -> Self:
