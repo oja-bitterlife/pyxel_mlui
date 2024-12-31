@@ -4,7 +4,6 @@ pyxel.init(256, 256)
 # ここからゲーム本体開始
 # *********************************************************
 from xmlui.ext.scene import XUXSceneManager
-from system import system_font
 
 from shop import Shop
 
@@ -31,3 +30,4 @@ def draw(): # 描画処理
 
 # アプリケーションの実行
 pyxel.run(update, draw)
+

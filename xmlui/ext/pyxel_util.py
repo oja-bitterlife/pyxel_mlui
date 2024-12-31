@@ -115,3 +115,12 @@ class PyxelPalette:
             return self.pal_gray16[min(max(gray_pal+add, 0), 15)]
         else:
             return self.brightR(self.brightG(self.brightB(pal, add), add), add)
+
+    # デバッグ用
+    # -----------------------------------------------------
+    def getColor(self, pal:int):
+        return self.palette[pal]
+
+    def strRGB(self, pal:int):
+        return format(self.palette[pal], "06X")
+
