@@ -597,6 +597,11 @@ class XMLUI(XUElem):
         self.add_child(self.root)  # 普通に使うもの
         self.add_child(self._over)  # 上に強制で出す物
 
+    def __del__(self):
+        # 削除完了通知
+        if self._debug.is_lib_debug:
+            print("XMLUI was deleted.")
+
     # XMLUIそのものを閉じる
     def close(self):
         for template in self._templates:

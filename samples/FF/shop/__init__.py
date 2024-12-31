@@ -19,7 +19,7 @@ class Shop(XUXFadeScene):
         ui.ui_init(self.template)
 
     def closed(self):
-        self.template.remove()
+        self.xmlui.close()
 
     def update(self):
         pass
