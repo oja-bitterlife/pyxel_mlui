@@ -14,7 +14,7 @@ class PyxelFont(FontBase):
         return self.font.text_width(text)
 
 
-# Pyxelの255パレットを最大まで使う
+# Pyxelの255パレットをたくさん使う
 # #############################################################################
 class PyxelPalette:
     # ojaパレット
@@ -87,3 +87,31 @@ class PyxelPalette:
     @property
     def pal_white(self) -> int:
         return self.pal_digital8[7]
+
+    # 明度操作
+    # -----------------------------------------------------
+    def _splitRGB6(self, pal:int) -> tuple[int, int, int]:
+        pal = min(max(pal-self.colors_offset+1, 0), 6*6*6-1)
+        return pal//36, pal%36//6, pal%6
+
+    def brightR(self, pal:int, add:int) -> int:
+        r, g, b = self._splitRGB6(pal)
+        pal = min(max(r+add, 0), 5)*36 + g*6 + b
+        return self.pal_colors[pal]
+
+    def brightG(self, pal:int, add:int) -> int:
+        r, g, b = self._splitRGB6(pal)
+        pal = r*36 + min(max(g+add, 0), 5)*6 + b
+        return self.pal_colors[pal]
+
+    def brightB(self, pal:int, add:int) -> int:
+        r, g, b = self._splitRGB6(pal)
+        pal = r*36 + g*6 + min(max(b+add, 0), 5)
+        return self.pal_colors[pal]
+
+    def bright(self, pal:int, add:int) -> int:
+        if pal in self.pal_gray16:
+            gray_pal = max(pal - self.gray_offset + 1, 0)
+            return self.pal_gray16[min(max(gray_pal+add, 0), 15)]
+        else:
+            return self.brightR(self.brightG(self.brightB(pal, add), add), add)
