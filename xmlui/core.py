@@ -199,8 +199,14 @@ class XUEvent:
 # XMLのElement管理
 class XUElem:
     def __init__(self, xmlui:'XMLUI', element:Element):
-        self.xmlui = xmlui  # ライブラリへのIF
+        self._xmlui:XMLUI|None = xmlui  # ライブラリへのIF
         self._element = element  # 自身のElement
+
+    @property
+    def xmlui(self) -> "XMLUI":
+        if self._xmlui is None:
+            raise Exception("This element is not attached to XMLUI.")
+        return self._xmlui
 
     # UI_Elemは都度使い捨てなので、対象となるElementで比較する
     def __eq__(self, other) -> bool:
@@ -613,7 +619,11 @@ class XMLUI(XUElem):
         # ワーキングツリー全体の参照を全て削除
         for element in self.xmlui._element.iter():
             element.clear()
-        self.xmlui.xmlui = None  # 自己参照を外す
+
+        # 自己参照を外す
+        self.xmlui._xmlui = None
+        self.root._xmlui = None
+        self._over._xmlui = None
 
         # キャッシュの削除
         self._parent_cache = {}
