@@ -201,8 +201,6 @@ class XUXFadeScene(_XUXSceneBase):
     def update_scene(self):
         # フェードアウト(close)が終わった
         if self.fade_act.is_empty:
-            self.xmlui.root.clear_children()  # 忘れることもあるので、ここでついでに
-
             # シーン完了。closed()内で次シーンを設定しておくように
             self.closed()
             self.is_end = True
