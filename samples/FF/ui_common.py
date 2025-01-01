@@ -16,8 +16,7 @@ FRAME_COL = 7
 FRAME_SHADOW_COL = system_palette.pal_gray16[5]
 FRAME_BG_COL = system_palette.pal_colors[40]
 
-def ui_common_init(xmlui:XMLUI):
-    common_template = xmlui.load_template("assets/ui/common.xml")
+def ui_init(common_template:XUTemplate):
     common_win = win.Decorator(common_template)
     common_text = text.Decorator(common_template)
 

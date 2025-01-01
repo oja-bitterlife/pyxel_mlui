@@ -4,14 +4,15 @@ import pyxel
 from xmlui.core import XMLUI,XUDebug
 from xmlui.ext.scene import XUXFadeScene
 
-from ui_common import ui_common_init
-from FF.shop import ui_shop,ui_buy,ui_sell
+import ui_common
+from FF.shop import ui_buy,ui_sell
 
 class Battle(XUXFadeScene):
     def __init__(self):
         super().__init__(XMLUI(pyxel.width, pyxel.height, XUDebug.DEBUGLEVEL_LIB))
 
         # XMLの読み込み
+        # common_template = self.xmlui.load_template("assets/ui/common.xml")
         # self.template = self.xmlui.load_template("assets/ui/shop.xml")
         # self.xmlui.open("ui_shop")
 

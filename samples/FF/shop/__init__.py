@@ -4,7 +4,7 @@ import pyxel
 from xmlui.core import XMLUI,XUDebug
 from xmlui.ext.scene import XUXFadeScene
 
-from ui_common import ui_common_init
+import ui_common
 from FF.shop import ui_shop,ui_buy,ui_sell
 
 class Shop(XUXFadeScene):
@@ -12,10 +12,11 @@ class Shop(XUXFadeScene):
         super().__init__(XMLUI(pyxel.width, pyxel.height, XUDebug.DEBUGLEVEL_LIB))
 
         # XMLの読み込み
+        common_template = self.xmlui.load_template("assets/ui/common.xml")
         self.template = self.xmlui.load_template("assets/ui/shop.xml")
         self.xmlui.open("ui_shop")
 
-        ui_common_init(self.xmlui)
+        ui_common.ui_init(common_template)
         ui_shop.ui_init(self.template)
         ui_buy.ui_init(self.template)
         ui_sell.ui_init(self.template)
