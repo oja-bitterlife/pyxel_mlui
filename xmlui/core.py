@@ -608,13 +608,13 @@ class XMLUI(XUElem):
     def close(self):
         # templateの削除
         # remove内でリスト操作(削除)が行われるので一旦コピーしておく
-        templates = self._templates[:]
-        for template in templates:
+        for template in self._templates[:]:
             template.remove()
 
         # ワーキングツリー全体の参照を全て削除
         for element in self.xmlui._element.iter():
             element.clear()
+        self.xmlui.xmlui = None  # 自己参照を外す
 
         # キャッシュの削除
         self._parent_cache = {}
