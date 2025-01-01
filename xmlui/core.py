@@ -407,6 +407,8 @@ class XUElem:
         else:
             target = self
 
+        for element in target._element.iter():
+            element.clear()
         target.remove()
 
     # デバッグ用
@@ -604,13 +606,18 @@ class XMLUI(XUElem):
 
     # XMLUIそのものを閉じる
     def close(self):
+        # templateの削除
         # remove内でリスト操作(削除)が行われるので一旦コピーしておく
         templates = self._templates[:]
         for template in templates:
             template.remove()
-        # XMLツリーのclose
-        self.root.close()
-        self._over.close()
+
+        # ワーキングツリー全体の参照を全て削除
+        for element in self.xmlui._element.iter():
+            element.clear()
+
+        # キャッシュの削除
+        self._parent_cache = {}
 
     # template操作
     # *************************************************************************
