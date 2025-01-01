@@ -50,7 +50,7 @@ def ui_init(template:XUTemplate):
                     return "start_sell"
                 case "exit":
                     # バトルへ
-                    pass
+                    return "exit"
 
     # メッセージ
     # *************************************************************************

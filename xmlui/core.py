@@ -604,7 +604,9 @@ class XMLUI(XUElem):
 
     # XMLUIそのものを閉じる
     def close(self):
-        for template in self._templates:
+        # remove内でリスト操作(削除)が行われるので一旦コピーしておく
+        templates = self._templates[:]
+        for template in templates:
             template.remove()
         # XMLツリーのclose
         self.root.close()

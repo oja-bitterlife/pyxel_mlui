@@ -1,28 +1,26 @@
 import pyxel
 
-# ショップ画面
+# バトル画面
 from xmlui.core import XMLUI,XUDebug
 from xmlui.ext.scene import XUXFadeScene
 
 from ui_common import ui_common_init
 from FF.shop import ui_shop,ui_buy,ui_sell
 
-class Shop(XUXFadeScene):
+class Battle(XUXFadeScene):
     def __init__(self):
         super().__init__(XMLUI(pyxel.width, pyxel.height, XUDebug.DEBUGLEVEL_LIB))
 
         # XMLの読み込み
-        self.template = self.xmlui.load_template("assets/ui/shop.xml")
-        self.xmlui.open("ui_shop")
+        # self.template = self.xmlui.load_template("assets/ui/shop.xml")
+        # self.xmlui.open("ui_shop")
 
-        ui_common_init(self.xmlui)
-        ui_shop.ui_init(self.template)
-        ui_buy.ui_init(self.template)
-        ui_sell.ui_init(self.template)
+        # ui_common_init(self.xmlui)
+        # ui_shop.ui_init(self.template)
+        # ui_buy.ui_init(self.template)
+        # ui_sell.ui_init(self.template)
 
     def closed(self):
-        from FF.battle import Battle
-        self.set_next_scene(Battle())
         self.xmlui.close()
 
     def update(self):
@@ -31,9 +29,6 @@ class Shop(XUXFadeScene):
 
         if "start_sell" in self.xmlui.event.trg:
             ui_sell.init_sell_list(self.xmlui)
-
-        if "exit" in self.xmlui.event.trg:
-            self.close()
 
     def draw(self):
         # UIの表示
