@@ -500,15 +500,14 @@ class XUDebug:
     DEBUGEVENT_PRINTTREE = "DEBUG_PRINTTREE"
     DEBUGEVENT_RELOAD = "DEBUG_RELOAD"
 
-    def __init__(self, xmlui:"XMLUI", debug_level):
-        self.xmlui = xmlui
+    def __init__(self, debug_level):
         self.level = debug_level
 
-    def update(self):
-        if self.DEBUGEVENT_PRINTTREE in self.xmlui.event.trg:
-            print(self.xmlui.strtree())
-        if self.DEBUGEVENT_RELOAD in self.xmlui.event.trg:
-            print(self.xmlui.reload_templates())
+    def update(self, xmlui:"XMLUI"):
+        if self.DEBUGEVENT_PRINTTREE in xmlui.event.trg:
+            print(xmlui.strtree())
+        if self.DEBUGEVENT_RELOAD in xmlui.event.trg:
+            print(xmlui.reload_templates())
 
     @property
     def is_lib_debug(self) -> bool:
@@ -588,7 +587,7 @@ class XMLUI(XUElem):
         self._templates:list[XUTemplate] = []
 
         # デバッグ用
-        self._debug = XUDebug(self, debug_level)
+        self._debug = XUDebug(debug_level)
 
         # イベント管理
         self.event = XUEvent(True)  # 唯一のactiveとする
@@ -673,7 +672,7 @@ class XMLUI(XUElem):
 
         # デバッグ
         if self._debug.is_lib_debug:
-            self._debug.update()
+            self._debug.update(self)
 
         # 最後に自分もカウントアップ
         self.set_attr("update_count", self.update_count+1)
