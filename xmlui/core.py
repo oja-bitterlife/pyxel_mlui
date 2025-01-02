@@ -604,12 +604,12 @@ class XMLUI(XUElem):
         self.event.update()
 
         # ActiveStateの取得。Active=最後、なので最後から確認
-        self.active_elems:list[XUElem] = []
+        active_elems:list[XUElem] = []
         for event in reversed([elem for elem in self._rec_iter()
                                 if elem.enable
                                     and (elem.use_event == XUEvent.UseEvent.ABSORBER
                                     or elem.use_event == XUEvent.UseEvent.LISTENER)]):
-            self.active_elems.append(event)  # イベントを使うelemを回収
+            active_elems.append(event)  # イベントを使うelemを回収
             if event.use_event == XUEvent.UseEvent.ABSORBER:  # イベント通知終端
                 break
 
@@ -623,7 +623,7 @@ class XMLUI(XUElem):
                 continue
 
             # active/inactiveどちらのeventを使うか決定
-            event = deepcopy(self.event) if elem in self.active_elems else XUEvent()
+            event = deepcopy(self.event) if elem in active_elems else XUEvent()
 
             # updateカウンタ更新
             event.on_init = elem.update_count == 0  # やっぱりinitialize情報がどこかに欲しい
