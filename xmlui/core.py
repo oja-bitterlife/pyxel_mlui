@@ -529,12 +529,10 @@ class XUTemplate(XUElem):
         super().__init__(root.xmlui, xml.etree.ElementTree.fromstring(f.read()))
         self.xml_filename = xml_filename
 
-        # 処理関数の登録
-        self._draw_funcs:dict[str, Callable[[XUElem, XUEvent], str|None]] = {}
-
     # 登録を削除する
     def remove(self):
         self.xmlui._templates.remove(self)
+        self._xmlui = None
 
     # XMLファイルを再読み込みする(開発用)
     def reload(self):
@@ -546,30 +544,6 @@ class XUTemplate(XUElem):
     # Elmentを複製して取り出す
     def duplicate(self, id:str) -> XUElem:
         return XUElem(self.xmlui, deepcopy(self.find_by_id(id)._element))
-
-    # 処理関数登録
-    # *************************************************************************
-    def set_drawfunc(self, tag_name:str, func:Callable[[XUElem,XUEvent], str|None]):
-        # 処理関数の登録
-        self._draw_funcs[tag_name] = func
-
-    # デコレータも用意
-    def tag_draw(self, tag_name:str):
-        def wrapper(bind_func:Callable[[XUElem,XUEvent], str|None]):
-            self.set_drawfunc(tag_name, bind_func)
-        return wrapper
-
-    # ライブラリ用
-    class HasRef:
-        def __init__(self, template:"XUTemplate"):
-            self.template = template
-
-    # 描画関係
-    # *************************************************************************
-    # タグ処理が登録されていたら実行
-    def draw_element(self, tag_name:str, elem:XUElem, event:XUEvent) -> str | None:
-        if tag_name in self._draw_funcs:
-            return self._draw_funcs[tag_name](elem, event)
 
 # XMLUIコア本体
 class XMLUI(XUElem):
@@ -591,6 +565,9 @@ class XMLUI(XUElem):
 
         # XMLテンプレート置き場
         self._templates:list[XUTemplate] = []
+
+        # 処理関数の登録
+        self._draw_funcs:dict[str, Callable[[XUElem, XUEvent], str|None]] = {}
 
         # デバッグ用
         self._debug = XUDebug(debug_level)
@@ -615,6 +592,9 @@ class XMLUI(XUElem):
         # remove内でリスト操作(削除)が行われるので一旦コピーしておく
         for template in self._templates[:]:
             template.remove()
+
+        # 登録関数のクリア
+        self._draw_funcs = {}
 
         # ワーキングツリー全体の参照を全て削除
         for element in self.xmlui._element.iter():
@@ -646,6 +626,26 @@ class XMLUI(XUElem):
         for template in self._templates:
             template.reload()
 
+    # 処理関数登録
+    # *************************************************************************
+    def set_drawfunc(self, tag_name:str, func:Callable[[XUElem,XUEvent], str|None]):
+        # 処理関数の登録
+        self._draw_funcs[tag_name] = func
+
+    def clear_drawfunc(self):
+        self._draw_funcs = {}
+
+    # デコレータも用意
+    def tag_draw(self, tag_name:str):
+        def wrapper(bind_func:Callable[[XUElem,XUEvent], str|None]):
+            self.set_drawfunc(tag_name, bind_func)
+        return wrapper
+
+    # デコレータ作成用
+    class HasRef:
+        def __init__(self, xmlui:"XMLUI"):
+            self.xmlui = xmlui
+
     # 更新
     # *************************************************************************
     def draw(self):
@@ -675,8 +675,8 @@ class XMLUI(XUElem):
             elem.set_attr("update_count", elem.update_count+1)  # 1スタート(0は初期化時)
 
             # 登録されている関数を実行。戻り値はイベント
-            for template in self._templates:
-                result = template.draw_element(elem.tag, elem, event)
+            if elem.tag in self._draw_funcs:
+                result = self._draw_funcs[elem.tag](elem, event)
                 if result is not None:
                     self.on(result)
 

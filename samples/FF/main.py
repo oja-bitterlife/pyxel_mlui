@@ -6,12 +6,13 @@ pyxel.init(256, 256)
 from xmlui.ext.scene import XUXSceneManager
 
 from shop import Shop
+from battle import Battle
 
-# 最初はショップ
-scene_manager = XUXSceneManager(Shop())
+#scene_manager = XUXSceneManager(Shop())
+scene_manager = XUXSceneManager(Battle())
 
 # Main
-def update(): # フレームの更新処理
+def update():
     # デバッグ用
     if pyxel.btnp(pyxel.KEY_TAB):
         print(scene_manager.current_scene.xmlui.strtree()) # type: ignore

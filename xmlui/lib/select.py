@@ -31,14 +31,14 @@ class RowList(XUSelectRowList):
 
 # デコレータを用意
 # *****************************************************************************
-class Decorator(XUTemplate.HasRef):
+class Decorator(XMLUI.HasRef):
     def grid(self, tag_name:str, init_item_tag:str):
         def wrapper(bind_func:Callable[[Grid,XUEvent], str|None]):
             # 登録用関数をジェネレート
             def draw(elem:XUElem, event:XUEvent):
                 return bind_func(Grid(elem, init_item_tag), event)
             # 関数登録
-            self.template.set_drawfunc(tag_name, draw)
+            self.xmlui.set_drawfunc(tag_name, draw)
         return wrapper
 
     def list(self, tag_name:str, init_item_tag:str):
@@ -47,7 +47,7 @@ class Decorator(XUTemplate.HasRef):
             def draw(elem:XUElem, event:XUEvent):
                 return bind_func(List(elem, init_item_tag), event)
             # 関数登録
-            self.template.set_drawfunc(tag_name, draw)
+            self.xmlui.set_drawfunc(tag_name, draw)
         return wrapper
 
     def row_list(self, tag_name:str, init_item_tag:str):
@@ -56,6 +56,6 @@ class Decorator(XUTemplate.HasRef):
             def draw(elem:XUElem, event:XUEvent):
                 return bind_func(RowList(elem, init_item_tag), event)
             # 関数登録
-            self.template.set_drawfunc(tag_name, draw)
+            self.xmlui.set_drawfunc(tag_name, draw)
         return wrapper
 

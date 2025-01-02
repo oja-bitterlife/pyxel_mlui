@@ -12,11 +12,11 @@ class Battle(XUXFadeScene):
         super().__init__(XMLUI(pyxel.width, pyxel.height, XUDebug.DEBUGLEVEL_LIB))
 
         # XMLの読み込み
-        # common_template = self.xmlui.load_template("assets/ui/common.xml")
-        # self.template = self.xmlui.load_template("assets/ui/shop.xml")
-        # self.xmlui.open("ui_shop")
+        self.xmlui.load_template("assets/ui/common.xml")
+        self.xmlui.load_template("assets/ui/battle.xml")
+        self.xmlui.open("status_win")
 
-        # ui_common_init(self.xmlui)
+        ui_common.ui_init(self.xmlui)
         # ui_shop.ui_init(self.template)
         # ui_buy.ui_init(self.template)
         # ui_sell.ui_init(self.template)

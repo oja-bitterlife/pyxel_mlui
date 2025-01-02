@@ -106,14 +106,14 @@ class MsgScr(Msg):
 
 # デコレータを用意
 # *****************************************************************************
-class Decorator(XUTemplate.HasRef):
+class Decorator(XMLUI.HasRef):
     def label(self, tag_name:str):
         def wrapper(bind_func:Callable[[Label,XUEvent], str|None]):
             # 登録用関数をジェネレート
             def draw(elem:XUElem, event:XUEvent):
                 return bind_func(Label(elem), event)
             # 関数登録
-            self.template.set_drawfunc(tag_name, draw)
+            self.xmlui.set_drawfunc(tag_name, draw)
         return wrapper
 
     def msg(self, tag_name:str, speed_attr:str|None=None):
@@ -125,7 +125,7 @@ class Decorator(XUTemplate.HasRef):
                     msg.current_page.draw_count += msg.attr_float(speed_attr, 0)
                 return bind_func(msg, event)
             # 関数登録
-            self.template.set_drawfunc(tag_name, draw)
+            self.xmlui.set_drawfunc(tag_name, draw)
         return wrapper
 
     def msg_scr(self, tag_name:str, speed_attr:str|None=None):
@@ -137,5 +137,5 @@ class Decorator(XUTemplate.HasRef):
                     msg.current_page.draw_count += msg.attr_float(speed_attr, 0)
                 return bind_func(MsgScr(elem), event)
             # 関数登録
-            self.template.set_drawfunc(tag_name, draw)
+            self.xmlui.set_drawfunc(tag_name, draw)
         return wrapper

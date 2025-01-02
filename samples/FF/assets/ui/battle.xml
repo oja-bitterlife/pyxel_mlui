@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<xmlui>
+    <info>バトル用</info>
+    <ui_battle>
+        <status_win x="96" y="160" w="160" h="96" id="status_win">
+            <hp_Label x="64" w="32" align="center" valign="bottom">ＨＰ</hp_Label>
+            <status x="-64"></status>
+        </status_win>
+    </ui_battle>
+
+</xmlui>
