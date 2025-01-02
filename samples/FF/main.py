@@ -3,8 +3,12 @@ pyxel.init(256, 256)
 
 # ここからゲーム本体開始
 # *********************************************************
-from xmlui.ext.scene import XUXSceneManager
+from xmlui.core import XMLUI
+from xmlui.lib import debug
+XMLUI.debug_enable = True
 
+# 作成するシーン選択
+from xmlui.ext.scene import XUXSceneManager
 from shop import Shop
 from battle import Battle
 
@@ -15,9 +19,9 @@ scene_manager = XUXSceneManager(Shop())
 def update():
     # デバッグ用
     if pyxel.btnp(pyxel.KEY_TAB):
-        print(scene_manager.current_scene.xmlui.strtree()) # type: ignore
+        scene_manager.current_scene.xmlui.on(debug.DebugXMLUI.DEBUGEVENT_PRINTTREE)
     if pyxel.btnp(pyxel.KEY_F5):
-        scene_manager.current_scene.xmlui.reload_templates() # type: ignore
+        scene_manager.current_scene.xmlui.on(debug.DebugXMLUI.DEBUGEVENT_RELOAD)
 
     # シーン更新
     scene_manager.update()
