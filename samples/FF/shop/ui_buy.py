@@ -1,6 +1,6 @@
 import pyxel
 
-from xmlui.core import XMLUI,XUElem,XUTemplate,XUEvent,XUSelectItem,XUWinBase,XUSelectInfo,XUTextUtil,XURect
+from xmlui.core import XMLUI,XUElem,XUEvent,XUSelectItem,XUWinBase,XUSelectInfo,XUTextUtil,XURect
 from xmlui.lib import select,text
 from system import system_font, hand_cursor
 
@@ -9,8 +9,8 @@ from FF.shop.shop_list import BuyList
 from FF.shop.ui_shop import set_shop_msg
 
 
-def ui_init(template:XUTemplate):
-    buy_select = select.Decorator(template)
+def ui_init(xmlui:XMLUI):
+    buy_select = select.Decorator(xmlui)
 
     # 基本選択物
     def buy_num_item(shop_ui_item:XUSelectItem):

@@ -1,6 +1,6 @@
 import pyxel
 
-from xmlui.core import XMLUI,XUElem,XUTemplate,XUEvent,XUSelectItem,XUWinBase,XUSelectInfo,XUTextUtil,XURect
+from xmlui.core import XMLUI,XUElem,XUEvent,XUSelectItem,XUWinBase,XUSelectInfo,XUTextUtil,XURect
 from xmlui.lib import select,text
 from system import system_font, hand_cursor
 
@@ -8,8 +8,8 @@ from db import user_data
 from FF.shop.shop_list import SellList
 from FF.shop.ui_shop import set_shop_msg
 
-def ui_init(template:XUTemplate):
-    shop_select = select.Decorator(template)
+def ui_init(xmlui:XMLUI):
+    shop_select = select.Decorator(xmlui)
 
     # 個数選択
     # *************************************************************************

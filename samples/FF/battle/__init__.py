@@ -1,7 +1,7 @@
 import pyxel
 
 # バトル画面
-from xmlui.core import XMLUI,XUDebug
+from xmlui.lib.debug import DebugXMLUI
 from xmlui.ext.scene import XUXFadeScene
 
 import ui_common
@@ -9,7 +9,7 @@ from FF.shop import ui_buy,ui_sell
 
 class Battle(XUXFadeScene):
     def __init__(self):
-        super().__init__(XMLUI(pyxel.width, pyxel.height, XUDebug.DEBUGLEVEL_LIB))
+        super().__init__(DebugXMLUI(pyxel.width, pyxel.height))
 
         # XMLの読み込み
         self.xmlui.load_template("assets/ui/common.xml")
