@@ -150,6 +150,6 @@ class ToolsData:
         for data in self.data:
             if data["type"] == type_:
                 return data
-        raise Exception(f"not found type:{type_}")
+        raise RuntimeError(f"not found type:{type_}")
 
 tools_data = ToolsData()

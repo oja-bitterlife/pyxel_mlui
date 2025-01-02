@@ -27,7 +27,7 @@ class XURect:
             for v in cls.__members__.values():
                 if v == type_:
                     return v
-            raise Exception(f"Invalid Align type: {type_}")
+            raise RuntimeError(f"Invalid Align type: {type_}")
 
     def __init__(self, x:int, y:int, w:int, h:int):
         self.x = x
@@ -174,7 +174,7 @@ class XUEvent:
 
         # インスタンスを作らず、クラスのまま使用する
         def __init__(self) -> None:
-            raise Exception("This class is not instantiable")
+            raise PermissionError("This class is not instantiable")
 
         # まとめてアクセス
         @classmethod
@@ -196,6 +196,10 @@ class XUEvent:
 
 # UIパーツの状態管理
 # #############################################################################
+class TreeException(RuntimeError):
+    def __init__(self, elem:"XUElem", msg:str, *args: object):
+        super().__init__(f"{elem.strtree()}\n{msg}", *args)
+
 # XMLのElement管理
 class XUElem:
     def __init__(self, xmlui:'XMLUI', element:Element):
@@ -205,7 +209,7 @@ class XUElem:
     @property
     def xmlui(self) -> "XMLUI":
         if self._xmlui is None:
-            raise Exception("This element is not attached to XMLUI.")
+            raise RuntimeError("This element is not attached to XMLUI.")
         return self._xmlui
 
     # UI_Elemは都度使い捨てなので、対象となるElementで比較する
@@ -322,7 +326,7 @@ class XUElem:
         for child in self._rec_iter():
             if child.id == id:
                 return child
-        raise Exception(f"\n{self.strtree()}\nID '{id}' not found in '{self.tag}' and children")
+        raise TreeException(self, f"ID '{id}' not found in '{self.tag}' and children")
 
     def find_by_tagall(self, tag:str) -> list['XUElem']:
         return [child for child in self._rec_iter() if child.tag == tag]
@@ -334,7 +338,7 @@ class XUElem:
             if parent.id == id:
                 return parent
             parent = parent.parent
-        raise Exception(f"\n{self.strtree()}\nParent '{id}' not found in '{self.tag}' parents")
+        raise TreeException(self, f"Parent '{id}' not found in '{self.tag}' parents")
 
     # openした親
     def find_owner(self) -> 'XUElem':
@@ -368,7 +372,7 @@ class XUElem:
     # 自分を親から外す
     def remove(self):
         if self.parent is None:
-            raise Exception(f"{self.strtree()}\nCan't remove {self.tag}")
+            raise TreeException(self, f"Can't remove {self.tag}")
         self.parent._element.remove(self._element)
 
     # open/close
@@ -381,7 +385,6 @@ class XUElem:
         # IDがかぶってはいけない
         if self.xmlui.exists_id(id_alias):
             return self.xmlui.find_by_id(id_alias)
-            # raise Exception(f"ID '{id_alias}' already exists")
 
         # オープン
         opened:XUElem|None = None
@@ -392,7 +395,7 @@ class XUElem:
                 self.add_child(opened)
                 break
         if opened == None:
-            raise Exception(f"ID '{id}' not found")
+            raise RuntimeError(f"ID '{id}' not found in templates")
 
         # ownerを設定しておく
         for child in opened._rec_iter():
@@ -1116,7 +1119,7 @@ class XUWinBase(XUElem):
         for parent in state.ancestors:
             if XUWinBase.is_win(parent):
                 return XUWinBase(parent)
-        raise Exception(f"\n{state.xmlui.strtree()}\nWindow not found")
+        raise TreeException(state.xmlui, "Window not found in parents")
 
     # ウインドウの状態管理
     # -----------------------------------------------------

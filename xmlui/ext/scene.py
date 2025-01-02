@@ -31,7 +31,7 @@ class XUXActItem(XUXTimeout, Generic[T]):
     @property
     def act(self) -> T:
         if self._act is None:
-            raise Exception("act is not set")
+            raise RuntimeError("act is not set")
         return self._act
 
 # 一定時間内ずっとwaigingが実行され、最後にaction。

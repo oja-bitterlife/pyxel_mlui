@@ -9,7 +9,8 @@ class WinFrame(XUWinBase):
     # -----------------------------------------------------
     # 枠外は-1を返す
     def _get_pattern_index(self, size:int, x:int, y:int, w:int, h:int) -> int:
-        raise Exception("no implements")
+        raise NotImplementedError("no implements")
+    
 
     # 1,3,5,7,4のエリア(カド以外)は特に計算が必要ない
     def _get13574index(self, size:int, x:int, y:int, w:int, h:int) -> int:
