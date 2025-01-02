@@ -2,7 +2,7 @@ import pyxel
 
 # xmlui_pyxelの初期化
 # *****************************************************************************
-from xmlui.core import XMLUI,XUDebug,XUElem,XUEvent,XUWinBase,XURect,XUTextUtil
+from xmlui.core import XMLUI,XUElem,XUEvent,XUWinBase,XURect,XUTextUtil
 from xmlui.lib import text,win
 from msg_dq import MsgDQ
 
@@ -11,10 +11,6 @@ from db import system_info, user_data
 
 system_font = PyxelFont("assets/font/b12.bdf")
 system_palette = PyxelPalette()
-
-# ライブラリのインスタンス化
-xmlui = XMLUI(pyxel.width, pyxel.height, XUDebug.DEBUGLEVEL_LIB)
-common_template = xmlui.load_template("assets/ui/common.xml")
 
 
 # 共通定義
@@ -62,61 +58,8 @@ def get_shadow_color() -> int:
     return 2 if user_data.hp <= 1 else 13
 
 
-common_win = win.Decorator(common_template)
-common_text = text.Decorator(common_template)
-
-# 工事中表示用
+# メッセージウインドウを共通で使う
 # *****************************************************************************
-# ポップアップウインドウ
-# ---------------------------------------------------------
-@common_win.rect_frame("popup_win")  # アニメはしない
-def popup_win(win:win.RectFrame, event:XUEvent):
-    pyxel.rect(win.area.x, win.area.y, win.area.w, win.area.h, 0)
-    win.draw_frame(pyxel.screen.data_ptr(), [0,7,13], win.area.inflate(-2, -2))
-
-@common_text.msg("popup_text")
-def popup_text(popup_text:text.Msg, event:XUEvent):
-    if XUEvent.Key.BTN_A in event.trg or XUEvent.Key.BTN_B in event.trg:
-        popup_text.close()
-
-    # テキスト描画
-    area = popup_text.area  # areaは重いので必ずキャッシュ
-    h = len(popup_text.text.split()) * system_font.size
-
-    for i,page in enumerate(popup_text.text.split()):
-        area = popup_text.area
-        x, y = area.aligned_pos(system_font.text_width(page), h, XURect.Align.CENTER, XURect.Align.CENTER)
-        pyxel.text(x, y + i*system_font.size, page, 7, system_font.font)
-
-
-# ゲーム内共通
-# *****************************************************************************
-# 角丸ウインドウ
-# ---------------------------------------------------------
-# openで値をセットをした後closeされる、closingなのに値はopningになっちゃうので別々に保存する
-CLOSING_CLIP_SIZE="_xmlui_closing_clip_size"
-OPENING_CLIP_SIZE="_xmlui_opening_clip_size"
-
-@common_win.round_frame("round_win")
-def round_win(round_win:win.RoundFrame, event:XUEvent):
-    area = round_win.area
-    clip = get_world_clip(round_win).to_offset()  # クリップエリアの設定
-
-    # 表示領域が無ければ完了なので閉じる
-    if round_win.is_closing and clip.is_empty:
-        round_win.close()  # 即座にclose
-    
-    # 背景
-    pyxel.rect(area.x, area.y, area.w, min(area.h, clip.h+2), 0)
-
-    col = get_text_color()
-    shadow_col = get_shadow_color()
-
-    # フレーム
-    round_win.draw_frame(pyxel.screen.data_ptr(), [col, shadow_col], area.inflate(-2, -2), clip)
-
-# メッセージウインドウ
-# ---------------------------------------------------------
 def common_msg_text(msg_dq:MsgDQ, event:XUEvent, cursor_visible:bool):
     area = msg_dq.area  # areaは重いので必ずキャッシュ
     line_height = system_font.size + 5  # 行間設定
@@ -215,31 +158,85 @@ def common_msg_text(msg_dq:MsgDQ, event:XUEvent, cursor_visible:bool):
             draw_msg_cursor(msg_dq, 0, (scroll_line_num-1)*line_height-4)
 
 
-# ステータスウインドウ( ｰ`дｰ´)ｷﾘｯ
-# ---------------------------------------------------------
-# ステータス各種アイテム
-@common_text.label("status_item")
-def status_item(status_item:text.Label, event:XUEvent):
-    # 値の取得
-    text = XUTextUtil.format_zenkaku(XUTextUtil.format_dict(status_item.text, user_data.data))
+def ui_init(xmlui:XMLUI):
+    common_win = win.Decorator(xmlui)
+    common_text = text.Decorator(xmlui)
 
-    col = get_text_color()
+    # 工事中表示用
+    # *****************************************************************************
+    # ポップアップウインドウ
+    # ---------------------------------------------------------
+    @common_win.rect_frame("popup_win")  # アニメはしない
+    def popup_win(win:win.RectFrame, event:XUEvent):
+        pyxel.rect(win.area.x, win.area.y, win.area.w, win.area.h, 0)
+        win.draw_frame(pyxel.screen.data_ptr(), [0,7,13], win.area.inflate(-2, -2))
 
-    # テキストは右寄せ
-    area = status_item.area
-    x, y = XURect.align_offset(area.w, area.h, system_font.text_width(text) + 5, 0, status_item.align, status_item.valign)
-    if area.y+y < get_world_clip(XUWinBase.find_parent_win(status_item)).bottom():
-        pyxel.text(area.x + x, area.y + y, text, col, system_font.font)
+    @common_text.msg("popup_text")
+    def popup_text(popup_text:text.Msg, event:XUEvent):
+        if XUEvent.Key.BTN_A in event.trg or XUEvent.Key.BTN_B in event.trg:
+            popup_text.close()
 
-# ステータスタイトル(名前)
-@common_text.label("status_title")
-def status_title(status_title:text.Label, event:XUEvent):
-    clip = get_world_clip(XUWinBase.find_parent_win(status_title)).intersect(status_title.area)
-    pyxel.rect(status_title.area.x, status_title.area.y, status_title.area.w, clip.h, 0)  # タイトルの下地
+        # テキスト描画
+        area = popup_text.area  # areaは重いので必ずキャッシュ
+        h = len(popup_text.text.split()) * system_font.size
 
-    col = get_text_color()
+        for i,page in enumerate(popup_text.text.split()):
+            area = popup_text.area
+            x, y = area.aligned_pos(system_font.text_width(page), h, XURect.Align.CENTER, XURect.Align.CENTER)
+            pyxel.text(x, y + i*system_font.size, page, 7, system_font.font)
 
-    # テキストは左寄せ
-    if status_title.area.y < clip.bottom():  # world座標で比較
-        x, y = status_title.aligned_pos(system_font)
-        pyxel.text(x+1, y-1, user_data.data["name"], col, system_font.font)
+
+    # ゲーム内共通
+    # *****************************************************************************
+    # 角丸ウインドウ
+    # ---------------------------------------------------------
+    # openで値をセットをした後closeされる、closingなのに値はopningになっちゃうので別々に保存する
+    CLOSING_CLIP_SIZE="_xmlui_closing_clip_size"
+    OPENING_CLIP_SIZE="_xmlui_opening_clip_size"
+
+    @common_win.round_frame("round_win")
+    def round_win(round_win:win.RoundFrame, event:XUEvent):
+        area = round_win.area
+        clip = get_world_clip(round_win).to_offset()  # クリップエリアの設定
+
+        # 表示領域が無ければ完了なので閉じる
+        if round_win.is_closing and clip.is_empty:
+            round_win.close()  # 即座にclose
+        
+        # 背景
+        pyxel.rect(area.x, area.y, area.w, min(area.h, clip.h+2), 0)
+
+        col = get_text_color()
+        shadow_col = get_shadow_color()
+
+        # フレーム
+        round_win.draw_frame(pyxel.screen.data_ptr(), [col, shadow_col], area.inflate(-2, -2), clip)
+
+    # ステータスウインドウ( ｰ`дｰ´)ｷﾘｯ
+    # ---------------------------------------------------------
+    # ステータス各種アイテム
+    @common_text.label("status_item")
+    def status_item(status_item:text.Label, event:XUEvent):
+        # 値の取得
+        text = XUTextUtil.format_zenkaku(XUTextUtil.format_dict(status_item.text, user_data.data))
+
+        col = get_text_color()
+
+        # テキストは右寄せ
+        area = status_item.area
+        x, y = XURect.align_offset(area.w, area.h, system_font.text_width(text) + 5, 0, status_item.align, status_item.valign)
+        if area.y+y < get_world_clip(XUWinBase.find_parent_win(status_item)).bottom():
+            pyxel.text(area.x + x, area.y + y, text, col, system_font.font)
+
+    # ステータスタイトル(名前)
+    @common_text.label("status_title")
+    def status_title(status_title:text.Label, event:XUEvent):
+        clip = get_world_clip(XUWinBase.find_parent_win(status_title)).intersect(status_title.area)
+        pyxel.rect(status_title.area.x, status_title.area.y, status_title.area.w, clip.h, 0)  # タイトルの下地
+
+        col = get_text_color()
+
+        # テキストは左寄せ
+        if status_title.area.y < clip.bottom():  # world座標で比較
+            x, y = status_title.aligned_pos(system_font)
+            pyxel.text(x+1, y-1, user_data.data["name"], col, system_font.font)

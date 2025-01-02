@@ -5,8 +5,6 @@ pyxel.init(256, 256)
 
 # ここからゲーム本体開始
 # *********************************************************
-from ui_common import xmlui
-
 from xmlui.ext.scene import XUXSceneManager
 
 from title import Title
@@ -14,18 +12,12 @@ from field import Field
 from battle import Battle
 
 # 最初はタイトル
-scene_manager = XUXSceneManager(Title(xmlui))
-#scene_manager = XUXSceneManager(Field(xmlui))
-#scene_manager = XUXSceneManager(Battle(xmlui))
+scene_manager = XUXSceneManager(Title())
+#scene_manager = XUXSceneManager(Field())
+#scene_manager = XUXSceneManager(Battle())
 
 # Main
 def update(): # フレームの更新処理
-    # デバッグ用
-    if pyxel.btnp(pyxel.KEY_TAB):
-        print(xmlui.strtree())
-    if pyxel.btnp(pyxel.KEY_F5):
-        xmlui.reload_templates()
-
     # シーン更新
     scene_manager.update()
 

@@ -9,23 +9,27 @@ from msg_dq import MsgDQ
 from db import user_data
 
 # UI
-from xmlui.core import XMLUI,XUElem,XUEvent,XUWinBase
+from xmlui.core import XUElem,XUEvent,XUWinBase
+from xmlui.lib.debug import DebugXMLUI
 from xmlui.ext.scene import XUXFadeScene
 
+import ui_common
 from field.ui import msg_win,menu,talk_dir,tools
 
-
 class Field(XUXFadeScene):
-    def __init__(self, xmlui:XMLUI):
-        super().__init__(xmlui)
+    def __init__(self):
+        super().__init__(DebugXMLUI(pyxel.width, pyxel.height))
 
         # UIの読み込み
-        self.template = self.xmlui.load_template("assets/ui/field.xml")
+        self.xmlui.load_template("assets/ui/field.xml")
+        self.xmlui.load_template("assets/ui/common.xml")
+
+        ui_common.ui_init(self.xmlui)
         for module in [msg_win, menu, talk_dir, tools]:
-            module.ui_init(self.template)
+            module.ui_init(self.xmlui)
 
         # ゲーム本体(仮)
-        self.player = Player(10, 10)
+        self.player = Player(self.xmlui, 10, 10)
         self.bg = BG()
         self.npc = NPCManager()
         self.field_obj = FieldObj()
@@ -35,10 +39,10 @@ class Field(XUXFadeScene):
 
 
     def closed(self):
-        self.template.remove()  # 読みこんだUIの削除
+        self.xmlui.close()  # 読みこんだUIの削除
 
         from battle import Battle
-        self.set_next_scene(Battle(self.xmlui))
+        self.set_next_scene(Battle())
 
     def update(self):
         # UIメニューが開いていたらキャラが動かないように

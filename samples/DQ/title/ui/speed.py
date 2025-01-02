@@ -1,6 +1,6 @@
 from enum import StrEnum
 
-from xmlui.core import XUTemplate,XUEvent,XUSelectItem
+from xmlui.core import XMLUI,XUEvent,XUSelectItem
 from xmlui.lib import select
 from title.ui.item import menu_item
 from db import system_info,SystemInfoTable
@@ -11,8 +11,8 @@ class MSG_SPEED(StrEnum):
     FAST = "fast"
 
 from ui_common import draw_menu_cursor
-def ui_init(template:XUTemplate):
-    title_select = select.Decorator(template)
+def ui_init(xmlui:XMLUI):
+    title_select = select.Decorator(xmlui)
 
     # メッセージスピード選択
     @title_select.row_list("game_speed", "menu_item")

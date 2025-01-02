@@ -72,12 +72,12 @@ class MsgDQ(MsgScr):
 
 # デコレータを用意
 # *****************************************************************************
-class Decorator(XUTemplate.HasRef):
+class Decorator(XMLUI.HasRef):
     def msg_dq(self, tag_name:str):
         def wrapper(bind_func:Callable[[MsgDQ,XUEvent], str|None]):
             # 登録用関数をジェネレート
             def draw(elem:XUElem, event:XUEvent):
                 return bind_func(MsgDQ(elem), event)
             # 関数登録
-            self.template.set_drawfunc(tag_name, draw)
+            self.xmlui.set_drawfunc(tag_name, draw)
         return wrapper

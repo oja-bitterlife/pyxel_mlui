@@ -1,11 +1,12 @@
 import pyxel
 
 # タイトル画面
-from xmlui.core import XMLUI
+from xmlui.lib.debug import DebugXMLUI
 from xmlui.ext.scene import XUXFadeScene
 from db import enemy_data
 
-from battle.ui.menu import ui_init
+import ui_common
+from battle.ui import menu
 from battle.act import *
 
 
@@ -14,14 +15,16 @@ from battle.act import *
 class Battle(XUXFadeScene):
     UI_TEMPLATE_BATTLE = "ui_battle"
 
-    def __init__(self, xmlui:XMLUI):
-        super().__init__(xmlui)
-        self.act = BattleAct(xmlui)
+    def __init__(self):
+        super().__init__(DebugXMLUI(pyxel.width, pyxel.height))
+        self.act = BattleAct(self.xmlui)
         self.is_close = False
 
         # UIの読み込み
         self.template = self.xmlui.load_template("assets/ui/battle.xml")
-        ui_init(self.template)
+        self.xmlui.load_template("assets/ui/common.xml")
+        ui_common.ui_init(self.xmlui)
+        menu.ui_init(self.xmlui)
 
         # バトル開始UI初期化
         self.battle = self.xmlui.open("battle")
@@ -37,11 +40,11 @@ class Battle(XUXFadeScene):
 
     def closed(self):
         # 読みこんだUIの削除
-        self.template.remove()
+        self.xmlui.close()
 
         # 王様の前に戻る
         from field import Field
-        self.set_next_scene(Field(self.xmlui))
+        self.set_next_scene(Field())
 
     def update(self):
         self.act.update()

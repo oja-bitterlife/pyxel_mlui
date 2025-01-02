@@ -1,12 +1,12 @@
 import pyxel
 
-from xmlui.core import XUTemplate,XUEvent,XUWinBase,XUSelectItem
+from xmlui.core import XMLUI,XUEvent,XUWinBase,XUSelectItem
 from xmlui.lib import select,text
 from ui_common import system_font,get_world_clip,draw_menu_cursor,KOJICHU_COL,get_text_color
 
-def ui_init(template:XUTemplate):
-    field_select = select.Decorator(template)
-    field_text = text.Decorator(template)
+def ui_init(xmlui:XMLUI):
+    field_select = select.Decorator(xmlui)
+    field_text = text.Decorator(xmlui)
 
     # コマンドメニュー
     # ---------------------------------------------------------

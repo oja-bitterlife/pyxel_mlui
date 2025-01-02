@@ -1,12 +1,12 @@
-from xmlui.core import XUTemplate,XUEvent
+from xmlui.core import XMLUI,XUEvent
 from xmlui.lib import select
 from title.ui.item import menu_item
 
 # タイトル画面UI
 # ---------------------------------------------------------
 from ui_common import draw_menu_cursor
-def ui_init(template:XUTemplate):
-    title_select = select.Decorator(template)
+def ui_init(xmlui:XMLUI):
+    title_select = select.Decorator(xmlui)
 
     # START/CONTINUE選択
     @title_select.list("game_start", "menu_item")

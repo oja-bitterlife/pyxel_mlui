@@ -1,15 +1,17 @@
 import pyxel
 from typing import Callable
 
+from xmlui.core import XMLUI
 from xmlui.ext.input import XUEInputInfo
 from xmlui.ext.tilemap import XUXTilemap
-from ui_common import xmlui
 
 from msg_dq import MsgDQ
 from db import user_data,npc_data
 
 class Player:
-    def __init__(self, x:int, y:int):
+    def __init__(self, xmlui:XMLUI, x:int, y:int):
+        self.xmlui = xmlui
+
         # 座標
         self.x = x*16
         self.y = y*16
@@ -28,7 +30,7 @@ class Player:
             self.y = 9*16
 
             # メッセージウインドウを開く
-            menu = xmlui.open("menu")
+            menu = self.xmlui.open("menu")
             msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
             talk = "おお　{name}！\nしんでしまうとは　なにごとだ！\\p…………\\pちょっと　いってみたかったの\\pがんばってね"
             msg_text.append_talk(talk, user_data.data)  # talkでテキスト開始
@@ -36,7 +38,7 @@ class Player:
     def update(self, hitcheck_funcs:list[Callable[[int,int],bool]]):
         # キー入力チェック
         if not self.is_moving:
-            input_info = XUEInputInfo(xmlui)
+            input_info = XUEInputInfo(self.xmlui)
             if input_info.input(pyxel.KEY_UP) and all([not hit(self.block_x, self.block_y-1) for hit in hitcheck_funcs]):
                 self.move_y = -16
             if input_info.input(pyxel.KEY_DOWN) and all([not hit(self.block_x, self.block_y+1) for hit in hitcheck_funcs]):

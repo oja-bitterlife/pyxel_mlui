@@ -1,11 +1,11 @@
 import pyxel
 
-from xmlui.core import XUTemplate,XUEvent,XUWinBase,XUSelectItem
+from xmlui.core import XMLUI,XUEvent,XUWinBase,XUSelectItem
 from xmlui.lib import select
 from ui_common import system_font,get_world_clip,draw_menu_cursor,get_text_color
 
-def ui_init(template:XUTemplate):
-    field_select = select.Decorator(template)
+def ui_init(xmlui:XMLUI):
+    field_select = select.Decorator(xmlui)
 
     # 会話方向
     # ---------------------------------------------------------
