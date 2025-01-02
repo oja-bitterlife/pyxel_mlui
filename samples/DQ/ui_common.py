@@ -202,6 +202,7 @@ def ui_init(xmlui:XMLUI):
         # 表示領域が無ければ完了なので閉じる
         if round_win.is_closing and clip.is_empty:
             round_win.close()  # 即座にclose
+            return
         
         # 背景
         pyxel.rect(area.x, area.y, area.w, min(area.h, clip.h+2), 0)

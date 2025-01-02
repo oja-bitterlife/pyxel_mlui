@@ -359,6 +359,10 @@ class XUElem:
 
     # 子を追加する
     def add_child(self, child:"XUElem"):
+        # 削除済みを再利用はできない
+        if child.removed:
+            RuntimeError(f"Can't reuse removed child {child._element}")
+
         self._element.append(child._element)
         self.xmlui._parent_cache[child._element] = self
 
@@ -374,6 +378,10 @@ class XUElem:
         if self.parent is None:
             raise TreeException(self, f"Can't remove {self.tag}")
         self.parent._element.remove(self._element)
+
+        # 子も全部removeはさすがに重いので、フラグ設定で済ませる
+        for element in self._element.iter():  # iter()は自分も含まれる
+            element.attrib["removed"] = "True"
 
     # open/close
     # *************************************************************************
@@ -416,8 +424,6 @@ class XUElem:
         else:
             target = self
 
-        for element in target._element.iter():
-            element.clear()
         target.remove()
 
     # デバッグ用
@@ -497,6 +503,10 @@ class XUElem:
     def enable(self, enable_:bool) -> bool:
         self.set_attr("enable", enable_)
         return enable_
+
+    @property
+    def removed(self) -> bool:  # 内部管理用削除済みフラグ
+        return self.attr_bool("removed", False)
 
 
 # XMLでUIライブラリ本体
@@ -608,6 +618,10 @@ class XMLUI(XUElem):
 
         # 更新処理
         for elem in self.children:  # 中でTreeを変えたいのでイテレータではなくリストで
+            # 前の処理までで削除済みなら何もしない
+            if elem.removed:
+                continue
+
             # active/inactiveどちらのeventを使うか決定
             event = deepcopy(self.event) if elem in self.active_elems else XUEvent()
 
