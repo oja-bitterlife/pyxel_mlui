@@ -3,6 +3,9 @@ import pyxel
 # initを呼ぶまでWebでファイルシステムが使えないことに注意
 pyxel.init(256, 256)
 
+from xmlui.core import XMLUI
+XMLUI.debug_enable = True
+
 # ここからゲーム本体開始
 # *********************************************************
 from xmlui.ext.scene import XUXSceneManager
@@ -12,8 +15,8 @@ from field import Field
 from battle import Battle
 
 # 最初はタイトル
-#scene_manager = XUXSceneManager(Title())
-scene_manager = XUXSceneManager(Field())
+scene_manager = XUXSceneManager(Title())
+#scene_manager = XUXSceneManager(Field())
 #scene_manager = XUXSceneManager(Battle())
 
 # Main
