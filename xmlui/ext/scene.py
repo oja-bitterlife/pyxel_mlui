@@ -111,7 +111,8 @@ class XUXAct:
 # #############################################################################
 # シーン管理用仕込み
 class _XUXSceneBase:
-    def __init__(self):
+    def __init__(self, xmlui:XMLUI):
+        self.xmlui = xmlui
         self._next_scene:XUXFadeScene|None = None
         self.is_end = False
 
@@ -187,8 +188,7 @@ class XUXFadeScene(_XUXSceneBase):
     # 初期化
     # -----------------------------------------------------
     def __init__(self, xmlui:XMLUI, open_count=OPEN_COUNT):
-        super().__init__()
-        self.xmlui = xmlui
+        super().__init__(xmlui)
 
         # フェードインから
         self.fade_act = XUXFadeScene.FadeAct()

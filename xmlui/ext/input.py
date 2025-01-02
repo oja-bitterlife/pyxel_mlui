@@ -1,5 +1,6 @@
 import pyxel
 from xmlui.core import XMLUI,XUEvent,XUEventItem
+from xmlui.lib import debug
 
 # Pyxelの入力をXMLUIのイベントに変換する。
 # ちゃんと設定しないとUIとゲームで操作が違ってしまうので、
@@ -74,3 +75,9 @@ class XUXInput(XUEInputInfo):
                 if pyxel.btn(key):
                     self.xmlui.on(event)
                     break
+
+        # デバッグ用
+        if pyxel.btnp(pyxel.KEY_TAB):
+            self.xmlui.on(debug.DebugXMLUI.DEBUGEVENT_PRINTTREE)
+        if pyxel.btnp(pyxel.KEY_F5):
+            self.xmlui.on(debug.DebugXMLUI.DEBUGEVENT_RELOAD)

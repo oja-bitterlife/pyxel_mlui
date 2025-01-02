@@ -26,7 +26,8 @@ class DebugXMLUI(XMLUI):
             get_logger().debug(self.xmlui.strtree())
         if self.DEBUGEVENT_RELOAD in self.xmlui.event.trg:
             self.xmlui.reload_templates()
+            get_logger().info("All XML Template was Reloaded")
 
+    # 削除完了通知
     def __del__(self):
-        # 削除完了通知
         get_logger().info("XMLUI was deleted.")

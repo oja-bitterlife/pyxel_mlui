@@ -17,12 +17,6 @@ scene_manager = XUXSceneManager(Shop())
 
 # Main
 def update():
-    # デバッグ用
-    if pyxel.btnp(pyxel.KEY_TAB):
-        scene_manager.current_scene.xmlui.on(debug.DebugXMLUI.DEBUGEVENT_PRINTTREE)
-    if pyxel.btnp(pyxel.KEY_F5):
-        scene_manager.current_scene.xmlui.on(debug.DebugXMLUI.DEBUGEVENT_RELOAD)
-
     # シーン更新
     scene_manager.update()
 
