@@ -385,10 +385,10 @@ class XUElem:
 
         # オープン
         opened:XUElem|None = None
-        for template in self.xmlui._templates:
+        for template in self.xmlui._templates.values():
             # 複数のテンプレートの中から最初に見つかったidを複製してopenする
             if template.exists_id(id):
-                opened = template.duplicate(id).set_attr("id", id_alias)
+                opened = XUElem(self.xmlui, deepcopy(template.find_by_id(id)._element))
                 self.add_child(opened)
                 break
         if opened == None:
@@ -498,59 +498,11 @@ class XUElem:
 
 # XMLでUIライブラリ本体
 # #############################################################################
-# デバッグ用
-class XUDebug:
-    # デバッグ用フラグ
-    DEBUGLEVEL_LIB:int = 100  # ライブラリ作成用
-
-    DEBUGEVENT_PRINTTREE = "DEBUG_PRINTTREE"
-    DEBUGEVENT_RELOAD = "DEBUG_RELOAD"
-
-    def __init__(self, debug_level):
-        self.level = debug_level
-
-    def update(self, xmlui:"XMLUI"):
-        if self.DEBUGEVENT_PRINTTREE in xmlui.event.trg:
-            print(xmlui.strtree())
-        if self.DEBUGEVENT_RELOAD in xmlui.event.trg:
-            print(xmlui.reload_templates())
-
-    @property
-    def is_lib_debug(self) -> bool:
-        return self.level >= self.DEBUGLEVEL_LIB
-
-# テンプレート
-class XUTemplate(XUElem):
-    # 初期化
-    # *************************************************************************
-    # ファイルから読み込み(ファイル読み込み失敗処理は外に任せる)
-    def __init__(self, root:XUElem, xml_filename:str):
-        f= open(xml_filename, "r", encoding="utf8")
-        super().__init__(root.xmlui, xml.etree.ElementTree.fromstring(f.read()))
-        self.xml_filename = xml_filename
-
-    # 登録を削除する
-    def remove(self):
-        self.xmlui._templates.remove(self)
-        self._xmlui = None
-
-    # XMLファイルを再読み込みする(開発用)
-    def reload(self):
-        self.xmlui._templates.remove(self)
-        self.xmlui._templates.append(XUTemplate(self.xmlui, self.xml_filename))
-
-    # XML操作
-    # *************************************************************************
-    # Elmentを複製して取り出す
-    def duplicate(self, id:str) -> XUElem:
-        return XUElem(self.xmlui, deepcopy(self.find_by_id(id)._element))
-
-# XMLUIコア本体
 class XMLUI(XUElem):
     # 初期化
     # *************************************************************************
     # 初期化。<xmlui>を持つXMLを突っ込む
-    def __init__(self, screen_w:int, screen_h:int, debug_level=0):
+    def __init__(self, screen_w:int, screen_h:int):
         # rootを作って自分自身に設定
         xmlui = Element("xmlui")
         xmlui.attrib["id"] = "xmlui"
@@ -564,13 +516,10 @@ class XMLUI(XUElem):
         self._parent_cache:dict[Element, XUElem] = {}  # dict[child] = parent_state
 
         # XMLテンプレート置き場
-        self._templates:list[XUTemplate] = []
+        self._templates:dict[str,XUElem] = {}  # dict[file_path, dom]
 
         # 処理関数の登録
         self._draw_funcs:dict[str, Callable[[XUElem, XUEvent], str|None]] = {}
-
-        # デバッグ用
-        self._debug = XUDebug(debug_level)
 
         # イベント管理
         self.event = XUEvent(True)  # 唯一のactiveとする
@@ -581,17 +530,10 @@ class XMLUI(XUElem):
         self.add_child(self.root)  # 普通に使うもの
         self.add_child(self._over)  # 上に強制で出す物
 
-    def __del__(self):
-        # 削除完了通知
-        if self._debug.is_lib_debug:
-            print("XMLUI was deleted.")
-
     # XMLUIそのものを閉じる
     def close(self):
         # templateの削除
-        # remove内でリスト操作(削除)が行われるので一旦コピーしておく
-        for template in self._templates[:]:
-            template.remove()
+        self._templates = {}
 
         # 登録関数のクリア
         self._draw_funcs = {}
@@ -608,23 +550,22 @@ class XMLUI(XUElem):
         # キャッシュの削除
         self._parent_cache = {}
 
+    # ユーティリティークラス作成用
+    class HasRef:
+        def __init__(self, xmlui:"XMLUI"):
+            self.xmlui = xmlui
+
     # template操作
     # *************************************************************************
-    def load_template(self, xml_filename:str) -> XUTemplate:
-        template = XUTemplate(self, xml_filename)
-        self._templates.append(template)
-        return template
-
-    def find_template(self, xml_filename:str) -> XUTemplate:
-        for template in self._templates:
-            if template.xml_filename == xml_filename:
-                return template
-        raise Exception(f"Template '{xml_filename}' not found")
+    # ファイルから読み込み(ファイル読み込み失敗は例外に任せる)
+    def load_template(self, xml_filename:str):
+        f= open(xml_filename, "r", encoding="utf8")
+        self._templates[xml_filename] = XUElem(self, xml.etree.ElementTree.fromstring(f.read()))
 
     # 開発用。テンプレートを読み込み直す
     def reload_templates(self):
-        for template in self._templates:
-            template.reload()
+        for xml_filename in self._templates.keys():
+            self.load_template(xml_filename)
 
     # 処理関数登録
     # *************************************************************************
@@ -640,11 +581,6 @@ class XMLUI(XUElem):
         def wrapper(bind_func:Callable[[XUElem,XUEvent], str|None]):
             self.set_drawfunc(tag_name, bind_func)
         return wrapper
-
-    # デコレータ作成用
-    class HasRef:
-        def __init__(self, xmlui:"XMLUI"):
-            self.xmlui = xmlui
 
     # 更新
     # *************************************************************************
@@ -679,10 +615,6 @@ class XMLUI(XUElem):
                 result = self._draw_funcs[elem.tag](elem, event)
                 if result is not None:
                     self.on(result)
-
-        # デバッグ
-        if self._debug.is_lib_debug:
-            self._debug.update(self)
 
         # 最後に自分もカウントアップ
         self.set_attr("update_count", self.update_count+1)

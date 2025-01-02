@@ -1,14 +1,14 @@
 import pyxel
 
-from xmlui.core import XMLUI,XUElem,XUTemplate,XUEvent,XUSelectItem,XUWinBase,XUSelectInfo,XUTextUtil,XURect
+from xmlui.core import XMLUI,XUEvent,XUSelectItem,XUWinBase,XUTextUtil,XURect
 from xmlui.lib import select,text
 from system import system_font, hand_cursor
 
 from db import user_data
 
-def ui_init(template:XUTemplate):
-    shop_select = select.Decorator(template)
-    shop_text = text.Decorator(template)
+def ui_init(xmlui:XMLUI):
+    shop_select = select.Decorator(xmlui)
+    shop_text = text.Decorator(xmlui)
 
     # 基本ラベル
     @shop_text.label("label")

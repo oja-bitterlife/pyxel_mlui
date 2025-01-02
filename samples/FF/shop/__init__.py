@@ -1,7 +1,7 @@
 import pyxel
 
 # ショップ画面
-from xmlui.core import XMLUI,XUDebug
+from xmlui.lib.debug import XMLUIDebug
 from xmlui.ext.scene import XUXFadeScene
 
 import ui_common
@@ -9,17 +9,17 @@ from FF.shop import ui_shop,ui_buy,ui_sell
 
 class Shop(XUXFadeScene):
     def __init__(self):
-        super().__init__(XMLUI(pyxel.width, pyxel.height, XUDebug.DEBUGLEVEL_LIB))
+        super().__init__(XMLUIDebug(pyxel.width, pyxel.height))
 
         # XMLの読み込み
-        common_template = self.xmlui.load_template("assets/ui/common.xml")
-        self.template = self.xmlui.load_template("assets/ui/shop.xml")
+        self.xmlui.load_template("assets/ui/common.xml")
+        self.xmlui.load_template("assets/ui/shop.xml")
         self.xmlui.open("ui_shop")
 
-        ui_common.ui_init(common_template)
-        ui_shop.ui_init(self.template)
-        ui_buy.ui_init(self.template)
-        ui_sell.ui_init(self.template)
+        ui_common.ui_init(self.xmlui)
+        ui_shop.ui_init(self.xmlui)
+        ui_buy.ui_init(self.xmlui)
+        ui_sell.ui_init(self.xmlui)
 
     def closed(self):
         from FF.battle import Battle
