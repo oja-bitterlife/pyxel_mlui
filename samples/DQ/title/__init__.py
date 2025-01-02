@@ -25,7 +25,6 @@ class Title(XUXFadeScene):
         self.img = pyxel.Image.from_image(filename="assets/images/title.png")
 
         self.xmlui.open("game_title")  # game_title以下表示開始
-        self.close()
 
     def closed(self):
         self.xmlui.close()

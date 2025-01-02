@@ -57,14 +57,14 @@ class MsgDQ(MsgScr):
     # -----------------------------------------------------
     # 会話マークを追加して格納
     def append_talk(self, text:str, all_params:dict[str,Any]={}):
-        for page in self.append_msg(text, all_params):
+        for page in self.append_zenkaku(text, all_params):
             # 追加されたページにTALKをマーキング
             page_item = XUPageItem(page).set_attr(MsgDQ.INDENT_TYPE_ATTR, MsgDQ.IndentType.TALK)
             page._element.text = self.TALK_START + page_item.all_text
 
     # Enemyマークを追加して格納
     def append_enemy(self, text:str, all_params:dict[str,Any]={}):
-        for page in self.append_msg(text, all_params):
+        for page in self.append_zenkaku(text, all_params):
             # 追加されたページにTALKをマーキング
             page_item = XUPageItem(page).set_attr(MsgDQ.INDENT_TYPE_ATTR, MsgDQ.IndentType.ENEMY)
             page._element.text = page_item.all_text
