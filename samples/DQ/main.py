@@ -12,8 +12,8 @@ from field import Field
 from battle import Battle
 
 # 最初はタイトル
-scene_manager = XUXSceneManager(Title())
-#scene_manager = XUXSceneManager(Field())
+#scene_manager = XUXSceneManager(Title())
+scene_manager = XUXSceneManager(Field())
 #scene_manager = XUXSceneManager(Battle())
 
 # Main

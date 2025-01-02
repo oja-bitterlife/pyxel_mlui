@@ -1116,7 +1116,7 @@ class XUWinBase(XUElem):
         for parent in state.ancestors:
             if XUWinBase.is_win(parent):
                 return XUWinBase(parent)
-        raise Exception("no window found")
+        raise Exception(f"\n{state.xmlui.strtree()}\nWindow not found")
 
     # ウインドウの状態管理
     # -----------------------------------------------------
