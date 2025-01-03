@@ -31,7 +31,7 @@ class UserData:
     def __init__(self):
         # セーブデータからの復帰
         for pc in user_save.pc:
-            user_db.execute("INSERT INTO user_data (lv, name, hp, mp) VALUES (?, ?, ?, ?)", [pc["lv"], pc["name"], pc["hp"], pc["mp"]])
+            user_db.execute("INSERT INTO user_data (lv, name, hp, mp, fb) VALUES (?, ?, ?, ?, ?)", [pc["lv"], pc["name"], pc["hp"], pc["mp"], pc["fb"]])
         user_db.execute("INSERT INTO party_data (gil) VALUES (?)", [user_save.gil])
 
         self.reload_db()
@@ -47,7 +47,7 @@ class UserData:
 
 user_data = UserData()
 
-print(user_data.player_data)
+#print(user_data.player_data)
 
 
 # エネミーデータアクセス
