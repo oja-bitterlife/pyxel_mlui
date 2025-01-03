@@ -2,9 +2,9 @@ import pyxel
 
 from xmlui.core import XMLUI,XUElem,XUEvent,XUSelectItem,XUWinBase,XUTextUtil,XURect
 from xmlui.lib import select,text
-from system import system_font, hand_cursor
+from system import system_font
 
-from db import user_data
+from db import user_data,enemy_data
 
 def ui_init(xmlui:XMLUI):
     status_select = select.Decorator(xmlui)
@@ -44,4 +44,20 @@ def ui_init(xmlui:XMLUI):
         # 一人ずつ表示
         for player_data in user_data.player_data:
             status_one(area, player_data)
+            area.y += status_line_size
+
+    # 敵の名前表示
+    @xmlui.tag_draw("enemy_names")
+    def enemy_names(enemy_names:XUElem, event:XUEvent):
+        area = enemy_names.area
+
+        # 各行のサイズ
+        status_line_size = 16
+        area.h = status_line_size
+
+        enemy_kinds = set([data["name"] for data in enemy_data.data])
+
+        # 種類ずつ表示
+        for enemy_kind in enemy_kinds:
+            pyxel.text(area.x, area.y, enemy_kind, 7, system_font.font)
             area.y += status_line_size

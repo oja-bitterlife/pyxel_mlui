@@ -3,11 +3,12 @@
 <xmlui>
     <info>バトル用</info>
     <ui_battle id="ui_battle">
-        <round_win x="96" y="172" w="160" h="96" id="status_win">
-            <hp_Label x="88" y="10" w="32" align="center" valign="bottom">ＨＰ</hp_Label>
-            <status x="16" y="20"/>
+        <round_win x="96" y="172" w="160" h="80" id="status_win">
+            <hp_Label x="88" y="8" w="32" align="center" valign="bottom">ＨＰ</hp_Label>
+            <status x="16" y="16"/>
         </round_win>
-        <round_win x="0" y="172" w="96" h="96" id="status_win">
+        <round_win x="0" y="172" w="96" h="80" id="enemy_win">
+            <enemy_names x="16" y="16"/>
         </round_win>
     </ui_battle>
 
