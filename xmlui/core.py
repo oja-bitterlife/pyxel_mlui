@@ -2,15 +2,16 @@
 import xml.etree.ElementTree
 from xml.etree.ElementTree import Element
 
+# 型を使うよ
+from typing import Callable,Any,Self
+from enum import StrEnum
+
 # 日本語対応
 import unicodedata
 
 # その他よく使う奴
 import re,math
 from copy import deepcopy
-from typing import Callable,Any,Self  # 型を使うよ
-from enum import StrEnum
-
 
 # 描画領域計算用
 # #############################################################################
@@ -576,6 +577,16 @@ class XMLUI(XUElem):
     def load_template(self, xml_filename:str):
         f= open(xml_filename, "r", encoding="utf8")
         self._templates[xml_filename] = XUElem(self, xml.etree.ElementTree.fromstring(f.read()))
+
+        # デバッグ時はIDがかぶってないかチェック
+        if XMLUI.debug_enable:
+            ids = []
+            for template in self._templates.values():
+                for child in template._rec_iter():
+                    if child.id:
+                        if child.id in ids:
+                            raise RuntimeError(f"ID '{child.id}' is duplicated in '{xml_filename}'")
+                        ids.append(child.id)
 
     # 開発用。テンプレートを読み込み直す
     def reload_templates(self):

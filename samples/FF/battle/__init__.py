@@ -14,7 +14,7 @@ class Battle(XUXFadeScene):
         # XMLの読み込み
         self.xmlui.load_template("assets/ui/common.xml")
         self.xmlui.load_template("assets/ui/battle.xml")
-        self.xmlui.open("status_win")
+        self.xmlui.open("ui_battle")
 
         ui_common.ui_init(self.xmlui)
         ui_status.ui_init(self.xmlui)
@@ -30,6 +30,11 @@ class Battle(XUXFadeScene):
         # if "start_sell" in self.xmlui.event.trg:
         #     ui_sell.init_sell_list(self.xmlui)
 
-    # def draw(self):
-    #     # UIの表示
-    #     self.xmlui.draw()
+    def draw(self):
+        if self.xmlui.update_count < 16:
+            self.xmlui.root.set_pos(256-self.xmlui.update_count*16, 0)
+        else:
+            self.xmlui.root.set_pos(0, 0)
+
+        # UIの表示
+        self.xmlui.draw()
