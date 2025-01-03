@@ -6,6 +6,7 @@ from xmlui.ext.scene import XUXFadeScene
 
 import ui_common
 from FF.battle import ui_status
+from db import enemy_data
 
 class Battle(XUXFadeScene):
     def __init__(self):
@@ -18,6 +19,8 @@ class Battle(XUXFadeScene):
 
         ui_common.ui_init(self.xmlui)
         ui_status.ui_init(self.xmlui)
+
+        self.enemy_img = pyxel.Image.from_image(filename="assets/images/fantasy_goblin.png")
 
     def closed(self):
         self.xmlui.close()
@@ -35,6 +38,12 @@ class Battle(XUXFadeScene):
             self.xmlui.root.set_pos(256-self.xmlui.update_count*16, 0)
         else:
             self.xmlui.root.set_pos(0, 0)
+
+        # 敵の表示
+        for data in enemy_data.data:
+            x = 24+data["x"]*48
+            y = 54+data["y"]*52
+            pyxel.blt(x, y, self.enemy_img, 0, 0, 64, 64, 0)
 
         # UIの表示
         self.xmlui.draw()
