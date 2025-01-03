@@ -5,7 +5,7 @@ from xmlui.lib.debug import DebugXMLUI
 from xmlui.ext.scene import XUXFadeScene
 
 import ui_common
-from FF.shop import ui_buy,ui_sell
+from FF.battle import ui_status
 
 class Battle(XUXFadeScene):
     def __init__(self):
@@ -17,20 +17,19 @@ class Battle(XUXFadeScene):
         self.xmlui.open("status_win")
 
         ui_common.ui_init(self.xmlui)
-        # ui_shop.ui_init(self.template)
-        # ui_buy.ui_init(self.template)
-        # ui_sell.ui_init(self.template)
+        ui_status.ui_init(self.xmlui)
 
     def closed(self):
         self.xmlui.close()
 
     def update(self):
-        if "start_buy" in self.xmlui.event.trg:
-            ui_buy.init_buy_list(self.xmlui)
+        pass
+        # if "start_buy" in self.xmlui.event.trg:
+        #     ui_buy.init_buy_list(self.xmlui)
 
-        if "start_sell" in self.xmlui.event.trg:
-            ui_sell.init_sell_list(self.xmlui)
+        # if "start_sell" in self.xmlui.event.trg:
+        #     ui_sell.init_sell_list(self.xmlui)
 
-    def draw(self):
-        # UIの表示
-        self.xmlui.draw()
+    # def draw(self):
+    #     # UIの表示
+    #     self.xmlui.draw()

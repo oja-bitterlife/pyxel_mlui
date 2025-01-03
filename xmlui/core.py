@@ -81,7 +81,7 @@ class XURect:
     def bottom(self, bottom_space:int=0) -> int:
         return self.y + self.h - bottom_space
 
-    # 座標取得
+    # 座標取得(w,h = content w,h)
     @classmethod
     def align_offset(cls, area_w:int, area_h:int, w:int=0, h:int=0, align:Align=Align.CENTER, valign:Align=Align.CENTER) -> tuple[int, int]:
         area = XURect(0, 0, area_w, area_h)
@@ -106,7 +106,7 @@ class XURect:
                 raise ValueError(f"align:{valign} is not supported.")
         return x,y
 
-    def aligned_pos(self, w:int=0, h:int=0, align:Align=Align.CENTER, valign:Align=Align.CENTER) -> tuple[int, int]:
+    def aligned_pos(self, w:int, h:int, align:Align=Align.CENTER, valign:Align=Align.CENTER) -> tuple[int, int]:
         offset_x, offset_y = self.align_offset(self.w, self.h, w, h, align, valign)
         return self.x + offset_x, self.y + offset_y
 

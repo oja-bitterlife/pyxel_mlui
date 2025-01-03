@@ -244,7 +244,7 @@ class XUXFadeScene(_XUXSceneBase):
     def update(self):
         pass
     def draw(self):
-        pass
+        self.xmlui.draw()
 
     # フェードアウト完了時に呼ばれる。主に次シーン設定を行う
     def closed(self):

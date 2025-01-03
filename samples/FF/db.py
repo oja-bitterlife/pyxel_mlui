@@ -25,7 +25,7 @@ class UserData:
             SELECT * from user_data
             INNER JOIN _level_data ON user_data.lv == _level_data.lv
         """
-        self.user_data = [dict(data) for data in user_db.execute(sql).fetchall()]
+        self.player_data = [dict(data) for data in user_db.execute(sql).fetchall()]
         self.party_data = dict(user_db.execute("SELECT * from party_data").fetchone())
 
     def __init__(self):
@@ -47,3 +47,19 @@ class UserData:
 
 user_data = UserData()
 
+#print(user_data.player_data)
+
+
+# エネミーデータアクセス
+class EnemyData:
+    def __init__(self, party_id):
+        sql = """
+            SELECT name,size,x,y FROM enemy_party
+            INNER JOIN enemy_data ON enemy_party.enemy_id = enemy_data.id 
+            WHERE party_id = ?
+        """
+        self.data = [dict(data) for data in game_db.execute(sql, [party_id]).fetchall()]
+
+enemy_data = EnemyData(1)
+
+#print(enemy_data.data)
