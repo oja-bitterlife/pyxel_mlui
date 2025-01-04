@@ -544,9 +544,9 @@ class XMLUI(XUElem):
         # 登録関数のクリア
         self._draw_funcs = {}
 
-        # 一応ワーキングツリー全体の参照を全て削除(attribに変な参照を突っ込んじゃった対策)
+        # ワーキングツリー全体のattribを全てクリア(attribに変な参照を突っ込んじゃった対策)
         for child in self.children:
-            child._element.clear()
+            child._element.attrib.clear()
 
         # 自己参照を外す
         self.xmlui._xmlui = None
@@ -637,7 +637,7 @@ class XMLUI(XUElem):
         for child in self.children:
             if child.removed:
                 self._parent_cache[child._element]._element.remove(child._element)
-                child._element.clear()
+                child._element.attrib.clear()
 
         # 最後に自分もカウントアップ
         self.set_attr("update_count", self.update_count+1)
