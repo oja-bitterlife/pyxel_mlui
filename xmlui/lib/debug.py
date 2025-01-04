@@ -18,15 +18,21 @@ class DebugXMLUI(XMLUI):
 
     def draw(self):
         super().draw()
+
+        # デバッグで無いときはdrawだけでおしまい
         if not XMLUI.debug_enable:
             return
 
-        # デバッグ
-        if self.DEBUGEVENT_PRINTTREE in self.xmlui.event.trg:
-            get_logger().debug(self.xmlui.strtree())
-        if self.DEBUGEVENT_RELOAD in self.xmlui.event.trg:
-            self.xmlui.reload_templates()
-            get_logger().info("All XML Template was Reloaded")
+        # 以下デバッグ時
+        # *********************************************************************
+        if self.DEBUGEVENT_PRINTTREE in self.event.trg:
+            get_logger().debug(self.strtree())
+
+        # 開発用。テンプレートを読み込み直す
+        if self.DEBUGEVENT_RELOAD in self.event.trg:
+            for xml_filename in self._templates.keys():
+                self.load_template(xml_filename)
+            get_logger().debug("All XML Template was Reloaded")
 
     # 削除完了通知
     def __del__(self):

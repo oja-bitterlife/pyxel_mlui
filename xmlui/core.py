@@ -578,11 +578,6 @@ class XMLUI(XUElem):
                             raise RuntimeError(f"ID '{child.id}' is duplicated in '{xml_filename}'")
                         ids.append(child.id)
 
-    # 開発用。テンプレートを読み込み直す
-    def reload_templates(self):
-        for xml_filename in self._templates.keys():
-            self.load_template(xml_filename)
-
     # 処理関数登録
     # *************************************************************************
     def set_drawfunc(self, tag_name:str, func:Callable[[XUElem,XUEvent], str|None]):
@@ -614,7 +609,7 @@ class XMLUI(XUElem):
         # 親情報の更新
         self._parent_cache = {c:XUElem(self, p) for p in self._element.iter() for c in p}
 
-        # 更新処理
+        # 更新処理(直前のリストを利用。daww中にAddChildされたElementは処理されれない)
         for elem in self.children:  # 中でTreeを変えたいのでイテレータではなくリストで
             # 前の処理までで削除済みなら何もしない
             if elem.removed:
