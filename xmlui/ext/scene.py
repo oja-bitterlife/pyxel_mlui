@@ -142,14 +142,16 @@ class _XUESceneBase(XUEActManager):
         # xmluiのキーイベントサポート
         if self.use_key_event:
             XUEInput(self.xmlui).check()
+
+        # イベント処理
         for event in self.xmlui.event.trg:
             self.event(event)
 
-        # ActがあればActの更新
+        # ActがあればActの更新。なければ通常のUpdate
         if not self.is_act_empty:
             super().update()
         else:
-            self.update()  # Actがなければ通常のUpdate
+            self.update()
 
     def draw_scene(self):
         if not self.is_end:
@@ -230,29 +232,29 @@ class XUEFadeScene(_XUESceneBase):
         # フェードインから
         self.add_act(XUEFadeScene.FadeIn(self, open_count))
 
-    # シーンマネージャから呼ばれるもの
-    # -----------------------------------------------------
-    def draw_scene(self):
-        if self.is_end:
-            return
-
-        pyxel.dither(1.0)  # 戻しておく
-
-        # フェード描画
-        # -------------------------------------------------
-        self.draw()
-
-        # 無駄な描画をしないよう
-        if self.alpha > 0:
-            pyxel.dither(self.alpha)  # フェードで
-            pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.FADE_COLOR)
-
     # フェードアウトを開始する
     def fade_close(self):
         # Actを全て破棄してフェードアウト開始
         self.clear_act()
         self.add_act(XUEFadeScene.FadeOut(self, self.CLOSE_COUNT))
 
+    # シーンマネージャから呼ばれるもの
+    # -----------------------------------------------------
+    def draw_scene(self):
+        if self.is_end:
+            return
+
+        # フェード描画
+        # -------------------------------------------------
+        pyxel.dither(1.0)  # 戻しておく
+
+        # 画面の描画
+        self.draw()
+
+        # フェードを上から描画
+        if self.alpha > 0:  # 無駄な描画をしないよう
+            pyxel.dither(self.alpha)  # フェードで
+            pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.FADE_COLOR)
 
 # シーン管理。mainの中で各シーンを実行する
 # *****************************************************************************
