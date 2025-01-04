@@ -1,16 +1,41 @@
 import pyxel
 from typing import Callable
 
-from xmlui.core import XMLUI
-from xmlui.ext.input import XUEInputInfo
+from xmlui.core import XMLUI,XUEvent
 from xmlui.ext.tilemap import XUETilemap
+from xmlui.ext.scene import XUEActWait,XUESceneBase
 
 from msg_dq import MsgDQ
-from db import user_data,npc_data
+from db import user_data
+
+class PlayerMoveAct(XUEActWait):
+    def __init__(self, player:"Player", move_x:int, move_y:int):
+        super().__init__()
+        self.player = player
+        self.move_x = move_x
+        self.move_y = move_y
+
+    def waiting(self) -> bool:
+        # プレイヤの移動
+        if self.move_x < 0:
+            self.player.x -= 1
+            self.move_x += 1
+        if self.move_x > 0:
+            self.player.x += 1
+            self.move_x -= 1
+        if self.move_y < 0:
+            self.player.y -= 1
+            self.move_y += 1
+        if self.move_y > 0:
+            self.player.y += 1
+            self.move_y -= 1
+
+        # 移動完了チェック
+        return self.move_x == 0 and self.move_y == 0
 
 class Player:
-    def __init__(self, xmlui:XMLUI, x:int, y:int):
-        self.xmlui = xmlui
+    def __init__(self, scene:XUESceneBase, x:int, y:int):
+        self.scene = scene
 
         # 座標
         self.x = x*16
@@ -25,42 +50,29 @@ class Player:
         # 死亡時
         self.is_dead = user_data.hp <= 0
         if self.is_dead:
-            user_data.hp = 1
-            self.x = 8*16
-            self.y = 9*16
+            self.scene.xmlui.on("dead_restart")
 
-            # メッセージウインドウを開く
-            menu = self.xmlui.open("menu")
-            msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
-            talk = "おお　{name}！\nしんでしまうとは　なにごとだ！\\p…………\\pちょっと　いってみたかったの\\pがんばってね"
-            msg_text.append_talk(talk, user_data.data)  # talkでテキスト開始
+            # user_data.hp = 1
+            # self.x = 8*16
+            # self.y = 9*16
+
+            # # メッセージウインドウを開く
+            # menu = self.xmlui.open("menu")
+            # msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
+            # talk = "おお　{name}！\nしんでしまうとは　なにごとだ！\\p…………\\pちょっと　いってみたかったの\\pがんばってね"
+            # msg_text.append_talk(talk, user_data.data)  # talkでテキスト開始
 
     def update(self, hitcheck_funcs:list[Callable[[int,int],bool]]):
-        # キー入力チェック
-        if not self.is_moving:
-            input_info = XUEInputInfo(self.xmlui)
-            if input_info.input(pyxel.KEY_UP) and all([not hit(self.block_x, self.block_y-1) for hit in hitcheck_funcs]):
-                self.move_y = -16
-            if input_info.input(pyxel.KEY_DOWN) and all([not hit(self.block_x, self.block_y+1) for hit in hitcheck_funcs]):
-                self.move_y = 16
-            if input_info.input(pyxel.KEY_LEFT) and all([not hit(self.block_x-1, self.block_y) for hit in hitcheck_funcs]):
-                self.move_x = -16
-            if input_info.input(pyxel.KEY_RIGHT) and all([not hit(self.block_x+1, self.block_y) for hit in hitcheck_funcs]):
-                self.move_x = 16
-
-        # プレイヤの移動
-        if self.move_x < 0:
-            self.x -= 1
-            self.move_x += 1
-        if self.move_x > 0:
-            self.x += 1
-            self.move_x -= 1
-        if self.move_y < 0:
-            self.y -= 1
-            self.move_y += 1
-        if self.move_y > 0:
-            self.y += 1
-            self.move_y -= 1
+        event_now = self.scene.xmlui.event.now
+        if XUEvent.Key.UP in event_now and all([not hit(self.block_x, self.block_y-1) for hit in hitcheck_funcs]):
+            return PlayerMoveAct(self, 0, -16)
+        if XUEvent.Key.DOWN in event_now and all([not hit(self.block_x, self.block_y+1) for hit in hitcheck_funcs]):
+            return PlayerMoveAct(self, 0, 16)
+        if XUEvent.Key.LEFT in event_now and all([not hit(self.block_x-1, self.block_y) for hit in hitcheck_funcs]):
+            return PlayerMoveAct(self, -16, 0)
+        if XUEvent.Key.RIGHT in event_now and all([not hit(self.block_x+1, self.block_y) for hit in hitcheck_funcs]):
+            return PlayerMoveAct(self, 16, 0)
+        return None
 
     @property
     def is_moving(self) -> bool:

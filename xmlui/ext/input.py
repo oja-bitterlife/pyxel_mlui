@@ -36,34 +36,6 @@ class XUEInputInfo:
             XUEvent.Key.BTN_Y: self.CFG_Y,
         }
 
-    # pyxelのキーがどのイベントに割り当てられているか調べる
-    def _find_keyevent(self, pyxel_key:int):
-        for event,keys in self.key_config.items():
-            if pyxel_key in keys:
-                return event
-    
-    # 現在入力中
-    def input(self, pyxel_key:int):
-        key_event = self._find_keyevent(pyxel_key)
-        if key_event:
-            return key_event in self.xmlui.event.now
-        return False
-
-    # 押された
-    def trg(self, pyxel_key:int):
-        key_event = self._find_keyevent(pyxel_key)
-        if key_event:
-            return key_event in self.xmlui.event.trg
-        return False
-
-    # はなされた
-    def release(self, pyxel_key:int):
-        key_event = self._find_keyevent(pyxel_key)
-        if key_event:
-            return key_event in self.xmlui.event.release
-        return False
-
-
 # インプット管理クラス、状態更新用
 # どこかで作ってcheck()を１回呼び出すように
 class XUEInput(XUEInputInfo):

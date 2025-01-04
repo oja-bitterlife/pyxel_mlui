@@ -16,11 +16,10 @@ from xmlui.ext.scene import XUEFadeScene,XUEActWait
 import ui_common
 from field.ui import msg_win,menu,talk_dir,tools
 
-
-class MenuWaitAct(XUEActWait):
+# メニューが開いている状態
+class MenuOpenAct(XUEActWait):
     def __init__(self, xmlui:XMLUI):
         super().__init__()
-        # self.use_key_event = False
         self.menu = xmlui.open("menu")
 
     # メニューが閉じられるまで待機
@@ -40,7 +39,7 @@ class Field(XUEFadeScene):
             module.ui_init(self.xmlui)
 
         # ゲーム本体(仮)
-        self.player = Player(self.xmlui, 10, 10)
+        self.player = Player(self, 10, 10)
         self.bg = BG()
         self.npc = NPCManager()
         self.field_obj = FieldObj()
@@ -54,14 +53,16 @@ class Field(XUEFadeScene):
         from battle import Battle
         self.set_next_scene(Battle())
 
+    # 何もしていない(actがない)ときだけここにくる、Idle関数
     def update(self):
         # プレイヤの移動
-        self.player.update([self.npc.hit_check, self.bg.hit_check, self.field_obj.hit_check])
+        player_act = self.player.update([self.npc.hit_check, self.bg.hit_check, self.field_obj.hit_check])
+        if player_act:
+            self.add_act(player_act)
 
         # キャラが動いていなければメニューオープン可能
-        if not self.player.is_moving:
-            if XUEvent.Key.BTN_A in self.xmlui.event.trg:
-                self.add_act(MenuWaitAct(self.xmlui))
+        if XUEvent.Key.BTN_A in self.xmlui.event.now:
+            self.add_act(MenuOpenAct(self.xmlui))
 
     def draw(self):
         # プレイヤを中心に世界が動く。さす勇
@@ -122,3 +123,7 @@ class Field(XUEFadeScene):
             if event[len("close_win:"):].strip() == "message":
                 menu = self.xmlui.find_by_id("menu")
                 XUWinBase(menu).start_close()
+
+        # 死に戻り処理
+        if event.startswith("dead_restart"):
+            print("dead_restart")
