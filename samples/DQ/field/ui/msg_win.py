@@ -14,8 +14,10 @@ def ui_init(xmlui:XMLUI):
         common_msg_text(msg_text, event, True)
 
         # 自分が閉じたらメニューごと閉じる
-        if XUWinBase.find_parent_win(msg_text).win_state == XUWinBase.STATE_CLOSED:
+        if XUWinBase.find_parent_win(msg_text).win_state == XUWinBase.WIN_STATE.CLOSED:
             XUWinBase(msg_text.xmlui.find_by_id("menu")).start_close()
+            print("close msg")
+
 
         # 入力アクション
         # ---------------------------------------------------------

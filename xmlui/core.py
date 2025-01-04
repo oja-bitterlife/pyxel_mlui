@@ -1097,10 +1097,11 @@ class XUPageText(XUPageInfo):
 # *****************************************************************************
 class XUWinBase(XUElem):
     # ウインドウの状態定義
-    STATE_OPENING = "opening"
-    STATE_OPENED = "opened"
-    STATE_CLOSING = "closing"
-    STATE_CLOSED = "closed"
+    class WIN_STATE(StrEnum):
+        OPENING = "opening"
+        OPENED = "opened"
+        CLOSING = "closing"
+        CLOSED = "closed"
 
     # 状態を保存するアトリビュート
     WIN_STATE_ATTR = "_xmlui_win_state"
@@ -1114,11 +1115,11 @@ class XUWinBase(XUElem):
 
         # ステートがなければ用意しておく
         if not self.has_attr(self.WIN_STATE_ATTR):
-            self.win_state = self.STATE_OPENING
+            self.win_state = XUWinBase.WIN_STATE.OPENING
 
     # override。closeするときに状態をCLOSEDにする
     def close(self):
-        self.win_state = self.STATE_CLOSED  # finish
+        self.win_state = XUWinBase.WIN_STATE.CLOSED  # finish
         super().close()
 
     # XUWinBaseを使ったElementかどうか。attributeの有無でチェック
@@ -1140,9 +1141,9 @@ class XUWinBase(XUElem):
     def update(self):
         win_state = self.attr_str(self.WIN_STATE_ATTR)
         match win_state:
-            case self.STATE_OPENING:
+            case XUWinBase.WIN_STATE.OPENING:
                 self.set_attr(self.OPENING_COUNT_ATTR, self.attr_int(self.OPENING_COUNT_ATTR) + 1)
-            case self.STATE_CLOSING:
+            case XUWinBase.WIN_STATE.CLOSING:
                 self.set_attr(self.CLOSING_COUNT_ATTR, self.attr_int(self.CLOSING_COUNT_ATTR) + 1)
 
     # ウインドウの状態のset/get
@@ -1160,12 +1161,12 @@ class XUWinBase(XUElem):
     # 現在open中かどうか。open完了もTrue
     @property
     def is_opening(self):
-        return self.win_state == self.STATE_OPENING or self.win_state == self.STATE_OPENED
+        return self.win_state == XUWinBase.WIN_STATE.OPENING or self.win_state == XUWinBase.WIN_STATE.OPENED
 
     # 現在close中かどうか。close完了もTrue
     @property
     def is_closing(self):
-        return self.win_state == self.STATE_CLOSING or self.win_state == self.STATE_CLOSED
+        return self.win_state == XUWinBase.WIN_STATE.CLOSING or self.win_state == XUWinBase.WIN_STATE.CLOSED
 
     # openされてからのカウント(≒update_count)
     @property
@@ -1180,13 +1181,13 @@ class XUWinBase(XUElem):
     # 子も含めてclosingにする
     def start_close(self):
         self.enable = False  # closingは実質closeなのでイベントは見ない
-        self.win_state = self.STATE_CLOSING
+        self.win_state = XUWinBase.WIN_STATE.CLOSING
 
         # 子も順次closing
         for child in self._rec_iter():
             child.enable = False  # 全ての子のイベント通知をoffに
             if XUWinBase.is_win(child):  # 子ウインドウも一緒にクローズ
-                XUWinBase(child).win_state = self.STATE_CLOSING
+                XUWinBase(child).win_state = XUWinBase.WIN_STATE.CLOSING
 
 
 # ゲージサポート
