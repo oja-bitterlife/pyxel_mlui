@@ -34,8 +34,8 @@ class PlayerMoveAct(XUEActWait):
         return self.move_x == 0 and self.move_y == 0
 
 class Player:
-    def __init__(self, scene:XUESceneBase, x:int, y:int):
-        self.scene = scene
+    def __init__(self, xmlui:XMLUI, x:int, y:int):
+        self.xmlui = xmlui
 
         # 座標
         self.x = x*16
@@ -47,23 +47,21 @@ class Player:
         self.anim_pat = [32, 33]
         self.tile = XUETilemap(1)
 
-        # 死亡時
+        # 死亡でFieldに飛ばされた時
         self.is_dead = user_data.hp <= 0
         if self.is_dead:
-            self.scene.xmlui.on("dead_restart")
+            user_data.hp = 1
+            self.x = 8*16
+            self.y = 9*16
 
-            # user_data.hp = 1
-            # self.x = 8*16
-            # self.y = 9*16
-
-            # # メッセージウインドウを開く
-            # menu = self.xmlui.open("menu")
-            # msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
-            # talk = "おお　{name}！\nしんでしまうとは　なにごとだ！\\p…………\\pちょっと　いってみたかったの\\pがんばってね"
-            # msg_text.append_talk(talk, user_data.data)  # talkでテキスト開始
+            # メッセージウインドウを開く
+            menu = self.xmlui.open("menu")
+            msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
+            talk = "おお　{name}！\nしんでしまうとは　なにごとだ！\\p…………\\pちょっと　いってみたかったの\\pがんばってね"
+            msg_text.append_talk(talk, user_data.data)  # talkでテキスト開始
 
     def update(self, hitcheck_funcs:list[Callable[[int,int],bool]]):
-        event_now = self.scene.xmlui.event.now
+        event_now = self.xmlui.event.now
         if XUEvent.Key.UP in event_now and all([not hit(self.block_x, self.block_y-1) for hit in hitcheck_funcs]):
             return PlayerMoveAct(self, 0, -16)
         if XUEvent.Key.DOWN in event_now and all([not hit(self.block_x, self.block_y+1) for hit in hitcheck_funcs]):

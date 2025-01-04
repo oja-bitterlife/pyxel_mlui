@@ -39,7 +39,7 @@ class Field(XUEFadeScene):
             module.ui_init(self.xmlui)
 
         # ゲーム本体(仮)
-        self.player = Player(self, 10, 10)
+        self.player = Player(self.xmlui, 10, 10)
         self.bg = BG()
         self.npc = NPCManager()
         self.field_obj = FieldObj()
@@ -123,7 +123,3 @@ class Field(XUEFadeScene):
             if event[len("close_win:"):].strip() == "message":
                 menu = self.xmlui.find_by_id("menu")
                 XUWinBase(menu).start_close()
-
-        # 死に戻り処理
-        if event.startswith("dead_restart"):
-            print("dead_restart")
