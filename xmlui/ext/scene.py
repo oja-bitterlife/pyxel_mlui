@@ -227,7 +227,10 @@ class XUEFadeScene(_XUESceneBase):
         self.alpha = 0.0
 
         # フェードインから
-        self.add_act(XUEFadeScene.FadeIn(self, open_count))
+        self.clear_act()
+        self.add_act(
+            XUEFadeScene.FadeIn(self, open_count),
+            _XUESceneBase._UpdateAct(self))
 
     # シーンマネージャから呼ばれるもの
     # -----------------------------------------------------
