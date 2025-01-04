@@ -1,6 +1,7 @@
 import pyxel
 
 # ショップ画面
+from xmlui.core import XUEventItem
 from xmlui.lib.debug import DebugXMLUI
 from xmlui.ext.scene import XUEFadeScene
 
@@ -26,15 +27,14 @@ class Shop(XUEFadeScene):
         self.set_next_scene(Battle())
         self.xmlui.close()
 
-    def update(self):
-        if "start_buy" in self.xmlui.event.trg:
-            ui_buy.init_buy_list(self.xmlui)
-
-        if "start_sell" in self.xmlui.event.trg:
-            ui_sell.init_sell_list(self.xmlui)
-
-        if "exit" in self.xmlui.event.trg:
-            self._close_scene()
+    def event(self, event:XUEventItem):
+        match event:
+            case "start_buy":
+                ui_buy.init_buy_list(self.xmlui)
+            case "start_sell":
+                ui_sell.init_sell_list(self.xmlui)
+            case "exit":
+                self.fade_close()
 
     def draw(self):
         # UIの表示
