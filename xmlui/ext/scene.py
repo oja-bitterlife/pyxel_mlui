@@ -118,7 +118,9 @@ class _XUESceneBase(XUEActManager):
 
         self.xmlui = xmlui
         self._next_scene:XUEFadeScene|None = None
-        self.is_end = False
+
+        self.use_key_event = True  # キーイベントを取得するかどうか
+        self.is_end = False  # このシーンが終了したかどうか
 
     # シーン遷移
     def set_next_scene(self, scene:"XUEFadeScene"):
@@ -126,8 +128,9 @@ class _XUESceneBase(XUEActManager):
 
     # シーン終了(closedの中でset_next_sceneをする)
     def close_scene(self):
-        self.closed()
-        self.is_end = True
+        if not self.is_end:
+            self.closed()
+            self.is_end = True
 
     # シーンマネージャから呼ばれるもの
     # -----------------------------------------------------
@@ -137,7 +140,8 @@ class _XUESceneBase(XUEActManager):
             return
 
         # xmluiのキーイベントサポート
-        XUEInput(self.xmlui).check()
+        if self.use_key_event:
+            XUEInput(self.xmlui).check()
         for event in self.xmlui.event.trg:
             self.event(event)
 
@@ -148,7 +152,8 @@ class _XUESceneBase(XUEActManager):
             self.update()  # Actがなければ通常のUpdate
 
     def draw_scene(self):
-        self.draw()
+        if not self.is_end:
+            self.draw()
 
     # オーバーライドして使う物
     # -----------------------------------------------------
@@ -206,8 +211,9 @@ class XUEFadeScene(_XUESceneBase):
             super().__init__(scene)
             self.set_wait(close_count)
 
+            self.scene.use_key_event = False  # フェード中は動かさない
+
         def waiting(self) -> bool:
-            self.scene.xmlui.event.clear()  # フェード中は動かさない
             self.scene.alpha = self.alpha
             return False
 
