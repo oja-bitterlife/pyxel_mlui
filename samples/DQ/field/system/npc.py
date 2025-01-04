@@ -10,7 +10,7 @@ class NPC:
         self.tile = XUETilemap(1)
 
     def draw(self, offset_x:int, offset_y:int):
-        self.tile.update()
+        self.tile._update()
         self.tile.draw(self.data["block_x"]*16 + offset_x, self.data["block_y"]*16 + offset_y, self.data["anim_pat"])
 
 class NPCManager:

@@ -9,12 +9,23 @@ from msg_dq import MsgDQ
 from db import user_data
 
 # UI
-from xmlui.core import XUElem,XUEvent,XUWinBase
+from xmlui.core import XUElem,XUEvent,XUEventItem,XUWinBase
 from xmlui.lib.debug import DebugXMLUI
-from xmlui.ext.scene import XUEFadeScene
+from xmlui.ext.scene import XUEFadeScene,XUEUpdateAct
 
 import ui_common
 from field.ui import msg_win,menu,talk_dir,tools
+
+class SceneMain(XUEUpdateAct["Field"]):
+    def update(self):
+        # UIメニューが開いていたらキャラが動かないように
+        if not self.scene.xmlui.exists_id("menu"):
+            # プレイヤの移動
+            self.scene.player.update([self.scene.npc.hit_check, self.scene.bg.hit_check, self.scene.field_obj.hit_check])
+
+            # キャラが動いていなければメニューオープン可能
+            if not self.scene.player.is_moving:
+                self.scene.xmlui.open_by_event(XUEvent.Key.BTN_A, "menu")
 
 class Field(XUEFadeScene):
     def __init__(self):
@@ -44,20 +55,6 @@ class Field(XUEFadeScene):
         from battle import Battle
         self.set_next_scene(Battle())
 
-    def update(self):
-        # UIメニューが開いていたらキャラが動かないように
-        if self.xmlui.exists_id("menu"):
-            # メニューイベント処理
-            menu = self.xmlui.find_by_id("menu")
-            self.menu_event(menu, self.xmlui.event)
-        else:
-            # プレイヤの移動
-            self.player.update([self.npc.hit_check, self.bg.hit_check, self.field_obj.hit_check])
-
-            # キャラが動いていなければメニューオープン可能
-            if not self.player.is_moving:
-                self.xmlui.open_by_event(XUEvent.Key.BTN_A, "menu")
-
     def draw(self):
         # プレイヤを中心に世界が動く。さす勇
         scroll_x = -self.player.x +160-32
@@ -72,37 +69,42 @@ class Field(XUEFadeScene):
         # UIの描画(fieldとdefaultグループ)
         self.xmlui.draw()
 
-
     # メニューで起こったイベントの処理を行う
-    def menu_event(self, menu:XUElem, event:XUEvent):
-        # 会話イベントチェック
-        for talk_event in self.npc.TALK_EVENTS:
-            if talk_event in event.trg:
-                # メッセージウインドウを開く
-                msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
-
-                talk = self.npc.check_talk(talk_event, self.player.block_x, self.player.block_y)
-                if talk is not None:
-                    msg_text.append_talk(talk, user_data.data)  # talkでテキスト開始
+    def event(self, event:XUEventItem):
+        match event:
+            # かいだんチェック
+            case "down_stairs":
+                menu = self.xmlui.find_by_id("menu")
+                if self.bg.check_stairs(menu, self.player.block_x, self.player.block_y):
+                    # バトル開始
+                    XUWinBase(menu).start_close()
+                    self.close()
                 else:
-                    msg_text.append_msg("だれもいません")  # systemメッセージ
+                    msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
+                    msg_text.append_msg("かいだんがない")  # systemメッセージ
 
-        # かいだんチェック
-        if "down_stairs" in menu.xmlui.event.trg:
-            if self.bg.check_stairs(menu, self.player.block_x, self.player.block_y):
-                # バトル開始
-                XUWinBase(menu).start_close()
-                self.close()
-            else:
-                msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
-                msg_text.append_msg("かいだんがない")  # systemメッセージ
+            # とびらチェック
+            case "open_door":
+                menu = self.xmlui.find_by_id("menu")
+                door = self.field_obj.find_door(self.player.block_x, self.player.block_y)
+                if door != None:
+                    self.field_obj.open(door)
+                    XUWinBase(menu).start_close()
+                else:
+                    msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
+                    msg_text.append_msg("とびらがない")  # systemメッセージ
 
-        # とびらチェック
-        if "open_door" in menu.xmlui.event.trg:
-            door = self.field_obj.find_door(self.player.block_x, self.player.block_y)
-            if door != None:
-                self.field_obj.open(door)
-                XUWinBase(menu).start_close()
-            else:
-                msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
-                msg_text.append_msg("とびらがない")  # systemメッセージ
+            case _:
+                # 会話イベントチェック
+                for talk_event in self.npc.TALK_EVENTS:
+                    if talk_event == event:
+                        menu = self.xmlui.find_by_id("menu")
+
+                        # メッセージウインドウを開く
+                        msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
+
+                        talk = self.npc.check_talk(talk_event, self.player.block_x, self.player.block_y)
+                        if talk is not None:
+                            msg_text.append_talk(talk, user_data.data)  # talkでテキスト開始
+                        else:
+                            msg_text.append_msg("だれもいません")  # systemメッセージ

@@ -52,7 +52,7 @@ class _MsgBase(BattleActWait):
         self.params = params
 
     # メッセージ表示完了待ち
-    def waiting(self):
+    def update(self):
         if self.msg_dq.is_all_finish:
             return True
         return False
@@ -82,7 +82,7 @@ class CmdStart(BattleActItem):
 
 # コマンド選択待ち
 class CmdCheck(BattleActWait):
-    def waiting(self):
+    def update(self):
         if "attack" in self.xmlui.event.trg:
             # 選択されたらメニューは閉じる
             XUWinBase(self.xmlui.find_by_id("menu")).start_close()
@@ -155,7 +155,7 @@ class DamageEffect(BattleActWait):
         self.damage = damage
         self.set_wait(15)  # 適当時間
 
-    def waiting(self):
+    def update(self):
         # とりあえず画面揺らし
         self.act.sway_x = random.randint(-3, 3)
         self.act.sway_y = random.randint(-3, 3)
@@ -170,7 +170,7 @@ class BlinkEffect(BattleActWait):
     def init(self):
         self.set_wait(10)  # エフェクトはないので適当待ち
 
-    def waiting(self):
+    def update(self):
         self.act.blink = self.count % 2 < 1
         return False
 

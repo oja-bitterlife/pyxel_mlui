@@ -1,8 +1,9 @@
 import pyxel
 
 # タイトル画面
+from xmlui.core import XUEventItem
 from xmlui.lib.debug import DebugXMLUI
-from xmlui.ext.scene import XUEFadeScene
+from xmlui.ext.scene import XUEFadeScene,XUEUpdateAct
 
 import ui_common
 from title.ui import start,speed
@@ -26,6 +27,8 @@ class Title(XUEFadeScene):
 
         self.xmlui.open("game_title")  # game_title以下表示開始
 
+        self.add_act(XUEUpdateAct(self))
+
     def closed(self):
         self.xmlui.close()
 
@@ -33,9 +36,10 @@ class Title(XUEFadeScene):
         from field import Field
         self.set_next_scene(Field())
 
-    def update(self):
-        if "start" in self.xmlui.event.trg:  # startが実行された
-            self.close()
+    def event(self, event:XUEventItem):
+        match event:
+            case "start":
+                self.close()
 
     def draw(self):
         # 背景絵

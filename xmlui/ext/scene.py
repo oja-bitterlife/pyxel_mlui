@@ -53,13 +53,14 @@ class XUEActWait(XUEActItem[T]):
             return super().alpha
 
     # override
-    def update(self) -> bool:
+    def _update(self) -> bool:
         if not self.is_finish:
             if self.waiting():
                 self.finish()
-        return super().update()
+        return super()._update()
 
     # オーバーライドして使う物
+    # -----------------------------------------------------
     def waiting(self) -> bool:
         return False
 
@@ -85,13 +86,13 @@ class XUEActManager:
 
     # 状態更新
     # -----------------------------------------------------
-    def update_act(self):
+    def _update_act(self):
         if not self.is_act_empty:
             act = self.current_act
             if act._init_func:
                 act._init_func()  # 初回はinitも実行
                 act._init_func = None
-            act.update()
+            act._update()
 
             # 完了したら次のAct
             if act.is_finish:
@@ -119,9 +120,6 @@ class _XUESceneBase(XUEActManager):
         self._next_scene:XUEFadeScene|None = None
         self.is_end = False
 
-    def event_callback(self, event:XUEventItem):
-        pass
-
     # シーン遷移
     def set_next_scene(self, scene:"XUEFadeScene"):
         self._next_scene = scene
@@ -129,13 +127,13 @@ class _XUESceneBase(XUEActManager):
     # シーンマネージャから呼ばれるもの
     # -----------------------------------------------------
     def update_scene(self):
-        # xmluiのイベント更新
-        XUEInput(self.xmlui).check()  # UI用キー入力
+        # xmluiのキーイベントサポート
+        XUEInput(self.xmlui).check()
         for event in self.xmlui.event.trg:
-            self.event_callback(event)
+            self.event(event)
 
         # Actの更新
-        self.update_act()
+        self._update_act()
 
         # シーン完了チェック。完了時はclosed()内で次シーンを設定しておくように
         if self.is_act_empty:
@@ -143,16 +141,14 @@ class _XUESceneBase(XUEActManager):
             self.is_end = True
             return
 
-        self.update()
-
     def draw_scene(self):
         self.draw()
 
     # オーバーライドして使う物
     # -----------------------------------------------------
-    def draw(self):
+    def event(self, event:XUEventItem):
         pass
-    def update(self):
+    def draw(self):
         pass
     # フェードアウト完了時に呼ばれる。主に次シーン設定を行う
     def closed(self):
@@ -192,6 +188,10 @@ class XUEFadeScene(_XUESceneBase):
             self.scene.alpha = 1-self.alpha  # 黒から
             return self.is_finish
 
+        # フェードインが終わったら綺麗な0にしておく
+        def action(self):
+            self.scene.alpha = 0
+
     # フェードアウト
     class FadeOut(_FadeActItem):
         def __init__(self, scene:"XUEFadeScene", close_count:int):
@@ -199,13 +199,8 @@ class XUEFadeScene(_XUESceneBase):
             self.set_wait(close_count)
 
         def waiting(self) -> bool:
+            self.scene.xmlui.event.clear()  # フェード中は動かさない
             self.scene.alpha = self.alpha
-            return False
-
-    # シーンメイン
-    class SceneMain(_FadeActItem):
-        def waiting(self) -> bool:
-            self.scene.alpha = 0
             return False
 
     # 初期化
@@ -215,10 +210,9 @@ class XUEFadeScene(_XUESceneBase):
         self.alpha = 0.0
 
         # フェードインから
-        self.add_act(
-            XUEFadeScene.FadeIn(self, open_count),
-            XUEFadeScene.SceneMain(self))
+        self.add_act(XUEFadeScene.FadeIn(self, open_count))
 
+    # シーンマネージャから呼ばれるもの
     # -----------------------------------------------------
     def draw_scene(self):
         pyxel.dither(1.0)  # 戻しておく
@@ -245,6 +239,19 @@ class XUEFadeScene(_XUESceneBase):
         self.clear_act()
         self.add_act(XUEFadeScene.FadeOut(self, self.CLOSE_COUNT))
 
+class XUEUpdateAct(XUEActWait[T]):
+    def __init__(self, scene:T):
+        super().__init__()
+        self.scene = scene
+
+    def waiting(self) -> bool:
+        self.update()
+        return super().waiting()
+
+    # overrideして使う物
+    # -----------------------------------------------------
+    def update(self):
+        pass
 
 
 # シーン管理。mainの中で各シーンを実行する
