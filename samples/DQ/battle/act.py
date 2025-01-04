@@ -1,14 +1,14 @@
 import random
 
 from xmlui.core import XMLUI,XUWinBase,XUTextUtil
-from xmlui.ext.scene import XUXAct,XUXActItem,XUXActWait
+from xmlui.ext.scene import XUEAct,XUEActItem,XUEActWait
 from msg_dq import MsgDQ
 from db import user_data, enemy_data
 
 
 # バトル用シーン遷移ベース
 # #############################################################################
-class BattleAct(XUXAct):
+class BattleAct(XUEAct):
     def __init__(self, xmlui:XMLUI):
         super().__init__()
         self.xmlui = xmlui
@@ -21,7 +21,7 @@ class BattleAct(XUXAct):
         self.is_dead = False
 
 
-class BattleActItem(XUXActItem[BattleAct]):
+class BattleActItem(XUEActItem[BattleAct]):
     @property
     def xmlui(self):
         return self.act.xmlui
@@ -30,7 +30,7 @@ class BattleActItem(XUXActItem[BattleAct]):
     def msg_dq(self):
         return MsgDQ(self.act.xmlui.find_by_id("msg_text"))
 
-class BattleActWait(XUXActWait[BattleAct]):
+class BattleActWait(XUEActWait[BattleAct]):
     @property
     def xmlui(self):
         return self.act.xmlui

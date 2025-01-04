@@ -1,13 +1,13 @@
 from enum import StrEnum
 
 from xmlui.core import XMLUI
-from xmlui.ext.tilemap import XUXTilemap
+from xmlui.ext.tilemap import XUETilemap
 import db
 
 class NPC:
     def __init__(self, data:dict):
         self.data = data
-        self.tile = XUXTilemap(1)
+        self.tile = XUETilemap(1)
 
     def draw(self, offset_x:int, offset_y:int):
         self.tile.update()

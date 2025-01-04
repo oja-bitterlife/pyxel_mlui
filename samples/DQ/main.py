@@ -8,16 +8,16 @@ XMLUI.debug_enable = True
 
 # ここからゲーム本体開始
 # *********************************************************
-from xmlui.ext.scene import XUXSceneManager
+from xmlui.ext.scene import XUESceneManager
 
 from title import Title
 from field import Field
 from battle import Battle
 
 # 最初はタイトル
-scene_manager = XUXSceneManager(Title())
-#scene_manager = XUXSceneManager(Field())
-#scene_manager = XUXSceneManager(Battle())
+scene_manager = XUESceneManager(Title())
+#scene_manager = XUESceneManager(Field())
+#scene_manager = XUESceneManager(Battle())
 
 # Main
 def update(): # フレームの更新処理

@@ -1,7 +1,7 @@
 import dataclasses
 
 from xmlui.core import XUElem
-from xmlui.ext.tilemap import XUXTilemap
+from xmlui.ext.tilemap import XUETilemap
 
 @dataclasses.dataclass
 class BGType:
@@ -44,7 +44,7 @@ class BG:
     ]
 
     def __init__(self) -> None:
-        self.tile_anim = XUXTilemap(1)
+        self.tile_anim = XUETilemap(1)
 
     def draw(self, scroll_x, scroll_y):
         # アニメ付き背景であれば更新

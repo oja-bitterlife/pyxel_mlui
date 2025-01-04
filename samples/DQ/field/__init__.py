@@ -11,12 +11,12 @@ from db import user_data
 # UI
 from xmlui.core import XUElem,XUEvent,XUWinBase
 from xmlui.lib.debug import DebugXMLUI
-from xmlui.ext.scene import XUXFadeScene
+from xmlui.ext.scene import XUEFadeScene
 
 import ui_common
 from field.ui import msg_win,menu,talk_dir,tools
 
-class Field(XUXFadeScene):
+class Field(XUEFadeScene):
     def __init__(self):
         super().__init__(DebugXMLUI(pyxel.width, pyxel.height))
 

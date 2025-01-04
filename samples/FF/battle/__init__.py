@@ -2,13 +2,13 @@ import pyxel
 
 # バトル画面
 from xmlui.lib.debug import DebugXMLUI
-from xmlui.ext.scene import XUXFadeScene
+from xmlui.ext.scene import XUEFadeScene
 
 import ui_common
 from FF.battle import ui_status
 from db import enemy_data,user_data
 
-class Battle(XUXFadeScene):
+class Battle(XUEFadeScene):
     def __init__(self):
         super().__init__(DebugXMLUI(pyxel.width, pyxel.height))
 

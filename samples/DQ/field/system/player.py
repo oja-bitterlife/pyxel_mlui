@@ -3,7 +3,7 @@ from typing import Callable
 
 from xmlui.core import XMLUI
 from xmlui.ext.input import XUEInputInfo
-from xmlui.ext.tilemap import XUXTilemap
+from xmlui.ext.tilemap import XUETilemap
 
 from msg_dq import MsgDQ
 from db import user_data,npc_data
@@ -20,7 +20,7 @@ class Player:
 
         # 表示イメージ設定
         self.anim_pat = [32, 33]
-        self.tile = XUXTilemap(1)
+        self.tile = XUETilemap(1)
 
         # 死亡時
         self.is_dead = user_data.hp <= 0

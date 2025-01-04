@@ -66,7 +66,7 @@ class XUEInputInfo:
 
 # インプット管理クラス、状態更新用
 # どこかで作ってcheck()を１回呼び出すように
-class XUXInput(XUEInputInfo):
+class XUEInput(XUEInputInfo):
     # 全ボタン一気に調べてイベント設定
     def check(self):
         for event,keys in self.key_config.items():

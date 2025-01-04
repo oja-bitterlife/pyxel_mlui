@@ -1,10 +1,10 @@
 # DBはサンプルでは使わないので固定値で
 from enum import Enum
 
-from xmlui.ext.db import XUXMemoryDB
+from xmlui.ext.db import XUEMemoryDB
 
-game_db = XUXMemoryDB.load("assets/data/game.db")
-user_db = XUXMemoryDB.load("assets/data/user.db")
+game_db = XUEMemoryDB.load("assets/data/game.db")
+user_db = XUEMemoryDB.load("assets/data/user.db")
 
 
 # システムデータ

@@ -1,7 +1,7 @@
-from typing import Callable,Self
+from typing import Self
 
 # タイマー管理
-class _XUXTimerBase:
+class _XUETimerBase:
     # タイマー開始
     def __init__(self, count:int):
         if count < 0:
@@ -43,7 +43,7 @@ class _XUXTimerBase:
 # 指定時間後に発火
 # ---------------------------------------------------------
 # 時間がきたら一度きりの実行
-class XUXTimeout(_XUXTimerBase):
+class XUETimeout(_XUETimerBase):
     def update(self) -> bool:
         # 完了済み
         if self.is_finish:
@@ -61,7 +61,7 @@ class XUXTimeout(_XUXTimerBase):
         return False
 
 # 時間ごとに何度も実行
-class XUXInterval(_XUXTimerBase):
+class XUEInterval(_XUETimerBase):
     def update(self) -> bool:
         # 完了済み
         if self.is_finish:
@@ -82,7 +82,7 @@ class XUXInterval(_XUXTimerBase):
 # 指定時間までずっと発火
 # ---------------------------------------------------------
 # カウントアップ
-class XUXCountUp(_XUXTimerBase):
+class XUECountUp(_XUETimerBase):
     def update(self) -> bool:
         # 完了済み
         if self.is_finish:
@@ -99,7 +99,7 @@ class XUXCountUp(_XUXTimerBase):
         return False
 
 # カウントダウン。0も含める
-class XUXCountDown(_XUXTimerBase):
+class XUECountDown(_XUETimerBase):
     def update(self) -> bool:
         # 完了済み
         if self.is_finish:

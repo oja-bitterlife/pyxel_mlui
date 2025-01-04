@@ -2,12 +2,12 @@ import pyxel
 
 # ショップ画面
 from xmlui.lib.debug import DebugXMLUI
-from xmlui.ext.scene import XUXFadeScene
+from xmlui.ext.scene import XUEFadeScene
 
 import ui_common
 from FF.shop import ui_shop,ui_buy,ui_sell
 
-class Shop(XUXFadeScene):
+class Shop(XUEFadeScene):
     def __init__(self):
         super().__init__(DebugXMLUI(pyxel.width, pyxel.height))
 

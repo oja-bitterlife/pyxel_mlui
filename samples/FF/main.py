@@ -8,12 +8,12 @@ from xmlui.lib import debug
 XMLUI.debug_enable = True
 
 # 作成するシーン選択
-from xmlui.ext.scene import XUXSceneManager
+from xmlui.ext.scene import XUESceneManager
 from shop import Shop
 from battle import Battle
 
-scene_manager = XUXSceneManager(Shop())
-#scene_manager = XUXSceneManager(Battle())
+scene_manager = XUESceneManager(Shop())
+#scene_manager = XUESceneManager(Battle())
 
 # Main
 def update():

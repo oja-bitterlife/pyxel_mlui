@@ -2,8 +2,8 @@ from typing import Callable,Generic,TypeVar
 import pyxel
 
 from xmlui.core import XMLUI
-from xmlui.ext.input import XUXInput
-from xmlui.ext.timer import XUXTimeout
+from xmlui.ext.input import XUEInput
+from xmlui.ext.timer import XUETimeout
 
 
 # ステータス遷移管理用。NPCの寸劇とかで使うやつ
@@ -11,7 +11,7 @@ from xmlui.ext.timer import XUXTimeout
 T = TypeVar('T')
 
 # 一定時間後に1つのaction。アクションをつなげて実行する場合は主にこちら
-class XUXActItem(XUXTimeout, Generic[T]):
+class XUEActItem(XUETimeout, Generic[T]):
     # デフォルトはすぐ実行
     def __init__(self):
         super().__init__(0)
@@ -27,7 +27,7 @@ class XUXActItem(XUXTimeout, Generic[T]):
         pass
 
     # 呼び出しActを返す
-    # Genericsで、XUXActではなくnewしたクラスそのものを返す
+    # GenericsでActではなくnewしたクラスそのものを返す
     @property
     def act(self) -> T:
         if self._act is None:
@@ -35,7 +35,7 @@ class XUXActItem(XUXTimeout, Generic[T]):
         return self._act
 
 # 一定時間内ずっとwaigingが実行され、最後にaction。
-class XUXActWait(XUXActItem[T]):
+class XUEActWait(XUEActItem[T]):
     WAIT_FOREVER = 2**31-1
 
     # デフォルトは無限待機
@@ -64,13 +64,13 @@ class XUXActWait(XUXActItem[T]):
 
 # Act管理クラス。各Itemをコレに登録していく
 # *****************************************************************************
-class XUXAct:
+class XUEAct:
     def __init__(self):
-        self.queue:list[XUXActItem] = []
+        self.queue:list[XUEActItem] = []
 
     # キュー操作
     # -----------------------------------------------------
-    def add(self, *items:XUXActItem):
+    def add(self, *items:XUEActItem):
         for item in items:
             item._act = self  # 自分を登録しておく
             self.queue.append(item)
@@ -99,7 +99,7 @@ class XUXAct:
     # 状態取得
     # -----------------------------------------------------
     @property
-    def current_act(self) -> XUXActItem:
+    def current_act(self) -> XUEActItem:
         return self.queue[0]
 
     @property
@@ -110,14 +110,14 @@ class XUXAct:
 # シーン管理(フェードイン・フェードアウト)用
 # #############################################################################
 # シーン管理用仕込み
-class _XUXSceneBase:
+class _XUESceneBase:
     def __init__(self, xmlui:XMLUI):
         self.xmlui = xmlui
-        self._next_scene:XUXFadeScene|None = None
+        self._next_scene:XUEFadeScene|None = None
         self.is_end = False
 
     # シーン遷移
-    def set_next_scene(self, scene:"XUXFadeScene"):
+    def set_next_scene(self, scene:"XUEFadeScene"):
         self._next_scene = scene
 
     # オーバーライドして使う物
@@ -127,7 +127,7 @@ class _XUXSceneBase:
         pass
 
 # シーンクラス。継承して使おう
-class XUXFadeScene(_XUXSceneBase):
+class XUEFadeScene(_XUESceneBase):
     # デフォルトフェードカラー
     FADE_COLOR = 0
 
@@ -137,7 +137,7 @@ class XUXFadeScene(_XUXSceneBase):
 
     # フェード管理
     # -----------------------------------------------------
-    class FadeAct(XUXAct):
+    class FadeAct(XUEAct):
         def __init__(self):
             super().__init__()
             self.alpha:float = 0.0
@@ -148,14 +148,14 @@ class XUXFadeScene(_XUXSceneBase):
     # 各フェードパート
     # -----------------------------------------------------
     # パートベース。fade_actのalphaを書き換える
-    class _FadeActItem(XUXActWait):
-        def __init__(self, fade_act:"XUXFadeScene.FadeAct"):
+    class _FadeActItem(XUEActWait):
+        def __init__(self, fade_act:"XUEFadeScene.FadeAct"):
             super().__init__()
             self.fade_act = fade_act
 
     # フェードイン
     class FadeIn(_FadeActItem):
-        def __init__(self, fade_act:"XUXFadeScene.FadeAct", open_count:int):
+        def __init__(self, fade_act:"XUEFadeScene.FadeAct", open_count:int):
             super().__init__(fade_act)
             self.set_wait(open_count)
 
@@ -168,7 +168,7 @@ class XUXFadeScene(_XUXSceneBase):
 
     # フェードアウト
     class FadeOut(_FadeActItem):
-        def __init__(self, fade_act:"XUXFadeScene.FadeAct", close_count:int):
+        def __init__(self, fade_act:"XUEFadeScene.FadeAct", close_count:int):
             super().__init__(fade_act)
             self.set_wait(close_count)
 
@@ -191,10 +191,10 @@ class XUXFadeScene(_XUXSceneBase):
         super().__init__(xmlui)
 
         # フェードインから
-        self.fade_act = XUXFadeScene.FadeAct()
+        self.fade_act = XUEFadeScene.FadeAct()
         self.fade_act.add(
-            XUXFadeScene.FadeIn(self.fade_act, open_count),
-            XUXFadeScene.SceneMain(self.fade_act))
+            XUEFadeScene.FadeIn(self.fade_act, open_count),
+            XUEFadeScene.SceneMain(self.fade_act))
 
     # mainから呼び出すもの
     # -----------------------------------------------------
@@ -208,7 +208,7 @@ class XUXFadeScene(_XUXSceneBase):
 
         # 許可されたActだけ更新処理呼び出し
         if self.fade_act.updateable:
-            XUXInput(self.xmlui).check()  # UI用キー入力
+            XUEInput(self.xmlui).check()  # UI用キー入力
             self.update()
 
         self.fade_act.update()
@@ -236,7 +236,7 @@ class XUXFadeScene(_XUXSceneBase):
     def close(self):
         # Actを全て破棄してフェードアウト開始
         self.fade_act.clear()
-        self.fade_act.add(XUXFadeScene.FadeOut(self.fade_act, self.CLOSE_COUNT))
+        self.fade_act.add(XUEFadeScene.FadeOut(self.fade_act, self.CLOSE_COUNT))
 
     # オーバーライドして使う物
     # これらはsceneの中から呼び出すように(自分で呼び出さない)
@@ -253,9 +253,9 @@ class XUXFadeScene(_XUXSceneBase):
 
 # シーン管理。mainの中で各シーンを実行する
 # *****************************************************************************
-class XUXSceneManager:
-    def __init__(self, start_scene:_XUXSceneBase):
-        self.current_scene:_XUXSceneBase = start_scene
+class XUESceneManager:
+    def __init__(self, start_scene:_XUESceneBase):
+        self.current_scene:_XUESceneBase = start_scene
 
     def update(self):
         # next_sceneが設定されていたら

@@ -2,7 +2,7 @@ import pyxel
 
 # タイトル画面
 from xmlui.lib.debug import DebugXMLUI
-from xmlui.ext.scene import XUXFadeScene
+from xmlui.ext.scene import XUEFadeScene
 from db import enemy_data
 
 import ui_common
@@ -12,7 +12,7 @@ from battle.act import *
 
 # バトルシーン
 # #############################################################################
-class Battle(XUXFadeScene):
+class Battle(XUEFadeScene):
     UI_TEMPLATE_BATTLE = "ui_battle"
 
     def __init__(self):

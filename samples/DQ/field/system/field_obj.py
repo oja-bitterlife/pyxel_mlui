@@ -1,9 +1,9 @@
-from xmlui.ext.tilemap import XUXTilemap
+from xmlui.ext.tilemap import XUETilemap
 from db import fieldobj_data
 
 class FieldObj:
     def __init__(self):
-        self.tile_anim = XUXTilemap(1)
+        self.tile_anim = XUETilemap(1)
 
     def draw(self, scroll_x, scroll_y):
         self.tile_anim.update()

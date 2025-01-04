@@ -1,9 +1,9 @@
 import pyxel
 from xmlui.core import XURect
-from xmlui.ext.timer import XUXInterval
+from xmlui.ext.timer import XUEInterval
 
 # 車輪の再発明、するぞー
-class XUXTilemap(XUXInterval):
+class XUETilemap(XUEInterval):
     # 定数
     DEFAULT_TILE_AREA = XURect(0, 0, 256, 256)  # イメージバンク全体を基本にすると横の数を気にしなくていい
     DEFAULT_TILE_SIZE = 16
