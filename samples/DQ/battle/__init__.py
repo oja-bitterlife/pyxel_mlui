@@ -18,7 +18,7 @@ class Battle(XUEFadeScene):
 
     def __init__(self):
         super().__init__(DebugXMLUI(pyxel.width, pyxel.height))
-        self.data = BattleData(self)
+        self.data = BattleData(self.xmlui)
         self.is_close = False
 
         # UIの読み込み

@@ -15,6 +15,7 @@ class XUEActItem(XUETimeout):
     def __init__(self):
         super().__init__(0)
         self._init_func:Callable|None = self.init
+        self._manager:XUEActManager|None = None
 
     # コンストラクタではなくinit()の中で時間を設定する。
     def set_wait(self, wait:int):
@@ -23,6 +24,14 @@ class XUEActItem(XUETimeout):
     # オーバーライドして使う物
     def init(self):
         pass
+
+    # 呼び出しActを返す(Actの中で次のActをaddする用)
+    # GenericsでActではなくnewしたクラスそのものを返す
+    @property
+    def manager(self) -> "XUEActManager":
+        if self._manager is None:
+            raise RuntimeError("act is not set")
+        return self._manager
 
 # 一定時間内ずっとwaigingが実行され、最後にaction。
 class XUEActWait(XUEActItem):
@@ -63,6 +72,7 @@ class XUEActManager:
     # -----------------------------------------------------
     def add_act(self, *items:XUEActItem):
         for item in items:
+            item._manager = self
             self.act_queue.append(item)
 
     def clear_act(self):
