@@ -237,15 +237,15 @@ class XUEFadeScene(XUESceneBase):
 
         # フェード描画
         # -------------------------------------------------
-        pyxel.dither(1.0)  # 戻しておく
-
         # 画面の描画
+        pyxel.dither(1.0)
         self.draw()
 
         # フェードを上から描画
         if self.alpha > 0:  # 無駄な描画をしないよう
             pyxel.dither(self.alpha)  # フェードで
             pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.FADE_COLOR)
+            pyxel.dither(1.0)  # 戻しておく
 
 # シーン管理。mainの中で各シーンを実行する
 # *****************************************************************************
