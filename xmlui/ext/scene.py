@@ -86,7 +86,7 @@ class XUEActManager:
 
     # 状態更新
     # -----------------------------------------------------
-    def _update_act(self):
+    def update(self):
         if not self.is_act_empty:
             act = self.current_act
             if act._init_func:
@@ -121,7 +121,7 @@ class _XUESceneBase(XUEActManager):
         self.is_end = False
 
         # デフォルトでUpdateを使えるように
-        self.add_act(_XUESceneBase._UpdateAct(self))
+        self.add_act(self.update_act)
 
     # シーン遷移
     def set_next_scene(self, scene:"XUEFadeScene"):
@@ -130,19 +130,20 @@ class _XUESceneBase(XUEActManager):
     # シーンマネージャから呼ばれるもの
     # -----------------------------------------------------
     def update_scene(self):
-        # xmluiのキーイベントサポート
-        XUEInput(self.xmlui).check()
-        for event in self.xmlui.event.trg:
-            self.event(event)
+        if not self.is_end:
+            # xmluiのキーイベントサポート
+            XUEInput(self.xmlui).check()
+            for event in self.xmlui.event.trg:
+                self.event(event)
 
-        # Actの更新
-        self._update_act()
+            # Actの更新
+            super().update()
 
-        # シーン完了チェック。完了時はclosed()内で次シーンを設定しておくように
-        if self.is_act_empty:
-            self.closed()
-            self.is_end = True
-            return
+            # シーン完了チェック。完了時はclosed()内で次シーンを設定しておくように
+            if self.is_act_empty:
+                self.closed()
+                self.is_end = True
+                return
 
     def draw_scene(self):
         self.draw()
@@ -157,6 +158,10 @@ class _XUESceneBase(XUEActManager):
         def waiting(self) -> bool:
             self.scene.update()
             return super().waiting()
+
+    @property
+    def update_act(self):
+        return _XUESceneBase._UpdateAct(self)
 
     # オーバーライドして使う物
     # -----------------------------------------------------
@@ -230,7 +235,7 @@ class XUEFadeScene(_XUESceneBase):
         self.clear_act()
         self.add_act(
             XUEFadeScene.FadeIn(self, open_count),
-            _XUESceneBase._UpdateAct(self))
+            self.update_act)
 
     # シーンマネージャから呼ばれるもの
     # -----------------------------------------------------
@@ -272,9 +277,7 @@ class XUESceneManager:
             self.current_scene = self.current_scene._next_scene
             self.current_scene._next_scene = None
 
-        # updateはend以降は呼ばない
-        if not self.current_scene.is_end:
-            self.current_scene.update_scene()
+        self.current_scene.update_scene()
 
     def draw(self):
         # drawはend以降も呼ぶ(endの状態を描画)

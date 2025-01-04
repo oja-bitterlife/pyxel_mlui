@@ -46,12 +46,12 @@ class Battle(XUEFadeScene):
         from field import Field
         self.set_next_scene(Field())
 
-    def update(self):
-        self.act.update()
+    # def update(self):
+    #     self.act.update_act()
 
-        if self.act.is_dead and not self.is_close:
-            self.close()
-            self.is_close = True
+    #     if self.act.is_dead and not self.is_close:
+    #         self.close()
+    #         self.is_close = True
 
     def draw(self):
         # 背景
