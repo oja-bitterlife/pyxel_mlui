@@ -1,17 +1,17 @@
 import random
 
-from xmlui.core import XMLUI,XUWinBase,XUTextUtil
-from xmlui.ext.scene import XUEActManager,XUEActItem,XUEActWait
+from xmlui.core import XUWinBase,XUTextUtil
+from xmlui.ext.scene import XUESceneBase,XUEActItem,XUEActWait
 from msg_dq import MsgDQ
 from db import user_data, enemy_data
 
 
 # バトル用シーン遷移ベース
 # #############################################################################
-class BattleAct(XUEActManager):
-    def __init__(self, xmlui:XMLUI):
+class BattleData:
+    def __init__(self, scene:XUESceneBase):
         super().__init__()
-        self.xmlui = xmlui
+        self.scene = scene
 
         # データ受け渡しをここでやってみる
         self.sway_x = 0
@@ -21,23 +21,31 @@ class BattleAct(XUEActManager):
         self.is_dead = False
 
 
-class BattleActItem(XUEActItem[BattleAct]):
+class BattleActItem(XUEActItem):
+    def __init__(self, data:BattleData):
+        super().__init__()
+        self.data = data
+
     @property
     def xmlui(self):
-        return self.act.xmlui
+        return self.data.scene.xmlui
 
     @property
     def msg_dq(self):
-        return MsgDQ(self.act.xmlui.find_by_id("msg_text"))
+        return MsgDQ(self.data.scene.xmlui.find_by_id("msg_text"))
 
-class BattleActWait(XUEActWait[BattleAct]):
+class BattleActWait(XUEActWait):
+    def __init__(self, data:BattleData):
+        super().__init__()
+        self.data = data
+
     @property
     def xmlui(self):
-        return self.act.xmlui
+        return self.data.scene.xmlui
 
     @property
     def msg_dq(self):
-        return MsgDQ(self.act.xmlui.find_by_id("msg_text"))
+        return MsgDQ(self.data.scene.xmlui.find_by_id("msg_text"))
 
 
 # 個々のAct
@@ -46,8 +54,8 @@ class BattleActWait(XUEActWait[BattleAct]):
 # *****************************************************************************
 # 設定済みメッセージ表示完了待機
 class _MsgBase(BattleActWait):
-    def __init__(self, text:str, params:dict):
-        super().__init__()
+    def __init__(self, data:BattleData, text:str, params:dict):
+        super().__init__(data)
         self.text = text
         self.params = params
 
@@ -78,7 +86,7 @@ class CmdStart(BattleActItem):
     def action(self):
         self.xmlui.open("menu")
         self.msg_dq.append_msg("コマンド？")
-        self.act.add_act(CmdCheck())
+        self.data.scene.add_act(CmdCheck(self.data))
 
 # コマンド選択待ち
 class CmdCheck(BattleActWait):
@@ -90,11 +98,11 @@ class CmdCheck(BattleActWait):
             # ダメージ計算
             enemy_data.data["hit"] = XUTextUtil.format_zenkaku(random.randint(1, 100))
 
-            self.act.add_act(
-                PlayerMsg("{name}の　こうげき！", user_data.data),
-                BlinkEffect(),
-                PlayerMsg("{name}に　{hit}ポイントの\nダメージを　あたえた！", enemy_data.data),
-                EnemyStart())
+            self.data.scene.add_act(
+                PlayerMsg(self.data, "{name}の　こうげき！", user_data.data),
+                BlinkEffect(self.data),
+                PlayerMsg(self.data, "{name}に　{hit}ポイントの\nダメージを　あたえた！", enemy_data.data),
+                EnemyStart(self.data))
             return True
 
         if "run" in self.xmlui.event.trg:
@@ -102,20 +110,20 @@ class CmdCheck(BattleActWait):
             XUWinBase(self.xmlui.find_by_id("menu")).start_close()
 
             # 逃げる
-            self.act.add_act(
-                PlayerMsg("{name}は　にげだした", user_data.data),
-                RunWait(),
-                PlayerMsg("しかし　まわりこまれて\nしまった!", {}),
-                EnemyStart())
+            self.data.scene.add_act(
+                PlayerMsg(self.data, "{name}は　にげだした", user_data.data),
+                RunWait(self.data),
+                PlayerMsg(self.data, "しかし　まわりこまれて\nしまった!", {}),
+                EnemyStart(self.data))
             return True
 
         if "spel" in self.xmlui.event.trg:
             # 選択されたらメニューは閉じる
             XUWinBase(self.xmlui.find_by_id("menu")).start_close()
 
-            self.act.add_act(
-                PlayerMsg("じゅもんを　おぼえていない", {}),
-                CmdStart())  # コマンド選択に戻る
+            self.data.scene.add_act(
+                PlayerMsg(self.data, "じゅもんを　おぼえていない", {}),
+                CmdStart(self.data))  # コマンド選択に戻る
             return True
 
         if "tools" in self.xmlui.event.trg:
@@ -134,36 +142,36 @@ class EnemyStart(BattleActItem):
         damage = random.randint(5, 10)
         user_data.data["damage"] = XUTextUtil.format_zenkaku(damage)
 
-        self.act.add_act(
-            EnemyMsg("{name}の　こうげき！", enemy_data.data),
-            DamageEffect(damage),
-            EnemyMsg("{name}は　{damage}ポイントの\nだめーじを　うけた", user_data.data))
+        self.data.scene.add_act(
+            EnemyMsg(self.data, "{name}の　こうげき！", enemy_data.data),
+            DamageEffect(self.data, damage),
+            EnemyMsg(self.data, "{name}は　{damage}ポイントの\nだめーじを　うけた", user_data.data))
         
         if user_data.hp > damage:
-            self.act.add_act(CmdStart())
+            self.data.scene.add_act(CmdStart(self.data))
         else:
-            self.act.add_act(
-                DeadWait(),
-                PlayerMsg("{name}は　しんでしまった", user_data.data),
-                ReturnKing())
+            self.data.scene.add_act(
+                DeadWait(self.data),
+                PlayerMsg(self.data, "{name}は　しんでしまった", user_data.data),
+                ReturnKing(self.data))
 
 # ウェイト系
 # *****************************************************************************
 class DamageEffect(BattleActWait):
-    def __init__(self, damage:int):
-        super().__init__()
+    def __init__(self, data:BattleData, damage:int):
+        super().__init__(data)
         self.damage = damage
         self.set_wait(15)  # 適当時間
 
     def update(self):
         # とりあえず画面揺らし
-        self.act.sway_x = random.randint(-3, 3)
-        self.act.sway_y = random.randint(-3, 3)
+        self.data.sway_x = random.randint(-3, 3)
+        self.data.sway_y = random.randint(-3, 3)
         return False
 
     def action(self):
-        self.act.sway_x = 0
-        self.act.sway_y = 0
+        self.data.sway_x = 0
+        self.data.sway_y = 0
         user_data.hp = max(0, user_data.hp - self.damage)
 
 class BlinkEffect(BattleActWait):
@@ -171,7 +179,7 @@ class BlinkEffect(BattleActWait):
         self.set_wait(10)  # エフェクトはないので適当待ち
 
     def update(self):
-        self.act.blink = self.count % 2 < 1
+        self.data.blink = self.count % 2 < 1
         return False
 
     def action(self):
@@ -191,4 +199,4 @@ class ReturnKing(BattleActItem):
     def init(self):
         self.set_wait(45)  # ちょっと待機
     def action(self):
-        self.act.is_dead = True
+        self.data.is_dead = True

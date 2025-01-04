@@ -30,7 +30,7 @@ class _XUETimerBase:
         return max(0, min(1, float(self.count)/float(self._count_max)))
 
     # タイマー更新
-    def _update(self) -> bool:
+    def _update(self):
         raise NotImplementedError()
 
     # タイマーアクション
@@ -44,10 +44,10 @@ class _XUETimerBase:
 # ---------------------------------------------------------
 # 時間がきたら一度きりの実行
 class XUETimeout(_XUETimerBase):
-    def _update(self) -> bool:
+    def _update(self):
         # 完了済み
         if self.is_finish:
-            return False
+            return
 
         # 1,2,3,4,...10
         self._count += 1
@@ -56,16 +56,13 @@ class XUETimeout(_XUETimerBase):
         if self._count >= self._count_max:
             self.action()
             self.finish()
-            return True
-
-        return False
 
 # 時間ごとに何度も実行
 class XUEInterval(_XUETimerBase):
-    def _update(self) -> bool:
+    def _update(self):
         # 完了済み
         if self.is_finish:
-            return False
+            return
 
         # 1,2,3,4,...10
         self._count += 1
@@ -74,19 +71,15 @@ class XUEInterval(_XUETimerBase):
         if self.count >= self._count_max:
             self.action()
             self._count = 0  # intervalはカウントし直し
-            return True
-
-        return False
-
 
 # 指定時間までずっと発火
 # ---------------------------------------------------------
 # カウントアップ
 class XUECountUp(_XUETimerBase):
-    def _update(self) -> bool:
+    def _update(self):
         # 完了済み
         if self.is_finish:
-            return False
+            return
 
         # 1,2,3,4,...10
         self._count += 1
@@ -94,16 +87,13 @@ class XUECountUp(_XUETimerBase):
 
         if self._count >= self._count_max:
             self.finish()  # カウントアップ完了
-            return True
-
-        return False
 
 # カウントダウン。0も含める
 class XUECountDown(_XUETimerBase):
-    def _update(self) -> bool:
+    def _update(self):
         # 完了済み
         if self.is_finish:
-            return False
+            return
 
         # 0,9,8...1,0
         self._count += 1
@@ -111,9 +101,6 @@ class XUECountDown(_XUETimerBase):
 
         if self._count >= self._count_max:
             self.finish()  # カウントダウン完了
-            return True
-
-        return False
 
     # カウントダウンにオーバーライド
     @property

@@ -1,4 +1,4 @@
-from typing import Callable,Generic,TypeVar
+from typing import Callable
 import pyxel
 
 from xmlui.core import XMLUI,XUEventItem
@@ -9,15 +9,12 @@ from xmlui.ext.timer import XUETimeout
 
 # ステータス遷移管理用。NPCの寸劇とかで使うやつ
 # #############################################################################
-T = TypeVar('T')
-
 # 一定時間後に1つのaction。アクションをつなげて実行する場合は主にこちら
-class XUEActItem(XUETimeout, Generic[T]):
+class XUEActItem(XUETimeout):
     # デフォルトはすぐ実行
     def __init__(self):
         super().__init__(0)
         self._init_func:Callable|None = self.init
-        self._manager:T|None = None  # 呼び出しActへの参照
 
     # コンストラクタではなくinit()の中で時間を設定する。
     def set_wait(self, wait:int):
@@ -27,16 +24,8 @@ class XUEActItem(XUETimeout, Generic[T]):
     def init(self):
         pass
 
-    # 呼び出しActを返す(Actの中で次のActをaddする用)
-    # GenericsでActではなくnewしたクラスそのものを返す
-    @property
-    def manager(self) -> T:
-        if self._manager is None:
-            raise RuntimeError("act is not set")
-        return self._manager
-
 # 一定時間内ずっとwaigingが実行され、最後にaction。
-class XUEActWait(XUEActItem[T]):
+class XUEActWait(XUEActItem):
     WAIT_FOREVER = 2**31-1
 
     # デフォルトは無限待機
@@ -53,11 +42,11 @@ class XUEActWait(XUEActItem[T]):
             return super().alpha
 
     # override
-    def _update(self) -> bool:
+    def _update(self):
         if not self.is_finish:
             if self.waiting():
                 self.finish()
-        return super()._update()
+        super()._update()
 
     # オーバーライドして使う物
     # -----------------------------------------------------
@@ -74,7 +63,6 @@ class XUEActManager:
     # -----------------------------------------------------
     def add_act(self, *items:XUEActItem):
         for item in items:
-            item._manager = self  # 自分を登録しておく
             self.act_queue.append(item)
 
     def clear_act(self):
@@ -92,6 +80,7 @@ class XUEActManager:
             if act._init_func:
                 act._init_func()  # 初回はinitも実行
                 act._init_func = None
+            # Actの実行
             act._update()
 
             # 完了したら次のAct
@@ -112,7 +101,7 @@ class XUEActManager:
 # シーン管理(フェードイン・フェードアウト)用
 # #############################################################################
 # シーン管理用仕込み
-class _XUESceneBase(XUEActManager):
+class XUESceneBase(XUEActManager):
     def __init__(self, xmlui:XMLUI):
         super().__init__()
 
@@ -170,20 +159,13 @@ class _XUESceneBase(XUEActManager):
         get_logger().debug("scene.closed is not implemented")
 
 # シーンクラス。継承して使おう
-class XUEFadeScene(_XUESceneBase):
+class XUEFadeScene(XUESceneBase):
     # デフォルトフェードカラー
     FADE_COLOR = 0
 
     # デフォルトフェードインアウト時間
     OPEN_COUNT = 10
     CLOSE_COUNT = 20
-
-    # フェード管理
-    # -----------------------------------------------------
-    class FadeAct(XUEActManager):
-        def __init__(self):
-            super().__init__()
-            self.alpha:float = 0.0
 
     # 各フェードパート
     # -----------------------------------------------------
@@ -201,7 +183,7 @@ class XUEFadeScene(_XUESceneBase):
 
         def waiting(self) -> bool:
             self.scene.alpha = 1-self.alpha  # 黒から
-            return self.is_finish
+            return False
 
         # フェードインが終わったら綺麗な0にしておく
         def action(self):
@@ -259,8 +241,8 @@ class XUEFadeScene(_XUESceneBase):
 # シーン管理。mainの中で各シーンを実行する
 # *****************************************************************************
 class XUESceneManager:
-    def __init__(self, start_scene:_XUESceneBase):
-        self.current_scene:_XUESceneBase = start_scene
+    def __init__(self, start_scene:XUESceneBase):
+        self.current_scene:XUESceneBase = start_scene
 
     def update(self):
         # next_sceneが設定されていたら
