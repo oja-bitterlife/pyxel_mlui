@@ -26,9 +26,8 @@ class XUEActItem(XUETimeout):
         pass
 
     # 呼び出しActを返す(Actの中で次のActをaddする用)
-    # GenericsでActではなくnewしたクラスそのものを返す
     @property
-    def manager(self) -> "XUEActManager":
+    def act(self) -> "XUEActManager":
         if self._manager is None:
             raise RuntimeError("act is not set")
         return self._manager

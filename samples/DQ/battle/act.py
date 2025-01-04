@@ -81,7 +81,7 @@ class CmdStart(BattleActItem):
     def action(self):
         self.xmlui.open("menu")
         self.msg_dq.append_msg("コマンド？")
-        self.manager.add_act(CmdCheck(self.data))
+        self.act.add_act(CmdCheck(self.data))
 
 # コマンド選択待ち
 class CmdCheck(BattleActWait):
@@ -93,7 +93,7 @@ class CmdCheck(BattleActWait):
             # ダメージ計算
             enemy_data.data["hit"] = XUTextUtil.format_zenkaku(random.randint(1, 100))
 
-            self.manager.add_act(
+            self.act.add_act(
                 PlayerMsg(self.data, "{name}の　こうげき！", user_data.data),
                 BlinkEffect(self.data),
                 PlayerMsg(self.data, "{name}に　{hit}ポイントの\nダメージを　あたえた！", enemy_data.data),
@@ -105,7 +105,7 @@ class CmdCheck(BattleActWait):
             XUWinBase(self.xmlui.find_by_id("menu")).start_close()
 
             # 逃げる
-            self.manager.add_act(
+            self.act.add_act(
                 PlayerMsg(self.data, "{name}は　にげだした", user_data.data),
                 RunWait(self.data),
                 PlayerMsg(self.data, "しかし　まわりこまれて\nしまった!", {}),
@@ -116,7 +116,7 @@ class CmdCheck(BattleActWait):
             # 選択されたらメニューは閉じる
             XUWinBase(self.xmlui.find_by_id("menu")).start_close()
 
-            self.manager.add_act(
+            self.act.add_act(
                 PlayerMsg(self.data, "じゅもんを　おぼえていない", {}),
                 CmdStart(self.data))  # コマンド選択に戻る
             return True
@@ -137,15 +137,15 @@ class EnemyStart(BattleActItem):
         damage = random.randint(5, 10)
         user_data.data["damage"] = XUTextUtil.format_zenkaku(damage)
 
-        self.manager.add_act(
+        self.act.add_act(
             EnemyMsg(self.data, "{name}の　こうげき！", enemy_data.data),
             DamageEffect(self.data, damage),
             EnemyMsg(self.data, "{name}は　{damage}ポイントの\nだめーじを　うけた", user_data.data))
         
         if user_data.hp > damage:
-            self.manager.add_act(CmdStart(self.data))
+            self.act.add_act(CmdStart(self.data))
         else:
-            self.manager.add_act(
+            self.act.add_act(
                 DeadWait(self.data),
                 PlayerMsg(self.data, "{name}は　しんでしまった", user_data.data),
                 ReturnKing(self.data))
