@@ -3,7 +3,7 @@ import pyxel
 # タイトル画面
 from xmlui.core import XUEventItem
 from xmlui.lib.debug import DebugXMLUI
-from xmlui.ext.scene import XUEFadeScene,XUEUpdateAct
+from xmlui.ext.scene import XUEFadeScene
 
 import ui_common
 from title.ui import start,speed
@@ -26,9 +26,6 @@ class Title(XUEFadeScene):
         self.img = pyxel.Image.from_image(filename="assets/images/title.png")
 
         self.xmlui.open("game_title")  # game_title以下表示開始
-
-        # 待機
-        self.add_act(XUEUpdateAct(self))
 
     def closed(self):
         self.xmlui.close()

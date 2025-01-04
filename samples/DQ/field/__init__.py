@@ -11,21 +11,10 @@ from db import user_data
 # UI
 from xmlui.core import XUElem,XUEvent,XUEventItem,XUWinBase
 from xmlui.lib.debug import DebugXMLUI
-from xmlui.ext.scene import XUEFadeScene,XUEUpdateAct
+from xmlui.ext.scene import XUEFadeScene
 
 import ui_common
 from field.ui import msg_win,menu,talk_dir,tools
-
-class SceneMain(XUEUpdateAct["Field"]):
-    def update(self):
-        # UIメニューが開いていたらキャラが動かないように
-        if not self.scene.xmlui.exists_id("menu"):
-            # プレイヤの移動
-            self.scene.player.update([self.scene.npc.hit_check, self.scene.bg.hit_check, self.scene.field_obj.hit_check])
-
-            # キャラが動いていなければメニューオープン可能
-            if not self.scene.player.is_moving:
-                self.scene.xmlui.open_by_event(XUEvent.Key.BTN_A, "menu")
 
 class Field(XUEFadeScene):
     def __init__(self):
@@ -48,14 +37,21 @@ class Field(XUEFadeScene):
         # 画像読み込み
         pyxel.images[1].load(0, 0, "assets/images/field_tile.png" )
 
-        # 待機
-        self.add_act(SceneMain(self))
-
     def closed(self):
         self.xmlui.close()  # 読みこんだUIの削除
 
         from battle import Battle
         self.set_next_scene(Battle())
+
+    def update(self):
+        # UIメニューが開いていたらキャラが動かないように
+        if not self.xmlui.exists_id("menu"):
+            # プレイヤの移動
+            self.player.update([self.npc.hit_check, self.bg.hit_check, self.field_obj.hit_check])
+
+            # キャラが動いていなければメニューオープン可能
+            if not self.player.is_moving:
+                self.xmlui.open_by_event(XUEvent.Key.BTN_A, "menu")
 
     def draw(self):
         # プレイヤを中心に世界が動く。さす勇
