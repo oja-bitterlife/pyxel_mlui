@@ -9,12 +9,23 @@ from msg_dq import MsgDQ
 from db import user_data
 
 # UI
-from xmlui.core import XUElem,XUEvent,XUEventItem,XUWinBase
+from xmlui.core import XMLUI,XUEvent,XUEventItem,XUWinBase
 from xmlui.lib.debug import DebugXMLUI
-from xmlui.ext.scene import XUEFadeScene
+from xmlui.ext.scene import XUEFadeScene,XUEActWait
 
 import ui_common
 from field.ui import msg_win,menu,talk_dir,tools
+
+
+class MenuWaitAct(XUEActWait):
+    def __init__(self, xmlui:XMLUI):
+        super().__init__()
+        # self.use_key_event = False
+        self.menu = xmlui.open("menu")
+
+    # メニューが閉じられるまで待機
+    def waiting(self) -> bool:
+        return self.menu.removed
 
 class Field(XUEFadeScene):
     def __init__(self):
@@ -44,14 +55,13 @@ class Field(XUEFadeScene):
         self.set_next_scene(Battle())
 
     def update(self):
-        # UIメニューが開いていたらキャラが動かないように
-        if not self.xmlui.exists_id("menu"):
-            # プレイヤの移動
-            self.player.update([self.npc.hit_check, self.bg.hit_check, self.field_obj.hit_check])
+        # プレイヤの移動
+        self.player.update([self.npc.hit_check, self.bg.hit_check, self.field_obj.hit_check])
 
-            # キャラが動いていなければメニューオープン可能
-            if not self.player.is_moving:
-                self.xmlui.open_by_event(XUEvent.Key.BTN_A, "menu")
+        # キャラが動いていなければメニューオープン可能
+        if not self.player.is_moving:
+            if XUEvent.Key.BTN_A in self.xmlui.event.trg:
+                self.add_act(MenuWaitAct(self.xmlui))
 
     def draw(self):
         # プレイヤを中心に世界が動く。さす勇

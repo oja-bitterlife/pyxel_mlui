@@ -17,6 +17,8 @@ class XUEActItem(XUETimeout):
         self._init_func:Callable|None = self.init
         self._manager:XUEActManager|None = None
 
+        self.use_key_event = True  # キーイベントを取得するかどうか
+
     # コンストラクタではなくinit()の中で時間を設定する。
     def set_wait(self, wait:int):
         self._count_max = wait
@@ -65,21 +67,21 @@ class XUEActWait(XUEActItem):
 # *****************************************************************************
 class XUEActManager:
     def __init__(self):
-        self.act_queue:list[XUEActItem] = []
+        self._act_queue:list[XUEActItem] = []
 
     # キュー操作
     # -----------------------------------------------------
     def add_act(self, *items:XUEActItem):
         for item in items:
             item._manager = self
-            self.act_queue.append(item)
+            self._act_queue.append(item)
 
     def clear_act(self):
-        self.act_queue.clear()
+        self._act_queue.clear()
 
     def next_act(self):
-        if self.act_queue:
-            self.act_queue.pop(0)
+        if self._act_queue:
+            self._act_queue.pop(0)
 
     # 状態更新
     # -----------------------------------------------------
@@ -100,11 +102,11 @@ class XUEActManager:
     # -----------------------------------------------------
     @property
     def current_act(self) -> XUEActItem:
-        return self.act_queue[0]
+        return self._act_queue[0]
 
     @property
     def is_act_empty(self) -> bool:
-        return len(self.act_queue) == 0
+        return len(self._act_queue) == 0
 
 
 # シーン管理(フェードイン・フェードアウト)用
@@ -116,8 +118,6 @@ class XUESceneBase(XUEActManager):
 
         self.xmlui = xmlui
         self._next_scene:XUEFadeScene|None = None
-
-        self.use_key_event = True  # キーイベントを取得するかどうか
         self.is_end = False  # このシーンが終了したかどうか
 
     # シーン遷移
@@ -137,9 +137,9 @@ class XUESceneBase(XUEActManager):
         if self.is_end:
             return
 
-        # xmluiのキーイベントサポート
-        if self.use_key_event:
-            XUEInput(self.xmlui).check()
+        # actがempty(updateを使う)か、actがuse_keyか
+        if self.is_act_empty or self.current_act.use_key_event:
+            XUEInput(self.xmlui).check()  # xmluiのキーイベントサポート
 
         # イベント処理
         for event in self.xmlui.event.trg:
@@ -204,7 +204,7 @@ class XUEFadeScene(XUESceneBase):
             super().__init__(scene)
             self.set_wait(close_count)
 
-            self.scene.use_key_event = False  # フェード中は動かさない
+            self.use_key_event = False  # フェード中は動かさない
 
         def waiting(self) -> bool:
             self.scene.alpha = self.alpha

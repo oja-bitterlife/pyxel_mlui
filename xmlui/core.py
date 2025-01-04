@@ -632,7 +632,6 @@ class XMLUI(XUElem):
         for child in self.children:
             if child.removed:
                 self._parent_cache[child._element]._element.remove(child._element)
-                child._element.attrib.clear()
 
         # 最後に自分もカウントアップ
         self.set_attr("update_count", self.update_count+1)
