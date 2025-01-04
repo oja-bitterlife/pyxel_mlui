@@ -1,7 +1,8 @@
 from typing import Callable,Generic,TypeVar
 import pyxel
 
-from xmlui.core import XMLUI
+from xmlui.core import XMLUI,XUEventItem
+from xmlui.lib.debug import get_logger
 from xmlui.ext.input import XUEInput
 from xmlui.ext.timer import XUETimeout
 
@@ -64,28 +65,28 @@ class XUEActWait(XUEActItem[T]):
 
 # Act管理クラス。各Itemをコレに登録していく
 # *****************************************************************************
-class XUEAct:
+class XUEActManager:
     def __init__(self):
-        self.queue:list[XUEActItem] = []
+        self.act_queue:list[XUEActItem] = []
 
     # キュー操作
     # -----------------------------------------------------
-    def add(self, *items:XUEActItem):
+    def add_act(self, *items:XUEActItem):
         for item in items:
             item._act = self  # 自分を登録しておく
-            self.queue.append(item)
+            self.act_queue.append(item)
 
-    def clear(self):
-        self.queue.clear()
+    def clear_act(self):
+        self.act_queue.clear()
 
-    def next(self):
-        if self.queue:
-            self.queue.pop(0)
+    def next_act(self):
+        if self.act_queue:
+            self.act_queue.pop(0)
 
     # 状態更新
     # -----------------------------------------------------
-    def update(self):
-        if not self.is_empty:
+    def update_act(self):
+        if not self.is_act_empty:
             act = self.current_act
             if act._init_func:
                 act._init_func()  # 初回はinitも実行
@@ -94,37 +95,68 @@ class XUEAct:
 
             # 完了したら次のAct
             if act.is_finish:
-                self.next()
+                self.next_act()
 
     # 状態取得
     # -----------------------------------------------------
     @property
     def current_act(self) -> XUEActItem:
-        return self.queue[0]
+        return self.act_queue[0]
 
     @property
-    def is_empty(self) -> bool:
-        return len(self.queue) == 0
+    def is_act_empty(self) -> bool:
+        return len(self.act_queue) == 0
 
 
 # シーン管理(フェードイン・フェードアウト)用
 # #############################################################################
 # シーン管理用仕込み
-class _XUESceneBase:
+class _XUESceneBase(XUEActManager):
     def __init__(self, xmlui:XMLUI):
+        super().__init__()
+
         self.xmlui = xmlui
         self._next_scene:XUEFadeScene|None = None
         self.is_end = False
+
+    def event_callback(self, event:XUEventItem):
+        pass
 
     # シーン遷移
     def set_next_scene(self, scene:"XUEFadeScene"):
         self._next_scene = scene
 
-    # オーバーライドして使う物
+    # シーンマネージャから呼ばれるもの
+    # -----------------------------------------------------
     def update_scene(self):
-        pass
+        # xmluiのイベント更新
+        XUEInput(self.xmlui).check()  # UI用キー入力
+        for event in self.xmlui.event.trg:
+            self.event_callback(event)
+
+        # Actの更新
+        self.update_act()
+
+        # シーン完了チェック。完了時はclosed()内で次シーンを設定しておくように
+        if self.is_act_empty:
+            self.closed()
+            self.is_end = True
+            return
+
+        self.update()
+
     def draw_scene(self):
+        self.draw()
+
+    # オーバーライドして使う物
+    # -----------------------------------------------------
+    def draw(self):
         pass
+    def update(self):
+        pass
+    # フェードアウト完了時に呼ばれる。主に次シーン設定を行う
+    def closed(self):
+        get_logger().debug("scene.closed is not implemented")
 
 # シーンクラス。継承して使おう
 class XUEFadeScene(_XUESceneBase):
@@ -137,118 +169,82 @@ class XUEFadeScene(_XUESceneBase):
 
     # フェード管理
     # -----------------------------------------------------
-    class FadeAct(XUEAct):
+    class FadeAct(XUEActManager):
         def __init__(self):
             super().__init__()
             self.alpha:float = 0.0
-
-            # 入力のアップデートが可能か
-            self.updateable = False
 
     # 各フェードパート
     # -----------------------------------------------------
     # パートベース。fade_actのalphaを書き換える
     class _FadeActItem(XUEActWait):
-        def __init__(self, fade_act:"XUEFadeScene.FadeAct"):
+        def __init__(self, scene:"XUEFadeScene"):
             super().__init__()
-            self.fade_act = fade_act
+            self.scene = scene
 
     # フェードイン
     class FadeIn(_FadeActItem):
-        def __init__(self, fade_act:"XUEFadeScene.FadeAct", open_count:int):
-            super().__init__(fade_act)
+        def __init__(self, scene:"XUEFadeScene", open_count:int):
+            super().__init__(scene)
             self.set_wait(open_count)
 
-        def init(self):
-            self.fade_act.updateable = True
-
         def waiting(self) -> bool:
-            self.fade_act.alpha = 1-self.alpha  # 黒から
+            self.scene.alpha = 1-self.alpha  # 黒から
             return self.is_finish
 
     # フェードアウト
     class FadeOut(_FadeActItem):
-        def __init__(self, fade_act:"XUEFadeScene.FadeAct", close_count:int):
-            super().__init__(fade_act)
+        def __init__(self, scene:"XUEFadeScene", close_count:int):
+            super().__init__(scene)
             self.set_wait(close_count)
 
         def waiting(self) -> bool:
-            self.fade_act.alpha = self.alpha
+            self.scene.alpha = self.alpha
             return False
 
     # シーンメイン
     class SceneMain(_FadeActItem):
-        def init(self):
-            self.fade_act.updateable = True
-
         def waiting(self) -> bool:
-            self.fade_act.alpha = 0
+            self.scene.alpha = 0
             return False
 
     # 初期化
     # -----------------------------------------------------
     def __init__(self, xmlui:XMLUI, open_count=OPEN_COUNT):
         super().__init__(xmlui)
+        self.alpha = 0.0
 
         # フェードインから
-        self.fade_act = XUEFadeScene.FadeAct()
-        self.fade_act.add(
-            XUEFadeScene.FadeIn(self.fade_act, open_count),
-            XUEFadeScene.SceneMain(self.fade_act))
+        self.add_act(
+            XUEFadeScene.FadeIn(self, open_count),
+            XUEFadeScene.SceneMain(self))
 
-    # mainから呼び出すもの
     # -----------------------------------------------------
-    def update_scene(self):
-        # フェードアウト(close)が終わった
-        if self.fade_act.is_empty:
-            # シーン完了。closed()内で次シーンを設定しておくように
-            self.closed()
-            self.is_end = True
-            return
-
-        # 許可されたActだけ更新処理呼び出し
-        if self.fade_act.updateable:
-            XUEInput(self.xmlui).check()  # UI用キー入力
-            self.update()
-
-        self.fade_act.update()
-
     def draw_scene(self):
         pyxel.dither(1.0)  # 戻しておく
 
         # フェード描画
         # -------------------------------------------------
         # Actがない(=シーン切り替え中)
-        if self.fade_act.is_empty:
-            self.fade_act.alpha = 1  # 常に塗りつぶす
+        if self.is_act_empty:
+            self.alpha = 1  # 常に塗りつぶす
             pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.FADE_COLOR)
 
         # Actがある(=シーン中)
         else:
-            self.draw()
+            super().draw_scene()
 
             # 無駄な描画をしないよう
-            if self.fade_act.alpha > 0:
-                pyxel.dither(self.fade_act.alpha)  # フェードで
+            if self.alpha > 0:
+                pyxel.dither(self.alpha)  # フェードで
                 pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.FADE_COLOR)
 
     # フェードアウトを開始する
     def close(self):
         # Actを全て破棄してフェードアウト開始
-        self.fade_act.clear()
-        self.fade_act.add(XUEFadeScene.FadeOut(self.fade_act, self.CLOSE_COUNT))
+        self.clear_act()
+        self.add_act(XUEFadeScene.FadeOut(self, self.CLOSE_COUNT))
 
-    # オーバーライドして使う物
-    # これらはsceneの中から呼び出すように(自分で呼び出さない)
-    # -----------------------------------------------------
-    def update(self):
-        pass
-    def draw(self):
-        self.xmlui.draw()
-
-    # フェードアウト完了時に呼ばれる。主に次シーン設定を行う
-    def closed(self):
-        pass
 
 
 # シーン管理。mainの中で各シーンを実行する

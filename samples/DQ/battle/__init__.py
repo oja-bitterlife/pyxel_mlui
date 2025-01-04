@@ -30,7 +30,7 @@ class Battle(XUEFadeScene):
         self.battle = self.xmlui.open("battle")
 
         # 最初のAct
-        self.act.add(
+        self.act.add_act(
             PlayerMsg("{name}が　あらわれた！", enemy_data.data),
             CmdStart())
 

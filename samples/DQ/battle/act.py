@@ -1,14 +1,14 @@
 import random
 
 from xmlui.core import XMLUI,XUWinBase,XUTextUtil
-from xmlui.ext.scene import XUEAct,XUEActItem,XUEActWait
+from xmlui.ext.scene import XUEActManager,XUEActItem,XUEActWait
 from msg_dq import MsgDQ
 from db import user_data, enemy_data
 
 
 # バトル用シーン遷移ベース
 # #############################################################################
-class BattleAct(XUEAct):
+class BattleAct(XUEActManager):
     def __init__(self, xmlui:XMLUI):
         super().__init__()
         self.xmlui = xmlui
@@ -78,7 +78,7 @@ class CmdStart(BattleActItem):
     def action(self):
         self.xmlui.open("menu")
         self.msg_dq.append_msg("コマンド？")
-        self.act.add(CmdCheck())
+        self.act.add_act(CmdCheck())
 
 # コマンド選択待ち
 class CmdCheck(BattleActWait):
@@ -90,7 +90,7 @@ class CmdCheck(BattleActWait):
             # ダメージ計算
             enemy_data.data["hit"] = XUTextUtil.format_zenkaku(random.randint(1, 100))
 
-            self.act.add(
+            self.act.add_act(
                 PlayerMsg("{name}の　こうげき！", user_data.data),
                 BlinkEffect(),
                 PlayerMsg("{name}に　{hit}ポイントの\nダメージを　あたえた！", enemy_data.data),
@@ -102,7 +102,7 @@ class CmdCheck(BattleActWait):
             XUWinBase(self.xmlui.find_by_id("menu")).start_close()
 
             # 逃げる
-            self.act.add(
+            self.act.add_act(
                 PlayerMsg("{name}は　にげだした", user_data.data),
                 RunWait(),
                 PlayerMsg("しかし　まわりこまれて\nしまった!", {}),
@@ -113,7 +113,7 @@ class CmdCheck(BattleActWait):
             # 選択されたらメニューは閉じる
             XUWinBase(self.xmlui.find_by_id("menu")).start_close()
 
-            self.act.add(
+            self.act.add_act(
                 PlayerMsg("じゅもんを　おぼえていない", {}),
                 CmdStart())  # コマンド選択に戻る
             return True
@@ -134,15 +134,15 @@ class EnemyStart(BattleActItem):
         damage = random.randint(5, 10)
         user_data.data["damage"] = XUTextUtil.format_zenkaku(damage)
 
-        self.act.add(
+        self.act.add_act(
             EnemyMsg("{name}の　こうげき！", enemy_data.data),
             DamageEffect(damage),
             EnemyMsg("{name}は　{damage}ポイントの\nだめーじを　うけた", user_data.data))
         
         if user_data.hp > damage:
-            self.act.add(CmdStart())
+            self.act.add_act(CmdStart())
         else:
-            self.act.add(
+            self.act.add_act(
                 DeadWait(),
                 PlayerMsg("{name}は　しんでしまった", user_data.data),
                 ReturnKing())
