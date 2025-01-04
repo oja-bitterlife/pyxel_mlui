@@ -60,10 +60,8 @@ class _MsgBase(BattleActWait):
         self.params = params
 
     # メッセージ表示完了待ち
-    def update(self):
-        if self.msg_dq.is_all_finish:
-            return True
-        return False
+    def waiting(self):
+        return self.msg_dq.is_all_finish
 
 # プレイヤメッセージ設定
 class PlayerMsg(_MsgBase):
@@ -81,6 +79,7 @@ class EnemyMsg(_MsgBase):
 # コマンド選択開始
 class CmdStart(BattleActItem):
     def init(self):
+        print("test")
         self.set_wait(10)  # コマンド？を出すのにちょっと溜める
 
     def action(self):
