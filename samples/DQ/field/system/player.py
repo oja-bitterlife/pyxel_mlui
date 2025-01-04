@@ -1,9 +1,9 @@
 import pyxel
 from typing import Callable
 
-from xmlui.core import XMLUI,XUEvent
+from xmlui.core import XMLUI,XUEvent,XUEventItem
 from xmlui.ext.tilemap import XUETilemap
-from xmlui.ext.scene import XUEActWait,XUESceneBase
+from xmlui.ext.scene import XUEActWait
 
 from msg_dq import MsgDQ
 from db import user_data
@@ -60,8 +60,7 @@ class Player:
             talk = "おお　{name}！\nしんでしまうとは　なにごとだ！\\p…………\\pちょっと　いってみたかったの\\pがんばってね"
             msg_text.append_talk(talk, user_data.data)  # talkでテキスト開始
 
-    def update(self, hitcheck_funcs:list[Callable[[int,int],bool]]):
-        event_now = self.xmlui.event.now
+    def move(self, event_now:set[XUEventItem], hitcheck_funcs:list[Callable[[int,int],bool]]):
         if XUEvent.Key.UP in event_now and all([not hit(self.block_x, self.block_y-1) for hit in hitcheck_funcs]):
             return PlayerMoveAct(self, 0, -16)
         if XUEvent.Key.DOWN in event_now and all([not hit(self.block_x, self.block_y+1) for hit in hitcheck_funcs]):
