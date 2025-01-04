@@ -70,7 +70,7 @@ def common_msg_text(msg_dq:MsgDQ, event:XUEvent, cursor_visible:bool):
     # テキストが空
     if not msg_dq.pages:
         return
-    
+
     # カウンタ操作
     # ---------------------------------------------------------
     # ボタンを押している間は速度MAX
@@ -190,10 +190,6 @@ def ui_init(xmlui:XMLUI):
     # *****************************************************************************
     # 角丸ウインドウ
     # ---------------------------------------------------------
-    # openで値をセットをした後closeされる、closingなのに値はopningになっちゃうので別々に保存する
-    CLOSING_CLIP_SIZE="_xmlui_closing_clip_size"
-    OPENING_CLIP_SIZE="_xmlui_opening_clip_size"
-
     @common_win.round_frame("round_win")
     def round_win(round_win:win.RoundFrame, event:XUEvent):
         area = round_win.area
@@ -202,6 +198,7 @@ def ui_init(xmlui:XMLUI):
         # 表示領域が無ければ完了なので閉じる
         if round_win.is_closing and clip.is_empty:
             round_win.close()  # 即座にclose
+            round_win.xmlui.on(f"close_win:{round_win.id}")  # ウインドウ閉じたイベント発行
             return
         
         # 背景

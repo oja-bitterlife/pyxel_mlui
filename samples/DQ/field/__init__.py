@@ -92,17 +92,23 @@ class Field(XUEFadeScene):
                     msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
                     msg_text.append_msg("とびらがない")  # systemメッセージ
 
-            case _:
-                # 会話イベントチェック
-                for talk_event in self.npc.TALK_EVENTS:
-                    if talk_event == event:
-                        menu = self.xmlui.find_by_id("menu")
+        # 会話イベントチェック
+        for talk_event in self.npc.TALK_EVENTS:
+            if talk_event == event:
+                menu = self.xmlui.find_by_id("menu")
 
-                        # メッセージウインドウを開く
-                        msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
+                # メッセージウインドウを開く
+                msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
 
-                        talk = self.npc.check_talk(talk_event, self.player.block_x, self.player.block_y)
-                        if talk is not None:
-                            msg_text.append_talk(talk, user_data.data)  # talkでテキスト開始
-                        else:
-                            msg_text.append_msg("だれもいません")  # systemメッセージ
+                talk = self.npc.check_talk(talk_event, self.player.block_x, self.player.block_y)
+                if talk is not None:
+                    msg_text.append_talk(talk, user_data.data)  # talkでテキスト開始
+                else:
+                    msg_text.append_msg("だれもいません")  # systemメッセージ
+
+        # ウインドウが閉じたときの対応
+        if event.startswith("close_win:"):
+            # メッセージウインドウの時はメニューごと閉じる
+            if event[len("close_win:"):].strip() == "message":
+                menu = self.xmlui.find_by_id("menu")
+                XUWinBase(menu).start_close()
