@@ -238,7 +238,6 @@ class XUEFadeScene(XUESceneBase):
         # フェード描画
         # -------------------------------------------------
         # 画面の描画
-        pyxel.dither(1.0)
         self.draw()
 
         # フェードを上から描画
