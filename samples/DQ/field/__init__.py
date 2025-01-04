@@ -48,6 +48,8 @@ class Field(XUEFadeScene):
         # 画像読み込み
         pyxel.images[1].load(0, 0, "assets/images/field_tile.png" )
 
+        # 待機
+        self.add_act(SceneMain(self))
 
     def closed(self):
         self.xmlui.close()  # 読みこんだUIの削除

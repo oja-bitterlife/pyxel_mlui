@@ -27,6 +27,7 @@ class Title(XUEFadeScene):
 
         self.xmlui.open("game_title")  # game_title以下表示開始
 
+        # 待機
         self.add_act(XUEUpdateAct(self))
 
     def closed(self):

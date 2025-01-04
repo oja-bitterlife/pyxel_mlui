@@ -17,7 +17,7 @@ class XUEActItem(XUETimeout, Generic[T]):
     def __init__(self):
         super().__init__(0)
         self._init_func:Callable|None = self.init
-        self._act:T|None = None  # 呼び出しActへの参照
+        self._manager:T|None = None  # 呼び出しActへの参照
 
     # コンストラクタではなくinit()の中で時間を設定する。
     def set_wait(self, wait:int):
@@ -27,13 +27,13 @@ class XUEActItem(XUETimeout, Generic[T]):
     def init(self):
         pass
 
-    # 呼び出しActを返す
+    # 呼び出しActを返す(Actの中で次のActをaddする用)
     # GenericsでActではなくnewしたクラスそのものを返す
     @property
-    def act(self) -> T:
-        if self._act is None:
+    def manager(self) -> T:
+        if self._manager is None:
             raise RuntimeError("act is not set")
-        return self._act
+        return self._manager
 
 # 一定時間内ずっとwaigingが実行され、最後にaction。
 class XUEActWait(XUEActItem[T]):
@@ -74,7 +74,7 @@ class XUEActManager:
     # -----------------------------------------------------
     def add_act(self, *items:XUEActItem):
         for item in items:
-            item._act = self  # 自分を登録しておく
+            item._manager = self  # 自分を登録しておく
             self.act_queue.append(item)
 
     def clear_act(self):
@@ -239,6 +239,7 @@ class XUEFadeScene(_XUESceneBase):
         self.clear_act()
         self.add_act(XUEFadeScene.FadeOut(self, self.CLOSE_COUNT))
 
+# Updateサポート
 class XUEUpdateAct(XUEActWait[T]):
     def __init__(self, scene:T):
         super().__init__()
