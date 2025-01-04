@@ -140,10 +140,6 @@ class XUEvent:
         self.trg:set[XUEventItem] = set([])
         self.release:set[XUEventItem] = set([])
 
-    def clear_trg(self):
-        self.trg:set[XUEventItem] = set([])
-        self.release:set[XUEventItem] = set([])
-
     # 更新
     def update(self):
         # 状態更新
@@ -409,15 +405,10 @@ class XUElem:
         for child in opened._rec_iter():
             child.set_attr("owner", id_alias)
 
-        # open/closeが連続しないようTrg入力を落としておく
-        self.xmlui.event.clear_trg()
         return opened
 
-    # すぐにclose
+    # クローズ
     def close(self):
-        # open/closeが連続しないようTrg入力を落としておく
-        self.xmlui.event.clear_trg()
-
         # ownerが設定されていればownerを、無ければ自身をremoveする
         if self.owner and self.xmlui.exists_id(self.owner):
             target = self.xmlui.find_by_id(self.owner)
@@ -553,9 +544,9 @@ class XMLUI(XUElem):
         # 登録関数のクリア
         self._draw_funcs = {}
 
-        # ワーキングツリー全体の参照を全て削除
-        for element in self.xmlui._element.iter():
-            element.clear()
+        # 一応ワーキングツリー全体の参照を全て削除(attribに変な参照を突っ込んじゃった対策)
+        for child in self.children:
+            child._element.clear()
 
         # 自己参照を外す
         self.xmlui._xmlui = None
@@ -597,9 +588,6 @@ class XMLUI(XUElem):
     def set_drawfunc(self, tag_name:str, func:Callable[[XUElem,XUEvent], str|None]):
         # 処理関数の登録
         self._draw_funcs[tag_name] = func
-
-    def clear_drawfunc(self):
-        self._draw_funcs = {}
 
     # デコレータも用意
     def tag_draw(self, tag_name:str):
