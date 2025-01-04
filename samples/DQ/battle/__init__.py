@@ -1,13 +1,14 @@
 import pyxel
 
 # タイトル画面
+from xmlui.core import XUEventItem
 from xmlui.lib.debug import DebugXMLUI
 from xmlui.ext.scene import XUEFadeScene
 from db import enemy_data
 
 import ui_common
 from battle.ui import menu
-from battle.act import *
+from battle.act import BattleData,PlayerMsg,CmdStart
 
 
 # バトルシーン
@@ -38,6 +39,11 @@ class Battle(XUEFadeScene):
         self.enemy_bg = pyxel.Image.from_image(filename="assets/images/enemy_bg.png")
         self.field_img = pyxel.Image.from_image(filename="assets/images/field.png")
 
+
+    def event(self, event:XUEventItem):
+        match event:
+            case "dead":
+                self.fade_close()
 
     def closed(self):
         # 読みこんだUIの削除

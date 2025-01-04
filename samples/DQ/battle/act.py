@@ -18,9 +18,6 @@ class BattleData:
         self.sway_y = 0
         self.blink = False
 
-        self.is_dead = False
-
-
 class BattleActItem(XUEActItem):
     def __init__(self, data:BattleData):
         super().__init__()
@@ -79,7 +76,6 @@ class EnemyMsg(_MsgBase):
 # コマンド選択開始
 class CmdStart(BattleActItem):
     def init(self):
-        print("test")
         self.set_wait(10)  # コマンド？を出すのにちょっと溜める
 
     def action(self):
@@ -89,7 +85,7 @@ class CmdStart(BattleActItem):
 
 # コマンド選択待ち
 class CmdCheck(BattleActWait):
-    def update(self):
+    def waiting(self):
         if "attack" in self.xmlui.event.trg:
             # 選択されたらメニューは閉じる
             XUWinBase(self.xmlui.find_by_id("menu")).start_close()
@@ -162,7 +158,7 @@ class DamageEffect(BattleActWait):
         self.damage = damage
         self.set_wait(15)  # 適当時間
 
-    def update(self):
+    def waiting(self):
         # とりあえず画面揺らし
         self.data.sway_x = random.randint(-3, 3)
         self.data.sway_y = random.randint(-3, 3)
@@ -177,7 +173,7 @@ class BlinkEffect(BattleActWait):
     def init(self):
         self.set_wait(10)  # エフェクトはないので適当待ち
 
-    def update(self):
+    def waiting(self):
         self.data.blink = self.count % 2 < 1
         return False
 
@@ -198,4 +194,4 @@ class ReturnKing(BattleActItem):
     def init(self):
         self.set_wait(45)  # ちょっと待機
     def action(self):
-        self.data.is_dead = True
+        self.data.scene.xmlui.on("dead")
