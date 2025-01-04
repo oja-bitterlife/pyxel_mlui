@@ -120,48 +120,35 @@ class _XUESceneBase(XUEActManager):
         self._next_scene:XUEFadeScene|None = None
         self.is_end = False
 
-        # デフォルトでUpdateを使えるように
-        self.add_act(self.update_act)
-
     # シーン遷移
     def set_next_scene(self, scene:"XUEFadeScene"):
         self._next_scene = scene
 
+    # シーン終了(closedの中でset_next_sceneをする)
+    def close_scene(self):
+        self.closed()
+        self.is_end = True
+
     # シーンマネージャから呼ばれるもの
     # -----------------------------------------------------
     def update_scene(self):
-        if not self.is_end:
-            # xmluiのキーイベントサポート
-            XUEInput(self.xmlui).check()
-            for event in self.xmlui.event.trg:
-                self.event(event)
+        # 終了していたらなにもしない
+        if self.is_end:
+            return
 
-            # Actの更新
+        # xmluiのキーイベントサポート
+        XUEInput(self.xmlui).check()
+        for event in self.xmlui.event.trg:
+            self.event(event)
+
+        # ActがあればActの更新
+        if not self.is_act_empty:
             super().update()
-
-            # シーン完了チェック。完了時はclosed()内で次シーンを設定しておくように
-            if self.is_act_empty:
-                self.closed()
-                self.is_end = True
-                return
+        else:
+            self.update()  # Actがなければ通常のUpdate
 
     def draw_scene(self):
         self.draw()
-
-    # デフォルトでUpdateを使えるように
-    # -----------------------------------------------------
-    class _UpdateAct(XUEActWait[T]):
-        def __init__(self, scene:"_XUESceneBase"):
-            super().__init__()
-            self.scene = scene
-
-        def waiting(self) -> bool:
-            self.scene.update()
-            return super().waiting()
-
-    @property
-    def update_act(self):
-        return _XUESceneBase._UpdateAct(self)
 
     # オーバーライドして使う物
     # -----------------------------------------------------
@@ -174,7 +161,6 @@ class _XUESceneBase(XUEActManager):
     # フェードアウト完了時に呼ばれる。主に次シーン設定を行う
     def closed(self):
         get_logger().debug("scene.closed is not implemented")
-
 
 # シーンクラス。継承して使おう
 class XUEFadeScene(_XUESceneBase):
@@ -225,6 +211,10 @@ class XUEFadeScene(_XUESceneBase):
             self.scene.alpha = self.alpha
             return False
 
+        # フェードアウトが終わったら終了
+        def action(self):
+            self.scene.close_scene()
+
     # 初期化
     # -----------------------------------------------------
     def __init__(self, xmlui:XMLUI, open_count=OPEN_COUNT):
@@ -232,34 +222,27 @@ class XUEFadeScene(_XUESceneBase):
         self.alpha = 0.0
 
         # フェードインから
-        self.clear_act()
-        self.add_act(
-            XUEFadeScene.FadeIn(self, open_count),
-            self.update_act)
+        self.add_act(XUEFadeScene.FadeIn(self, open_count))
 
     # シーンマネージャから呼ばれるもの
     # -----------------------------------------------------
     def draw_scene(self):
+        if self.is_end:
+            return
+
         pyxel.dither(1.0)  # 戻しておく
 
         # フェード描画
         # -------------------------------------------------
-        # Actがない(=シーン切り替え中)
-        if self.is_act_empty:
-            self.alpha = 1  # 常に塗りつぶす
+        self.draw()
+
+        # 無駄な描画をしないよう
+        if self.alpha > 0:
+            pyxel.dither(self.alpha)  # フェードで
             pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.FADE_COLOR)
 
-        # Actがある(=シーン中)
-        else:
-            super().draw_scene()
-
-            # 無駄な描画をしないよう
-            if self.alpha > 0:
-                pyxel.dither(self.alpha)  # フェードで
-                pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.FADE_COLOR)
-
     # フェードアウトを開始する
-    def close(self):
+    def fade_close(self):
         # Actを全て破棄してフェードアウト開始
         self.clear_act()
         self.add_act(XUEFadeScene.FadeOut(self, self.CLOSE_COUNT))

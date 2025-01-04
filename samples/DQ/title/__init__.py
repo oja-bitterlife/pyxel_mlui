@@ -40,7 +40,7 @@ class Title(XUEFadeScene):
     def event(self, event:XUEventItem):
         match event:
             case "start":
-                self.close()
+                self.fade_close()
 
     def draw(self):
         # 背景絵

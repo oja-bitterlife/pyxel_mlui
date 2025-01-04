@@ -76,7 +76,7 @@ class Field(XUEFadeScene):
                 if self.bg.check_stairs(menu, self.player.block_x, self.player.block_y):
                     # バトル開始
                     XUWinBase(menu).start_close()
-                    self.close()
+                    self.fade_close()
                 else:
                     msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
                     msg_text.append_msg("かいだんがない")  # systemメッセージ

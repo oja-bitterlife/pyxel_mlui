@@ -34,7 +34,7 @@ class Shop(XUEFadeScene):
             ui_sell.init_sell_list(self.xmlui)
 
         if "exit" in self.xmlui.event.trg:
-            self.close()
+            self._close_scene()
 
     def draw(self):
         # UIの表示

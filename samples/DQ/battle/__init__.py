@@ -38,6 +38,7 @@ class Battle(XUEFadeScene):
         self.enemy_bg = pyxel.Image.from_image(filename="assets/images/enemy_bg.png")
         self.field_img = pyxel.Image.from_image(filename="assets/images/field.png")
 
+
     def closed(self):
         # 読みこんだUIの削除
         self.xmlui.close()
@@ -45,13 +46,6 @@ class Battle(XUEFadeScene):
         # 王様の前に戻る
         from field import Field
         self.set_next_scene(Field())
-
-    # def update(self):
-    #     self.act.update_act()
-
-    #     if self.act.is_dead and not self.is_close:
-    #         self.close()
-    #         self.is_close = True
 
     def draw(self):
         # 背景
