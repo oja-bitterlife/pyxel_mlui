@@ -364,25 +364,24 @@ class XUElem:
         if child.removed:
             RuntimeError(f"Can't reuse removed child {child._element}")
 
+        # デバッグ時は以下全部チェック
+        if XMLUI.debug_enable:
+            for c in child.children:
+                if c.removed:
+                    RuntimeError(f"Can't reuse removed child {c._element}")
+
         self._element.append(child._element)
         self.xmlui._parent_cache[child._element] = self
 
-    # 子を全部削除する
-    def clear_children(self):
-        # clearでattribまで消えるので、attrに保存して戻す
-        attr = self._element.attrib.copy()
-        self._element.clear()
-        self._element.attrib = attr
+    # 子を全部removedにする
+    def remove_children(self):
+        for child in self.children:
+            child.set_attr("removed", True)
 
-    # 自分を親から外す
+    # 自身をremovedにする(子も全部removed)
     def remove(self):
-        if self.parent is None:
-            raise TreeException(self, f"Can't remove {self.tag}")
-        self.parent._element.remove(self._element)
-
-        # 子も全部removeはさすがに重いので、フラグ設定で済ませる
-        for element in self._element.iter():  # iter()は自分も含まれる
-            element.attrib["removed"] = "True"
+        self.set_attr("removed", True)
+        self.remove_children()
 
     # open/close
     # *************************************************************************
@@ -645,6 +644,12 @@ class XMLUI(XUElem):
                 result = self._draw_funcs[elem.tag](elem, event)
                 if result is not None:
                     self.on(result)
+
+        # removedなElementをTreeから削除
+        for child in self.children:
+            if child.removed:
+                self._parent_cache[child._element]._element.remove(child._element)
+                child._element.clear()
 
         # 最後に自分もカウントアップ
         self.set_attr("update_count", self.update_count+1)
