@@ -44,14 +44,14 @@ class Battle(XUEFadeScene):
 
         # 敵の表示
         for data in enemy_data.data:
-            x = 24+data["x"]*48
-            y = 56+data["y"]*56
+            x = data["x"]*48 - 128 + (128+24)*(1-self.alpha)
+            y = data["y"]*56 + 56
             pyxel.blt(x, y, self.enemy_img, 0, 0, 64, 64, 0)
 
         # プレイヤの表示
         for i,data in enumerate(user_data.player_data):
             img = self.player_imgs[i]
-            x = 256-48 - (1-data["fb"])*16
+            x = 256-32 - (1+(1-data["fb"])) * 16*(1-self.alpha)
             pyxel.blt(x, 40+i*32, img, 0, 0, 64, 64, 0)
 
         # UIの表示
