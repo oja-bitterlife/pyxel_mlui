@@ -7,7 +7,7 @@ from system import system_font,system_palette
 
 # 共通定義
 # *****************************************************************************
-WIN_OPEN_SPEED   = 32
+WIN_OPEN_SPEED   = 16
 WIN_CLOSE_SPEED   = 32
 KOJICHU_COL = 15
 
@@ -70,7 +70,7 @@ def ui_init(xmlui:XMLUI):
             round_win.close()  # 即座にclose
         
         # 背景
-        pyxel.rect(area.x, area.y, area.w, min(area.h, clip.h+2), 0)
+        pyxel.rect(area.x, area.y, area.w, min(area.h, clip.h+1), 0)
         inside_area = area.inflate(-2, -2)
         pyxel.rect(inside_area.x, inside_area.y, inside_area.w, min(inside_area.h, clip.h-1), FRAME_BG_COL)
 

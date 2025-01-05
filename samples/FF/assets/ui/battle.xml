@@ -12,4 +12,7 @@
         </round_win>
     </ui_battle>
 
+    <round_win x="32" w="64" h="80" id="menu">
+    </round_win>
+
 </xmlui>

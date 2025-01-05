@@ -31,9 +31,12 @@ class Battle(XUEFadeScene):
             pyxel.Image.from_image(filename="assets/images/majyo.png"),
         ]
 
+        # actとのデータ受け渡し用
+        self.data = act.BattleData(self)
+
         # 最初をスライドインに変更
         self.clear_act()
-        self.add_act(act.BattleStart(self))
+        self.add_act(act.BattleStart(self), act.BattleCmdOpen(self.data))
 
     def closed(self):
         self.xmlui.close()
