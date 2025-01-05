@@ -16,21 +16,23 @@ FRAME_COL = 7
 FRAME_SHADOW_COL = system_palette.pal_gray16[5]
 FRAME_BG_COL = system_palette.pal_colors[40]
 
+# 共通で使える関数
+def get_world_clip(win:XUWinBase) -> XURect:
+    area = win.area
+    if win.is_opening:
+        clip_size = min(int(win.opening_count * WIN_OPEN_SPEED), area.h)
+        area.h = clip_size
+    else:
+        clip_size = max(int(win.closing_count * WIN_CLOSE_SPEED), 0)
+        area.h -= clip_size
+    return area
+
+
+# ui初期化
+# *****************************************************************************
 def ui_init(xmlui:XMLUI):
     common_win = win.Decorator(xmlui)
     common_text = text.Decorator(xmlui)
-
-    # 共通で使える関数
-    # *****************************************************************************
-    def get_world_clip(win:XUWinBase) -> XURect:
-        area = win.area
-        if win.is_opening:
-            clip_size = min(int(win.opening_count * WIN_OPEN_SPEED), area.h)
-            area.h = clip_size
-        else:
-            clip_size = max(int(win.closing_count * WIN_CLOSE_SPEED), 0)
-            area.h -= clip_size
-        return area
 
     # 工事中表示用
     # *****************************************************************************

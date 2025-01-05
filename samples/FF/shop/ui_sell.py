@@ -5,6 +5,7 @@ from xmlui.lib import select,text
 from system import system_font, hand_cursor
 
 from db import user_data
+from FF.ui_common import get_world_clip
 from FF.shop.shop_list import SellList
 from FF.shop.ui_shop import set_shop_msg
 
@@ -68,6 +69,11 @@ def ui_init(xmlui:XMLUI):
     # 売却アイテムリスト表示
     def sell_item(sell_item:XUSelectItem, parent_enable:bool):
         area = sell_item.area
+
+        # ウインドウが表示されてる場所のみ描画
+        clip = get_world_clip(XUWinBase.find_parent_win(sell_item))
+        if clip.bottom() < area.y:
+            return
 
         # カーソルは常に表示
         if sell_item.selected and parent_enable:

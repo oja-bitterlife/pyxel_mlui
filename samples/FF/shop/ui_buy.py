@@ -5,6 +5,7 @@ from xmlui.lib import select,text
 from system import system_font, hand_cursor
 
 from db import user_data
+from FF.ui_common import get_world_clip
 from FF.shop.shop_list import BuyList
 from FF.shop.ui_shop import set_shop_msg
 
@@ -65,8 +66,14 @@ def ui_init(xmlui:XMLUI):
     def buy_item(buy_item:XUSelectItem, parent_enable:bool):
         buy_menu = buy_item.find_parent_by_id("buy_menu")
 
-        # 商品名
         area = buy_item.area
+
+        # ウインドウが表示されてる場所のみ描画
+        clip = get_world_clip(XUWinBase.find_parent_win(buy_item))
+        if clip.bottom() < area.y:
+            return
+
+        # 商品名
         pyxel.text(area.x, area.y, buy_item.text, 7, system_font.font)
 
         # お値段
