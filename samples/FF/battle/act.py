@@ -1,7 +1,7 @@
 from xmlui.core import XUElem
-from xmlui.ext.scene import XUEActWait
+from xmlui.ext.scene import XUEActItem
 
-class SlideIn(XUEActWait):
+class BattleStart(XUEActItem):
     def __init__(self, elem:XUElem):
         super().__init__(8)
         self.elem = elem

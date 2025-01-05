@@ -1,7 +1,7 @@
 import random
 
 from xmlui.core import XMLUI,XUWinBase,XUTextUtil
-from xmlui.ext.scene import XUEActItem,XUEActWait
+from xmlui.ext.scene import XUEActItem,XUEActItem
 from msg_dq import MsgDQ
 from db import user_data, enemy_data
 
@@ -31,26 +31,13 @@ class BattleActItem(XUEActItem):
     def msg_dq(self):
         return MsgDQ(self.data.xmlui.find_by_id("msg_text"))
 
-class BattleActWait(XUEActWait):
-    def __init__(self, data:BattleData):
-        super().__init__()
-        self.data = data
-
-    @property
-    def xmlui(self):
-        return self.data.xmlui
-
-    @property
-    def msg_dq(self):
-        return MsgDQ(self.data.xmlui.find_by_id("msg_text"))
-
 
 # 個々のAct
 # #############################################################################
 # メッセージ
 # *****************************************************************************
 # 設定済みメッセージ表示完了待機
-class _MsgBase(BattleActWait):
+class _MsgBase(BattleActItem):
     def __init__(self, data:BattleData, text:str, params:dict):
         super().__init__(data)
         self.text = text
@@ -84,7 +71,7 @@ class CmdStart(BattleActItem):
         self.act.add_act(CmdCheck(self.data))
 
 # コマンド選択待ち
-class CmdCheck(BattleActWait):
+class CmdCheck(BattleActItem):
     def waiting(self):
         if "attack" in self.xmlui.event.trg:
             # 選択されたらメニューは閉じる
@@ -152,7 +139,7 @@ class EnemyStart(BattleActItem):
 
 # ウェイト系
 # *****************************************************************************
-class DamageEffect(BattleActWait):
+class DamageEffect(BattleActItem):
     def __init__(self, data:BattleData, damage:int):
         super().__init__(data)
         self.damage = damage
@@ -169,7 +156,7 @@ class DamageEffect(BattleActWait):
         self.data.sway_y = 0
         user_data.hp = max(0, user_data.hp - self.damage)
 
-class BlinkEffect(BattleActWait):
+class BlinkEffect(BattleActItem):
     def init(self):
         self.set_wait(10)  # エフェクトはないので適当待ち
 
@@ -180,11 +167,11 @@ class BlinkEffect(BattleActWait):
     def action(self):
         self.blink = False
 
-class RunWait(BattleActWait):
+class RunWait(BattleActItem):
     def init(self):
         self.set_wait(15)  # SE待ち
 
-class DeadWait(BattleActWait):
+class DeadWait(BattleActItem):
     def init(self):
         self.set_wait(15)  # SE待ち
 

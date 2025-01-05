@@ -11,13 +11,13 @@ from db import user_data
 # UI
 from xmlui.core import XMLUI,XUEvent,XUEventItem,XUWinBase
 from xmlui.lib.debug import DebugXMLUI
-from xmlui.ext.scene import XUEFadeScene,XUEActWait
+from xmlui.ext.scene import XUEFadeScene,XUEActItem
 
 import ui_common
 from field.ui import msg_win,menu,talk_dir,tools
 
 # メニューが開いている状態
-class MenuOpenAct(XUEActWait):
+class MenuOpenAct(XUEActItem):
     def __init__(self, xmlui:XMLUI):
         super().__init__()
         self.menu = xmlui.open("menu")

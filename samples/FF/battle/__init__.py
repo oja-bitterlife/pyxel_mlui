@@ -32,7 +32,7 @@ class Battle(XUEFadeScene):
         ]
 
         # 最初はスライドイン
-        self.add_act(act.SlideIn(self.xmlui.find_by_id("ui_battle")))
+        self.add_act(act.BattleStart(self.xmlui.find_by_id("ui_battle")))
 
     def closed(self):
         self.xmlui.close()

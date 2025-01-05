@@ -9,11 +9,14 @@ from xmlui.ext.timer import XUETimeout
 
 # ステータス遷移管理用。NPCの寸劇とかで使うやつ
 # #############################################################################
-# 一定時間後に1つのaction。アクションをつなげて実行する場合は主にこちら
+# 一定時間内ずっとwaigingが実行され、最後にaction。
 class XUEActItem(XUETimeout):
-    # デフォルトはすぐ実行
-    def __init__(self, count:int=0):
+    WAIT_FOREVER = 2**31-1
+
+    # デフォルトは無限待機
+    def __init__(self, count:int=WAIT_FOREVER):
         super().__init__(count)
+
         self._init_func:Callable|None = self.init
         self._manager:XUEActManager|None = None
 
@@ -22,25 +25,6 @@ class XUEActItem(XUETimeout):
     # コンストラクタではなくinit()の中で時間を設定する。
     def set_wait(self, wait:int):
         self._count_max = wait
-
-    # オーバーライドして使う物
-    def init(self):
-        pass
-
-    # 呼び出しActを返す(Actの中で次のActをaddする用)
-    @property
-    def act(self) -> "XUEActManager":
-        if self._manager is None:
-            raise RuntimeError("act is not set")
-        return self._manager
-
-# 一定時間内ずっとwaigingが実行され、最後にaction。
-class XUEActWait(XUEActItem):
-    WAIT_FOREVER = 2**31-1
-
-    # デフォルトは無限待機
-    def __init__(self, count:int=WAIT_FOREVER):
-        super().__init__(count)
 
     # override
     @property
@@ -58,10 +42,20 @@ class XUEActWait(XUEActItem):
                 self.finish()
         super()._update()
 
+    # 呼び出しActを返す(Actの中で次のActをaddする用)
+    @property
+    def act(self) -> "XUEActManager":
+        if self._manager is None:
+            raise RuntimeError("act is not set")
+        return self._manager
+
     # オーバーライドして使う物
     # -----------------------------------------------------
+    def init(self):
+        pass
     def waiting(self) -> bool:
         return False
+    # def action(self)は親クラスで定義
 
 # Act管理クラス。各Itemをコレに登録していく
 # *****************************************************************************
@@ -179,7 +173,7 @@ class XUEFadeScene(XUESceneBase):
     # 各フェードパート
     # -----------------------------------------------------
     # パートベース。fade_actのalphaを書き換える
-    class _FadeActItem(XUEActWait):
+    class _FadeActItem(XUEActItem):
         def __init__(self, scene:"XUEFadeScene"):
             super().__init__()
             self.scene = scene
