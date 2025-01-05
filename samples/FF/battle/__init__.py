@@ -31,8 +31,9 @@ class Battle(XUEFadeScene):
             pyxel.Image.from_image(filename="assets/images/majyo.png"),
         ]
 
-        # 最初はスライドイン
-        self.add_act(act.BattleStart(self.xmlui.find_by_id("ui_battle")))
+        # 最初をスライドインに変更
+        self.clear_act()
+        self.add_act(act.BattleStart(self))
 
     def closed(self):
         self.xmlui.close()
