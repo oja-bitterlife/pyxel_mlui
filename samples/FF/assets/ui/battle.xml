@@ -13,6 +13,8 @@
     </ui_battle>
 
     <round_win x="32" w="64" h="80" id="menu">
+        <command x="16" y="16" item_h="16" id="command">
+        </command>
     </round_win>
 
 </xmlui>

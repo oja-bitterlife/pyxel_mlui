@@ -5,7 +5,7 @@ from xmlui.lib.debug import DebugXMLUI
 from xmlui.ext.scene import XUEFadeScene
 
 import ui_common
-from FF.battle import ui_status
+from FF.battle import ui_status,ui_action
 from db import enemy_data,user_data
 
 from battle import act
@@ -21,6 +21,7 @@ class Battle(XUEFadeScene):
 
         ui_common.ui_init(self.xmlui)
         ui_status.ui_init(self.xmlui)
+        ui_action.ui_init(self.xmlui)
 
         self.enemy_img = pyxel.Image.from_image(filename="assets/images/fantasy_goblin.png")
         self.bg_img = pyxel.Image.from_image(filename="assets/images/bg.png")
@@ -36,7 +37,7 @@ class Battle(XUEFadeScene):
 
         # 最初をスライドインに変更
         self.clear_act()
-        self.add_act(act.BattleStart(self), act.BattleCmdOpen(self.data))
+        self.add_act(act.BattleStart(self), act.BattleCmdStart(self.data))
 
     def closed(self):
         self.xmlui.close()
