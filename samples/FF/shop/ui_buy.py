@@ -29,7 +29,7 @@ def ui_init(xmlui:XMLUI):
             buy_num_item(item)
 
         # 価格を変動させる
-        buy_num.select_by_event(event.trg, *XUEvent.Key.LEFT_RIGHT())
+        buy_num.select_by_event(event.repeat, *XUEvent.Key.LEFT_RIGHT())
 
         if XUEvent.Key.BTN_A in event.trg:
             buy_menu = buy_num.find_parent_by_id("buy_menu")
@@ -90,7 +90,7 @@ def ui_init(xmlui:XMLUI):
         for item in buy_list.items:
             buy_item(item, buy_list.enable)
 
-        buy_list.select_by_event(event.trg, *XUEvent.Key.UP_DOWN())
+        buy_list.select_by_event(event.repeat, *XUEvent.Key.UP_DOWN())
         if XUEvent.Key.BTN_A in event.trg:
             buy_menu = buy_list.find_parent_by_id("buy_menu")
             price = get_buy_price(buy_menu, buy_list.selected_item)

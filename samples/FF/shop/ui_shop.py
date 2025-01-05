@@ -39,7 +39,7 @@ def ui_init(xmlui:XMLUI):
         for item in shop_act.items:
             shop_act_item(item)
 
-        shop_act.select_by_event(event.trg, *XUEvent.Key.LEFT_RIGHT())
+        shop_act.select_by_event(event.repeat, *XUEvent.Key.LEFT_RIGHT())
         if XUEvent.Key.BTN_A in event.trg:
             shop_act_win = XUWinBase.find_parent_win(shop_act)
             shop_act.enable = False

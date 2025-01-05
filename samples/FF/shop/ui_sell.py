@@ -30,7 +30,7 @@ def ui_init(xmlui:XMLUI):
             sell_num_item(item)
 
         # 価格を変動させる
-        sell_num.select_by_event(event.trg, *XUEvent.Key.LEFT_RIGHT())
+        sell_num.select_by_event(event.repeat, *XUEvent.Key.LEFT_RIGHT())
 
         if XUEvent.Key.BTN_A in event.trg:
             sell_menu = sell_num.find_parent_by_id("sell_menu")
@@ -114,7 +114,7 @@ def ui_init(xmlui:XMLUI):
             return
 
         # 所持アイテム選択
-        sell_list.select_by_event(event.trg, *XUEvent.Key.CURSOR())
+        sell_list.select_by_event(event.repeat, *XUEvent.Key.CURSOR())
         if XUEvent.Key.BTN_A in event.trg:
             # 0個以上の時だけ決定できる
             num = sell_list.selected_item.attr_int("num")
