@@ -8,6 +8,8 @@ import ui_common
 from FF.battle import ui_status
 from db import enemy_data,user_data
 
+from battle import act
+
 class Battle(XUEFadeScene):
     def __init__(self):
         super().__init__(DebugXMLUI(pyxel.width, pyxel.height))
@@ -29,16 +31,11 @@ class Battle(XUEFadeScene):
             pyxel.Image.from_image(filename="assets/images/majyo.png"),
         ]
 
+        # 最初はスライドイン
+        self.add_act(act.SlideIn(self.xmlui.find_by_id("ui_battle")))
+
     def closed(self):
         self.xmlui.close()
-
-    def update(self):
-        pass
-        # if "start_buy" in self.xmlui.event.trg:
-        #     ui_buy.init_buy_list(self.xmlui)
-
-        # if "start_sell" in self.xmlui.event.trg:
-        #     ui_sell.init_sell_list(self.xmlui)
 
     def draw(self):
         # 背景の表示
@@ -57,8 +54,4 @@ class Battle(XUEFadeScene):
             pyxel.blt(x, 40+i*32, img, 0, 0, 64, 64, 0)
 
         # UIの表示
-        if self.xmlui.update_count < 16:
-            self.xmlui.root.set_pos(256-self.xmlui.update_count*16, 0)
-        else:
-            self.xmlui.root.set_pos(0, 0)
         self.xmlui.draw()

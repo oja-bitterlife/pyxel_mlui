@@ -12,8 +12,8 @@ from xmlui.ext.timer import XUETimeout
 # 一定時間後に1つのaction。アクションをつなげて実行する場合は主にこちら
 class XUEActItem(XUETimeout):
     # デフォルトはすぐ実行
-    def __init__(self):
-        super().__init__(0)
+    def __init__(self, count:int=0):
+        super().__init__(count)
         self._init_func:Callable|None = self.init
         self._manager:XUEActManager|None = None
 
@@ -39,9 +39,8 @@ class XUEActWait(XUEActItem):
     WAIT_FOREVER = 2**31-1
 
     # デフォルトは無限待機
-    def __init__(self):
-        super().__init__()
-        self.set_wait(self.WAIT_FOREVER)
+    def __init__(self, count:int=WAIT_FOREVER):
+        super().__init__(count)
 
     # override
     @property
@@ -55,6 +54,7 @@ class XUEActWait(XUEActItem):
     def _update(self):
         if not self.is_finish:
             if self.waiting():
+                self.action()  # 完了呼び出し
                 self.finish()
         super()._update()
 
