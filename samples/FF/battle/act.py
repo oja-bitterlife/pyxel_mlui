@@ -7,6 +7,7 @@ class BattleData:
     def __init__(self, scene:XUEFadeScene):
         self.scene = scene
         self.player_idx = -1
+        self.player_move_front = [0, 0, 0, 0]
 
     @property
     def player_job(self):
@@ -41,6 +42,7 @@ class BattleCmdStart(BattleDataAct):
 
     def action(self):
         self.data.player_idx = 0
+        self.data.player_move_front[self.data.player_idx] = 0
         self.act.add_act(BattleCmd(self.data, self.scene.xmlui.find_by_id("enemy_win").open("menu")))
 
 class BattleCmd(BattleDataAct):

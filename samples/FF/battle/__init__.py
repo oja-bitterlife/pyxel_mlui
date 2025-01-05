@@ -56,6 +56,12 @@ class Battle(XUEFadeScene):
         for i,data in enumerate(user_data.player_data):
             img = self.player_imgs[i]
             x = 256-32 - (1+(1-data["fb"])) * 16*(1-self.alpha)
+
+            # 順番のキャラは前に出す
+            if self.data.player_idx == i:
+                self.data.player_move_front[i] += 4
+                x = max(x-self.data.player_move_front[i], 256-80)
+
             pyxel.blt(x, 40+i*32, img, 0, 0, 64, 64, 0)
 
         # UIの表示
