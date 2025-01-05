@@ -114,8 +114,9 @@ class XUEActManager:
 class XUESceneBase(XUEActManager):
     def __init__(self, xmlui:XMLUI):
         super().__init__()
-
         self.xmlui = xmlui
+        self.input = XUEInput(xmlui)  # xmluiのキーイベントサポート
+
         self._next_scene:XUEFadeScene|None = None
         self.is_end = False  # このシーンが終了したかどうか
 
@@ -138,7 +139,7 @@ class XUESceneBase(XUEActManager):
 
         # actがempty(updateを使う)か、actがuse_keyか
         if self.is_act_empty or self.current_act.use_key_event:
-            XUEInput(self.xmlui).check()  # xmluiのキーイベントサポート
+            self.input.check()  # xmluiのキーイベントサポート
 
         # イベント処理
         for event in self.xmlui.event.trg:

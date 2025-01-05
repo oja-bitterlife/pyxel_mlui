@@ -122,6 +122,9 @@ class XUEventItem(str):
         return super().__new__(cls, val)
 
 class XUEvent:
+    REPEAT_HOLD = 15
+    REPEAT_SPAN = 3
+
     # 綴り間違いをしないようuse_eventをチェックする時は定数を使うようにする
     class UseEvent(StrEnum):
         ABSORBER = "absorber"
@@ -131,6 +134,7 @@ class XUEvent:
     def __init__(self, init_active=False):
         self.is_active = init_active  # アクティブなイベントかどうか
         self.on_init = False
+        self.repeat_count:dict[XUEventItem,int] = {}
         self.clear()
 
     def clear(self):
@@ -139,6 +143,7 @@ class XUEvent:
         self.now:set[XUEventItem] = set([])
         self.trg:set[XUEventItem] = set([])
         self.release:set[XUEventItem] = set([])
+        self.repeat:set[XUEventItem] = set([])
 
     # 更新
     def update(self):
@@ -146,6 +151,15 @@ class XUEvent:
         self.trg = set([i for i in self._receive if i not in self.now])
         self.release = set([i for i in self.now if i not in self._receive])
         self.now = self._receive
+
+        # リピート更新
+        self.repeat = self.trg.copy()
+        for key in self.repeat_count.keys():
+            if key not in self.now:  # 押されていなければカウンタリセット
+                self.repeat_count[key] = 0
+        for item in self.now:
+            if self.repeat_count[item] > XUEvent.REPEAT_HOLD and (self.repeat_count[item]-XUEvent.REPEAT_HOLD) % XUEvent.REPEAT_SPAN  == 0:
+                self.repeat.add(item)
 
         # 取得し直す
         self._receive = set([])
@@ -155,6 +169,9 @@ class XUEvent:
         if event_name in self._receive:
             raise ValueError(f"event_name:{event_name} is already registered.")
         self._receive.add(event_name)
+
+        # リピートカウンター増加
+        self.repeat_count[event_name] = self.repeat_count.get(event_name, 0) + 1
 
     # キー入力イベント
     # *************************************************************************
