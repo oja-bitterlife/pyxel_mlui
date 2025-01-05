@@ -8,7 +8,6 @@ class BattleStart(XUEActItem):
 
     def waiting(self):
         self.elem.set_pos(256-self.count*32, 0)
-        return False
 
     def action(self):
         self.elem.set_pos(0, 0)

@@ -45,7 +45,8 @@ class _MsgBase(BattleActItem):
 
     # メッセージ表示完了待ち
     def waiting(self):
-        return self.msg_dq.is_all_finish
+        if self.msg_dq.is_all_finish:
+            self.finish()
 
 # プレイヤメッセージ設定
 class PlayerMsg(_MsgBase):
@@ -85,7 +86,8 @@ class CmdCheck(BattleActItem):
                 BlinkEffect(self.data),
                 PlayerMsg(self.data, "{name}に　{hit}ポイントの\nダメージを　あたえた！", enemy_data.data),
                 EnemyStart(self.data))
-            return True
+
+            self.finish()
 
         if "run" in self.xmlui.event.trg:
             # 選択されたらメニューは閉じる
@@ -97,7 +99,8 @@ class CmdCheck(BattleActItem):
                 RunWait(self.data),
                 PlayerMsg(self.data, "しかし　まわりこまれて\nしまった!", {}),
                 EnemyStart(self.data))
-            return True
+
+            self.finish()
 
         if "spel" in self.xmlui.event.trg:
             # 選択されたらメニューは閉じる
@@ -106,12 +109,11 @@ class CmdCheck(BattleActItem):
             self.act.add_act(
                 PlayerMsg(self.data, "じゅもんを　おぼえていない", {}),
                 CmdStart(self.data))  # コマンド選択に戻る
-            return True
+
+            self.finish()
 
         if "tools" in self.xmlui.event.trg:
             self.xmlui.popup("under_construct")
-
-        return False
 
 # 敵の行動
 # *****************************************************************************
@@ -149,7 +151,6 @@ class DamageEffect(BattleActItem):
         # とりあえず画面揺らし
         self.data.sway_x = random.randint(-3, 3)
         self.data.sway_y = random.randint(-3, 3)
-        return False
 
     def action(self):
         self.data.sway_x = 0
@@ -162,7 +163,6 @@ class BlinkEffect(BattleActItem):
 
     def waiting(self):
         self.data.blink = self.count % 2 < 1
-        return False
 
     def action(self):
         self.blink = False

@@ -13,14 +13,16 @@ from xmlui.ext.timer import XUETimeout
 class XUEActItem(XUETimeout):
     WAIT_FOREVER = 2**31-1
 
-    # デフォルトは無限待機
+    # デフォルトはfinish()が呼ばれるまで無限待機
     def __init__(self, count:int=WAIT_FOREVER):
         super().__init__(count)
 
-        self._init_func:Callable|None = self.init
+        # Managerで設定されるもの
+        self._init_func:Callable|None = None
         self._manager:XUEActManager|None = None
 
-        self.use_key_event = True  # キーイベントを取得するかどうか
+        # SceneBaseで使われるもの
+        self.use_key_event = True  # キーイベントの取得要求
 
     # コンストラクタではなくinit()の中で時間を設定する。
     def set_wait(self, wait:int):
@@ -37,12 +39,12 @@ class XUEActItem(XUETimeout):
     # override
     def _update(self):
         if not self.is_finish:
-            if self.waiting():
+            self.waiting()
+            if self.is_finish:
                 self.action()  # 完了呼び出し
-                self.finish()
         super()._update()
 
-    # 呼び出しActを返す(Actの中で次のActをaddする用)
+    # 呼び出しManagerを返す(Actの中で次のActをaddする用)
     @property
     def act(self) -> "XUEActManager":
         if self._manager is None:
@@ -53,8 +55,8 @@ class XUEActItem(XUETimeout):
     # -----------------------------------------------------
     def init(self):
         pass
-    def waiting(self) -> bool:
-        return False
+    def waiting(self):
+        pass
     # def action(self)は親クラスで定義
 
 # Act管理クラス。各Itemをコレに登録していく
@@ -67,15 +69,18 @@ class XUEActManager:
     # -----------------------------------------------------
     def add_act(self, *items:XUEActItem):
         for item in items:
+            # Actの初期化
             item._manager = self
+            item._init_func = item.init
+
             self._act_queue.append(item)
 
     def clear_act(self):
         self._act_queue.clear()
 
-    def next_act(self):
+    def next_act(self) -> XUEActItem | None:
         if self._act_queue:
-            self._act_queue.pop(0)
+            return self._act_queue.pop(0)
 
     # 状態更新
     # -----------------------------------------------------
@@ -184,9 +189,8 @@ class XUEFadeScene(XUESceneBase):
             super().__init__(scene)
             self.set_wait(open_count)
 
-        def waiting(self) -> bool:
+        def waiting(self):
             self.scene.alpha = 1-self.alpha  # 黒から
-            return False
 
         # フェードインが終わったら綺麗な0にしておく
         def action(self):
@@ -200,9 +204,8 @@ class XUEFadeScene(XUESceneBase):
 
             self.use_key_event = False  # フェード中は動かさない
 
-        def waiting(self) -> bool:
+        def waiting(self):
             self.scene.alpha = self.alpha
-            return False
 
         # フェードアウトが終わったら終了
         def action(self):

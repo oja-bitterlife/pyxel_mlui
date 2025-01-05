@@ -15,7 +15,7 @@ class PlayerMoveAct(XUEActItem):
         self.move_x = move_x
         self.move_y = move_y
 
-    def waiting(self) -> bool:
+    def waiting(self):
         # プレイヤの移動
         if self.move_x < 0:
             self.player.x -= 1
@@ -30,8 +30,9 @@ class PlayerMoveAct(XUEActItem):
             self.player.y += 1
             self.move_y -= 1
 
-        # 移動完了チェック
-        return self.move_x == 0 and self.move_y == 0
+        # 移動完了
+        if self.move_x == 0 and self.move_y == 0:
+            self.finish()
 
 class Player:
     def __init__(self, xmlui:XMLUI, x:int, y:int):

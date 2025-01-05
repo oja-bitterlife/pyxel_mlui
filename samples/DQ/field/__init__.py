@@ -23,8 +23,9 @@ class MenuOpenAct(XUEActItem):
         self.menu = xmlui.open("menu")
 
     # メニューが閉じられるまで待機
-    def waiting(self) -> bool:
-        return self.menu.removed
+    def waiting(self):
+        if self.menu.removed:
+            self.finish()
 
 class Field(XUEFadeScene):
     def __init__(self):
