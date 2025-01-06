@@ -45,6 +45,9 @@ class UserData:
         user_db.connection.commit()
         self.reload_db()
 
+    def get_lives(self):
+        return [data for data in self.player_data if data["hp"] > 0]
+
 user_data = UserData()
 
 #print(user_data.player_data)

@@ -24,6 +24,7 @@ def ui_init(xmlui:XMLUI[BattleData]):
 
         pyxel.text(area.x, area.y, battle_action.text, 7, system_font.font)
 
+        # コマンド選択中はHandIconを表示
         if xmlui.data_ref.scene.current_act == BattleCmdSel:
             if battle_action.selected:
                 hand_cursor.draw(area.x, area.y+4)

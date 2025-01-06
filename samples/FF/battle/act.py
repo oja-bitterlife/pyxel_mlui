@@ -2,6 +2,8 @@ from xmlui.core import XUElem,XMLUI,XUEvent,XUSelectItem
 from xmlui.ext.scene import XUEActItem
 from battle.data import BattleData
 
+from db import user_data
+
 # BattleDataを扱えるAct
 class BattleDataAct(XUEActItem):
     def __init__(self, xmlui:XMLUI[BattleData]):
@@ -98,5 +100,5 @@ class BattleCmdEnemySel(BattleDataAct):
 
     def waiting(self):
         # 全員のターゲットが決まった
-        if len(self.battle_data.player_target) == 4:
+        if len(self.battle_data.player_target) >= len(user_data.get_lives()):
             self.finish()
