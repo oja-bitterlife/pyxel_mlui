@@ -7,7 +7,7 @@
             <hp_Label x="88" y="8" w="32" align="center" valign="bottom">ＨＰ</hp_Label>
             <status x="16" y="16"/>
         </round_win>
-        <round_win x="0" y="170" w="96" h="80" id="enemy_win">
+        <round_win x="0" y="170" w="96" h="80" id="enemy_name_win">
             <enemy_names x="16" y="16"/>
         </round_win>
     </ui_battle>
@@ -15,6 +15,12 @@
     <round_win x="32" w="64" h="80" id="menu">
         <command x="16" y="16" item_h="16" id="command">
         </command>
+    </round_win>
+
+    <round_win abs_x="0" abs_y="40" id="enemy_sel_win">
+        <enemy_sel x="16" y="16" item_h="16" id="enemy_sel">
+
+        </enemy_sel>
     </round_win>
 
 </xmlui>

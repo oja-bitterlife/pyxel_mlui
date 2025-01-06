@@ -5,7 +5,6 @@ from xmlui.lib import select,text
 from system import system_font,hand_cursor
 from ui_common import get_world_clip
 
-from db import user_data,enemy_data
 
 def ui_init(xmlui:XMLUI):
     action_select = select.Decorator(xmlui)

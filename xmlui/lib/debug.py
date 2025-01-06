@@ -2,7 +2,12 @@ import logging
 logging.basicConfig()
 
 from xmlui.core import XMLUI
+from typing import TypeVar
+T = TypeVar('T')
 
+
+# ロギング用
+# *********************************************************************
 def get_logger() -> logging.Logger:
     logger = logging.getLogger("XMLUI")
     if XMLUI.debug_enable:
@@ -11,8 +16,10 @@ def get_logger() -> logging.Logger:
         logger.setLevel(logging.ERROR)
     return logger
 
+
 # デバッグ用
-class DebugXMLUI(XMLUI):
+# *********************************************************************
+class DebugXMLUI(XMLUI[T]):
     DEBUGEVENT_PRINTTREE = "DEBUG_PRINTTREE"
     DEBUGEVENT_RELOAD = "DEBUG_RELOAD"
 

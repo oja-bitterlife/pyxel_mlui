@@ -3,8 +3,9 @@ import xml.etree.ElementTree
 from xml.etree.ElementTree import Element
 
 # 型を使うよ
-from typing import Callable,Any,Self
+from typing import Callable,Any,Self,Generic,TypeVar
 from enum import StrEnum
+T = TypeVar('T')
 
 # 日本語対応
 import unicodedata
@@ -519,7 +520,7 @@ class XUElem:
 
 # XMLでUIライブラリ本体
 # #############################################################################
-class XMLUI(XUElem):
+class XMLUI(XUElem, Generic[T]):
     debug_enable = False  # デバッグから参照するフラグ(クラス変数≒システムで一意)
 
     # 初期化
@@ -553,8 +554,14 @@ class XMLUI(XUElem):
         self.add_child(self.root)  # 普通に使うもの
         self.add_child(self._over)  # 上に強制で出す物
 
+        # UI描画時の参照先データ
+        self._data_ref:T|None = None
+
     # XMLUIそのものを閉じる
     def close(self):
+        # 参照データの削除
+        self._data_ref = None
+
         # templateの削除
         self._templates = {}
 
@@ -577,6 +584,17 @@ class XMLUI(XUElem):
     class HasRef:
         def __init__(self, xmlui:"XMLUI"):
             self.xmlui = xmlui
+
+    # UI描画に使う参照データ
+    # *************************************************************************
+    @property
+    def data_ref(self) -> T:
+        if self._data_ref is None:
+            raise RuntimeError("data_ref is not set")
+        return self._data_ref
+    @data_ref.setter
+    def data_ref(self, data:T):
+        self._data_ref = data
 
     # template操作
     # *************************************************************************
