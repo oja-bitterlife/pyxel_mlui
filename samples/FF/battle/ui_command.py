@@ -1,12 +1,16 @@
 import pyxel
 
-from xmlui.core import XMLUI,XUElem,XUEvent,XUSelectItem,XUWinBase,XUTextUtil,XURect
-from xmlui.lib import select,text
+from xmlui.core import XMLUI,XUElem,XUEvent,XUWinBase,XURect
+from xmlui.lib import select
+
 from system import system_font,hand_cursor
 from ui_common import get_world_clip
 
+from battle.data import BattleData
+from battle.act import *
 
-def ui_init(xmlui:XMLUI):
+
+def ui_init(xmlui:XMLUI[BattleData]):
     action_select = select.Decorator(xmlui)
 
     # 各キャラのアクション表示
@@ -20,8 +24,9 @@ def ui_init(xmlui:XMLUI):
 
         pyxel.text(area.x, area.y, battle_action.text, 7, system_font.font)
 
-        if battle_action.selected:
-            hand_cursor.draw(area.x, area.y+4)
+        if xmlui.data_ref.scene.current_act == BattleCmdSel:
+            if battle_action.selected:
+                hand_cursor.draw(area.x, area.y+4)
 
     @action_select.list("command", "battle_action")
     def command(command:select.List, event:XUEvent):

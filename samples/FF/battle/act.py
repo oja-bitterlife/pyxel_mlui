@@ -94,8 +94,9 @@ class BattleCmdEnemySel(BattleDataAct):
     def __init__(self, xmlui:XMLUI[BattleData], menu_win:XUElem):
         super().__init__(xmlui)
         self.menu_win = menu_win
-        self.enemy_selecting = True
+        self.battle_data.player_target = []
 
     def waiting(self):
-        if self.enemy_selecting == False:
+        # 全員のターゲットが決まった
+        if len(self.battle_data.player_target) == 4:
             self.finish()

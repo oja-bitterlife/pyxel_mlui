@@ -51,6 +51,13 @@ class XUEActItem(XUETimeout):
             raise RuntimeError("act is not set")
         return self._manager
 
+    # == で現在のActのチェックができるように
+    def __eq__(self, other) -> bool:
+        if issubclass(other, XUEActItem):
+            return other.__name__ == self.__class__.__name__
+        else:
+            return super().__eq__(other)
+
     # オーバーライドして使う物
     # -----------------------------------------------------
     def init(self):
@@ -58,6 +65,7 @@ class XUEActItem(XUETimeout):
     def waiting(self):
         pass
     # def action(self)は親クラスで定義
+
 
 # Act管理クラス。各Itemをコレに登録していく
 # *****************************************************************************
