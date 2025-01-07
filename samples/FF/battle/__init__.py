@@ -47,7 +47,7 @@ class Battle(XUEFadeScene):
 
         # プレイヤの座標設定
         for i,data in enumerate(user_data.player_data):
-            x = 256-32 - data["fb"]*16
+            x = 256-48 - (1-data["fb"])*16
             y = 40 + i*32
             self.xmlui.data_ref.player_rect.append(XURect(x, y, self.player_imgs[i].width, self.player_imgs[i].height))
 
@@ -68,8 +68,8 @@ class Battle(XUEFadeScene):
         # 敵の表示
         for i in range(len(enemy_data.data)):
             rect = battle_data.enemy_rect[i].copy()
-            # スライドイン
-            pyxel.blt(rect.x - int(128*self.alpha), rect.y, self.enemy_img, 0, 0, rect.w, rect.h, 0)
+            x = rect.x - int(128*self.alpha)  # スライドイン
+            pyxel.blt(x, rect.y, self.enemy_img, 0, 0, rect.w, rect.h, 0)
 
         # プレイヤの表示
         front_target = 256-80
@@ -77,15 +77,18 @@ class Battle(XUEFadeScene):
             img = self.player_imgs[i]
             rect = battle_data.player_rect[i]
 
-            # 順番のキャラは前に出す
+            x = max(rect.x, int(256-48-16 + self.alpha*32))  # スライドイン
+
+            # 順番のキャラを前に出す
             battle_data.player_offset[i] += battle_data.player_move_dir[i] * 4
-            if rect.x + battle_data.player_offset[i] < front_target:
-                battle_data.player_offset[i] = front_target - rect.x
+            if x + battle_data.player_offset[i] < front_target:
+                battle_data.player_offset[i] = front_target - x
                 battle_data.player_move_dir[i] = 0
             elif battle_data.player_offset[i] > 0:
                 battle_data.player_move_dir[i] = 0
+            x += battle_data.player_offset[i]
 
-            pyxel.blt(rect.x + battle_data.player_offset[i], rect.y, img, 0, 0, rect.w, rect.h, 0)
+            pyxel.blt(x, rect.y, img, 0, 0, rect.w, rect.h, 0)
 
         # UIの表示
         self.xmlui.draw()
