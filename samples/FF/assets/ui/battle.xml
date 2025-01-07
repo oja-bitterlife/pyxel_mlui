@@ -17,10 +17,9 @@
         </command>
     </round_win>
 
-    <round_win abs_x="0" abs_y="40" id="enemy_sel_win">
-        <enemy_sel x="16" y="16" item_h="16" id="enemy_sel">
-
-        </enemy_sel>
-    </round_win>
+    <target_select abs_x="0" abs_y="40" id="target_select">
+        <enemy_sel x="16" y="16" item_w="56" item_h="56"/>
+        <player_sel x="200" y="16" item_h="56"/>
+    </target_select>
 
 </xmlui>

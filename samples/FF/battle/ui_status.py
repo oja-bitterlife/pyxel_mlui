@@ -5,9 +5,9 @@ from xmlui.lib import select,text
 from system import system_font
 
 from db import user_data,enemy_data
+from battle.data import BattleData
 
-def ui_init(xmlui:XMLUI):
-    status_select = select.Decorator(xmlui)
+def ui_init(xmlui:XMLUI[BattleData]):
     status_text = text.Decorator(xmlui)
 
 

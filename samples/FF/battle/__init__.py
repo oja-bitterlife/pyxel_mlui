@@ -7,7 +7,8 @@ from xmlui.ext.scene import XUEFadeScene
 
 # ui
 import ui_common
-from FF.battle import ui_command,ui_status,act
+from FF.battle import ui_command,ui_status,act,ui_target
+from FF.battle import act
 
 # データ
 from db import enemy_data,user_data
@@ -24,6 +25,7 @@ class Battle(XUEFadeScene):
         ui_common.ui_init(self.xmlui)
         ui_status.ui_init(self.xmlui)
         ui_command.ui_init(self.xmlui)
+        ui_target.ui_init(self.xmlui)
 
         self.enemy_img = pyxel.Image.from_image(filename="assets/images/fantasy_goblin.png")
         self.bg_img = pyxel.Image.from_image(filename="assets/images/bg.png")

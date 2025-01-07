@@ -770,6 +770,9 @@ class XUSelectInfo(_XUUtilBase):
 class XUSelectBase(XUSelectInfo):
     def __init__(self, elem:XUElem, item_tag:str, rows:int, item_w:int, item_h:int):
         super().__init__(elem)
+        self.rows = rows
+        self.item_w = item_w
+        self.item_h = item_h
 
         # infoタグの下になければ自分の直下から探してコピーする
         if not self.items and item_tag:
@@ -781,9 +784,6 @@ class XUSelectBase(XUSelectInfo):
 
                 # 初期座標
                 item.set_pos(item.x + i % rows * item_w, item.y + i // rows * item_h)
-
-        # 操作の時に使うので覚えておく
-        self.rows = rows
 
         # 選択状態復帰
         self.select(self.selected_no)

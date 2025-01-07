@@ -88,15 +88,17 @@ class BattleCmdSel(BattleDataAct):
 
     def waiting(self):
         if XUEvent.Key.BTN_A in self.scene.xmlui.event.trg:
-            self.act.add_act(BattleCmdEnemySel(self.xmlui, self.menu_win))
+            self.act.add_act(BattleTargetSel(self.xmlui, self.menu_win))
             self.finish()
 
-# 敵の選択
-class BattleCmdEnemySel(BattleDataAct):
+# ターゲットの選択
+class BattleTargetSel(BattleDataAct):
     def __init__(self, xmlui:XMLUI[BattleData], menu_win:XUElem):
         super().__init__(xmlui)
         self.menu_win = menu_win
         self.battle_data.player_target = []
+
+        menu_win.open("target_select")
 
     def waiting(self):
         # 全員のターゲットが決まった
