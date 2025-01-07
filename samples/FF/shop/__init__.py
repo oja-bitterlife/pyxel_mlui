@@ -10,17 +10,18 @@ from FF.shop import ui_shop,ui_buy,ui_sell
 
 class Shop(XUEFadeScene):
     def __init__(self):
-        super().__init__(DebugXMLUI(pyxel.width, pyxel.height))
+        xmlui = DebugXMLUI(pyxel.width, pyxel.height)
+        super().__init__(xmlui)
 
         # XMLの読み込み
         self.xmlui.load_template("assets/ui/common.xml")
         self.xmlui.load_template("assets/ui/shop.xml")
         self.xmlui.open("ui_shop")
 
-        ui_common.ui_init(self.xmlui)
-        ui_shop.ui_init(self.xmlui)
-        ui_buy.ui_init(self.xmlui)
-        ui_sell.ui_init(self.xmlui)
+        ui_common.ui_init(xmlui)
+        ui_shop.ui_init(xmlui)
+        ui_buy.ui_init(xmlui)
+        ui_sell.ui_init(xmlui)
 
     def closed(self):
         from FF.battle import Battle
