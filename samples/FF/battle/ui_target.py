@@ -36,7 +36,7 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
 
         # カーソル表示
         area = enemy_sel.items[target_idx].area
-        hand_cursor.draw(area.x, area.y)
+        hand_cursor.draw(area.x, area.y + 8)
     
     @target_select.list("player_sel", "select_item")
     def player_sel(player_sel:select.List, event:XUEvent):
@@ -57,4 +57,4 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
 
         # カーソル表示
         area = player_sel.selected_item.area
-        hand_cursor.draw(area.x, area.y)
+        hand_cursor.draw(area.x + battle_data.player_offset[player_sel.selected_no], area.y+8)
