@@ -96,7 +96,7 @@ class BattleTargetSel(BattleDataAct):
     def __init__(self, xmlui:XMLUI[BattleData], menu_win:XUElem):
         super().__init__(xmlui)
         self.menu_win = menu_win
-        self.battle_data.player_target = []
+        self.battle_data.target = []
 
         target_select = menu_win.open("target_select")
 
@@ -115,5 +115,5 @@ class BattleTargetSel(BattleDataAct):
 
     def waiting(self):
         # 全員のターゲットが決まった
-        if len(self.battle_data.player_target) >= len(user_data.get_lives()):
+        if len(self.battle_data.target) >= len(user_data.get_lives()):
             self.finish()
