@@ -38,19 +38,21 @@ class Battle(XUEFadeScene):
         ]
 
         # actとのデータ受け渡し用
-        self.xmlui.data_ref = act.BattleData(self)
+        battle_data = act.BattleData(self)
 
         # 敵の座標設定
         for data in enemy_data.data:
             x = data["x"]*48 + 24
             y = data["y"]*56 + 56
-            self.xmlui.data_ref.enemy_rect.append(XURect(x, y, self.enemy_img.width, self.enemy_img.height))
+            battle_data.enemy_rect.append(XURect(x, y, self.enemy_img.width, self.enemy_img.height))
 
         # プレイヤの座標設定
         for i,data in enumerate(user_data.player_data):
             x = 256-48 - (1-data["fb"])*16
             y = 40 + i*32
-            self.xmlui.data_ref.player_rect.append(XURect(x, y, self.player_imgs[i].width, self.player_imgs[i].height))
+            battle_data.player_rect.append(XURect(x, y, self.player_imgs[i].width, self.player_imgs[i].height))
+
+        self.xmlui.data_ref = battle_data
 
         # 最初をスライドインに変更
         self.clear_act()
