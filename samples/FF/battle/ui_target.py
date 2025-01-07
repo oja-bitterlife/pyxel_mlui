@@ -15,30 +15,46 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
     def enemy_sel(enemy_sel:select.Grid, event:XUEvent):
         battle_data = xmlui.data_ref
         target_idx = battle_data.target[battle_data.player_idx]
-        if target_idx >= 0:
-            input = ""
-            if XUEvent.Key.LEFT in event.trg:
-                input = "next_l"
-            elif XUEvent.Key.RIGHT in event.trg:
-                input = "next_r"
-            elif XUEvent.Key.UP in event.trg:
-                input = "next_u"
-            elif XUEvent.Key.DOWN in event.trg:
-                input = "next_d"
 
-            if input:
-                battle_data.target[battle_data.player_idx] = enemy_data.data[target_idx][input]
+        # 敵のエリアでの選択じゃなかった
+        if target_idx < 0:
+            return
 
-            # カーソル表示
-            area = enemy_sel.items[target_idx].area
-            hand_cursor.draw(area.x, area.y)
+        # カーソル移動
+        input = ""
+        if XUEvent.Key.LEFT in event.repeat:
+            input = "next_l"
+        elif XUEvent.Key.RIGHT in event.repeat:
+            input = "next_r"
+        elif XUEvent.Key.UP in event.repeat:
+            input = "next_u"
+        elif XUEvent.Key.DOWN in event.repeat:
+            input = "next_d"
+
+        if input:
+            battle_data.target[battle_data.player_idx] = enemy_data.data[target_idx][input]
+
+        # カーソル表示
+        area = enemy_sel.items[target_idx].area
+        hand_cursor.draw(area.x, area.y)
     
     @target_select.list("player_sel", "select_item")
     def player_sel(player_sel:select.List, event:XUEvent):
         battle_data = xmlui.data_ref
         target_idx = battle_data.target[battle_data.player_idx]
-        if target_idx < 0:
-            for i,item in enumerate(player_sel.items):
-                area = item.area
-                pyxel.text(area.x + battle_data.player_offset[i], area.y, str(i), 7, system_font.font)
+
+        # プレイヤーエリアでの選択中ではない
+        if target_idx >= 0:
+            return
     
+        target_idx = -target_idx - 1
+
+        # カーソル移動
+        if XUEvent.Key.LEFT in event.repeat:
+            battle_data.target[battle_data.player_idx] = 1
+        elif player_sel.select_by_event(event.repeat, *XUEvent.Key.UP_DOWN()):
+            battle_data.target[battle_data.player_idx] = -player_sel.selected_no - 1
+
+        # カーソル表示
+        area = player_sel.selected_item.area
+        hand_cursor.draw(area.x, area.y)
