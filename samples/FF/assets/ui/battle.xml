@@ -18,8 +18,8 @@
     </round_win>
 
     <target_select abs_x="0" abs_y="0" id="target_select">
-        <enemy_sel id="enemy_sel"/>
-        <player_sel id="player_sel"/>
+        <enemy_sel id="enemy_sel" use_event="listener"/>
+        <player_sel id="player_sel" use_event="listener"/>
     </target_select>
 
 </xmlui>
