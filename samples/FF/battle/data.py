@@ -15,4 +15,3 @@ class BattleData:
         self.player_move_dir = [0, 0, 0, 0]
         self.player_offset = [0, 0, 0, 0]
         self.player_target = []  # プレイヤが選んだターゲット(-で味方側)
-

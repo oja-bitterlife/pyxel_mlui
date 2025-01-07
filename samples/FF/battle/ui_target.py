@@ -20,5 +20,7 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
     def player_sel(player_sel:select.List, event:XUEvent):
         for i,item in enumerate(player_sel.items):
             area = item.area
-            pyxel.text(area.x, area.y, str(i), 7, system_font.font)
+            battle_data = xmlui.data_ref
+
+            pyxel.text(area.x + battle_data.player_offset[i], area.y, str(i), 7, system_font.font)
     
