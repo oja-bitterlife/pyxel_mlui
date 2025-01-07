@@ -4,7 +4,6 @@ pyxel.init(256, 256)
 # ここからゲーム本体開始
 # *********************************************************
 from xmlui.core import XMLUI
-from xmlui.lib import debug
 XMLUI.debug_enable = True
 
 # 作成するシーン選択

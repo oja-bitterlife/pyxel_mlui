@@ -110,7 +110,7 @@ class BattleTargetSel(BattleDataAct):
         player_sel = target_select.find_by_id("player_sel")
         for i,player in enumerate(user_data.player_data):
             item = XUSelectItem(XUElem.new(self.scene.xmlui, "select_item"))
-            item.set_pos(self.battle_data.enemy_rect[i].x, self.battle_data.enemy_rect[i].y)
+            item.set_pos(self.battle_data.player_rect[i].x, self.battle_data.player_rect[i].y)
             player_sel.add_child(item)
 
     def waiting(self):

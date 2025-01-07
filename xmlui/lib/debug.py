@@ -44,3 +44,7 @@ class DebugXMLUI(XMLUI[T]):
     # 削除完了通知
     def __del__(self):
         get_logger().info("XMLUI was deleted.")
+
+    @property
+    def logger(self) -> logging.Logger:
+        return get_logger()
