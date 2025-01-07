@@ -15,17 +15,18 @@ from db import enemy_data,user_data
 
 class Battle(XUEFadeScene):
     def __init__(self):
-        super().__init__(DebugXMLUI[act.BattleData](pyxel.width, pyxel.height))
+        xmlui = DebugXMLUI[act.BattleData](pyxel.width, pyxel.height)
+        super().__init__(xmlui)
 
         # XMLの読み込み
         self.xmlui.load_template("assets/ui/common.xml")
         self.xmlui.load_template("assets/ui/battle.xml")
         self.xmlui.open("ui_battle")
 
-        ui_common.ui_init(self.xmlui)
-        ui_status.ui_init(self.xmlui)
-        ui_command.ui_init(self.xmlui)
-        ui_target.ui_init(self.xmlui)
+        ui_common.ui_init(xmlui)
+        ui_status.ui_init(xmlui)
+        ui_command.ui_init(xmlui)
+        ui_target.ui_init(xmlui)
 
         self.enemy_img = pyxel.Image.from_image(filename="assets/images/fantasy_goblin.png")
         self.bg_img = pyxel.Image.from_image(filename="assets/images/bg.png")

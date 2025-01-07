@@ -1,15 +1,14 @@
 import pyxel
 
-from xmlui.core import XMLUI,XUElem,XUEvent,XUTextUtil,XURect
-from xmlui.lib import select,text
+from xmlui.core import XUElem,XUEvent,XUTextUtil,XURect
+from xmlui.lib import text,debug
 from system import system_font
 
 from db import user_data,enemy_data
 from battle.data import BattleData
 
-def ui_init(xmlui:XMLUI[BattleData]):
+def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
     status_text = text.Decorator(xmlui)
-
 
     # なぜかぽつんと一つあるHPラベル
     @status_text.label("hp_Label")

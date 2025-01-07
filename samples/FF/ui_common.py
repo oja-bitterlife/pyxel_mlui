@@ -1,9 +1,10 @@
 import pyxel
 
 from xmlui.core import *
-from xmlui.lib import win,text
+from xmlui.lib import win,text,debug
 
 from system import system_font,system_palette
+from battle.act import BattleData
 
 # 共通定義
 # *****************************************************************************
@@ -30,7 +31,7 @@ def get_world_clip(win:XUWinBase) -> XURect:
 
 # ui初期化
 # *****************************************************************************
-def ui_init(xmlui:XMLUI):
+def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
     common_win = win.Decorator(xmlui)
     common_text = text.Decorator(xmlui)
 

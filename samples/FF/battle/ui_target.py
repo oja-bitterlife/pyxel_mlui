@@ -1,13 +1,13 @@
 import pyxel
 
-from xmlui.core import XMLUI,XUElem,XUEvent,XUSelectItem,XUWinBase,XUTextUtil,XURect
-from xmlui.lib import select,text
+from xmlui.core import XUEvent
+from xmlui.lib import select,debug
 from system import system_font
 
 from db import user_data,enemy_data
 from battle.data import BattleData
 
-def ui_init(xmlui:XMLUI[BattleData]):
+def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
     target_select = select.Decorator(xmlui)
 
     @target_select.grid("enemy_sel", "select_item")

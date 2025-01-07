@@ -1,7 +1,7 @@
 import pyxel
 
-from xmlui.core import XMLUI,XUElem,XUEvent,XUWinBase,XURect
-from xmlui.lib import select
+from xmlui.core import XUElem,XUEvent,XUWinBase,XURect
+from xmlui.lib import select,debug
 
 from system import system_font,hand_cursor
 from ui_common import get_world_clip
@@ -10,7 +10,7 @@ from battle.data import BattleData
 from battle.act import *
 
 
-def ui_init(xmlui:XMLUI[BattleData]):
+def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
     action_select = select.Decorator(xmlui)
 
     # 各キャラのアクション表示
