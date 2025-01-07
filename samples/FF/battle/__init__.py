@@ -42,9 +42,8 @@ class Battle(XUEFadeScene):
 
         # 敵の座標設定
         for data in enemy_data.data:
-            x = data["x"]*48 + 24
-            y = data["y"]*56 + 56
-            battle_data.enemy_rect.append(XURect(x, y, self.enemy_img.width, self.enemy_img.height))
+            # 背景分ずらす
+            battle_data.enemy_rect.append(XURect(data["x"], data["y"] + self.bg_img.height, self.enemy_img.width, self.enemy_img.height))
 
         # プレイヤの座標設定
         for i,data in enumerate(user_data.player_data):

@@ -20,4 +20,4 @@ class BattleData:
         self.player_offset = [0, 0, 0, 0]
 
         # ターゲット
-        self.target = []  # プレイヤが選んだターゲット(-で味方側)
+        self.target = [0, 0, 0, 0]  # プレイヤが選んだターゲット(-で味方側)

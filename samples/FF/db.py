@@ -57,12 +57,12 @@ user_data = UserData()
 class EnemyData:
     def __init__(self, party_id):
         sql = """
-            SELECT name,size,x,y FROM enemy_party
-            INNER JOIN enemy_data ON enemy_party.enemy_id = enemy_data.id 
+            SELECT name,size,x,y,next_l,next_r,next_u,next_d FROM enemy_party
+            INNER JOIN enemy_data ON enemy_party.enemy_id = enemy_data.id
+            INNER JOIN enemy_arrange ON enemy_party.arrange_id = enemy_arrange.id and enemy_party.arrange_no = enemy_arrange.no
             WHERE party_id = ?
         """
         self.data = [dict(data) for data in game_db.execute(sql, [party_id]).fetchall()]
 
 enemy_data = EnemyData(1)
-
 #print(enemy_data.data)

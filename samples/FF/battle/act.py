@@ -32,6 +32,10 @@ class BattleStart(BattleDataAct):
         self.scene.alpha = 0
         self.elem.set_pos(0, 0)
 
+# ターン開始
+# self.battle_data.player_idx = -1
+# battle_data.target = []
+
 # コマンド待ち
 class BattleCmdStart(BattleDataAct):
     def init(self):
@@ -96,8 +100,6 @@ class BattleTargetSel(BattleDataAct):
     def __init__(self, xmlui:XMLUI[BattleData], menu_win:XUElem):
         super().__init__(xmlui)
         self.menu_win = menu_win
-        self.battle_data.target = []
-
         target_select = menu_win.open("target_select")
 
         # ターゲット設定
@@ -115,5 +117,5 @@ class BattleTargetSel(BattleDataAct):
 
     def waiting(self):
         # 全員のターゲットが決まった
-        if len(self.battle_data.target) >= len(user_data.get_lives()):
+        if self.battle_data.player_idx > len(user_data.player_data):
             self.finish()
