@@ -1,4 +1,5 @@
 import pyxel
+
 from xmlui.core import XMLUI,XUEvent,XUEventItem
 from xmlui.lib import debug
 
@@ -19,9 +20,6 @@ class XUEInputInfo:
     CFG_X = [pyxel.GAMEPAD1_BUTTON_X, pyxel.KEY_Q, pyxel.KEY_C]
     CFG_Y = [pyxel.GAMEPAD1_BUTTON_Y, pyxel.KEY_E, pyxel.KEY_V]
 
-    def __init__(self, xmlui:XMLUI):
-        self.xmlui = xmlui
-
     # その時のキー定義に合わせて構築し直すようプロパティで
     @property
     def key_config(self) -> dict[XUEventItem, list[int]]:
@@ -40,16 +38,16 @@ class XUEInputInfo:
 # どこかで作ってcheck()を１回呼び出すように
 class XUEInput(XUEInputInfo):
     # 全ボタン一気に調べてイベント設定
-    def check(self):
+    def check(self, xmlui:XMLUI):
         for event,keys in self.key_config.items():
             # 定義されたキーのどれか１つでも押されていたら押された扱い
             for key in keys:
                 if pyxel.btn(key):
-                    self.xmlui.on(event)
+                    xmlui.on(event)
                     break
 
         # デバッグ用
         if pyxel.btnp(pyxel.KEY_TAB):
-            self.xmlui.on(debug.DebugXMLUI.DEBUGEVENT_PRINTTREE)
+            xmlui.on(debug.DebugXMLUI.DEBUGEVENT_PRINTTREE)
         if pyxel.btnp(pyxel.KEY_F5):
-            self.xmlui.on(debug.DebugXMLUI.DEBUGEVENT_RELOAD)
+            xmlui.on(debug.DebugXMLUI.DEBUGEVENT_RELOAD)

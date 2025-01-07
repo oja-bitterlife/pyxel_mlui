@@ -15,7 +15,7 @@ from db import enemy_data,user_data
 
 class Battle(XUEFadeScene):
     def __init__(self):
-        super().__init__(DebugXMLUI(pyxel.width, pyxel.height))
+        super().__init__(DebugXMLUI[act.BattleData](pyxel.width, pyxel.height))
 
         # XMLの読み込み
         self.xmlui.load_template("assets/ui/common.xml")
@@ -43,7 +43,13 @@ class Battle(XUEFadeScene):
         for data in enemy_data.data:
             x = data["x"]*48 + 24
             y = data["y"]*56 + 56
-            self.xmlui.data_ref.enemy_pos.append(XURect(x, y, 48, 56))
+            self.xmlui.data_ref.enemy_rect.append(XURect(x, y, self.enemy_img.width, self.enemy_img.height))
+
+        # プレイヤの座標設定
+        for i,data in enumerate(user_data.player_data):
+            x = 256-32 - data["fb"]*16
+            y = 40 + i*32
+            self.xmlui.data_ref.player_rect.append(XURect(x, y, self.player_imgs[i].width, self.player_imgs[i].height))
 
         # 最初をスライドインに変更
         self.clear_act()
@@ -54,33 +60,32 @@ class Battle(XUEFadeScene):
 
     def draw(self):
         # バトル中のデータ一元管理を参照する
-        battle_data = self.xmlui.data_ref
+        battle_data:act.BattleData = self.xmlui.data_ref
 
         # 背景の表示
         pyxel.blt(0, 0, self.bg_img, 0, 0, 256, 40, 0)
 
         # 敵の表示
         for i in range(len(enemy_data.data)):
-            x: float = battle_data.enemy_pos[i].x - 128*self.alpha  # スライドイン
-            pyxel.blt(x, battle_data.enemy_pos[i].y, self.enemy_img, 0, 0, 64, 64, 0)
+            rect = battle_data.enemy_rect[i].copy()
+            # スライドイン
+            pyxel.blt(rect.x - int(128*self.alpha), rect.y, self.enemy_img, 0, 0, rect.w, rect.h, 0)
 
         # プレイヤの表示
         front_target = 256-80
         for i,data in enumerate(user_data.player_data):
             img = self.player_imgs[i]
-            x = 256-32 - int((1+(1-data["fb"])) * 16*(1-self.alpha))
+            rect = battle_data.player_rect[i]
 
             # 順番のキャラは前に出す
             battle_data.player_offset[i] += battle_data.player_move_dir[i] * 4
-            if x + battle_data.player_offset[i] < front_target:
-                battle_data.player_offset[i] = front_target - x
+            if rect.x + battle_data.player_offset[i] < front_target:
+                battle_data.player_offset[i] = front_target - rect.x
                 battle_data.player_move_dir[i] = 0
             elif battle_data.player_offset[i] > 0:
                 battle_data.player_move_dir[i] = 0
 
-            x += battle_data.player_offset[i]
-
-            pyxel.blt(x, 40+i*32, img, 0, 0, 64, 64, 0)
+            pyxel.blt(rect.x + battle_data.player_offset[i], rect.y, img, 0, 0, rect.w, rect.h, 0)
 
         # UIの表示
         self.xmlui.draw()

@@ -17,9 +17,9 @@
         </command>
     </round_win>
 
-    <target_select abs_x="0" abs_y="40" id="target_select">
-        <enemy_sel x="16" y="16" item_w="56" item_h="56"/>
-        <player_sel x="200" y="16" item_h="56"/>
+    <target_select abs_x="0" abs_y="0" id="target_select">
+        <enemy_sel id="enemy_sel"/>
+        <player_sel id="player_sel"/>
     </target_select>
 
 </xmlui>

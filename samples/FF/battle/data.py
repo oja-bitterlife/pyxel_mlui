@@ -7,9 +7,11 @@ class BattleData:
 
     def __init__(self, scene:XUEFadeScene):
         self.scene = scene
-        self.enemy_pos:list[XURect] = []
+        self.enemy_rect:list[XURect] = []
 
         self.player_idx = -1
+        self.player_rect:list[XURect] = []
+
         self.player_move_dir = [0, 0, 0, 0]
         self.player_offset = [0, 0, 0, 0]
         self.player_target = []  # プレイヤが選んだターゲット(-で味方側)

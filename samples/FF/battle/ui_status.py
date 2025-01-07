@@ -1,6 +1,6 @@
 import pyxel
 
-from xmlui.core import XMLUI,XUElem,XUEvent,XUSelectItem,XUWinBase,XUTextUtil,XURect
+from xmlui.core import XMLUI,XUElem,XUEvent,XUTextUtil,XURect
 from xmlui.lib import select,text
 from system import system_font
 

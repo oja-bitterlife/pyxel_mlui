@@ -2,7 +2,7 @@ from xmlui.core import XUElem,XMLUI,XUEvent,XUSelectItem
 from xmlui.ext.scene import XUEActItem
 from battle.data import BattleData
 
-from db import user_data
+from db import user_data,enemy_data
 
 # BattleDataを扱えるAct
 class BattleDataAct(XUEActItem):
@@ -98,7 +98,20 @@ class BattleTargetSel(BattleDataAct):
         self.menu_win = menu_win
         self.battle_data.player_target = []
 
-        menu_win.open("target_select")
+        target_select = menu_win.open("target_select")
+
+        # ターゲット設定
+        enemy_sel = target_select.find_by_id("enemy_sel")
+        for i,enemy in enumerate(enemy_data.data):
+            item = XUSelectItem(XUElem.new(self.scene.xmlui, "select_item"))
+            item.set_pos(self.battle_data.enemy_rect[i].x, self.battle_data.enemy_rect[i].y)
+            enemy_sel.add_child(item)
+
+        player_sel = target_select.find_by_id("player_sel")
+        for i,player in enumerate(user_data.player_data):
+            item = XUSelectItem(XUElem.new(self.scene.xmlui, "select_item"))
+            item.set_pos(self.battle_data.enemy_rect[i].x, self.battle_data.enemy_rect[i].y)
+            player_sel.add_child(item)
 
     def waiting(self):
         # 全員のターゲットが決まった
