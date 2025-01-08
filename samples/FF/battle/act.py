@@ -91,7 +91,7 @@ class BattleCmdSel(BattleDataAct):
         self.menu_win = menu_win
 
     def waiting(self):
-        if XUEvent.Key.BTN_A in self.scene.xmlui.event.trg:
+        if self.scene.xmlui.event.chk(XUEvent.Key.BTN_A):
             self.act.add_act(BattleTargetSel(self.xmlui, self.menu_win))
             self.finish()
 
@@ -116,6 +116,11 @@ class BattleTargetSel(BattleDataAct):
             player_sel.add_child(item)
 
     def waiting(self):
-        # 全員のターゲットが決まった
-        if self.battle_data.player_idx > len(user_data.player_data):
+        # 全員のターゲット決定
+        if self.xmlui.event.chk(XUEvent.Key.BTN_A):
             self.finish()
+        
+
+        # 全員のターゲットが決まった
+        # if self.battle_data.player_idx > len(user_data.player_data):
+            # self.finish()

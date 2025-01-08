@@ -174,6 +174,28 @@ class XUEvent:
         # リピートカウンター増加
         self.repeat_count[event_name] = self.repeat_count.get(event_name, 0) + 1
 
+    # イベントの確認短縮版
+    def chk(self, *keys:XUEventItem) -> bool:
+        for key in keys:
+            if key in self.trg:
+                return True
+        return False
+    def chk_rpt(self, *keys:XUEventItem) -> bool:
+        for key in keys:
+            if key in self.repeat:
+                return True
+        return False
+    def chk_now(self, *keys:XUEventItem) -> bool:
+        for key in keys:
+            if key in self.now:
+                return True
+        return False
+    def chk_res(self, *keys:XUEventItem) -> bool:
+        for key in keys:
+            if key in self.release:
+                return True
+        return False
+
     # キー入力イベント
     # *************************************************************************
     class Key:
