@@ -27,10 +27,10 @@ def ui_init(xmlui:XMLUI):
             menu_item(item)
 
         # メニュー選択
-        menu_grid.select_by_event(event._trg, *XUEvent.Key.CURSOR())
+        menu_grid.select_by_event(event.trg, *XUEvent.Key.CURSOR())
 
         # 選択アイテムの表示
-        if XUEvent.Key.BTN_A in event._trg:
+        if XUEvent.Key.BTN_A in event.trg:
             match menu_grid.action:
                 case "talk":
                     menu_grid.open("talk_dir")
@@ -49,7 +49,7 @@ def ui_init(xmlui:XMLUI):
             item.enable = event.is_active and not is_message_oepn
 
         # 閉じる
-        if XUEvent.Key.BTN_B in event._trg:
+        if XUEvent.Key.BTN_B in event.trg:
             XUWinBase.find_parent_win(menu_grid).start_close()
 
     # コマンドメニューのタイトル

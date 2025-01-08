@@ -30,15 +30,15 @@ def ui_init(xmlui:XMLUI):
             sell_num_item(item)
 
         # 価格を変動させる
-        sell_num.select_by_event(event._repeat, *XUEvent.Key.LEFT_RIGHT())
+        sell_num.select_by_event(event.repeat, *XUEvent.Key.LEFT_RIGHT())
 
-        if XUEvent.Key.BTN_A in event._trg:
+        if XUEvent.Key.BTN_A in event.trg:
             sell_menu = sell_num.find_parent_by_id("sell_menu")
             sell_list = sell_menu.find_by_id("sell_list")
             sell_list.enable = True
 
         # 戻る
-        if XUEvent.Key.BTN_B in event._trg:
+        if XUEvent.Key.BTN_B in event.trg:
             # DBの更新
             sell_menu = sell_num.find_parent_by_id("sell_menu")
             sell_list = XUSelectInfo(sell_menu.find_by_id("sell_list"))
@@ -99,9 +99,9 @@ def ui_init(xmlui:XMLUI):
 
         # 決定待ち
         if sell_list.attr_bool(SELL_WAIT_ATTR):
-            if XUEvent.Key.BTN_A in event._trg or XUEvent.Key.BTN_B in event._trg:
+            if XUEvent.Key.BTN_A in event.trg or XUEvent.Key.BTN_B in event.trg:
                 # 売却決定
-                if XUEvent.Key.BTN_A in event._trg:
+                if XUEvent.Key.BTN_A in event.trg:
                     # お金をふやす
                     user_data.gil += get_sell_price(sell_list.selected_item)
 
@@ -114,8 +114,8 @@ def ui_init(xmlui:XMLUI):
             return
 
         # 所持アイテム選択
-        sell_list.select_by_event(event._repeat, *XUEvent.Key.CURSOR())
-        if XUEvent.Key.BTN_A in event._trg:
+        sell_list.select_by_event(event.repeat, *XUEvent.Key.CURSOR())
+        if XUEvent.Key.BTN_A in event.trg:
             # 0個以上の時だけ決定できる
             num = sell_list.selected_item.attr_int("num")
             if num > 0:
@@ -129,7 +129,7 @@ def ui_init(xmlui:XMLUI):
                 sell_list.set_attr(SELL_WAIT_ATTR, True)
 
         # 戻る
-        if XUEvent.Key.BTN_B in event._trg:
+        if XUEvent.Key.BTN_B in event.trg:
             sell_list.enable = False
             set_shop_msg(sell_list.xmlui, "なににいたしましょうか？")
 

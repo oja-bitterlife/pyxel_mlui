@@ -32,11 +32,11 @@ class DebugXMLUI(XMLUI[T]):
 
         # 以下デバッグ時
         # *********************************************************************
-        if self.DEBUGEVENT_PRINTTREE in self.event._trg:
+        if self.DEBUGEVENT_PRINTTREE in self.event.trg:
             get_logger().debug(self.strtree())
 
         # 開発用。テンプレートを読み込み直す
-        if self.DEBUGEVENT_RELOAD in self.event._trg:
+        if self.DEBUGEVENT_RELOAD in self.event.trg:
             for xml_filename in self._templates.keys():
                 self.load_template(xml_filename)
             get_logger().debug("All XML Template was Reloaded")

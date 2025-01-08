@@ -36,11 +36,11 @@ def ui_init(xmlui:XMLUI):
         for item in tools_list.items:
             tools_item(item)
 
-        tools_list.select_by_event(event._trg, *XUEvent.Key.UP_DOWN())
+        tools_list.select_by_event(event.trg, *XUEvent.Key.UP_DOWN())
 
         # どうぐを使用した
         # ---------------------------------------------------------
-        if XUEvent.Key.BTN_A in event._trg:
+        if XUEvent.Key.BTN_A in event.trg:
             # どうぐデータ取得
             try:
                 data = tools_data.get_data(tools_list.action)
@@ -59,7 +59,7 @@ def ui_init(xmlui:XMLUI):
 
         # 閉じる
         # ---------------------------------------------------------
-        if XUEvent.Key.BTN_B in event._trg:
+        if XUEvent.Key.BTN_B in event.trg:
             XUWinBase.find_parent_win(tools_list).start_close()
 
 

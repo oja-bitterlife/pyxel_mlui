@@ -156,7 +156,7 @@ class XUESceneBase(XUEActManager):
             self.input.check(self.xmlui)  # xmluiのキーイベントサポート
 
         # イベント処理
-        for event in self.xmlui.event._trg:
+        for event in self.xmlui.event.trg:
             self.event(event)
 
         # ActがあればActの更新。なければ通常のUpdate

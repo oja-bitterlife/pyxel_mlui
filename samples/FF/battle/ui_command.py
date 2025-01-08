@@ -35,4 +35,4 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
         for item in command.items:
             battle_action(item, clip)
 
-        command.select_by_event(event._repeat, *XUEvent.Key.UP_DOWN())
+        command.select_by_event(event.repeat, *XUEvent.Key.UP_DOWN())

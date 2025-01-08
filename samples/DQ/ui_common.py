@@ -75,7 +75,7 @@ def common_msg_text(msg_dq:MsgDQ, event:XUEvent, cursor_visible:bool):
     # ---------------------------------------------------------
     # ボタンを押している間は速度MAX
     speed = system_info.msg_spd
-    if XUEvent.Key.BTN_A in event._now or XUEvent.Key.BTN_B in event._now:
+    if XUEvent.Key.BTN_A in event.now or XUEvent.Key.BTN_B in event.now:
         speed = system_info.MsgSpd.FAST
 
     # カウンタを進める。必ず行端で一旦止まる
@@ -173,7 +173,7 @@ def ui_init(xmlui:XMLUI):
 
     @common_text.msg("popup_text")
     def popup_text(popup_text:text.Msg, event:XUEvent):
-        if XUEvent.Key.BTN_A in event._trg or XUEvent.Key.BTN_B in event._trg:
+        if XUEvent.Key.BTN_A in event.trg or XUEvent.Key.BTN_B in event.trg:
             popup_text.close()
 
         # テキスト描画

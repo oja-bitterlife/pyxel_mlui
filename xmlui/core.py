@@ -141,26 +141,26 @@ class XUEvent:
     def clear(self):
         self._receive:set[XUEventItem] = set([])  # 次の状態受付
 
-        self._now:set[XUEventItem] = set([])
-        self._trg:set[XUEventItem] = set([])
-        self._release:set[XUEventItem] = set([])
-        self._repeat:set[XUEventItem] = set([])
+        self.now:set[XUEventItem] = set([])
+        self.trg:set[XUEventItem] = set([])
+        self.release:set[XUEventItem] = set([])
+        self.repeat:set[XUEventItem] = set([])
 
     # 更新
     def update(self):
         # 状態更新
-        self._trg = set([i for i in self._receive if i not in self._now])
-        self._release = set([i for i in self._now if i not in self._receive])
-        self._now = self._receive
+        self.trg = set([i for i in self._receive if i not in self.now])
+        self.release = set([i for i in self.now if i not in self._receive])
+        self.now = self._receive
 
         # リピート更新
-        self._repeat = self._trg.copy()
+        self.repeat = self.trg.copy()
         for key in self._repeat_count.keys():
-            if key not in self._now:  # 押されていなければカウンタリセット
+            if key not in self.now:  # 押されていなければカウンタリセット
                 self._repeat_count[key] = 0
-        for item in self._now:
+        for item in self.now:
             if self._repeat_count[item] > XUEvent.REPEAT_HOLD and (self._repeat_count[item]-XUEvent.REPEAT_HOLD) % XUEvent.REPEAT_SPAN  == 0:
-                self._repeat.add(item)
+                self.repeat.add(item)
 
         # 取得し直す
         self._receive = set([])
@@ -177,22 +177,22 @@ class XUEvent:
     # イベントの確認
     def check(self, *keys:XUEventItem) -> bool:
         for key in keys:
-            if key in self._trg:
+            if key in self.trg:
                 return True
         return False
     def check_repeat(self, *keys:XUEventItem) -> bool:
         for key in keys:
-            if key in self._repeat:
+            if key in self.repeat:
                 return True
         return False
     def check_now(self, *keys:XUEventItem) -> bool:
         for key in keys:
-            if key in self._now:
+            if key in self.now:
                 return True
         return False
     def check_release(self, *keys:XUEventItem) -> bool:
         for key in keys:
-            if key in self._release:
+            if key in self.release:
                 return True
         return False
 
@@ -704,7 +704,7 @@ class XMLUI(XUElem, Generic[T]):
         if isinstance(event_names, str):
             event_names = [event_names]  # 配列で統一
         for event_name in event_names:
-            if event_name in self.event._trg:
+            if event_name in self.event.trg:
                 return self.root.open(id, id_alias)
         return None
 
