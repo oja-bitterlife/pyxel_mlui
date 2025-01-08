@@ -22,6 +22,7 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
         if clip.bottom() < area.y:
             return
 
+        # コマンドの表示
         pyxel.text(area.x, area.y, battle_action.text, 7, system_font.font)
 
         # コマンド選択中はHandIconを表示

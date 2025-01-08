@@ -1,4 +1,4 @@
-from xmlui.core import XUElem,XMLUI,XUEvent,XUSelectItem
+from xmlui.core import XUElem,XMLUI,XUEvent,XUSelectItem,XUSelectInfo
 from xmlui.ext.scene import XUEActItem
 from battle.data import BattleData
 
@@ -62,23 +62,17 @@ class BattleTurnStart(BattleDataAct):
     def action(self):
         self.battle_data.player_idx = -1
         self.battle_data.target = [0, 0, 0, 0]
-        self.act.add_act(
-            BattleWait(self.xmlui, 15),
-            BattleCmdSetup(self.xmlui, self.xmlui.find_by_id("enemy_name_win").open("menu")))
-
-# 共通
-# ---------------------------------------------------------
-# 少し待つ
-class BattleWait(BattleDataAct):
-    def __init__(self, xmlui:XMLUI[BattleData], wait:int):
-        super().__init__(xmlui)
-        self.wait = wait
-
-    def init(self):
-        self.set_wait(self.wait)
+        self.act.add_act(BattleCmdStart(self.xmlui))
 
 # コマンド
 # ---------------------------------------------------------
+class BattleCmdStart(BattleDataAct):
+    def __init__(self, xmlui:XMLUI[BattleData]):
+        super().__init__(xmlui)
+        self.set_wait(15)
+
+    def action(self):
+        self.act.add_act(BattleCmdSetup(self.xmlui, self.xmlui.find_by_id("enemy_name_win").open("menu")))
 
 # メニューの設定とキャラ進め
 class BattleCmdSetup(BattleMenuAct):
@@ -88,8 +82,11 @@ class BattleCmdSetup(BattleMenuAct):
     def init(self):
         self.battle_data.player_idx += 1  # 操作キャラ決定
 
-        # 職業によってメニューを変える。とりあえずサンプルなので適当に
+        # コマンドのリセット
         command = self.menu_win.find_by_id("command")
+        command.remove_children()
+
+        # 職業によってメニューを変える。とりあえずサンプルなので適当に
         job = {
             "heishi":["たたかう", "ぼうぎょ", "にげる", "アイテム"],
             "basaka":["たたかう", "まもらぬ", "にげぬ", "アイテム"],
@@ -97,6 +94,7 @@ class BattleCmdSetup(BattleMenuAct):
             "majyo":["たたかう", "ぼうぎょ", "まほう", "アイテム"],
         }
         for action in job[self.battle_data.JOBS[self.battle_data.player_idx]]:
+            # コマンド追加
             item = XUSelectItem(XUElem.new(self.scene.xmlui, "battle_action").set_text(action).set_attr("action", action))
             command.add_child(item)
 
@@ -122,30 +120,27 @@ class BattleCmdSel(BattleMenuAct):
 # ターゲットの選択
 class BattleTargetSel(BattleMenuAct):
     def init(self):
-        target_select = self.menu_win.open("target_select")
+        self.target_select = self.menu_win.open("target_select")
 
         # ターゲット設定
-        enemy_sel = target_select.find_by_id("enemy_sel")
+        enemy_sel = self.target_select.find_by_id("enemy_sel")
         for i,enemy in enumerate(enemy_data.data):
             item = XUSelectItem(XUElem.new(self.scene.xmlui, "select_item"))
             item.set_pos(self.battle_data.enemy_rect[i].x, self.battle_data.enemy_rect[i].y)
             enemy_sel.add_child(item)
 
-        player_sel = target_select.find_by_id("player_sel")
+        player_sel = self.target_select.find_by_id("player_sel")
         for i,player in enumerate(user_data.player_data):
             item = XUSelectItem(XUElem.new(self.scene.xmlui, "select_item"))
             item.set_pos(self.battle_data.player_rect[i].x, self.battle_data.player_rect[i].y)
             player_sel.add_child(item)
 
     def waiting(self):
-        # 全員のターゲット決定
+        # ターゲット決定
         if self.xmlui.event.check(XUEvent.Key.BTN_A):
+            self.target_select.close()
             self.act.add_act(BattleCharaBack(self.xmlui, self.menu_win))
             self.finish()
-
-        # 全員のターゲットが決まった
-        # if self.battle_data.player_idx > len(user_data.player_data):
-            # self.finish()
 
 class BattleCharaBack(BattleMenuAct):
     def init(self):
@@ -155,5 +150,12 @@ class BattleCharaBack(BattleMenuAct):
     # キャラ移動待ち
     def waiting(self):
         if self.battle_data.player_move_dir[self.battle_data.player_idx] == 0:
-            self.act.add_act(BattleCmdSetup(self.xmlui, self.menu_win))
+            # 全員のターゲットが決まった
+            if self.battle_data.player_idx+1 >= len(user_data.player_data):
+                pass
+
+            # 残次のキャラのコマンド入力
+            else:
+                self.act.add_act(BattleCmdSetup(self.xmlui, self.menu_win))
+
             self.finish()
