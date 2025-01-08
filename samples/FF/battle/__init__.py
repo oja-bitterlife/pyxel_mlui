@@ -55,7 +55,7 @@ class Battle(XUEFadeScene):
 
         # 最初をスライドインに変更
         self.clear_act()
-        self.add_act(act.BattleStart(self.xmlui), act.BattleCmdStart(self.xmlui))
+        self.add_act(act.BattleStart(self.xmlui))
 
     def closed(self):
         self.xmlui.close()

@@ -17,6 +17,25 @@ class BattleDataAct(XUEActItem):
     def scene(self):
         return self.xmlui.data_ref.scene
 
+# コマンドメニュー下のAct
+class BattleMenuAct(XUEActItem):
+    def __init__(self, xmlui:XMLUI[BattleData], menu_win:XUElem):
+        super().__init__()
+        self.xmlui = xmlui
+        self.menu_win = menu_win
+
+    @property
+    def battle_data(self):
+        return self.xmlui.data_ref
+    @property
+    def scene(self):
+        return self.xmlui.data_ref.scene
+
+
+# バトルコマンド関係
+# *****************************************************************************
+# 初期化
+# ---------------------------------------------------------
 # バトル開始時スライド＆フェード
 class BattleStart(BattleDataAct):
     def __init__(self, xmlui:XMLUI[BattleData]):
@@ -31,30 +50,31 @@ class BattleStart(BattleDataAct):
     def action(self):
         self.scene.alpha = 0
         self.elem.set_pos(0, 0)
+        self.act.add_act(BattleTurnStart(self.xmlui))
 
 # ターン開始
-# self.battle_data.player_idx = -1
-# battle_data.target = []
+class BattleTurnStart(BattleDataAct):
+    def action(self):
+        self.act.add_act(BattleCmdStart(self.xmlui))    
+        self.battle_data.player_idx = -1
+        self.battle_data.target = [0, 0, 0, 0]
 
-# コマンド待ち
+# コマンド
+# ---------------------------------------------------------
+# 最初に少し待つ
 class BattleCmdStart(BattleDataAct):
     def init(self):
         self.set_wait(16)
 
     def action(self):
+        self.battle_data.player_idx += 1  # 操作キャラ決定
         self.act.add_act(BattleCmdSetup(self.xmlui, self.scene.xmlui.find_by_id("enemy_name_win").open("menu")))
 
 # メニューの設定とキャラ進め
-class BattleCmdSetup(BattleDataAct):
-    def __init__(self, xmlui:XMLUI[BattleData], menu_win:XUElem):
-        super().__init__(xmlui)
-        self.menu_win = menu_win
-
-        # 次のキャラへ
-        self.battle_data.player_idx += 1
-
+class BattleCmdSetup(BattleMenuAct):
+    def init(self):
         # 職業によってメニューを変える。とりあえずサンプルなので適当に
-        command = menu_win.find_by_id("command")
+        command = self.menu_win.find_by_id("command")
         job = {
             "heishi":["たたかう", "ぼうぎょ", "にげる", "アイテム"],
             "basaka":["たたかう", "まもらぬ", "にげぬ", "アイテム"],
@@ -77,30 +97,17 @@ class BattleCmdSetup(BattleDataAct):
     def action(self):
         self.act.add_act(BattleCmdSel(self.xmlui, self.menu_win))
 
-# class BattleCharaMove(BattleDataAct):
-#     def init(self):
-#         # 現在のキャラを引っ込める
-#         if self.data.player_idx >= 0:
-#             self.data.player_move_dir[self.data.player_idx] = 1
-#             self.data.player_offset[self.data.player_idx] = 0
-
 # コマンド選択
-class BattleCmdSel(BattleDataAct):
-    def __init__(self, xmlui:XMLUI[BattleData], menu_win:XUElem):
-        super().__init__(xmlui)
-        self.menu_win = menu_win
-
+class BattleCmdSel(BattleMenuAct):
     def waiting(self):
         if self.scene.xmlui.event.chk(XUEvent.Key.BTN_A):
             self.act.add_act(BattleTargetSel(self.xmlui, self.menu_win))
             self.finish()
 
 # ターゲットの選択
-class BattleTargetSel(BattleDataAct):
-    def __init__(self, xmlui:XMLUI[BattleData], menu_win:XUElem):
-        super().__init__(xmlui)
-        self.menu_win = menu_win
-        target_select = menu_win.open("target_select")
+class BattleTargetSel(BattleMenuAct):
+    def init(self):
+        target_select = self.menu_win.open("target_select")
 
         # ターゲット設定
         enemy_sel = target_select.find_by_id("enemy_sel")
@@ -118,9 +125,17 @@ class BattleTargetSel(BattleDataAct):
     def waiting(self):
         # 全員のターゲット決定
         if self.xmlui.event.chk(XUEvent.Key.BTN_A):
+            self.act.add_act(BattleCharaBack(self.xmlui, self.menu_win))
             self.finish()
-        
 
         # 全員のターゲットが決まった
         # if self.battle_data.player_idx > len(user_data.player_data):
             # self.finish()
+
+class BattleCharaBack(BattleMenuAct):
+    def init(self):
+        # 現在のキャラを引っ込める
+        pass
+        # if self.data.player_idx >= 0:
+        #     self.data.player_move_dir[self.data.player_idx] = 1
+        #     self.data.player_offset[self.data.player_idx] = 0
