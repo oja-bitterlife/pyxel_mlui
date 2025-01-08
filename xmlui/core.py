@@ -135,7 +135,7 @@ class XUEvent:
     def __init__(self, init_active=False):
         self.is_active = init_active  # アクティブなイベントかどうか
         self.on_init = False
-        self.repeat_count:dict[XUEventItem,int] = {}
+        self._repeat_count:dict[XUEventItem,int] = {}
         self.clear()
 
     def clear(self):
@@ -155,11 +155,11 @@ class XUEvent:
 
         # リピート更新
         self._repeat = self._trg.copy()
-        for key in self.repeat_count.keys():
+        for key in self._repeat_count.keys():
             if key not in self._now:  # 押されていなければカウンタリセット
-                self.repeat_count[key] = 0
+                self._repeat_count[key] = 0
         for item in self._now:
-            if self.repeat_count[item] > XUEvent.REPEAT_HOLD and (self.repeat_count[item]-XUEvent.REPEAT_HOLD) % XUEvent.REPEAT_SPAN  == 0:
+            if self._repeat_count[item] > XUEvent.REPEAT_HOLD and (self._repeat_count[item]-XUEvent.REPEAT_HOLD) % XUEvent.REPEAT_SPAN  == 0:
                 self._repeat.add(item)
 
         # 取得し直す
@@ -172,7 +172,7 @@ class XUEvent:
         self._receive.add(event_name)
 
         # リピートカウンター増加
-        self.repeat_count[event_name] = self.repeat_count.get(event_name, 0) + 1
+        self._repeat_count[event_name] = self._repeat_count.get(event_name, 0) + 1
 
     # イベントの確認
     def check(self, *keys:XUEventItem) -> bool:
