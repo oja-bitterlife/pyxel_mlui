@@ -40,8 +40,10 @@ class BattleMenuAct(XUEActItem):
 class BattleStart(BattleDataAct):
     def __init__(self, xmlui:XMLUI[BattleData]):
         super().__init__(xmlui)
-        self.set_wait(8)
         self.elem =self.xmlui.find_by_id("ui_battle")
+
+    def init(self):
+        self.set_wait(8)
 
     def waiting(self):
         self.scene.alpha = 1-self.alpha  # fadeのコントロールをこっちで
@@ -60,22 +62,32 @@ class BattleTurnStart(BattleDataAct):
     def action(self):
         self.battle_data.player_idx = -1
         self.battle_data.target = [0, 0, 0, 0]
-        self.act.add_act(BattleCmdStart(self.xmlui))
+        self.act.add_act(
+            BattleWait(self.xmlui, 15),
+            BattleCmdSetup(self.xmlui, self.xmlui.find_by_id("enemy_name_win").open("menu")))
+
+# 共通
+# ---------------------------------------------------------
+# 少し待つ
+class BattleWait(BattleDataAct):
+    def __init__(self, xmlui:XMLUI[BattleData], wait:int):
+        super().__init__(xmlui)
+        self.wait = wait
+
+    def init(self):
+        self.set_wait(self.wait)
 
 # コマンド
 # ---------------------------------------------------------
-# 最初に少し待つ
-class BattleCmdStart(BattleDataAct):
-    def init(self):
-        self.set_wait(16)
-
-    def action(self):
-        self.battle_data.player_idx += 1  # 操作キャラ決定
-        self.act.add_act(BattleCmdSetup(self.xmlui, self.scene.xmlui.find_by_id("enemy_name_win").open("menu")))
 
 # メニューの設定とキャラ進め
 class BattleCmdSetup(BattleMenuAct):
+    def __init__(self, xmlui:XMLUI[BattleData], menu_win:XUElem):
+        super().__init__(xmlui, menu_win)
+
     def init(self):
+        self.battle_data.player_idx += 1  # 操作キャラ決定
+
         # 職業によってメニューを変える。とりあえずサンプルなので適当に
         command = self.menu_win.find_by_id("command")
         job = {
@@ -138,5 +150,10 @@ class BattleTargetSel(BattleMenuAct):
 class BattleCharaBack(BattleMenuAct):
     def init(self):
         # 現在のキャラを引っ込める
-        self.battle_data.player_offset[self.battle_data.player_idx] = 0
         self.battle_data.player_move_dir[self.battle_data.player_idx] = 1
+
+    # キャラ移動待ち
+    def waiting(self):
+        if self.battle_data.player_move_dir[self.battle_data.player_idx] == 0:
+            self.act.add_act(BattleCmdSetup(self.xmlui, self.menu_win))
+            self.finish()
