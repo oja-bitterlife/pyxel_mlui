@@ -74,7 +74,7 @@ class CmdStart(BattleActItem):
 # コマンド選択待ち
 class CmdCheck(BattleActItem):
     def waiting(self):
-        if "attack" in self.xmlui.event.trg:
+        if "attack" in self.xmlui.event._trg:
             # 選択されたらメニューは閉じる
             XUWinBase(self.xmlui.find_by_id("menu")).start_close()
 
@@ -89,7 +89,7 @@ class CmdCheck(BattleActItem):
 
             self.finish()
 
-        if "run" in self.xmlui.event.trg:
+        if "run" in self.xmlui.event._trg:
             # 選択されたらメニューは閉じる
             XUWinBase(self.xmlui.find_by_id("menu")).start_close()
 
@@ -102,7 +102,7 @@ class CmdCheck(BattleActItem):
 
             self.finish()
 
-        if "spel" in self.xmlui.event.trg:
+        if "spel" in self.xmlui.event._trg:
             # 選択されたらメニューは閉じる
             XUWinBase(self.xmlui.find_by_id("menu")).start_close()
 
@@ -112,7 +112,7 @@ class CmdCheck(BattleActItem):
 
             self.finish()
 
-        if "tools" in self.xmlui.event.trg:
+        if "tools" in self.xmlui.event._trg:
             self.xmlui.popup("under_construct")
 
 # 敵の行動

@@ -100,7 +100,7 @@ class BattleCmdSetup(BattleMenuAct):
 # コマンド選択
 class BattleCmdSel(BattleMenuAct):
     def waiting(self):
-        if self.scene.xmlui.event.chk(XUEvent.Key.BTN_A):
+        if self.scene.xmlui.event.check(XUEvent.Key.BTN_A):
             self.act.add_act(BattleTargetSel(self.xmlui, self.menu_win))
             self.finish()
 
@@ -124,7 +124,7 @@ class BattleTargetSel(BattleMenuAct):
 
     def waiting(self):
         # 全員のターゲット決定
-        if self.xmlui.event.chk(XUEvent.Key.BTN_A):
+        if self.xmlui.event.check(XUEvent.Key.BTN_A):
             self.act.add_act(BattleCharaBack(self.xmlui, self.menu_win))
             self.finish()
 

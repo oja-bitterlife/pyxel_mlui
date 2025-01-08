@@ -27,22 +27,22 @@ def ui_init(xmlui:XMLUI):
             dir_item(item)
 
         # 会話ウインドウは特別な配置
-        if XUEvent.Key.UP in event.trg:
+        if XUEvent.Key.UP in event._trg:
             dir_select.select(0)
-        if XUEvent.Key.LEFT in event.trg:
+        if XUEvent.Key.LEFT in event._trg:
             dir_select.select(1)
-        if XUEvent.Key.RIGHT in event.trg:
+        if XUEvent.Key.RIGHT in event._trg:
             dir_select.select(2)
-        if XUEvent.Key.DOWN in event.trg:
+        if XUEvent.Key.DOWN in event._trg:
             dir_select.select(3)
 
-        if XUEvent.Key.BTN_A in event.trg:
+        if XUEvent.Key.BTN_A in event._trg:
             dir_win = XUWinBase.find_parent_win(dir_select)
             dir_win.start_close()
             return f"start_talk_{dir_select.action}"
 
         # 閉じる
-        if XUEvent.Key.BTN_B in event.trg:
+        if XUEvent.Key.BTN_B in event._trg:
             XUWinBase.find_parent_win(dir_select).start_close()
 
 

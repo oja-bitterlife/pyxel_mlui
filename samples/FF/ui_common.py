@@ -46,7 +46,7 @@ def ui_init(xmlui:debug.DebugXMLUI):
 
     @common_text.msg("popup_text")
     def popup_text(popup_text:text.Msg, event:XUEvent):
-        if XUEvent.Key.BTN_A in event.trg or XUEvent.Key.BTN_B in event.trg:
+        if XUEvent.Key.BTN_A in event._trg or XUEvent.Key.BTN_B in event._trg:
             popup_text.close()
 
         # テキスト描画

@@ -52,10 +52,10 @@ def ui_init(template):
             menu_item(item)
 
         # メニュー選択
-        menu_grid.select_by_event(event.trg, *XUEvent.Key.CURSOR())
+        menu_grid.select_by_event(event._trg, *XUEvent.Key.CURSOR())
 
         # 選択アイテムの表示
-        if XUEvent.Key.BTN_A in event.trg:
+        if XUEvent.Key.BTN_A in event._trg:
             return menu_grid.action
 
 

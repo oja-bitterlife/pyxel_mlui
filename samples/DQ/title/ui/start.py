@@ -16,10 +16,10 @@ def ui_init(xmlui:XMLUI):
             menu_item(item)
 
         # メニュー選択
-        game_start.select_by_event(event.trg, *XUEvent.Key.UP_DOWN())
+        game_start.select_by_event(event._trg, *XUEvent.Key.UP_DOWN())
 
         # メニュー決定
-        if XUEvent.Key.BTN_A in event.trg:
+        if XUEvent.Key.BTN_A in event._trg:
             match game_start.action:
                 case "start" as action:
                     return action

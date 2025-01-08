@@ -29,15 +29,15 @@ def ui_init(xmlui:XMLUI):
             buy_num_item(item)
 
         # 価格を変動させる
-        buy_num.select_by_event(event.repeat, *XUEvent.Key.LEFT_RIGHT())
+        buy_num.select_by_event(event._repeat, *XUEvent.Key.LEFT_RIGHT())
 
-        if XUEvent.Key.BTN_A in event.trg:
+        if XUEvent.Key.BTN_A in event._trg:
             buy_menu = buy_num.find_parent_by_id("buy_menu")
             buy_list = buy_menu.find_by_id("buy_list")
             buy_list.enable = True
 
         # 戻る
-        if XUEvent.Key.BTN_B in event.trg:
+        if XUEvent.Key.BTN_B in event._trg:
             buy_num.close()
 
             # enableにしていたメニューを元に戻す
@@ -90,8 +90,8 @@ def ui_init(xmlui:XMLUI):
         for item in buy_list.items:
             buy_item(item, buy_list.enable)
 
-        buy_list.select_by_event(event.repeat, *XUEvent.Key.UP_DOWN())
-        if XUEvent.Key.BTN_A in event.trg:
+        buy_list.select_by_event(event._repeat, *XUEvent.Key.UP_DOWN())
+        if XUEvent.Key.BTN_A in event._trg:
             buy_menu = buy_list.find_parent_by_id("buy_menu")
             price = get_buy_price(buy_menu, buy_list.selected_item)
             user_data.gil -= price
@@ -106,7 +106,7 @@ def ui_init(xmlui:XMLUI):
             msg.append_msg("ありがとうございます ほかには？")
 
         # 戻る
-        if XUEvent.Key.BTN_B in event.trg:
+        if XUEvent.Key.BTN_B in event._trg:
             buy_list.enable = False
 
             # メッセージ更新
