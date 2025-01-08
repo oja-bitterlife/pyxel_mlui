@@ -8,7 +8,8 @@ from xmlui.ext.scene import XUEFadeScene
 # ui
 import ui_common
 from FF.battle import ui_command,ui_status,act,ui_target
-from FF.battle import act
+from FF.battle.act import BattleStart
+from FF.battle.data import BattleData
 
 # データ
 from db import enemy_data,user_data
@@ -55,14 +56,14 @@ class Battle(XUEFadeScene):
 
         # 最初をスライドインに変更
         self.clear_act()
-        self.add_act(act.BattleStart(self.xmlui))
+        self.add_act(BattleStart(self.xmlui))
 
     def closed(self):
         self.xmlui.close()
 
     def draw(self):
         # バトル中のデータ一元管理を参照する
-        battle_data:act.BattleData = self.xmlui.data_ref
+        battle_data:BattleData = self.xmlui.data_ref
 
         # 背景の表示
         pyxel.blt(0, 0, self.bg_img, 0, 0, 256, 40, 0)

@@ -106,6 +106,11 @@ class XUEActManager:
             if act.is_finish:
                 self.next_act()
 
+                # デバッグ表示
+                if not self.is_act_empty:
+                    get_logger().debug(f"next act:{self.current_act}")
+
+
     # 状態取得
     # -----------------------------------------------------
     @property
@@ -174,7 +179,7 @@ class XUESceneBase(XUEActManager):
         pass
     # フェードアウト完了時に呼ばれる。主に次シーン設定を行う
     def closed(self):
-        get_logger().debug("scene.closed is not implemented")
+        get_logger().warning("scene.closed is not implemented")
 
 # シーンクラス。継承して使おう
 class XUEFadeScene(XUESceneBase):

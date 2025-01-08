@@ -54,10 +54,13 @@ class BattleStart(BattleDataAct):
 
 # ターン開始
 class BattleTurnStart(BattleDataAct):
+    def init(self):
+        self.set_wait(0)
+
     def action(self):
-        self.act.add_act(BattleCmdStart(self.xmlui))    
         self.battle_data.player_idx = -1
         self.battle_data.target = [0, 0, 0, 0]
+        self.act.add_act(BattleCmdStart(self.xmlui))
 
 # コマンド
 # ---------------------------------------------------------
@@ -135,7 +138,5 @@ class BattleTargetSel(BattleMenuAct):
 class BattleCharaBack(BattleMenuAct):
     def init(self):
         # 現在のキャラを引っ込める
-        pass
-        # if self.data.player_idx >= 0:
-        #     self.data.player_move_dir[self.data.player_idx] = 1
-        #     self.data.player_offset[self.data.player_idx] = 0
+        self.battle_data.player_offset[self.battle_data.player_idx] = 0
+        self.battle_data.player_move_dir[self.battle_data.player_idx] = 1
