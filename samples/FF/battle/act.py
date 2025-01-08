@@ -1,4 +1,4 @@
-from xmlui.core import XUElem,XMLUI,XUEvent,XUSelectItem,XUSelectInfo
+from xmlui.core import XUElem,XMLUI,XUEvent,XUSelectItem,XUWinBase
 from xmlui.ext.scene import XUEActItem
 from battle.data import BattleData
 
@@ -41,6 +41,9 @@ class BattleStart(BattleDataAct):
     def __init__(self, xmlui:XMLUI[BattleData]):
         super().__init__(xmlui)
         self.elem =self.xmlui.find_by_id("ui_battle")
+
+        # enemy_name_winをownerから切り離す
+        self.xmlui.find_by_id("enemy_name_win").set_attr("owner", "")
 
     def init(self):
         self.set_wait(8)
@@ -114,11 +117,17 @@ class BattleCmdSetup(BattleMenuAct):
 class BattleCmdSel(BattleMenuAct):
     def waiting(self):
         if self.scene.xmlui.event.check(XUEvent.Key.BTN_A):
-            self.act.add_act(BattleTargetSel(self.xmlui, self.menu_win))
+            self.act.add_act(BattleCmdTargetSel(self.xmlui, self.menu_win))
             self.finish()
 
+        # # 取りやめ
+        # if self.xmlui.event.check(XUEvent.Key.BTN_B):
+        #     self.battle_data.player_idx -= 1  # 戻す
+        #     self.act.add_act(BattleCmdCharaBack(self.xmlui, self.menu_win))
+        #     self.finish()
+
 # ターゲットの選択
-class BattleTargetSel(BattleMenuAct):
+class BattleCmdTargetSel(BattleMenuAct):
     def init(self):
         self.target_select = self.menu_win.open("target_select")
 
@@ -139,10 +148,10 @@ class BattleTargetSel(BattleMenuAct):
         # ターゲット決定
         if self.xmlui.event.check(XUEvent.Key.BTN_A):
             self.target_select.close()
-            self.act.add_act(BattleCharaBack(self.xmlui, self.menu_win))
+            self.act.add_act(BattleCmdCharaBack(self.xmlui, self.menu_win))
             self.finish()
 
-class BattleCharaBack(BattleMenuAct):
+class BattleCmdCharaBack(BattleMenuAct):
     def init(self):
         # 現在のキャラを引っ込める
         self.battle_data.player_move_dir[self.battle_data.player_idx] = 1
@@ -152,10 +161,23 @@ class BattleCharaBack(BattleMenuAct):
         if self.battle_data.player_move_dir[self.battle_data.player_idx] == 0:
             # 全員のターゲットが決まった
             if self.battle_data.player_idx+1 >= len(user_data.player_data):
-                pass
-
+                self.act.add_act(BattleCmdClose(self.xmlui))
             # 残次のキャラのコマンド入力
             else:
                 self.act.add_act(BattleCmdSetup(self.xmlui, self.menu_win))
 
             self.finish()
+
+class BattleCmdClose(BattleDataAct):
+    def init(self):
+        self.target_win = XUWinBase(self.xmlui.find_by_id("enemy_name_win"))
+        self.target_win.start_close()
+
+    def waiting(self):
+        if self.target_win.removed:
+            self.act.add_act(BattlePlay(self.xmlui))
+            self.finish()
+
+class BattlePlay(BattleDataAct):
+    def waiting(self):
+        pass

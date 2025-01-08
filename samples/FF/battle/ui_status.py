@@ -1,9 +1,10 @@
 import pyxel
 
-from xmlui.core import XUElem,XUEvent,XUTextUtil,XURect
+from xmlui.core import XUElem,XUEvent,XUTextUtil,XURect,XUWinBase
 from xmlui.lib import text,debug
 from system import system_font
 
+from ui_common import get_world_clip
 from db import user_data,enemy_data
 from battle.data import BattleData
 
@@ -19,7 +20,10 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
     # 各キャラのステータス表示
     # *************************************************************************
     # キャラ1人分
-    def status_one(area:XURect, player_data:dict):
+    def status_one(area:XURect, player_data:dict, clip:XURect):
+        if clip.bottom() < area.y+system_font.size:
+            return
+
         pyxel.text(area.x, area.y, player_data["name"], 7, system_font.font)
 
         hp_text = XUTextUtil.format_zenkaku("{hp}／", player_data)
@@ -35,6 +39,7 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
     @xmlui.tag_draw("status")
     def status(status:XUElem, event:XUEvent):
         area = status.area
+        clip = get_world_clip(XUWinBase.find_parent_win(status))
 
         # ステータス各行のサイズ
         status_line_size = 16
@@ -42,13 +47,14 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
 
         # 一人ずつ表示
         for player_data in user_data.player_data:
-            status_one(area, player_data)
+            status_one(area, player_data, clip)
             area.y += status_line_size
 
     # 敵の名前表示
     @xmlui.tag_draw("enemy_names")
     def enemy_names(enemy_names:XUElem, event:XUEvent):
         area = enemy_names.area
+        clip = get_world_clip(XUWinBase.find_parent_win(enemy_names))
 
         # 各行のサイズ
         status_line_size = 16
@@ -58,5 +64,6 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
 
         # 種類ずつ表示
         for enemy_kind in enemy_kinds:
-            pyxel.text(area.x, area.y, enemy_kind, 7, system_font.font)
+            if clip.bottom() > area.y+status_line_size:
+                pyxel.text(area.x, area.y, enemy_kind, 7, system_font.font)
             area.y += status_line_size
