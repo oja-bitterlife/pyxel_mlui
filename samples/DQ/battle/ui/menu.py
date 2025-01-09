@@ -2,10 +2,12 @@ import pyxel
 
 from xmlui.core import XUEvent,XUWinBase,XUSelectItem
 from xmlui.lib import select,text
-from msg_dq import Decorator as DQDecorator
 
-from ui_common import system_font,KOJICHU_COL,get_text_color
-from msg_dq import MsgDQ
+from DQ import msg_dq
+from DQ.msg_dq import MsgDQ
+
+from DQ.system import system_font
+from DQ.ui_common import KOJICHU_COL,get_text_color
 
 
 # バトルUI
@@ -16,7 +18,7 @@ def ui_init(template):
     # fieldグループ用デコレータを作る
     battle_select = select.Decorator(template)
     battle_text = text.Decorator(template)
-    battle_dq = DQDecorator(template)
+    battle_dq = msg_dq.Decorator(template)
 
     # コマンドメニューのタイトル
     @battle_text.label("title")
@@ -55,7 +57,7 @@ def ui_init(template):
         menu_grid.select_by_event(event.trg, *XUEvent.Key.CURSOR())
 
         # 選択アイテムの表示
-        if XUEvent.Key.BTN_A in event.trg:
+        if event.check(XUEvent.Key.BTN_A):
             return menu_grid.action
 
 
