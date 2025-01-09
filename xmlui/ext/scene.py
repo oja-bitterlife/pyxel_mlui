@@ -41,8 +41,12 @@ class XUEActItem(XUETimeout):
     def _update(self):
         if not self.is_finish:
             self.waiting()
+
+            # waitingの中でfinish()が呼ばれた
             if self.is_finish:
                 self.action()  # 完了呼び出し
+
+        # is_finishの時はなにもしないのでactionが2つ呼ばれることはない
         super()._update()
 
     # 呼び出しManagerを返す(Actの中で次のActをaddする用)
@@ -55,6 +59,7 @@ class XUEActItem(XUETimeout):
     # == で現在のActのチェックができるように
     def __eq__(self, other) -> bool:
         if issubclass(other, XUEActItem):
+            # 名前でcheckするので継承元は見ない(確定でそのclassだけチェックしたい)
             return other.__name__ == self.__class__.__name__
         else:
             return super().__eq__(other)
