@@ -9,15 +9,15 @@ user_db = XUEMemoryDB.load("assets/data/user.db")
 
 # システムデータ
 # *****************************************************************************
-# システムインフォ。コンフィグがメイン
-class SystemInfoTable:
+# ユーザーコンフィグ
+class UserConfig:
     class MsgSpd(Enum):
         SLOW = 1.0/3
         NORMAL = 1.0
         FAST = 3
     def __init__(self):
-        self.msg_spd:SystemInfoTable.MsgSpd = self.MsgSpd.NORMAL
-system_info = SystemInfoTable()
+        self.msg_spd:UserConfig.MsgSpd = self.MsgSpd.NORMAL
+user_config = UserConfig()
 
 
 # ユーザーデータ

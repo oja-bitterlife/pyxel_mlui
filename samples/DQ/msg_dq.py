@@ -5,7 +5,7 @@ from xmlui.core import *
 from xmlui.lib.text import MsgScr
 
 from system import system_font
-from db import system_info
+from db import user_config
 
 from ui_common import draw_msg_cursor,get_world_clip,get_text_color
 
@@ -90,9 +90,9 @@ class MsgDQ(MsgScr):
         # カウンタ操作
         # ---------------------------------------------------------
         # ボタンを押している間は速度MAX
-        speed = system_info.msg_spd
+        speed = user_config.msg_spd
         if XUEvent.Key.BTN_A in event.now or XUEvent.Key.BTN_B in event.now:
-            speed = system_info.MsgSpd.FAST
+            speed = user_config.MsgSpd.FAST
 
         # カウンタを進める。必ず行端で一旦止まる
         remain_count = self.current_page.current_line_length - len(self.current_page.current_line)

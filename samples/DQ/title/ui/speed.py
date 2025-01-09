@@ -3,7 +3,7 @@ from enum import StrEnum
 from xmlui.core import XMLUI,XUEvent,XUSelectItem
 from xmlui.lib import select
 from title.ui.item import menu_item
-from db import system_info,SystemInfoTable
+from db import user_config,UserConfig
 
 class MSG_SPEED(StrEnum):
     SLOW = "slow"
@@ -25,8 +25,8 @@ def ui_init(xmlui:XMLUI):
             # メッセージスピードをその場で切り替える
             match game_speed.action:
                 case MSG_SPEED.SLOW:
-                    system_info.msg_spd = system_info.MsgSpd.SLOW
+                    user_config.msg_spd = user_config.MsgSpd.SLOW
                 case MSG_SPEED.NORMAL:
-                    system_info.msg_spd = system_info.MsgSpd.NORMAL
+                    user_config.msg_spd = user_config.MsgSpd.NORMAL
                 case MSG_SPEED.FAST:
-                    system_info.msg_spd = system_info.MsgSpd.FAST
+                    user_config.msg_spd = user_config.MsgSpd.FAST
