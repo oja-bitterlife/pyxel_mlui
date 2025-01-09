@@ -1,7 +1,7 @@
 from xmlui.core import XMLUI,XUEvent
 from xmlui.lib import select
 
-from DQ.title.ui.item import menu_item
+from title.ui.item import menu_item
 
 # タイトル画面UI
 # ---------------------------------------------------------

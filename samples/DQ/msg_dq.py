@@ -4,7 +4,7 @@ import pyxel
 from xmlui.core import *
 from xmlui.lib.text import MsgScr
 
-from system import system_font
+from system_dq import system_font
 from db import user_config
 
 from ui_common import draw_msg_cursor,get_world_clip,get_text_color

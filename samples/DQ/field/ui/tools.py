@@ -3,11 +3,11 @@ import pyxel
 from xmlui.core import XMLUI,XUEvent,XUWinBase,XUSelectItem,XUTextUtil,XUElem
 from xmlui.lib import select
 
-from DQ.msg_dq import MsgDQ
-from DQ.system import system_font
-from DQ.ui_common import get_world_clip,draw_menu_cursor,get_text_color
+from msg_dq import MsgDQ
+from system_dq import system_font
+from ui_common import get_world_clip,draw_menu_cursor,get_text_color
 
-from DQ.db import user_data,tools_data
+from db import user_data,tools_data
 
 def ui_init(xmlui:XMLUI):
     field_select = select.Decorator(xmlui)

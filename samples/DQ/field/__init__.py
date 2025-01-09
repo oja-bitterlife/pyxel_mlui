@@ -7,10 +7,10 @@ from xmlui.ext.scene import XUEFadeScene,XUEActItem
 from db import user_data
 
 # フィールド関係
-from field.system.player import Player
-from field.system.bg import BG
-from field.system.npc import NPCManager
-from field.system.field_obj import FieldObj
+from field.modules.player import Player
+from field.modules.bg import BG
+from field.modules.npc import NPCManager
+from field.modules.field_obj import FieldObj
 
 # UI
 import ui_common

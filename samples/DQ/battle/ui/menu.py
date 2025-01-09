@@ -6,7 +6,7 @@ from xmlui.lib import select,text
 import msg_dq
 from msg_dq import MsgDQ
 
-from system import system_font
+from system_dq import system_font
 from ui_common import KOJICHU_COL,get_text_color
 
 

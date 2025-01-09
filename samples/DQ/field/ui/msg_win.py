@@ -1,7 +1,7 @@
 from xmlui.core import XMLUI,XUEvent,XUWinBase
 
-from DQ import msg_dq
-from DQ.msg_dq import MsgDQ
+import msg_dq
+from msg_dq import MsgDQ
 
 def ui_init(xmlui:XMLUI):
     field_dq = msg_dq.Decorator(xmlui)
