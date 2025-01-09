@@ -185,15 +185,26 @@ class BattleCmdCharaBack(BattleMenuAct):
 
 class BattleCmdClose(BattleDataAct):
     def init(self):
+        # enemy名(command_menuの上位)ごと閉じる
         self.target_win = XUWinBase(self.xmlui.find_by_id("enemy_name_win"))
         self.target_win.start_close()
 
     def waiting(self):
         if self.target_win.removed:
-            self.act.add_act(BattlePlay(self.xmlui))
+            self.act.add_act(BattlePlayStart(self.xmlui))
             self.finish()
 
-class BattlePlay(BattleDataAct):
-    def waiting(self):
-        print(self.battle_data.player_idx)
-        pass
+# アクション
+# ---------------------------------------------------------
+class BattlePlayStart(BattleDataAct):
+    def init(self):
+        self.set_wait(0)
+
+class BattlePlayMove(BattleDataAct):
+    pass
+
+class BattlePlayDamage(BattleDataAct):
+    pass
+
+class BattlePlayBack(BattleDataAct):
+    pass

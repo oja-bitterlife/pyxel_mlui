@@ -31,9 +31,9 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
         hp_x, hp_y = hp_area.aligned_pos(system_font.text_width(hp_text), 0, XURect.Align.RIGHT, XURect.Align.TOP)
         pyxel.text(hp_x, hp_y, hp_text, 7, system_font.font)
 
-        # HPの右側は最大HPかコマンド
+        # HPの右側は最大HPか、コマンド選択中ならコマンド
         hpmax_area = XURect(area.x+82+16, area.y, system_font.size*4, system_font.size)
-        if no < xmlui.data_ref.player_idx:
+        if xmlui.exists_id("command") and no < xmlui.data_ref.player_idx:
             right_text = xmlui.data_ref.command[no]
         else:
             right_text = XUTextUtil.format_zenkaku("{max_hp}", player_data)

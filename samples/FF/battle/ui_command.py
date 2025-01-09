@@ -7,7 +7,7 @@ from system import system_font,hand_cursor
 from ui_common import get_world_clip
 
 from battle.data import BattleData
-from battle.act import *
+from battle.act import BattleCmdSel
 
 
 def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
