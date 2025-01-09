@@ -26,7 +26,7 @@ class XUEActItem(XUETimeout):
         self.use_key_event = True  # キーイベントの取得要求
 
     # コンストラクタではなくinit()の中で時間を設定する。
-    def set_wait(self, wait:int):
+    def set_timeout(self, wait:int):
         self._count_max = wait
 
     # override
@@ -202,7 +202,7 @@ class XUEFadeScene(XUESceneBase):
     class FadeIn(_FadeActItem):
         def __init__(self, scene:"XUEFadeScene", open_count:int):
             super().__init__(scene)
-            self.set_wait(open_count)
+            self.set_timeout(open_count)
 
         def waiting(self):
             self.scene.alpha = 1-self.alpha  # 黒から
@@ -215,7 +215,7 @@ class XUEFadeScene(XUESceneBase):
     class FadeOut(_FadeActItem):
         def __init__(self, scene:"XUEFadeScene", close_count:int):
             super().__init__(scene)
-            self.set_wait(close_count)
+            self.set_timeout(close_count)
 
             self.use_key_event = False  # フェード中は動かさない
 

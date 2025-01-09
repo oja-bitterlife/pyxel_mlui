@@ -55,7 +55,7 @@ class EnemyMsg(_MsgBase):
 # コマンド選択開始
 class CmdStart(BattleActItem):
     def init(self):
-        self.set_wait(10)  # コマンド？を出すのにちょっと溜める
+        self.set_timeout(10)  # コマンド？を出すのにちょっと溜める
 
     def action(self):
         self.xmlui.open("menu")
@@ -110,7 +110,7 @@ class CmdCheck(BattleActItem):
 # *****************************************************************************
 class EnemyStart(BattleActItem):
     def init(self):
-        self.set_wait(10)  # コマンド？を出すのにちょっと溜める
+        self.set_timeout(10)  # コマンド？を出すのにちょっと溜める
 
     def action(self):
         # ダメージ計算
@@ -136,7 +136,7 @@ class DamageEffect(BattleActItem):
     def __init__(self, xmlui:XMLUI[BattleData], damage:int):
         super().__init__(xmlui)
         self.damage = damage
-        self.set_wait(15)  # 適当時間
+        self.set_timeout(15)  # 適当時間
 
     def waiting(self):
         # とりあえず画面揺らし
@@ -150,7 +150,7 @@ class DamageEffect(BattleActItem):
 
 class BlinkEffect(BattleActItem):
     def init(self):
-        self.set_wait(10)  # エフェクトはないので適当待ち
+        self.set_timeout(10)  # エフェクトはないので適当待ち
 
     def waiting(self):
         self.data.blink = self.count % 2 < 1
@@ -160,16 +160,16 @@ class BlinkEffect(BattleActItem):
 
 class RunWait(BattleActItem):
     def init(self):
-        self.set_wait(15)  # SE待ち
+        self.set_timeout(15)  # SE待ち
 
 class DeadWait(BattleActItem):
     def init(self):
-        self.set_wait(15)  # SE待ち
+        self.set_timeout(15)  # SE待ち
 
 # 死に戻り
 # *****************************************************************************
 class ReturnKing(BattleActItem):
     def init(self):
-        self.set_wait(45)  # ちょっと待機
+        self.set_timeout(45)  # ちょっと待機
     def action(self):
         self.xmlui.on("dead")

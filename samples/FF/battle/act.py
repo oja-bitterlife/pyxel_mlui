@@ -46,7 +46,7 @@ class BattleStart(BattleDataAct):
         self.xmlui.find_by_id("enemy_name_win").set_attr("owner", "")
 
     def init(self):
-        self.set_wait(8)
+        self.set_timeout(8)
 
     def waiting(self):
         self.scene.alpha = 1-self.alpha  # fadeのコントロールをこっちで
@@ -60,7 +60,7 @@ class BattleStart(BattleDataAct):
 # ターン開始
 class BattleTurnStart(BattleDataAct):
     def init(self):
-        self.set_wait(0)
+        self.set_timeout(0)
 
     def action(self):
         self.battle_data.player_idx = 0
@@ -70,18 +70,14 @@ class BattleTurnStart(BattleDataAct):
 # コマンド
 # ---------------------------------------------------------
 class BattleCmdStart(BattleDataAct):
-    def __init__(self, xmlui:XMLUI[BattleData]):
-        super().__init__(xmlui)
-        self.set_wait(15)
+    def init(self):
+        self.set_timeout(15)
 
     def action(self):
         self.act.add_act(BattleCmdSetup(self.xmlui, self.xmlui.find_by_id("enemy_name_win").open("menu")))
 
 # メニューの設定とキャラ進め
 class BattleCmdSetup(BattleMenuAct):
-    def __init__(self, xmlui:XMLUI[BattleData], menu_win:XUElem):
-        super().__init__(xmlui, menu_win)
-
     def init(self):
         # コマンドのリセット
         command = self.menu_win.find_by_id("command")
@@ -198,7 +194,7 @@ class BattleCmdClose(BattleDataAct):
 # ---------------------------------------------------------
 class BattlePlayStart(BattleDataAct):
     def init(self):
-        self.set_wait(0)
+        self.set_timeout(0)
 
 class BattlePlayMove(BattleDataAct):
     pass
