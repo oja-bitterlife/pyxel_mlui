@@ -35,9 +35,10 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
         hpmax_area = XURect(area.x+82+16, area.y, system_font.size*4, system_font.size)
         if xmlui.exists_id("command") and no < xmlui.data_ref.player_idx:
             right_text = xmlui.data_ref.command[no]
+            hpmax_x, hpmax_y = hpmax_area.aligned_pos(system_font.text_width(right_text), 0, XURect.Align.LEFT, XURect.Align.TOP)
         else:
             right_text = XUTextUtil.format_zenkaku("{max_hp}", player_data)
-        hpmax_x, hpmax_y = hpmax_area.aligned_pos(system_font.text_width(right_text), 0, XURect.Align.RIGHT, XURect.Align.TOP)
+            hpmax_x, hpmax_y = hpmax_area.aligned_pos(system_font.text_width(right_text), 0, XURect.Align.RIGHT, XURect.Align.TOP)
         pyxel.text(hpmax_x, hp_y, right_text, 7, system_font.font)
 
     # キャラ全員ステータス
