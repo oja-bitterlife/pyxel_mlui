@@ -27,9 +27,6 @@ class Title(XUEFadeScene):
 
         self.xmlui.open("game_title")  # game_title以下表示開始
 
-    def update(self):
-        pass
-
     def closed(self):
         self.xmlui.close()
 
@@ -39,6 +36,7 @@ class Title(XUEFadeScene):
 
     def event(self, event:XUEventItem):
         match event:
+            # スタートが決定された
             case "start":
                 self.fade_close()
 
