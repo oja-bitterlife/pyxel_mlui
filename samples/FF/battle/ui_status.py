@@ -20,19 +20,25 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
     # 各キャラのステータス表示
     # *************************************************************************
     # キャラ1人分
-    def status_one(area:XURect, player_data:dict, clip:XURect):
+    def status_one(area:XURect, no:int, player_data:dict, clip:XURect):
         if clip.bottom < area.y+system_font.size:
             return
 
         pyxel.text(area.x, area.y, player_data["name"], 7, system_font.font)
 
         hp_text = XUTextUtil.format_zenkaku("{hp}／", player_data)
-        hp_area = XURect(area.x+82, area.y, system_font.size*4//2, system_font.size)
+        hp_area = XURect(area.x+64, area.y, system_font.size*4, system_font.size)
         hp_x, hp_y = hp_area.aligned_pos(system_font.text_width(hp_text), 0, XURect.Align.RIGHT, XURect.Align.TOP)
         pyxel.text(hp_x, hp_y, hp_text, 7, system_font.font)
 
-        max_hp_text = XUTextUtil.format_zenkaku("{max_hp}", player_data)
-        pyxel.text(hp_x+32, hp_y, max_hp_text, 7, system_font.font)
+        # HPの右側は最大HPかコマンド
+        hpmax_area = XURect(area.x+82+16, area.y, system_font.size*4, system_font.size)
+        if no < xmlui.data_ref.player_idx:
+            right_text = xmlui.data_ref.command[no]
+        else:
+            right_text = XUTextUtil.format_zenkaku("{max_hp}", player_data)
+        hpmax_x, hpmax_y = hpmax_area.aligned_pos(system_font.text_width(right_text), 0, XURect.Align.RIGHT, XURect.Align.TOP)
+        pyxel.text(hpmax_x, hp_y, right_text, 7, system_font.font)
 
     # キャラ全員ステータス
     # -----------------------------------------------------
@@ -46,8 +52,8 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
         area.h = status_line_size
 
         # 一人ずつ表示
-        for player_data in user_data.player_data:
-            status_one(area, player_data, clip)
+        for i,player_data in enumerate(user_data.player_data):
+            status_one(area, i, player_data, clip)
             area.y += status_line_size
 
     # 敵の名前表示

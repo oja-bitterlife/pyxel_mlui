@@ -1,4 +1,4 @@
-from xmlui.core import XUElem,XMLUI,XUEvent,XUSelectItem,XUWinBase
+from xmlui.core import XUElem,XMLUI,XUEvent,XUSelectItem,XUWinBase,XUSelectInfo
 from xmlui.ext.scene import XUEActItem
 from battle.data import BattleData
 
@@ -90,7 +90,7 @@ class BattleCmdSetup(BattleMenuAct):
         # 職業によってメニューを変える。とりあえずサンプルなので適当に
         job = {
             "heishi":["たたかう", "ぼうぎょ", "にげる", "アイテム"],
-            "basaka":["たたかう", "まもらぬ", "ひかぬ", "かえりみぬ"],
+            "basaka":["たたかう", "まもらぬ", "ひかぬ", "こびぬ"],
             "yousei":["たたかう", "ぬすむ", "とんずら", "アイテム"],
             "majyo":["たたかう", "ぼうぎょ", "まほう", "アイテム"],
         }
@@ -115,6 +115,10 @@ class BattleCmdSetup(BattleMenuAct):
 class BattleCmdSel(BattleMenuAct):
     def waiting(self):
         if self.scene.xmlui.event.check(XUEvent.Key.BTN_A):
+            menu = XUSelectInfo(self.menu_win.find_by_id("command"))
+            # 選択コマンドを記録
+            self.battle_data.command[self.battle_data.player_idx] = menu.selected_item.text
+
             self.act.add_act(BattleCmdTargetSel(self.xmlui, self.menu_win))
             self.finish()
 
@@ -168,12 +172,13 @@ class BattleCmdCharaBack(BattleMenuAct):
     # キャラ移動待ち
     def waiting(self):
         if self.battle_data.player_move_dir[self.battle_data.player_idx] == 0:
+            self.battle_data.player_idx = self.next_idx  # 操作キャラを更新
+
             # 全員のターゲットが決まった
-            if self.next_idx >= len(user_data.player_data):
+            if self.battle_data.player_idx >= len(user_data.player_data):
                 self.act.add_act(BattleCmdClose(self.xmlui))
-            # 残次のキャラのコマンド入力
+            # 次のキャラのコマンド入力
             else:
-                self.battle_data.player_idx = self.next_idx  # 操作キャラを進める
                 self.act.add_act(BattleCmdSetup(self.xmlui, self.menu_win))
 
             self.finish()
@@ -190,4 +195,5 @@ class BattleCmdClose(BattleDataAct):
 
 class BattlePlay(BattleDataAct):
     def waiting(self):
+        print(self.battle_data.player_idx)
         pass

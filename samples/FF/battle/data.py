@@ -21,3 +21,6 @@ class BattleData:
 
         # ターゲット
         self.target = [0, 0, 0, 0]  # プレイヤが選んだターゲット(-で味方側)
+
+        # コマンド
+        self.command = ["", "", "", ""]
