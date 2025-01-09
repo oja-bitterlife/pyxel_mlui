@@ -71,17 +71,21 @@ class XURect:
         return self.w <= 0 or self.h <= 0
 
     # 座標取得
-    def center_x(self, w:int=0) -> int:
-        return self.x + (self.w-w)//2
+    @property
+    def center_x(self) -> int:
+        return self.x + self.w//2
 
-    def center_y(self, h:int=0) -> int:
-        return self.y + (self.h-h)//2
+    @property
+    def center_y(self) -> int:
+        return self.y + self.h//2
 
-    def right(self, right_space:int=0) -> int:
-        return self.x + self.w - right_space
+    @property
+    def right(self) -> int:
+        return self.x + self.w
 
-    def bottom(self, bottom_space:int=0) -> int:
-        return self.y + self.h - bottom_space
+    @property
+    def bottom(self) -> int:
+        return self.y + self.h
 
     # 座標取得(w,h = content w,h)
     @classmethod
@@ -91,9 +95,9 @@ class XURect:
             case cls.Align.LEFT:
                 x = 0
             case cls.Align.CENTER:
-                x = area.center_x(w)
+                x = area.x + (area.w-w)//2
             case cls.Align.RIGHT:
-                x = area.right(w)
+                x = area.right - w
             case _:
                 raise ValueError(f"align:{align} is not supported.")
 
@@ -101,9 +105,9 @@ class XURect:
             case cls.Align.TOP:
                 y = 0
             case cls.Align.CENTER:
-                y = area.center_y(h)
+                y = area.y + (area.h-h)//2
             case cls.Align.BOTTOM:
-                y = area.bottom(h)
+                y = area.bottom - h
             case _:
                 raise ValueError(f"align:{valign} is not supported.")
         return x,y
