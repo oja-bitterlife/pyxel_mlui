@@ -4,10 +4,10 @@ import pyxel
 from xmlui.core import *
 from xmlui.lib.text import MsgScr
 
-from system import system_font
-from db import user_config
+from DQ.system import system_font
+from DQ.db import user_config
 
-from ui_common import draw_msg_cursor,get_world_clip,get_text_color
+from DQ.ui_common import draw_msg_cursor,get_world_clip,get_text_color
 
 # テキストを扱う
 # #############################################################################
@@ -76,7 +76,8 @@ class MsgDQ(MsgScr):
             page._element.text = page_item.all_text
 
 
-    def common_msg(self, event:XUEvent, cursor_visible:bool):
+    # メッセージ描画
+    def draw(self, event:XUEvent, cursor_visible:bool):
         area = self.area  # areaは重いので必ずキャッシュ
         line_height = system_font.size + 5  # 行間設定
         page_line_num = self.attr_int(self.PAGE_LINE_NUM_ATTR)

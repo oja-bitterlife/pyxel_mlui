@@ -2,8 +2,9 @@ from enum import StrEnum
 
 from xmlui.core import XMLUI,XUEvent,XUSelectItem
 from xmlui.lib import select
-from title.ui.item import menu_item
-from db import user_config,UserConfig
+
+from DQ.title.ui.item import menu_item
+from DQ.db import user_config
 
 class MSG_SPEED(StrEnum):
     SLOW = "slow"

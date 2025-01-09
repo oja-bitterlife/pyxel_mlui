@@ -10,7 +10,7 @@ def ui_init(xmlui:XMLUI):
     @field_dq.msg_dq("msg_text")
     def msg_text(msg_text:MsgDQ, event:XUEvent):
         # メッセージ共通処理
-        msg_text.common_msg(event, True)
+        msg_text.draw(event, True)
 
         # 自分が閉じたらメニューごと閉じる
         if XUWinBase.find_parent_win(msg_text).win_state == XUWinBase.WIN_STATE.CLOSED:

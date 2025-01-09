@@ -1,7 +1,9 @@
 import pyxel
 
 from xmlui.core import XUSelectItem
-from ui_common import system_font,draw_menu_cursor,KOJICHU_COL
+
+from DQ.system import system_font
+from DQ.ui_common import draw_menu_cursor,KOJICHU_COL
 
 def menu_item(menu_item:XUSelectItem):
     area = menu_item.area

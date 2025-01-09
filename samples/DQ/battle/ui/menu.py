@@ -62,7 +62,7 @@ def ui_init(template):
     @battle_dq.msg_dq("msg_text")
     def msg_text(msg_text:MsgDQ, event:XUEvent):
         # メッセージ共通処理
-        msg_text.common_msg(event, False)
+        msg_text.draw(event, False)
 
         # 自動テキスト送り
         if msg_text.is_next_wait:
