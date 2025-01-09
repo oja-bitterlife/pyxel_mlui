@@ -21,7 +21,7 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
     # *************************************************************************
     # キャラ1人分
     def status_one(area:XURect, player_data:dict, clip:XURect):
-        if clip.bottom() < area.y+system_font.size:
+        if clip.bottom < area.y+system_font.size:
             return
 
         pyxel.text(area.x, area.y, player_data["name"], 7, system_font.font)
@@ -64,6 +64,6 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
 
         # 種類ずつ表示
         for enemy_kind in enemy_kinds:
-            if clip.bottom() > area.y+status_line_size:
+            if clip.bottom > area.y+status_line_size:
                 pyxel.text(area.x, area.y, enemy_kind, 7, system_font.font)
             area.y += status_line_size

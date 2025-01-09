@@ -15,7 +15,7 @@ def ui_init(xmlui:XMLUI):
         col = get_text_color()
 
         # ウインドウのクリップ状態に合わせて表示する
-        if dir_item.area.y < get_world_clip(XUWinBase.find_parent_win(dir_item)).bottom():
+        if dir_item.area.y < get_world_clip(XUWinBase.find_parent_win(dir_item)).bottom:
             pyxel.text(dir_item.area.x, dir_item.area.y, dir_item.text, col, system_font.font)
 
         # カーソル表示

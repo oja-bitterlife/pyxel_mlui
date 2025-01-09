@@ -29,7 +29,7 @@ def ui_init(template):
         col = get_text_color()
 
         # テキストはセンタリング
-        if title.area.y < clip.bottom():  # world座標で比較
+        if title.area.y < clip.bottom:  # world座標で比較
             x, y = title.aligned_pos(system_font)
             pyxel.text(x, y-1, title.text, col, system_font.font)
 
@@ -37,7 +37,7 @@ def ui_init(template):
     # ---------------------------------------------------------
     def menu_item(menu_item:XUSelectItem):
         # ウインドウのクリップ状態に合わせて表示する
-        if menu_item.area.y < get_world_clip(XUWinBase.find_parent_win(menu_item)).bottom():
+        if menu_item.area.y < get_world_clip(XUWinBase.find_parent_win(menu_item)).bottom:
             col = KOJICHU_COL if menu_item.value == "工事中" else get_text_color()
             pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, col, system_font.font)
 

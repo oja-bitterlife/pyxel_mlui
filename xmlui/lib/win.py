@@ -73,11 +73,11 @@ class WinFrame(XUWinBase):
                 # 上
                 if line_clip.contains_y(y_):
                     offset = (screen_area.y + y_)*screen_buf_w + screen_area.x
-                    screen_buf[offset+line_clip.x: offset+line_clip.right()] = pat_bytes[y_:y_+1] * line_clip.w
+                    screen_buf[offset+line_clip.x: offset+line_clip.right] = pat_bytes[y_:y_+1] * line_clip.w
                 # 下
                 if line_clip.contains_y(area.h-1-y_):
-                    offset = (screen_area.bottom()-1-y_)*screen_buf_w + screen_area.x
-                    screen_buf[offset+line_clip.x: offset+line_clip.right()] = rev_butes[y_:y_+1] * line_clip.w
+                    offset = (screen_area.bottom-1-y_)*screen_buf_w + screen_area.x
+                    screen_buf[offset+line_clip.x: offset+line_clip.right] = rev_butes[y_:y_+1] * line_clip.w
 
         # 左
         left_clip = clip.intersect(XURect(0, 0, size, area.h).inflate(0, -size))

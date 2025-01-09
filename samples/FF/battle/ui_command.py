@@ -19,7 +19,7 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
         area = battle_action.area
 
         # ウインドウが表示されてる場所のみ描画
-        if clip.bottom() < area.y+system_font.size:
+        if clip.bottom < area.y+system_font.size:
             return
 
         # コマンドの表示

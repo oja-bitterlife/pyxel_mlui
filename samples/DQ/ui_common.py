@@ -121,7 +121,7 @@ def ui_init(xmlui:XMLUI):
         # テキストは右寄せ
         area = status_item.area
         x, y = XURect.align_offset(area.w, area.h, system_font.text_width(text) + 5, 0, status_item.align, status_item.valign)
-        if area.y+y < get_world_clip(XUWinBase.find_parent_win(status_item)).bottom():
+        if area.y+y < get_world_clip(XUWinBase.find_parent_win(status_item)).bottom:
             pyxel.text(area.x + x, area.y + y, text, col, system_font.font)
 
     # ステータスタイトル(名前)
@@ -133,6 +133,6 @@ def ui_init(xmlui:XMLUI):
         col = get_text_color()
 
         # テキストは左寄せ
-        if status_title.area.y < clip.bottom():  # world座標で比較
+        if status_title.area.y < clip.bottom:  # world座標で比較
             x, y = status_title.aligned_pos(system_font)
             pyxel.text(x+1, y-1, user_data.data["name"], col, system_font.font)

@@ -153,7 +153,7 @@ class MsgDQ(MsgScr):
             # yはスクロール考慮
             y = area.y + i*line_height - shift_y
             clip = get_world_clip(XUWinBase.find_parent_win(self)).intersect(self.area)
-            if y+system_font.size >= clip.bottom():  # メッセージもクリップ対応
+            if y+system_font.size >= clip.bottom:  # メッセージもクリップ対応
                 break
 
             # インデント設定
