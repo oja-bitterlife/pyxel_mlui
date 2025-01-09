@@ -120,8 +120,7 @@ class BattleCmdSel(BattleMenuAct):
 
         # 取りやめ
         if self.xmlui.event.check(XUEvent.Key.BTN_B):
-            self.battle_data.player_idx = max(0, self.battle_data.player_idx-1)  # 戻す
-            self.act.add_act(BattleCmdCharaBack(self.xmlui, self.menu_win))
+            self.act.add_act(BattleCmdCharaBack(self.xmlui, self.menu_win, self.battle_data.player_idx-1))
             self.finish()
 
 # ターゲットの選択
@@ -147,7 +146,7 @@ class BattleCmdTargetSel(BattleMenuAct):
         # ターゲット決定
         if self.xmlui.event.check(XUEvent.Key.BTN_A):
             self.target_select.close()
-            self.act.add_act(BattleCmdCharaBack(self.xmlui, self.menu_win))
+            self.act.add_act(BattleCmdCharaBack(self.xmlui, self.menu_win, self.battle_data.player_idx+1))
             self.finish()
 
         # 取りやめ
@@ -158,6 +157,10 @@ class BattleCmdTargetSel(BattleMenuAct):
 
 
 class BattleCmdCharaBack(BattleMenuAct):
+    def __init__(self, xmlui: XMLUI[BattleData], menu_win: XUElem, next_idx:int):
+        super().__init__(xmlui, menu_win)
+        self.next_idx = min(max(next_idx, 0), len(user_data.player_data))
+
     def init(self):
         # 現在のキャラを引っ込める
         self.battle_data.player_move_dir[self.battle_data.player_idx] = 1
@@ -166,11 +169,11 @@ class BattleCmdCharaBack(BattleMenuAct):
     def waiting(self):
         if self.battle_data.player_move_dir[self.battle_data.player_idx] == 0:
             # 全員のターゲットが決まった
-            if self.battle_data.player_idx+1 >= len(user_data.player_data):
+            if self.next_idx >= len(user_data.player_data):
                 self.act.add_act(BattleCmdClose(self.xmlui))
             # 残次のキャラのコマンド入力
             else:
-                self.battle_data.player_idx += 1  # 操作キャラを進める
+                self.battle_data.player_idx = self.next_idx  # 操作キャラを進める
                 self.act.add_act(BattleCmdSetup(self.xmlui, self.menu_win))
 
             self.finish()
