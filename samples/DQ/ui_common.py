@@ -4,13 +4,9 @@ import pyxel
 # *****************************************************************************
 from xmlui.core import XMLUI,XUElem,XUEvent,XUWinBase,XURect,XUTextUtil
 from xmlui.lib import text,win
-from msg_dq import MsgDQ
 
-from xmlui.ext.pyxel_util import PyxelFont,PyxelPalette
-from db import system_info, user_data
-
-system_font = PyxelFont("assets/font/b12.bdf")
-system_palette = PyxelPalette()
+from db import user_data
+from system import system_font
 
 
 # 共通定義
@@ -23,20 +19,20 @@ KOJICHU_COL = 15
 # 共通で使える関数
 # *****************************************************************************
 # カーソル描画
-def draw_menu_cursor(state:XUElem, x:int, y:int):
+def draw_menu_cursor(elem:XUElem, x:int, y:int):
     col = get_text_color()
 
     tri_size = 6
-    left = state.area.x + x
-    top = state.area.y+2 + y
+    left = elem.area.x + x
+    top = elem.area.y+2 + y
     pyxel.tri(left, top, left, top+tri_size, left+tri_size//2, top+tri_size//2, col)
 
-def draw_msg_cursor(state:XUElem, x:int, y:int):
+def draw_msg_cursor(elem:XUElem, x:int, y:int):
     col = get_text_color()
 
     tri_size = 6
     center_x = 127-tri_size//2+x  # Xはど真ん中固定で
-    y = state.area.y + tri_size - 3 + y
+    y = elem.area.y + tri_size - 3 + y
     pyxel.tri(center_x, y, center_x+tri_size, y, center_x+tri_size//2, y+tri_size//2, col)
 
 def get_world_clip(win:XUWinBase) -> XURect:
@@ -58,106 +54,8 @@ def get_shadow_color() -> int:
     return 2 if user_data.hp <= 1 else 13
 
 
-# メッセージウインドウを共通で使う
+# 共通UI
 # *****************************************************************************
-def common_msg_text(msg_dq:MsgDQ, event:XUEvent, cursor_visible:bool):
-    area = msg_dq.area  # areaは重いので必ずキャッシュ
-    line_height = system_font.size + 5  # 行間設定
-    page_line_num = msg_dq.attr_int(msg_dq.PAGE_LINE_NUM_ATTR)
-    scroll_line_num = page_line_num + 1  # スクロールバッファサイズはページサイズ+1
-    scroll_split = 3  # スクロールアニメ分割数
-
-    # テキストが空
-    if not msg_dq.pages:
-        return
-
-    # カウンタ操作
-    # ---------------------------------------------------------
-    # ボタンを押している間は速度MAX
-    speed = system_info.msg_spd
-    if XUEvent.Key.BTN_A in event.now or XUEvent.Key.BTN_B in event.now:
-        speed = system_info.MsgSpd.FAST
-
-    # カウンタを進める。必ず行端で一旦止まる
-    remain_count = msg_dq.current_page.current_line_length - len(msg_dq.current_page.current_line)
-    msg_dq.current_page.draw_count += min(remain_count, speed.value)
-
-    # 行が完了してからの経過時間
-    if msg_dq.is_line_end:
-        over_count = msg_dq.attr_int("_over_count") + 1
-        # ページ切り替えがあったらリセット
-        if msg_dq.current_page_no != msg_dq.attr_int("_old_page", -1):
-            over_count = 0
-    else:
-        over_count = 0
-
-    # 更新
-    msg_dq.set_attr("_over_count", over_count)
-    msg_dq.set_attr("_old_page", msg_dq.current_page_no)
-
-    # 表示バッファ
-    # ---------------------------------------------------------
-    scroll_info =  msg_dq.dq_scroll_lines(scroll_line_num)
-
-    # スクロール
-    shift_y = 0
-    # ページが完了している
-    if msg_dq.current_page.is_finish:
-        # スクロールが必要？
-        if len(scroll_info) > page_line_num:
-            # スクロールが終わった
-            if over_count >= scroll_split:
-                scroll_info = scroll_info[1:]
-            # スクロール
-            else:
-                shift_y = min(over_count,scroll_split) * line_height*0.8 / scroll_split
-
-    # 行だけが完了している
-    elif msg_dq.is_line_end:
-        # スクロールが必要？
-        if len(scroll_info) > page_line_num:
-            # スクロールが終わった
-            if over_count >= scroll_split:
-                scroll_info = scroll_info[1:]
-                msg_dq.current_page.draw_count = int(msg_dq.current_page.draw_count) + 1  # 次の文字へ
-                msg_dq.set_attr("_over_count", 0)  # 最速表示対応
-            # スクロール
-            else:
-                shift_y = min(over_count,scroll_split) * line_height*0.8 / scroll_split
-
-        # スクロールが不要でも一瞬待機
-        elif over_count >= scroll_split:
-            msg_dq.current_page.draw_count = int(msg_dq.current_page.draw_count) + 1  # 次の文字へ
-            msg_dq.set_attr("_over_count", 0)  # 最速表示対応
-
-
-    # テキスト描画
-    for i,info in enumerate(scroll_info):
-        # yはスクロール考慮
-        y = area.y + i*line_height - shift_y
-        clip = get_world_clip(XUWinBase.find_parent_win(msg_dq)).intersect(msg_dq.area)
-        if y+system_font.size >= clip.bottom():  # メッセージもクリップ対応
-            break
-
-        # インデント設定
-        x = area.x
-        if info.indent_type == MsgDQ.IndentType.TALK:
-            x += system_font.text_width(MsgDQ.TALK_START)
-        elif info.indent_type == MsgDQ.IndentType.ENEMY:
-            x += system_font.size
-
-        col = get_text_color()
-        pyxel.text(x, y, info.line_text, col, system_font.font)
-
-
-    # カーソル表示
-    # ---------------------------------------------------------
-    if cursor_visible and msg_dq.is_next_wait and shift_y == 0:  # ページ送り待ち中でスクロール中でない
-        cursor_count = msg_dq.current_page.draw_count - msg_dq.current_page.length
-        if cursor_count//7 % 2 == 0:
-            draw_msg_cursor(msg_dq, 0, (scroll_line_num-1)*line_height-4)
-
-
 def ui_init(xmlui:XMLUI):
     common_win = win.Decorator(xmlui)
     common_text = text.Decorator(xmlui)

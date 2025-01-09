@@ -1,7 +1,13 @@
 from enum import StrEnum,auto
+import pyxel
 
 from xmlui.core import *
 from xmlui.lib.text import MsgScr
+
+from system import system_font
+from db import system_info
+
+from ui_common import draw_msg_cursor,get_world_clip,get_text_color
 
 # テキストを扱う
 # #############################################################################
@@ -68,6 +74,105 @@ class MsgDQ(MsgScr):
             # 追加されたページにTALKをマーキング
             page_item = XUPageItem(page).set_attr(MsgDQ.INDENT_TYPE_ATTR, MsgDQ.IndentType.ENEMY)
             page._element.text = page_item.all_text
+
+
+    def common_msg(self, event:XUEvent, cursor_visible:bool):
+        area = self.area  # areaは重いので必ずキャッシュ
+        line_height = system_font.size + 5  # 行間設定
+        page_line_num = self.attr_int(self.PAGE_LINE_NUM_ATTR)
+        scroll_line_num = page_line_num + 1  # スクロールバッファサイズはページサイズ+1
+        scroll_split = 3  # スクロールアニメ分割数
+
+        # テキストが空
+        if not self.pages:
+            return
+
+        # カウンタ操作
+        # ---------------------------------------------------------
+        # ボタンを押している間は速度MAX
+        speed = system_info.msg_spd
+        if XUEvent.Key.BTN_A in event.now or XUEvent.Key.BTN_B in event.now:
+            speed = system_info.MsgSpd.FAST
+
+        # カウンタを進める。必ず行端で一旦止まる
+        remain_count = self.current_page.current_line_length - len(self.current_page.current_line)
+        self.current_page.draw_count += min(remain_count, speed.value)
+
+        # 行が完了してからの経過時間
+        if self.is_line_end:
+            over_count = self.attr_int("_over_count") + 1
+            # ページ切り替えがあったらリセット
+            if self.current_page_no != self.attr_int("_old_page", -1):
+                over_count = 0
+        else:
+            over_count = 0
+
+        # 更新
+        self.set_attr("_over_count", over_count)
+        self.set_attr("_old_page", self.current_page_no)
+
+        # 表示バッファ
+        # ---------------------------------------------------------
+        scroll_info =  self.dq_scroll_lines(scroll_line_num)
+
+        # スクロール
+        shift_y = 0
+        # ページが完了している
+        if self.current_page.is_finish:
+            # スクロールが必要？
+            if len(scroll_info) > page_line_num:
+                # スクロールが終わった
+                if over_count >= scroll_split:
+                    scroll_info = scroll_info[1:]
+                # スクロール
+                else:
+                    shift_y = min(over_count,scroll_split) * line_height*0.8 / scroll_split
+
+        # 行だけが完了している
+        elif self.is_line_end:
+            # スクロールが必要？
+            if len(scroll_info) > page_line_num:
+                # スクロールが終わった
+                if over_count >= scroll_split:
+                    scroll_info = scroll_info[1:]
+                    self.current_page.draw_count = int(self.current_page.draw_count) + 1  # 次の文字へ
+                    self.set_attr("_over_count", 0)  # 最速表示対応
+                # スクロール
+                else:
+                    shift_y = min(over_count,scroll_split) * line_height*0.8 / scroll_split
+
+            # スクロールが不要でも一瞬待機
+            elif over_count >= scroll_split:
+                self.current_page.draw_count = int(self.current_page.draw_count) + 1  # 次の文字へ
+                self.set_attr("_over_count", 0)  # 最速表示対応
+
+
+        # テキスト描画
+        for i,info in enumerate(scroll_info):
+            # yはスクロール考慮
+            y = area.y + i*line_height - shift_y
+            clip = get_world_clip(XUWinBase.find_parent_win(self)).intersect(self.area)
+            if y+system_font.size >= clip.bottom():  # メッセージもクリップ対応
+                break
+
+            # インデント設定
+            x = area.x
+            if info.indent_type == MsgDQ.IndentType.TALK:
+                x += system_font.text_width(MsgDQ.TALK_START)
+            elif info.indent_type == MsgDQ.IndentType.ENEMY:
+                x += system_font.size
+
+            col = get_text_color()
+            pyxel.text(x, y, info.line_text, col, system_font.font)
+
+
+        # カーソル表示
+        # ---------------------------------------------------------
+        if cursor_visible and self.is_next_wait and shift_y == 0:  # ページ送り待ち中でスクロール中でない
+            cursor_count = self.current_page.draw_count - self.current_page.length
+            if cursor_count//7 % 2 == 0:
+                draw_msg_cursor(self, 0, (scroll_line_num-1)*line_height-4)
+
 
 
 # デコレータを用意

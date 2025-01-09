@@ -10,7 +10,7 @@ from msg_dq import MsgDQ
 
 # バトルUI
 # *****************************************************************************
-from ui_common import common_msg_text, get_world_clip, draw_menu_cursor
+from ui_common import get_world_clip, draw_menu_cursor
 
 def ui_init(template):
     # fieldグループ用デコレータを作る
@@ -62,7 +62,7 @@ def ui_init(template):
     @battle_dq.msg_dq("msg_text")
     def msg_text(msg_text:MsgDQ, event:XUEvent):
         # メッセージ共通処理
-        common_msg_text(msg_text, event, False)
+        msg_text.common_msg(event, False)
 
         # 自動テキスト送り
         if msg_text.is_next_wait:

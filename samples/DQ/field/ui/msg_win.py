@@ -1,7 +1,6 @@
 from xmlui.core import XMLUI,XUEvent,XUWinBase
 from msg_dq import Decorator as DQDecorator
 from msg_dq import MsgDQ
-from ui_common import common_msg_text
 
 def ui_init(xmlui:XMLUI):
     field_dq = DQDecorator(xmlui)
@@ -11,7 +10,7 @@ def ui_init(xmlui:XMLUI):
     @field_dq.msg_dq("msg_text")
     def msg_text(msg_text:MsgDQ, event:XUEvent):
         # メッセージ共通処理
-        common_msg_text(msg_text, event, True)
+        msg_text.common_msg(event, True)
 
         # 自分が閉じたらメニューごと閉じる
         if XUWinBase.find_parent_win(msg_text).win_state == XUWinBase.WIN_STATE.CLOSED:
