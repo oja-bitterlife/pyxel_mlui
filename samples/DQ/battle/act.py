@@ -12,17 +12,15 @@ from DQ.battle.data import BattleData
 # バトル用シーン遷移ベース
 # #############################################################################
 class BattleActItem(XUEActItem):
-    def __init__(self, data:BattleData):
+    def __init__(self, xmlui:XMLUI[BattleData]):
         super().__init__()
-        self.data = data
+        self.xmlui = xmlui
+
+        self.msg_dq = MsgDQ(xmlui.find_by_id("msg_text"))
 
     @property
-    def xmlui(self):
-        return self.data.xmlui
-
-    @property
-    def msg_dq(self):
-        return MsgDQ(self.data.xmlui.find_by_id("msg_text"))
+    def data(self) -> BattleData:
+        return self.xmlui.data_ref
 
 
 # 個々のAct
@@ -31,8 +29,8 @@ class BattleActItem(XUEActItem):
 # *****************************************************************************
 # 設定済みメッセージ表示完了待機
 class _MsgBase(BattleActItem):
-    def __init__(self, data:BattleData, text:str, params:dict):
-        super().__init__(data)
+    def __init__(self, xmlui:XMLUI[BattleData], text:str, params:dict):
+        super().__init__(xmlui)
         self.text = text
         self.params = params
 
@@ -62,7 +60,7 @@ class CmdStart(BattleActItem):
     def action(self):
         self.xmlui.open("menu")
         self.msg_dq.append_msg("コマンド？")
-        self.act.add_act(CmdCheck(self.data))
+        self.act.add_act(CmdCheck(self.xmlui))
 
 # コマンド選択待ち
 class CmdCheck(BattleActItem):
@@ -75,10 +73,10 @@ class CmdCheck(BattleActItem):
             enemy_data.data["hit"] = XUTextUtil.format_zenkaku(random.randint(1, 100))
 
             self.act.add_act(
-                PlayerMsg(self.data, "{name}の　こうげき！", user_data.data),
-                BlinkEffect(self.data),
-                PlayerMsg(self.data, "{name}に　{hit}ポイントの\nダメージを　あたえた！", enemy_data.data),
-                EnemyStart(self.data))
+                PlayerMsg(self.xmlui, "{name}の　こうげき！", user_data.data),
+                BlinkEffect(self.xmlui),
+                PlayerMsg(self.xmlui, "{name}に　{hit}ポイントの\nダメージを　あたえた！", enemy_data.data),
+                EnemyStart(self.xmlui))
 
             self.finish()
 
@@ -88,10 +86,10 @@ class CmdCheck(BattleActItem):
 
             # 逃げる
             self.act.add_act(
-                PlayerMsg(self.data, "{name}は　にげだした", user_data.data),
-                RunWait(self.data),
-                PlayerMsg(self.data, "しかし　まわりこまれて\nしまった!", {}),
-                EnemyStart(self.data))
+                PlayerMsg(self.xmlui, "{name}は　にげだした", user_data.data),
+                RunWait(self.xmlui),
+                PlayerMsg(self.xmlui, "しかし　まわりこまれて\nしまった!", {}),
+                EnemyStart(self.xmlui))
 
             self.finish()
 
@@ -100,8 +98,8 @@ class CmdCheck(BattleActItem):
             XUWinBase(self.xmlui.find_by_id("menu")).start_close()
 
             self.act.add_act(
-                PlayerMsg(self.data, "じゅもんを　おぼえていない", {}),
-                CmdStart(self.data))  # コマンド選択に戻る
+                PlayerMsg(self.xmlui, "じゅもんを　おぼえていない", {}),
+                CmdStart(self.xmlui))  # コマンド選択に戻る
 
             self.finish()
 
@@ -120,23 +118,23 @@ class EnemyStart(BattleActItem):
         user_data.data["damage"] = XUTextUtil.format_zenkaku(damage)
 
         self.act.add_act(
-            EnemyMsg(self.data, "{name}の　こうげき！", enemy_data.data),
-            DamageEffect(self.data, damage),
-            EnemyMsg(self.data, "{name}は　{damage}ポイントの\nだめーじを　うけた", user_data.data))
+            EnemyMsg(self.xmlui, "{name}の　こうげき！", enemy_data.data),
+            DamageEffect(self.xmlui, damage),
+            EnemyMsg(self.xmlui, "{name}は　{damage}ポイントの\nだめーじを　うけた", user_data.data))
         
         if user_data.hp > damage:
-            self.act.add_act(CmdStart(self.data))
+            self.act.add_act(CmdStart(self.xmlui))
         else:
             self.act.add_act(
-                DeadWait(self.data),
-                PlayerMsg(self.data, "{name}は　しんでしまった", user_data.data),
-                ReturnKing(self.data))
+                DeadWait(self.xmlui),
+                PlayerMsg(self.xmlui, "{name}は　しんでしまった", user_data.data),
+                ReturnKing(self.xmlui))
 
 # ウェイト系
 # *****************************************************************************
 class DamageEffect(BattleActItem):
-    def __init__(self, data:BattleData, damage:int):
-        super().__init__(data)
+    def __init__(self, xmlui:XMLUI[BattleData], damage:int):
+        super().__init__(xmlui)
         self.damage = damage
         self.set_wait(15)  # 適当時間
 
