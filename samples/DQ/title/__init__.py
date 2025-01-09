@@ -5,8 +5,8 @@ from xmlui.core import XUEventItem
 from xmlui.lib.debug import DebugXMLUI
 from xmlui.ext.scene import XUEFadeScene
 
-from DQ import ui_common
-from DQ.title.ui import start,speed
+import ui_common
+from title.ui import start,speed
 
 class Title(XUEFadeScene):
     NEXT_SCENE_EVENT = "game_start"

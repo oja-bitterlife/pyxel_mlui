@@ -3,10 +3,10 @@ import random
 from xmlui.core import XMLUI,XUWinBase,XUTextUtil
 from xmlui.ext.scene import XUEActItem,XUEActItem
 
-from DQ.msg_dq import MsgDQ
-from DQ.db import user_data, enemy_data
+from msg_dq import MsgDQ
+from db import user_data, enemy_data
 
-from DQ.battle.data import BattleData
+from battle.data import BattleData
 
 
 # バトル用シーン遷移ベース

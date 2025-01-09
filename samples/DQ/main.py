@@ -7,9 +7,9 @@ pyxel.init(256, 256)
 # *********************************************************
 from xmlui.ext.scene import XUESceneManager
 
-from DQ.title import Title
-from DQ.field import Field
-from DQ.battle import Battle
+from title import Title
+from field import Field
+from battle import Battle
 
 # 最初はタイトル
 scene_manager = XUESceneManager(Title())

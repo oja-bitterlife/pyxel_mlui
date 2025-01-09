@@ -4,18 +4,18 @@ from xmlui.core import XMLUI,XUEvent,XUEventItem,XUWinBase
 from xmlui.lib.debug import DebugXMLUI
 from xmlui.ext.scene import XUEFadeScene,XUEActItem
 
-from DQ.db import user_data
+from db import user_data
 
 # フィールド関係
-from DQ.field.system.player import Player
-from DQ.field.system.bg import BG
-from DQ.field.system.npc import NPCManager
-from DQ.field.system.field_obj import FieldObj
+from field.system.player import Player
+from field.system.bg import BG
+from field.system.npc import NPCManager
+from field.system.field_obj import FieldObj
 
 # UI
-from DQ import ui_common
-from DQ.msg_dq import MsgDQ
-from DQ.field.ui import msg_win,menu,talk_dir,tools
+import ui_common
+from msg_dq import MsgDQ
+from field.ui import msg_win,menu,talk_dir,tools
 
 # メニューが開いている状態
 class MenuOpenAct(XUEActItem):

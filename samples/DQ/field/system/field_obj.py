@@ -1,5 +1,5 @@
 from xmlui.ext.tilemap import XUETilemap
-from DQ.db import fieldobj_data
+from db import fieldobj_data
 
 class FieldObj:
     def __init__(self):

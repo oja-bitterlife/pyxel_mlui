@@ -4,10 +4,10 @@ import pyxel
 from xmlui.core import *
 from xmlui.lib.text import MsgScr
 
-from DQ.system import system_font
-from DQ.db import user_config
+from system import system_font
+from db import user_config
 
-from DQ.ui_common import draw_msg_cursor,get_world_clip,get_text_color
+from ui_common import draw_msg_cursor,get_world_clip,get_text_color
 
 # テキストを扱う
 # #############################################################################

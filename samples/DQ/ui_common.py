@@ -5,8 +5,8 @@ import pyxel
 from xmlui.core import XMLUI,XUElem,XUEvent,XUWinBase,XURect,XUTextUtil
 from xmlui.lib import text,win
 
-from DQ.db import user_data
-from DQ.system import system_font
+from db import user_data
+from system import system_font
 
 
 # 共通定義

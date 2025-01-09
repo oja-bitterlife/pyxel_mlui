@@ -1,7 +1,7 @@
 from enum import StrEnum
 
 from xmlui.ext.tilemap import XUETilemap
-from DQ.db import npc_data
+from db import npc_data
 
 class NPC:
     def __init__(self, data:dict):

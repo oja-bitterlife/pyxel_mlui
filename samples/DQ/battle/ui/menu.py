@@ -3,11 +3,11 @@ import pyxel
 from xmlui.core import XUEvent,XUWinBase,XUSelectItem
 from xmlui.lib import select,text
 
-from DQ import msg_dq
-from DQ.msg_dq import MsgDQ
+import msg_dq
+from msg_dq import MsgDQ
 
-from DQ.system import system_font
-from DQ.ui_common import KOJICHU_COL,get_text_color
+from system import system_font
+from ui_common import KOJICHU_COL,get_text_color
 
 
 # バトルUI
