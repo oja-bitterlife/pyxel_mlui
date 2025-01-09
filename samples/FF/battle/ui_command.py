@@ -36,4 +36,6 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
         for item in command.items:
             battle_action(item, clip)
 
-        command.select_by_event(event.repeat, *XUEvent.Key.UP_DOWN())
+        # コマンド選択中のみカーソル移動
+        if xmlui.data_ref.scene.current_act == BattleCmdSel:
+            command.select_by_event(event.repeat, *XUEvent.Key.UP_DOWN())

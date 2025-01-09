@@ -63,7 +63,7 @@ class BattleTurnStart(BattleDataAct):
         self.set_wait(0)
 
     def action(self):
-        self.battle_data.player_idx = -1
+        self.battle_data.player_idx = 0
         self.battle_data.target = [0, 0, 0, 0]
         self.act.add_act(BattleCmdStart(self.xmlui))
 
@@ -83,8 +83,6 @@ class BattleCmdSetup(BattleMenuAct):
         super().__init__(xmlui, menu_win)
 
     def init(self):
-        self.battle_data.player_idx += 1  # 操作キャラ決定
-
         # コマンドのリセット
         command = self.menu_win.find_by_id("command")
         command.remove_children()
@@ -120,16 +118,17 @@ class BattleCmdSel(BattleMenuAct):
             self.act.add_act(BattleCmdTargetSel(self.xmlui, self.menu_win))
             self.finish()
 
-        # # 取りやめ
-        # if self.xmlui.event.check(XUEvent.Key.BTN_B):
-        #     self.battle_data.player_idx -= 1  # 戻す
-        #     self.act.add_act(BattleCmdCharaBack(self.xmlui, self.menu_win))
-        #     self.finish()
+        # 取りやめ
+        if self.xmlui.event.check(XUEvent.Key.BTN_B):
+            self.battle_data.player_idx = max(0, self.battle_data.player_idx-1)  # 戻す
+            self.act.add_act(BattleCmdCharaBack(self.xmlui, self.menu_win))
+            self.finish()
 
 # ターゲットの選択
 class BattleCmdTargetSel(BattleMenuAct):
     def init(self):
         self.target_select = self.menu_win.open("target_select")
+        self.battle_data.target[self.battle_data.player_idx] = 0  # 選択を戻す
 
         # ターゲット設定
         enemy_sel = self.target_select.find_by_id("enemy_sel")
@@ -151,6 +150,13 @@ class BattleCmdTargetSel(BattleMenuAct):
             self.act.add_act(BattleCmdCharaBack(self.xmlui, self.menu_win))
             self.finish()
 
+        # 取りやめ
+        if self.xmlui.event.check(XUEvent.Key.BTN_B):
+            self.target_select.close()
+            self.act.add_act(BattleCmdSel(self.xmlui, self.menu_win))
+            self.finish()
+
+
 class BattleCmdCharaBack(BattleMenuAct):
     def init(self):
         # 現在のキャラを引っ込める
@@ -164,6 +170,7 @@ class BattleCmdCharaBack(BattleMenuAct):
                 self.act.add_act(BattleCmdClose(self.xmlui))
             # 残次のキャラのコマンド入力
             else:
+                self.battle_data.player_idx += 1  # 操作キャラを進める
                 self.act.add_act(BattleCmdSetup(self.xmlui, self.menu_win))
 
             self.finish()
