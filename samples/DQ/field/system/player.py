@@ -1,12 +1,11 @@
-import pyxel
 from typing import Callable
 
 from xmlui.core import XMLUI,XUEvent,XUEventItem
 from xmlui.ext.tilemap import XUETilemap
 from xmlui.ext.scene import XUEActItem
 
-from msg_dq import MsgDQ
-from db import user_data
+from DQ.msg_dq import MsgDQ
+from DQ.db import user_data
 
 class PlayerMoveAct(XUEActItem):
     def __init__(self, player:"Player", move_x:int, move_y:int):

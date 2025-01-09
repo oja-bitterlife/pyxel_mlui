@@ -1,9 +1,10 @@
 from xmlui.core import XMLUI,XUEvent,XUWinBase
-from msg_dq import Decorator as DQDecorator
-from msg_dq import MsgDQ
+
+from DQ import msg_dq
+from DQ.msg_dq import MsgDQ
 
 def ui_init(xmlui:XMLUI):
-    field_dq = DQDecorator(xmlui)
+    field_dq = msg_dq.Decorator(xmlui)
 
     # フィールド画面のメッセージウインドウ
     # ---------------------------------------------------------

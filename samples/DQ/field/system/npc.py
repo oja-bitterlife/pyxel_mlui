@@ -1,8 +1,7 @@
 from enum import StrEnum
 
-from xmlui.core import XMLUI
 from xmlui.ext.tilemap import XUETilemap
-import db
+from DQ.db import npc_data
 
 class NPC:
     def __init__(self, data:dict):
@@ -23,7 +22,7 @@ class NPCManager:
     TALK_EVENTS = [TALK_EVENT.EAST, TALK_EVENT.WEST, TALK_EVENT.SOUTH, TALK_EVENT.NORTH]
 
     def __init__(self):
-        self.npcs = [NPC(data) for data in db.npc_data.data]
+        self.npcs = [NPC(data) for data in npc_data.data]
 
     def draw(self, scroll_x:int, scroll_y:int):
         for npc in self.npcs:

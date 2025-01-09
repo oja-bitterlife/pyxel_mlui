@@ -2,6 +2,7 @@ import pyxel
 
 from xmlui.core import XMLUI,XUEvent,XUWinBase,XUSelectItem
 from xmlui.lib import select,text
+
 from DQ.ui_common import get_world_clip,draw_menu_cursor,KOJICHU_COL,get_text_color
 from DQ.system import system_font
 
