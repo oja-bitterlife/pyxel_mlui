@@ -175,23 +175,23 @@ class XUEvent:
         self._repeat_count[event_name] = self._repeat_count.get(event_name, 0) + 1
 
     # イベントの確認
-    def check(self, *keys:XUEventItem) -> bool:
-        for key in keys:
+    def check(self, *events:XUEventItem) -> bool:
+        for key in events:
             if key in self.trg:
                 return True
         return False
-    def check_repeat(self, *keys:XUEventItem) -> bool:
-        for key in keys:
+    def check_repeat(self, *events:XUEventItem) -> bool:
+        for key in events:
             if key in self.repeat:
                 return True
         return False
-    def check_now(self, *keys:XUEventItem) -> bool:
-        for key in keys:
+    def check_now(self, *events:XUEventItem) -> bool:
+        for key in events:
             if key in self.now:
                 return True
         return False
-    def check_release(self, *keys:XUEventItem) -> bool:
-        for key in keys:
+    def check_release(self, *events:XUEventItem) -> bool:
+        for key in events:
             if key in self.release:
                 return True
         return False

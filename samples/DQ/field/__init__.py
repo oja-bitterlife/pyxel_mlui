@@ -1,20 +1,21 @@
 import pyxel
 
-# フィールド関係
-from field.system.player import Player
-from field.system.bg import BG
-from field.system.npc import NPCManager
-from field.system.field_obj import FieldObj
-from msg_dq import MsgDQ
-from db import user_data
-
-# UI
 from xmlui.core import XMLUI,XUEvent,XUEventItem,XUWinBase
 from xmlui.lib.debug import DebugXMLUI
 from xmlui.ext.scene import XUEFadeScene,XUEActItem
 
-import ui_common
-from field.ui import msg_win,menu,talk_dir,tools
+from DQ.db import user_data
+
+# フィールド関係
+from DQ.field.system.player import Player
+from DQ.field.system.bg import BG
+from DQ.field.system.npc import NPCManager
+from DQ.field.system.field_obj import FieldObj
+
+# UI
+from DQ import ui_common
+from DQ.msg_dq import MsgDQ
+from DQ.field.ui import msg_win,menu,talk_dir,tools
 
 # メニューが開いている状態
 class MenuOpenAct(XUEActItem):
@@ -36,8 +37,10 @@ class Field(XUEFadeScene):
         self.xmlui.load_template("assets/ui/common.xml")
 
         ui_common.ui_init(self.xmlui)
-        for module in [msg_win, menu, talk_dir, tools]:
-            module.ui_init(self.xmlui)
+        msg_win.ui_init(self.xmlui)
+        menu.ui_init(self.xmlui)
+        talk_dir.ui_init(self.xmlui)
+        tools.ui_init(self.xmlui)
 
         # ゲーム本体(仮)
         self.player = Player(self.xmlui, 10, 10)
@@ -51,21 +54,23 @@ class Field(XUEFadeScene):
     def closed(self):
         self.xmlui.close()  # 読みこんだUIの削除
 
+        # バトルへ
         from battle import Battle
         self.set_next_scene(Battle())
 
     # 何もしていない(actがない)ときだけここにくる、Idle関数
     def update(self):
-        # プレイヤの移動
+        # プレイヤの移動。移動できれば移動Actが返る
         player_move_act = self.player.move(self.xmlui.event.now, [
             self.npc.hit_check,  # 当たり判定リスト
             self.bg.hit_check,
             self.field_obj.hit_check])
+
         if player_move_act:
             self.add_act(player_move_act)
 
         # キャラが動いていなければメニューオープン可能
-        if XUEvent.Key.BTN_A in self.xmlui.event.now:
+        if self.xmlui.event.check_now(XUEvent.Key.BTN_A):
             self.add_act(MenuOpenAct(self.xmlui))
 
     def draw(self):
