@@ -11,8 +11,8 @@ from xmlui.ext.scene import XUESceneManager
 from shop import Shop
 from battle import Battle
 
-#scene_manager = XUESceneManager(Shop())
-scene_manager = XUESceneManager(Battle())
+scene_manager = XUESceneManager(Shop())
+#scene_manager = XUESceneManager(Battle())
 
 # Main
 def update():

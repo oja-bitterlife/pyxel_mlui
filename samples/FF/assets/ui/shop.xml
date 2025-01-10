@@ -25,7 +25,7 @@
     </ui_shop>
 
     <buy_menu id="buy_menu">
-        <label w="72" h="24" align="center" valign="bottom">いくつ？</label>
+        <label w="64" h="24" align="center" valign="bottom">いくつ？</label>
         <buy_num x="56" y="16" item_w="16" id="buy_num">
             <shop_ui_item action="1">１</shop_ui_item>
             <shop_ui_item action="4">４</shop_ui_item>
@@ -37,7 +37,7 @@
     </buy_menu>
 
     <sell_menu id="sell_menu">
-        <label w="72" h="24" align="center" valign="bottom">いくつ？</label>
+        <label w="64" h="24" align="center" valign="bottom">いくつ？</label>
         <sell_num x="60" y="16" item_w="16" id="sell_num">
             <shop_ui_item action="1">１</shop_ui_item>
             <shop_ui_item action="all">ぜんぶ</shop_ui_item>
