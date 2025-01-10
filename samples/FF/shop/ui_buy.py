@@ -70,7 +70,7 @@ def ui_init(xmlui:XMLUI):
 
         # ウインドウが表示されてる場所のみ描画
         clip = get_world_clip(XUWinBase.find_parent_win(buy_item))
-        if clip.bottom < area.y:
+        if clip.bottom < area.y+system_font.size:
             return
 
         # 商品名
