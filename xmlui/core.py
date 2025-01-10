@@ -945,17 +945,10 @@ class XUWinInfo(XUElem):
 
         @classmethod
         def from_str(cls, state:str) -> "XUWinInfo.WIN_STATE":
-            match state:
-                case _XUWinBase.WIN_STATE.OPENING:
-                    return _XUWinBase.WIN_STATE.OPENING
-                case _XUWinBase.WIN_STATE.OPENED:
-                    return _XUWinBase.WIN_STATE.OPENED
-                case _XUWinBase.WIN_STATE.CLOSING:
-                    return _XUWinBase.WIN_STATE.CLOSING
-                case _XUWinBase.WIN_STATE.CLOSED:
-                    return _XUWinBase.WIN_STATE.CLOSED
-                case _:
-                    raise RuntimeError(f"Unknown win_state '{state}'")
+            for v in cls.__members__.values():
+                if v == state:
+                    return v
+            raise RuntimeError(f"Unknown state '{state}'")
 
     # 状態を保存するアトリビュート
     WIN_STATE_ATTR = "_xmlui_win_state"
