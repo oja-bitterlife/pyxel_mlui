@@ -23,6 +23,14 @@ class Shop(XUEFadeScene):
         ui_buy.ui_init(xmlui)
         ui_sell.ui_init(xmlui)
 
+        # プレイヤの画像
+        self.player_imgs = [
+            pyxel.Image.from_image(filename="assets/images/heishi.png"),
+            pyxel.Image.from_image(filename="assets/images/basaka.png"),
+            pyxel.Image.from_image(filename="assets/images/yousei.png"),
+            pyxel.Image.from_image(filename="assets/images/majyo.png"),
+        ]
+
     def closed(self):
         from FF.battle import Battle
         self.set_next_scene(Battle())
@@ -38,5 +46,10 @@ class Shop(XUEFadeScene):
                 self.fade_close()
 
     def draw(self):
+        # プレイヤの表示
+        if self.xmlui.exists_id("buy_menu"):
+            for i,img in enumerate(self.player_imgs):
+                pyxel.blt(204, 80+i*38, img, 0, 0, img.width, img.height, 0)
+
         # UIの表示
         self.xmlui.draw()
