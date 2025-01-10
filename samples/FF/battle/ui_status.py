@@ -1,6 +1,6 @@
 import pyxel
 
-from xmlui.core import XUElem,XUEvent,XUTextUtil,XURect,XUWinBase
+from xmlui.core import XUElem,XUEvent,XUTextUtil,XURect,XUWinInfo
 from xmlui.lib import text,debug
 from system import system_font
 
@@ -46,7 +46,7 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
     @xmlui.tag_draw("status")
     def status(status:XUElem, event:XUEvent):
         area = status.area
-        clip = get_world_clip(XUWinBase.find_parent_win(status))
+        clip = get_world_clip(XUWinInfo.find_parent_win(status))
 
         # ステータス各行のサイズ
         status_line_size = 16
@@ -61,7 +61,7 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
     @xmlui.tag_draw("enemy_names")
     def enemy_names(enemy_names:XUElem, event:XUEvent):
         area = enemy_names.area
-        clip = get_world_clip(XUWinBase.find_parent_win(enemy_names))
+        clip = get_world_clip(XUWinInfo.find_parent_win(enemy_names))
 
         # 各行のサイズ
         status_line_size = 16

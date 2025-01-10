@@ -1,6 +1,6 @@
 import pyxel
 
-from xmlui.core import XMLUI,XUEvent,XUWinBase,XUSelectItem
+from xmlui.core import XMLUI,XUEvent,XUWinInfo,XUSelectItem
 from xmlui.lib import select,text
 
 from ui_common import get_world_clip,draw_menu_cursor,KOJICHU_COL,get_text_color
@@ -15,7 +15,7 @@ def ui_init(xmlui:XMLUI):
     # ---------------------------------------------------------
     def menu_item(menu_item:XUSelectItem):
         # ウインドウのクリップ状態に合わせて表示する
-        if menu_item.area.y < get_world_clip(XUWinBase.find_parent_win(menu_item)).bottom:
+        if menu_item.area.y < get_world_clip(XUWinInfo.find_parent_win(menu_item)).bottom:
             col = KOJICHU_COL if menu_item.value == "工事中" else get_text_color()
             pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, col, system_font.font)
 
@@ -53,13 +53,13 @@ def ui_init(xmlui:XMLUI):
 
         # 閉じる
         if XUEvent.Key.BTN_B in event.trg:
-            XUWinBase.find_parent_win(menu_grid).start_close()
+            XUWinInfo.find_parent_win(menu_grid).start_close()
 
     # コマンドメニューのタイトル
     @field_text.label("title")
     # ---------------------------------------------------------
     def title(title:text.XULabel, event:XUEvent):
-        clip = get_world_clip(XUWinBase.find_parent_win(title)).intersect(title.area)
+        clip = get_world_clip(XUWinInfo.find_parent_win(title)).intersect(title.area)
         pyxel.rect(title.area.x, title.area.y, title.area.w, clip.h, 0)  # タイトルの下地
 
         col = get_text_color()
@@ -74,7 +74,7 @@ def ui_init(xmlui:XMLUI):
     # ---------------------------------------------------------
     @field_text.label("child_menu_title")
     def child_menu_title(child_menu_title:text.XULabel, event:XUEvent):
-        clip = get_world_clip(XUWinBase.find_parent_win(child_menu_title)).intersect(child_menu_title.area)
+        clip = get_world_clip(XUWinInfo.find_parent_win(child_menu_title)).intersect(child_menu_title.area)
         clip.h = max(clip.h, 4)  # フレームを隠すように
         pyxel.rect(child_menu_title.area.x, child_menu_title.area.y, child_menu_title.area.w, clip.h, 0)  # タイトルの下地
 

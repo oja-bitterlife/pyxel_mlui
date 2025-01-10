@@ -1,11 +1,11 @@
 from typing import Self
 
 import pyxel
-from xmlui.lib.text import FontBase
+from xmlui.lib.text import _XUFontBase
 
 # Pyxelのフォントを使う
 # #############################################################################
-class PyxelFont(FontBase):
+class PyxelFont(_XUFontBase):
     def __init__(self, font_path:str):
         self.font_path = font_path
         super().__init__(pyxel.Font(font_path), PyxelFont.get_bdf_size(font_path))

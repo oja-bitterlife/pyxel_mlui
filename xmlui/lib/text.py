@@ -1,8 +1,11 @@
-from xmlui.core import *
+import math
+from typing import Any,Callable,Self
+
+from xmlui.core import XURect,XUElem,XUEvent,XMLUI,XUSelectItem,_XUSelectBase,XUTextUtil
 
 # フォントを扱う
 # #############################################################################
-class FontBase:
+class _XUFontBase:
     def __init__(self, font:Any, size:int):
         self.font = font
         self.size = size
@@ -26,7 +29,7 @@ class XULabel(XUElem):
         self.align = XURect.Align.from_str(elem.attr_str(self.ALIGN_ATTR, XURect.Align.LEFT))
         self.valign = XURect.Align.from_str(elem.attr_str(self.VALIGN_ATTR, XURect.Align.TOP))
 
-    def aligned_pos(self, font:FontBase, text:str|None=None) -> tuple[int, int]:
+    def aligned_pos(self, font:_XUFontBase, text:str|None=None) -> tuple[int, int]:
         # 引数があればそちらを(置換文字列対応)
         if text is None:
             text = self.text
@@ -118,7 +121,7 @@ class XUPageItem(XUSelectItem):
 
 
 # 複数ページをセレクトアイテムで管理
-class XUPageList(XUSelectBase):
+class XUPageList(_XUSelectBase):
     def __init__(self, elem:XUElem, page_line_num:int=1024, wrap:int=4096):
         super().__init__(elem, "", 1, 0, 0)
         self.page_line_num = page_line_num

@@ -1,7 +1,10 @@
-from xmlui.core import *
+import math
+from typing import Callable
+
+from xmlui.core import XURect,XUElem,XMLUI,XUEvent,_XUWinBase
 
 # コレは外だし
-class _XUWinFrameBase(XUWinBase):
+class _XUWinFrameBase(_XUWinBase):
     # ウインドウ(ピクセル)描画
     # 0 1 2
     # 3 4 5

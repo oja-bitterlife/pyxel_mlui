@@ -1,6 +1,6 @@
 import pyxel
 
-from xmlui.core import XMLUI,XUElem,XUEvent,XUSelectItem,XUWinBase,XUSelectInfo,XUTextUtil,XURect
+from xmlui.core import XMLUI,XUElem,XUEvent,XUSelectItem,XUWinInfo,XUSelectInfo,XUTextUtil,XURect
 from xmlui.lib import select,text
 from system import system_font, hand_cursor
 
@@ -41,7 +41,7 @@ def ui_init(xmlui:XMLUI):
             buy_num.close()
 
             # enableにしていたメニューを元に戻す
-            win = XUWinBase.find_parent_win(buy_num)
+            win = XUWinInfo.find_parent_win(buy_num)
             shop_act_list = win.find_by_id("shop_act_list")
             shop_act_list.enable = True
 
@@ -69,7 +69,7 @@ def ui_init(xmlui:XMLUI):
         area = buy_item.area
 
         # ウインドウが表示されてる場所のみ描画
-        clip = get_world_clip(XUWinBase.find_parent_win(buy_item))
+        clip = get_world_clip(XUWinInfo.find_parent_win(buy_item))
         if clip.bottom < area.y+system_font.size:
             return
 
@@ -116,7 +116,7 @@ def ui_init(xmlui:XMLUI):
 # かうメニュースタート
 # *************************************************************************
 def init_buy_list(xmlui:XMLUI):
-    buy_menu = XUWinBase.find_parent_win(xmlui.find_by_id("shop_act_list")).open("buy_menu")
+    buy_menu = XUWinInfo.find_parent_win(xmlui.find_by_id("shop_act_list")).open("buy_menu")
 
     buy_list = buy_menu.find_by_id("buy_list")
     buy_list.enable = False  # イベントはNumが決まってから

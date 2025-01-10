@@ -1,8 +1,9 @@
-from xmlui.core import *
+from typing import Callable
+from xmlui.core import XMLUI,XUElem,XUEventItem,XUEvent,_XUSelectBase
 
 # グリッド選択
 # *****************************************************************************
-class XUGrid(XUSelectBase):
+class XUGrid(_XUSelectBase):
     ROWS_ATTR = 'rows'
     ITEM_W_ATTR = 'item_w'
     ITEM_H_ATTR = 'item_h'
@@ -39,7 +40,7 @@ class XUGrid(XUSelectBase):
 
 # リスト選択
 # *****************************************************************************
-class _XUListBase(XUSelectBase):
+class _XUListBase(_XUSelectBase):
     def __init__(self, elem:XUElem, item_tag:str, rows:int, item_w:int, item_h:int, next_move=[0, 0]):
         super().__init__(elem, item_tag, rows, item_w, item_h)
         self.next_move = next_move

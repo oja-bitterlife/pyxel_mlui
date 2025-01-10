@@ -1,6 +1,6 @@
 import pyxel
 
-from xmlui.core import XUEvent,XUWinBase,XUSelectItem
+from xmlui.core import XUEvent,XUWinInfo,XUSelectItem
 from xmlui.lib import select,text
 
 import msg_dq
@@ -23,7 +23,7 @@ def ui_init(template):
     # コマンドメニューのタイトル
     @battle_text.label("title")
     def title(title:text.XULabel, event:XUEvent):
-        clip = get_world_clip(XUWinBase.find_parent_win(title)).intersect(title.area)
+        clip = get_world_clip(XUWinInfo.find_parent_win(title)).intersect(title.area)
         pyxel.rect(title.area.x, title.area.y, title.area.w, clip.h, 0)  # タイトルの下地
 
         col = get_text_color()
@@ -37,7 +37,7 @@ def ui_init(template):
     # ---------------------------------------------------------
     def menu_item(menu_item:XUSelectItem):
         # ウインドウのクリップ状態に合わせて表示する
-        if menu_item.area.y < get_world_clip(XUWinBase.find_parent_win(menu_item)).bottom:
+        if menu_item.area.y < get_world_clip(XUWinInfo.find_parent_win(menu_item)).bottom:
             col = KOJICHU_COL if menu_item.value == "工事中" else get_text_color()
             pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, col, system_font.font)
 

@@ -1,6 +1,6 @@
 import random
 
-from xmlui.core import XMLUI,XUWinBase,XUTextUtil
+from xmlui.core import XMLUI,XUWinInfo,XUTextUtil
 from xmlui.ext.scene import XUEActItem,XUEActItem
 
 from msg_dq import MsgDQ
@@ -67,7 +67,7 @@ class CmdCheck(BattleActItem):
     def waiting(self):
         if "attack" in self.xmlui.event.trg:
             # 選択されたらメニューは閉じる
-            XUWinBase(self.xmlui.find_by_id("menu")).start_close()
+            XUWinInfo(self.xmlui.find_by_id("menu")).start_close()
 
             # ダメージ計算
             enemy_data.data["hit"] = XUTextUtil.format_zenkaku(random.randint(1, 100))
@@ -82,7 +82,7 @@ class CmdCheck(BattleActItem):
 
         if "run" in self.xmlui.event.trg:
             # 選択されたらメニューは閉じる
-            XUWinBase(self.xmlui.find_by_id("menu")).start_close()
+            XUWinInfo(self.xmlui.find_by_id("menu")).start_close()
 
             # 逃げる
             self.act.add_act(
@@ -95,7 +95,7 @@ class CmdCheck(BattleActItem):
 
         if "spel" in self.xmlui.event.trg:
             # 選択されたらメニューは閉じる
-            XUWinBase(self.xmlui.find_by_id("menu")).start_close()
+            XUWinInfo(self.xmlui.find_by_id("menu")).start_close()
 
             self.act.add_act(
                 PlayerMsg(self.xmlui, "じゅもんを　おぼえていない", {}),

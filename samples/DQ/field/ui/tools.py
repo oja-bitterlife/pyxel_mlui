@@ -1,6 +1,6 @@
 import pyxel
 
-from xmlui.core import XMLUI,XUEvent,XUWinBase,XUSelectItem,XUTextUtil,XUElem
+from xmlui.core import XMLUI,XUEvent,XUWinInfo,XUSelectItem,XUTextUtil,XUElem
 from xmlui.lib import select
 
 from msg_dq import MsgDQ
@@ -19,7 +19,7 @@ def ui_init(xmlui:XMLUI):
         col = get_text_color()
 
         # ウインドウのクリップ状態に合わせて表示する
-        if tools_item.area.y < get_world_clip(XUWinBase.find_parent_win(tools_item)).bottom:
+        if tools_item.area.y < get_world_clip(XUWinInfo.find_parent_win(tools_item)).bottom:
             pyxel.text(6+tools_item.area.x, tools_item.area.y, tools_item.text, col, system_font.font)
 
         # カーソル表示
@@ -54,7 +54,7 @@ def ui_init(xmlui:XMLUI):
             msg = tools_effect(tools_list.selected_no, data)
 
             # メッセージウインドウを開く
-            XUWinBase.find_parent_win(tools_list).start_close()
+            XUWinInfo.find_parent_win(tools_list).start_close()
             msg_win = tools_list.xmlui.find_by_id("menu").open("message")
             msg_text = MsgDQ(msg_win.find_by_id("msg_text"))
             msg_text.append_msg(msg)  # systemメッセージ
@@ -62,7 +62,7 @@ def ui_init(xmlui:XMLUI):
         # 閉じる
         # ---------------------------------------------------------
         if XUEvent.Key.BTN_B in event.trg:
-            XUWinBase.find_parent_win(tools_list).start_close()
+            XUWinInfo.find_parent_win(tools_list).start_close()
 
 
     # どうぐ処理

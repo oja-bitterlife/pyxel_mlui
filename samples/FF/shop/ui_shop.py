@@ -1,6 +1,6 @@
 import pyxel
 
-from xmlui.core import XMLUI,XUEvent,XUSelectItem,XUWinBase,XUTextUtil,XURect
+from xmlui.core import XMLUI,XUEvent,XUSelectItem,XUWinInfo,XUTextUtil,XURect
 from xmlui.lib import select,text
 from system import system_font, hand_cursor
 
@@ -41,7 +41,7 @@ def ui_init(xmlui:XMLUI):
 
         shop_act.select_by_event(event.repeat, *XUEvent.Key.LEFT_RIGHT())
         if XUEvent.Key.BTN_A in event.trg:
-            shop_act_win = XUWinBase.find_parent_win(shop_act)
+            shop_act_win = XUWinInfo.find_parent_win(shop_act)
             shop_act.enable = False
             match shop_act.action:
                 case "buy":

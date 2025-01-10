@@ -1,6 +1,6 @@
 import pyxel
 
-from xmlui.core import XUElem,XUEvent,XUWinBase,XURect
+from xmlui.core import XUElem,XUEvent,XUWinInfo,XURect
 from xmlui.lib import select,debug
 
 from system import system_font,hand_cursor
@@ -32,7 +32,7 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
 
     @action_select.list("command", "battle_action")
     def command(command:select.XUList, event:XUEvent):
-        clip = get_world_clip(XUWinBase.find_parent_win(command))
+        clip = get_world_clip(XUWinInfo.find_parent_win(command))
         for item in command.items:
             battle_action(item, clip)
 

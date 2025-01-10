@@ -2,7 +2,7 @@ import pyxel
 
 # xmlui_pyxelの初期化
 # *****************************************************************************
-from xmlui.core import XMLUI,XUElem,XUEvent,XUWinBase,XURect,XUTextUtil
+from xmlui.core import XMLUI,XUElem,XUEvent,XUWinInfo,XURect,XUTextUtil
 from xmlui.lib import text,win
 
 from db import user_data
@@ -35,7 +35,7 @@ def draw_msg_cursor(elem:XUElem, x:int, y:int):
     y = elem.area.y + tri_size - 3 + y
     pyxel.tri(center_x, y, center_x+tri_size, y, center_x+tri_size//2, y+tri_size//2, col)
 
-def get_world_clip(win:XUWinBase) -> XURect:
+def get_world_clip(win:XUWinInfo) -> XURect:
     area = win.area
     if win.is_opening:
         clip_size = min(int(win.opening_count * WIN_OPEN_SPEED), area.h)
@@ -121,13 +121,13 @@ def ui_init(xmlui:XMLUI):
         # テキストは右寄せ
         area = status_item.area
         x, y = XURect.align_offset(area.w, area.h, system_font.text_width(text) + 5, 0, status_item.align, status_item.valign)
-        if area.y+y < get_world_clip(XUWinBase.find_parent_win(status_item)).bottom:
+        if area.y+y < get_world_clip(XUWinInfo.find_parent_win(status_item)).bottom:
             pyxel.text(area.x + x, area.y + y, text, col, system_font.font)
 
     # ステータスタイトル(名前)
     @common_text.label("status_title")
     def status_title(status_title:text.XULabel, event:XUEvent):
-        clip = get_world_clip(XUWinBase.find_parent_win(status_title)).intersect(status_title.area)
+        clip = get_world_clip(XUWinInfo.find_parent_win(status_title)).intersect(status_title.area)
         pyxel.rect(status_title.area.x, status_title.area.y, status_title.area.w, clip.h, 0)  # タイトルの下地
 
         col = get_text_color()

@@ -3,7 +3,7 @@ from typing import Callable,Any
 
 import pyxel
 
-from xmlui.core import XMLUI,XUElem,XUEvent,XUWinBase
+from xmlui.core import XMLUI,XUElem,XUEvent,XUWinInfo
 from xmlui.lib.text import XUMsgScr,XUPageItem
 
 from system_dq import system_font
@@ -154,7 +154,7 @@ class MsgDQ(XUMsgScr):
         for i,info in enumerate(scroll_info):
             # yはスクロール考慮
             y = area.y + i*line_height - shift_y
-            clip = get_world_clip(XUWinBase.find_parent_win(self)).intersect(self.area)
+            clip = get_world_clip(XUWinInfo.find_parent_win(self)).intersect(self.area)
             if y+system_font.size >= clip.bottom:  # メッセージもクリップ対応
                 break
 

@@ -1,6 +1,6 @@
 import pyxel
 
-from xmlui.core import *
+from xmlui.core import XURect,XUEvent,XUWinInfo
 from xmlui.lib import win,text,debug
 
 from system import system_font,system_palette
@@ -18,7 +18,7 @@ FRAME_SHADOW_COL = system_palette.pal_gray16[5]
 FRAME_BG_COL = system_palette.pal_colors[40]
 
 # 共通で使える関数
-def get_world_clip(win:XUWinBase) -> XURect:
+def get_world_clip(win:XUWinInfo) -> XURect:
     area = win.area
     if win.is_opening:
         clip_size = min(int(win.opening_count * WIN_OPEN_SPEED), area.h)

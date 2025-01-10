@@ -131,7 +131,7 @@ class XUEActManager:
 # シーン管理(フェードイン・フェードアウト)用
 # #############################################################################
 # シーン管理用仕込み
-class XUESceneBase(XUEActManager):
+class _XUESceneBase(XUEActManager):
     def __init__(self, xmlui:XMLUI):
         super().__init__()
         self.xmlui = xmlui
@@ -188,7 +188,7 @@ class XUESceneBase(XUEActManager):
         self.logger.warning("scene.closed is not implemented")
 
 # シーンクラス。継承して使おう
-class XUEFadeScene(XUESceneBase):
+class XUEFadeScene(_XUESceneBase):
     # デフォルトフェードカラー
     FADE_COLOR = 0
 
@@ -267,8 +267,8 @@ class XUEFadeScene(XUESceneBase):
 # シーン管理。mainの中で各シーンを実行する
 # *****************************************************************************
 class XUESceneManager:
-    def __init__(self, start_scene:XUESceneBase):
-        self.current_scene:XUESceneBase = start_scene
+    def __init__(self, start_scene:_XUESceneBase):
+        self.current_scene:_XUESceneBase = start_scene
 
     def update(self):
         # next_sceneが設定されていたら

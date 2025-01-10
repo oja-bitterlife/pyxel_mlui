@@ -1,4 +1,4 @@
-from xmlui.core import XUElem,XMLUI,XUEvent,XUSelectItem,XUWinBase,XUSelectInfo
+from xmlui.core import XUElem,XMLUI,XUEvent,XUSelectItem,XUWinInfo,XUSelectInfo
 from xmlui.ext.scene import XUEActItem
 from battle.data import BattleData
 
@@ -182,7 +182,7 @@ class BattleCmdCharaBack(BattleMenuAct):
 class BattleCmdClose(BattleDataAct):
     def init(self):
         # enemy名(command_menuの上位)ごと閉じる
-        self.target_win = XUWinBase(self.xmlui.find_by_id("enemy_name_win"))
+        self.target_win = XUWinInfo(self.xmlui.find_by_id("enemy_name_win"))
         self.target_win.start_close()
 
     def waiting(self):
