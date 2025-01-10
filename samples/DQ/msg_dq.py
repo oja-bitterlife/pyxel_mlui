@@ -1,8 +1,10 @@
 from enum import StrEnum,auto
+from typing import Callable,Any
+
 import pyxel
 
-from xmlui.core import *
-from xmlui.lib.text import XUMsgScr
+from xmlui.core import XMLUI,XUElem,XUEvent,XUWinBase
+from xmlui.lib.text import XUMsgScr,XUPageItem
 
 from system_dq import system_font
 from db import user_config

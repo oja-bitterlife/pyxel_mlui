@@ -931,6 +931,7 @@ class XUTextUtil:
     def length(cls, text:str) -> int:
         return len(re.sub("\n|\0", "", text))
 
+
 # ウインドウサポート
 # *****************************************************************************
 class XUWinBase(XUElem):

@@ -3,7 +3,7 @@ from typing import Callable
 import pyxel
 
 from xmlui.core import XMLUI,XUEventItem
-from xmlui.lib.debug import get_logger
+from xmlui.lib.debug import XULog
 from xmlui.ext.input import XUEInput
 from xmlui.ext.timer import XUETimeout
 
@@ -78,6 +78,7 @@ class XUEActItem(XUETimeout):
 class XUEActManager:
     def __init__(self):
         self._act_queue:list[XUEActItem] = []
+        self.logger = XULog().logger
 
     # キュー操作
     # -----------------------------------------------------
@@ -113,7 +114,7 @@ class XUEActManager:
 
                 # デバッグ表示
                 if not self.is_act_empty:
-                    get_logger().debug(f"next act:{self.current_act}")
+                    self.logger.debug(f"next act:{self.current_act}")
 
 
     # 状態取得
@@ -184,7 +185,7 @@ class XUESceneBase(XUEActManager):
         pass
     # フェードアウト完了時に呼ばれる。主に次シーン設定を行う
     def closed(self):
-        get_logger().warning("scene.closed is not implemented")
+        self.logger.warning("scene.closed is not implemented")
 
 # シーンクラス。継承して使おう
 class XUEFadeScene(XUESceneBase):
