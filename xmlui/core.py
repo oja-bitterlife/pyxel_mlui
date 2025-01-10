@@ -955,16 +955,16 @@ class XUWinInfo(XUElem):
     # -----------------------------------------------------
     # XUWinBaseを使ったElementかどうか。attributeの有無でチェック
     @classmethod
-    def is_win(cls, state:XUElem) -> bool:
-        return state.has_attr(cls.WIN_STATE_ATTR)
+    def is_win(cls, elem:XUElem) -> bool:
+        return elem.has_attr(cls.WIN_STATE_ATTR)
 
     # 一番近いXUWinBaseを持つ親を取得する
     @classmethod
-    def find_parent_win(cls, state:XUElem) -> "XUWinInfo":
-        for parent in state.ancestors:
+    def find_parent_win(cls, elem:XUElem) -> "XUWinInfo":
+        for parent in elem.ancestors:
             if XUWinInfo.is_win(parent):
                 return XUWinInfo(parent)
-        raise TreeException(state.xmlui, "Window not found in parents")
+        raise TreeException(elem.xmlui, "Window not found in parents")
 
     # ウインドウの状態
     # -----------------------------------------------------
@@ -1034,11 +1034,21 @@ class _XUWinBase(XUWinInfo):
                 self.set_attr(self.CLOSING_COUNT_ATTR, self.attr_int(self.CLOSING_COUNT_ATTR) + 1)
 
     @property
-    def win_state(self) -> str:
-        return self.attr_str(self.WIN_STATE_ATTR)
+    def win_state(self) -> "_XUWinBase.WIN_STATE":
+        match self.attr_str(self.WIN_STATE_ATTR):
+            case _XUWinBase.WIN_STATE.OPENING:
+                return _XUWinBase.WIN_STATE.OPENING
+            case _XUWinBase.WIN_STATE.OPENED:
+                return _XUWinBase.WIN_STATE.OPENED
+            case _XUWinBase.WIN_STATE.CLOSING:
+                return _XUWinBase.WIN_STATE.CLOSING
+            case _XUWinBase.WIN_STATE.CLOSED:
+                return _XUWinBase.WIN_STATE.CLOSED
+            case _:
+                raise RuntimeError(f"Unknown win_state '{self.attr_str(self.WIN_STATE_ATTR)}'")
 
     @win_state.setter
-    def win_state(self, win_state:str) -> str:
+    def win_state(self, win_state:"_XUWinBase.WIN_STATE") -> str:
         self.set_attr(self.WIN_STATE_ATTR, win_state)
         return win_state
 
