@@ -943,6 +943,20 @@ class XUWinInfo(XUElem):
         CLOSING = "closing"
         CLOSED = "closed"
 
+        @classmethod
+        def from_str(cls, state:str) -> "XUWinInfo.WIN_STATE":
+            match state:
+                case _XUWinBase.WIN_STATE.OPENING:
+                    return _XUWinBase.WIN_STATE.OPENING
+                case _XUWinBase.WIN_STATE.OPENED:
+                    return _XUWinBase.WIN_STATE.OPENED
+                case _XUWinBase.WIN_STATE.CLOSING:
+                    return _XUWinBase.WIN_STATE.CLOSING
+                case _XUWinBase.WIN_STATE.CLOSED:
+                    return _XUWinBase.WIN_STATE.CLOSED
+                case _:
+                    raise RuntimeError(f"Unknown win_state '{state}'")
+
     # 状態を保存するアトリビュート
     WIN_STATE_ATTR = "_xmlui_win_state"
     OPENING_COUNT_ATTR = "_xmlui_opening_count"
@@ -1035,17 +1049,7 @@ class _XUWinBase(XUWinInfo):
 
     @property
     def win_state(self) -> "_XUWinBase.WIN_STATE":
-        match self.attr_str(self.WIN_STATE_ATTR):
-            case _XUWinBase.WIN_STATE.OPENING:
-                return _XUWinBase.WIN_STATE.OPENING
-            case _XUWinBase.WIN_STATE.OPENED:
-                return _XUWinBase.WIN_STATE.OPENED
-            case _XUWinBase.WIN_STATE.CLOSING:
-                return _XUWinBase.WIN_STATE.CLOSING
-            case _XUWinBase.WIN_STATE.CLOSED:
-                return _XUWinBase.WIN_STATE.CLOSED
-            case _:
-                raise RuntimeError(f"Unknown win_state '{self.attr_str(self.WIN_STATE_ATTR)}'")
+        return _XUWinBase.WIN_STATE.from_str(self.attr_str(self.WIN_STATE_ATTR))
 
     @win_state.setter
     def win_state(self, win_state:"_XUWinBase.WIN_STATE") -> str:
