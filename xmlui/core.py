@@ -1010,8 +1010,6 @@ class XUWinInfo(XUElem):
 
 # ウインドウクラスベース
 class _XUWinBase(XUWinInfo):
-    # 状態管理
-    # -----------------------------------------------------
     def __init__(self, elem:XUElem):
         super().__init__(elem)
 
@@ -1047,12 +1045,13 @@ class _XUWinBase(XUWinInfo):
             case _XUWinBase.WIN_STATE.CLOSING:
                 self.set_attr(self.CLOSING_COUNT_ATTR, self.attr_int(self.CLOSING_COUNT_ATTR) + 1)
 
+    # win_state管理
     @property
     def win_state(self) -> "_XUWinBase.WIN_STATE":
         return _XUWinBase.WIN_STATE.from_str(self.attr_str(self.WIN_STATE_ATTR))
 
     @win_state.setter
-    def win_state(self, win_state:"_XUWinBase.WIN_STATE") -> str:
+    def win_state(self, win_state:"_XUWinBase.WIN_STATE") -> "_XUWinBase.WIN_STATE":
         self.set_attr(self.WIN_STATE_ATTR, win_state)
         return win_state
 
