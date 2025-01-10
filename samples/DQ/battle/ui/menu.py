@@ -22,7 +22,7 @@ def ui_init(template):
 
     # コマンドメニューのタイトル
     @battle_text.label("title")
-    def title(title:text.Label, event:XUEvent):
+    def title(title:text.XULabel, event:XUEvent):
         clip = get_world_clip(XUWinBase.find_parent_win(title)).intersect(title.area)
         pyxel.rect(title.area.x, title.area.y, title.area.w, clip.h, 0)  # タイトルの下地
 

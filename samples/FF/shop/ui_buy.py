@@ -101,7 +101,7 @@ def ui_init(xmlui:XMLUI):
             BuyList.add(buy_list.selected_item.attr_int("item_id"), int(buy_num.action))
 
             # メッセージ更新
-            msg = text.Msg(buy_list.xmlui.find_by_id("shop_msg"))
+            msg = text.XUMsg(buy_list.xmlui.find_by_id("shop_msg"))
             msg.clear_pages()
             msg.append_msg("ありがとうございます ほかには？")
 

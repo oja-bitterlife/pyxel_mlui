@@ -899,158 +899,8 @@ class XUTextUtil:
         val = cls.format_dict(str(val), all_params)  # \n\pを先に変換しておく
         return unicodedata.normalize("NFKC", val).translate(_hankaku_zenkaku_dict)
 
-    # その他
+    # 行・ページ分割
     # -----------------------------------------------------
-    # 改行・改ページを抜いた文字数カウント
-    @classmethod
-    def length(cls, text:str) -> int:
-        return len(re.sub("\n|\0", "", text))
-
-# アニメーションテキストページ
-class XUPageItem(XUSelectItem):
-    DRAW_COUNT_ATTR = "_xmlui_text_count"
-
-    # 表示カウンタ操作
-    # -----------------------------------------------------
-    # 現在の表示文字数
-    @property
-    def draw_count(self) -> float:
-        return float(self.attr_float(self.DRAW_COUNT_ATTR, 0))
-
-    @draw_count.setter
-    def draw_count(self, count:float) -> float:
-        self.set_attr(self.DRAW_COUNT_ATTR, count)
-        return count
-
-    # アニメーション用
-    # -----------------------------------------------------
-    # draw_countまでの文字列を改行分割。スライスじゃないのは改行を数えないため
-    @classmethod
-    def _limitstr(cls, tmp_text:str, text_count:float) -> str:
-        limit = math.ceil(text_count)
-
-        # limitまで縮める
-        for i,c in enumerate(tmp_text):
-            if (limit := limit if ord(c) < 0x20 else limit-1) < 0:  # 改行は数えない
-                return tmp_text[:i]
-        return tmp_text
-
-    # 改行を抜いた文字数よりカウントが大きくなった
-    @property
-    def is_finish(self) -> bool:
-        return self.draw_count >= self.length
-
-    # 一気に表示
-    @property
-    def finish(self) -> Self:
-        self.draw_count = self.length
-        return self
-
-    # draw_countまでのテキストを受け取る
-    @property
-    def text(self) -> str:
-        return self._limitstr(super().text, self.draw_count)
-
-    # draw_countまでのテキストを全角で受け取る
-    @property
-    def zenkaku(self) -> str:
-        return XUTextUtil.format_zenkaku(self.text)
-
-    # テキスト全体
-    # -----------------------------------------------------
-    # 全体テキストを受け取る
-    @property
-    def all_text(self) -> str:
-        return super().text
-
-    # テキスト全体の長さ(\n\0抜き)
-    @property
-    def length(self) -> int:
-        return XUTextUtil.length(super().text)
-
-    # 行
-    # -----------------------------------------------------
-    # 現在の行番号
-    @property
-    def current_line_no(self) -> int:
-        return max(0, len(self.text.splitlines())-1)
-
-    # 現在の行テキスト
-    @property
-    def current_line(self) -> str:
-        lines = self.text.splitlines()
-        return lines[self.current_line_no] if lines else ""
-
-    # 現在の行の全体の長さ
-    @property
-    def current_line_length(self):
-        return len(self.all_text.splitlines()[self.current_line_no])
-
-
-# ページをセレクトアイテムで管理
-class XUPageInfo(XUSelectBase):
-    def __init__(self, elem:XUElem):
-        super().__init__(elem, "", 1, 0, 0)
-
-    # ページ操作
-    # -----------------------------------------------------
-    # 現在ページ番号
-    @property
-    def current_page_no(self) -> int:
-        return self.selected_no
-
-    # ページテキスト
-    # -----------------------------------------------------
-    # 現在ページのアニメーション情報アクセス
-    @property
-    def current_page(self):
-        return XUPageItem(self.items[self.current_page_no])
-
-    # ただの型キャスト。中身はitems
-    @property
-    def pages(self) -> list[XUPageItem]:
-        return [XUPageItem(item) for item in self.items]
-
-    # 次ページがなくテキストは表示完了 = 完全に終了
-    @property
-    def is_all_finish(self):
-        if not self.items:  # テキストがない
-            return True
-        return not self.is_next_wait and self.current_page.is_finish
-
-    # 次ページあり
-    @property
-    def is_next_wait(self):
-        if not self.items:  # テキストがない
-            return False
-        return self.current_page.is_finish and self.current_page_no < self.item_num-1
-
-    # ツリー操作
-    # -----------------------------------------------------
-    # テキストをページ分解してツリーにぶら下げる。作ったページを返す
-    def add_pages(self, text:str, page_line_num:int, wrap:int) -> list[XUPageItem]:
-        pages:list[XUPageItem] = []
-        for page_text in XUPageText.split_page_texts(text, page_line_num, wrap):
-            page_item = XUPageItem(XUElem.new(self.xmlui, self.ITEM_TAG))
-            self._util_info.add_child(page_item.set_text(page_text))
-
-            pages.append(page_item)  # return用
-        return pages
-
-    def clear_pages(self):
-        for child in self._util_info.find_by_tagall(self.ITEM_TAG):
-            child.remove()
-
-class XUPageText(XUPageInfo):
-    def __init__(self, elem:XUElem, page_line_num:int=1024, wrap:int=4096):
-        super().__init__(elem)
-        self.page_line_num = page_line_num
-        self.wrap = wrap
-
-        # ページ未登録なら登録しておく
-        if not self.pages and self.text.strip():
-            self.add_pages(self.text, page_line_num, wrap)
-
     # ページごとに行・ワードラップ分割
     @classmethod
     def split_page_lines(cls, text:str, page_line_num:int, wrap:int) -> list[list[str]]:
@@ -1074,20 +924,12 @@ class XUPageText(XUPageInfo):
     def split_page_texts(cls, text:str, page_line_num:int, wrap:int) -> list[str]:
         return ["\n".join(page) for page in cls.split_page_lines(text, page_line_num, wrap)]
 
-    # ページ操作
+    # その他
     # -----------------------------------------------------
-    # ページ設定
-    def set_page_no(self, no:int=0) -> Self:
-        # ページを切り替えたときはカウンタをリセット
-        if self.current_page_no != no:
-            self.current_page.draw_count = 0
-        self.select(no)
-        return self
-
-    # 次のページへ
-    def next_page(self):
-        self.set_page_no(self.current_page_no+1)
-
+    # 改行・改ページを抜いた文字数カウント
+    @classmethod
+    def length(cls, text:str) -> int:
+        return len(re.sub("\n|\0", "", text))
 
 # ウインドウサポート
 # *****************************************************************************

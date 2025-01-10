@@ -121,7 +121,7 @@ def ui_init(xmlui:XMLUI):
             if num > 0:
                 price_text = XUTextUtil.format_zenkaku(get_sell_price(sell_list.selected_item))
                 price_text = "　"*(7-len(price_text)) + price_text
-                msg = text.Msg(sell_list.xmlui.find_by_id("shop_msg"))
+                msg = text.XUMsg(sell_list.xmlui.find_by_id("shop_msg"))
                 msg.clear_pages()
                 msg.append_msg(f"それなら {price_text}ギルになります")
 

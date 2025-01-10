@@ -65,12 +65,12 @@ def ui_init(xmlui:XMLUI):
     # ポップアップウインドウ
     # ---------------------------------------------------------
     @common_win.rect_frame("popup_win")  # アニメはしない
-    def popup_win(win:win.RectFrame, event:XUEvent):
+    def popup_win(win:win.XURectFrame, event:XUEvent):
         pyxel.rect(win.area.x, win.area.y, win.area.w, win.area.h, 0)
         win.draw_frame(pyxel.screen.data_ptr(), [0,7,13], win.area.inflate(-2, -2))
 
     @common_text.msg("popup_text")
-    def popup_text(popup_text:text.Msg, event:XUEvent):
+    def popup_text(popup_text:text.XUMsg, event:XUEvent):
         if XUEvent.Key.BTN_A in event.trg or XUEvent.Key.BTN_B in event.trg:
             popup_text.close()
 
@@ -89,7 +89,7 @@ def ui_init(xmlui:XMLUI):
     # 角丸ウインドウ
     # ---------------------------------------------------------
     @common_win.round_frame("round_win")
-    def round_win(round_win:win.RoundFrame, event:XUEvent):
+    def round_win(round_win:win.XURoundFrame, event:XUEvent):
         area = round_win.area
         clip = get_world_clip(round_win).to_offset()  # クリップエリアの設定
 
@@ -112,7 +112,7 @@ def ui_init(xmlui:XMLUI):
     # ---------------------------------------------------------
     # ステータス各種アイテム
     @common_text.label("status_item")
-    def status_item(status_item:text.Label, event:XUEvent):
+    def status_item(status_item:text.XULabel, event:XUEvent):
         # 値の取得
         text = XUTextUtil.format_zenkaku(XUTextUtil.format_dict(status_item.text, user_data.data))
 
@@ -126,7 +126,7 @@ def ui_init(xmlui:XMLUI):
 
     # ステータスタイトル(名前)
     @common_text.label("status_title")
-    def status_title(status_title:text.Label, event:XUEvent):
+    def status_title(status_title:text.XULabel, event:XUEvent):
         clip = get_world_clip(XUWinBase.find_parent_win(status_title)).intersect(status_title.area)
         pyxel.rect(status_title.area.x, status_title.area.y, status_title.area.w, clip.h, 0)  # タイトルの下地
 

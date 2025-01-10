@@ -13,7 +13,7 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
 
     # なぜかぽつんと一つあるHPラベル
     @status_text.label("hp_Label")
-    def hp_Label(hp_Label:text.Label, event:XUEvent):
+    def hp_Label(hp_Label:text.XULabel, event:XUEvent):
         pyxel.text(hp_Label.area.x, hp_Label.area.y, hp_Label.text, 7, system_font.font)
 
 

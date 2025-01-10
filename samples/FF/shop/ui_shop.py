@@ -12,7 +12,7 @@ def ui_init(xmlui:XMLUI):
 
     # 基本ラベル
     @shop_text.label("label")
-    def label(label:text.Label, event:XUEvent):
+    def label(label:text.XULabel, event:XUEvent):
         text = XUTextUtil.format_zenkaku(label.text, {"gil":user_data.gil})
         x, y = label.aligned_pos(system_font, text)
         pyxel.text(x, y, text, 7, system_font.font)
@@ -55,7 +55,7 @@ def ui_init(xmlui:XMLUI):
     # メッセージ
     # *************************************************************************
     @shop_text.msg("shop_msg", "speed")
-    def shop_msg(shop_msg:text.Msg, event:XUEvent):
+    def shop_msg(shop_msg:text.XUMsg, event:XUEvent):
         area = shop_msg.area
         x, y = area.aligned_pos(0, system_font.size, XURect.Align.LEFT, XURect.Align.from_str(shop_msg.attr_str("valign", "center")))
         pyxel.text(x, y, shop_msg.current_page.text, 7, system_font.font)
@@ -64,6 +64,6 @@ def ui_init(xmlui:XMLUI):
 # メッセージ設定
 # *************************************************************************
 def set_shop_msg(xmlui:XMLUI, text_:str):
-    msg = text.Msg(xmlui.find_by_id("shop_msg"))
+    msg = text.XUMsg(xmlui.find_by_id("shop_msg"))
     msg.clear_pages()
     msg.append_msg(text_)

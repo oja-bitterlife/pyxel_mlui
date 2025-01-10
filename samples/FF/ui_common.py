@@ -40,12 +40,12 @@ def ui_init(xmlui:debug.DebugXMLUI):
     # ポップアップウインドウ
     # ---------------------------------------------------------
     @common_win.rect_frame("popup_win")  # アニメはしない
-    def popup_win(win:win.RectFrame, event:XUEvent):
+    def popup_win(win:win.XURectFrame, event:XUEvent):
         pyxel.rect(win.area.x, win.area.y, win.area.w, win.area.h, 0)
         win.draw_frame(pyxel.screen.data_ptr(), [0,7,13], win.area.inflate(-2, -2))
 
     @common_text.msg("popup_text")
-    def popup_text(popup_text:text.Msg, event:XUEvent):
+    def popup_text(popup_text:text.XUMsg, event:XUEvent):
         if XUEvent.Key.BTN_A in event.trg or XUEvent.Key.BTN_B in event.trg:
             popup_text.close()
 
@@ -64,7 +64,7 @@ def ui_init(xmlui:debug.DebugXMLUI):
     # 角丸ウインドウ
     # ---------------------------------------------------------
     @common_win.round_frame("round_win")
-    def round_win(round_win:win.RoundFrame, event:XUEvent):
+    def round_win(round_win:win.XURoundFrame, event:XUEvent):
         area = round_win.area
         clip = get_world_clip(round_win).to_offset()  # クリップエリアの設定
 

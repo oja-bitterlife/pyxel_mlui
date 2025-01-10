@@ -2,7 +2,7 @@ from enum import StrEnum,auto
 import pyxel
 
 from xmlui.core import *
-from xmlui.lib.text import MsgScr
+from xmlui.lib.text import XUMsgScr
 
 from system_dq import system_font
 from db import user_config
@@ -11,7 +11,7 @@ from ui_common import draw_msg_cursor,get_world_clip,get_text_color
 
 # テキストを扱う
 # #############################################################################
-class MsgDQ(MsgScr):
+class MsgDQ(XUMsgScr):
     TALK_START = "＊「"
     INDENT_TYPE_ATTR = "_xmlui_indent_type"
 
@@ -103,14 +103,14 @@ class MsgDQ(MsgScr):
         if self.is_line_end:
             over_count = self.attr_int("_over_count") + 1
             # ページ切り替えがあったらリセット
-            if self.current_page_no != self.attr_int("_old_page", -1):
+            if self.page_no != self.attr_int("_old_page", -1):
                 over_count = 0
         else:
             over_count = 0
 
         # 更新
         self.set_attr("_over_count", over_count)
-        self.set_attr("_old_page", self.current_page_no)
+        self.set_attr("_old_page", self.page_no)
 
         # 表示バッファ
         # ---------------------------------------------------------

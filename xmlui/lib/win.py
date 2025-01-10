@@ -1,7 +1,7 @@
 from xmlui.core import *
 
 # コレは外だし
-class WinFrame(XUWinBase):
+class _XUWinFrameBase(XUWinBase):
     # ウインドウ(ピクセル)描画
     # 0 1 2
     # 3 4 5
@@ -95,7 +95,7 @@ class WinFrame(XUWinBase):
                     offset = (screen_area.y + y_)*screen_buf_w + screen_area.x + area.w-size
                     screen_buf[offset:offset+right_clip.w] = rev_butes[:right_clip.w]
 
-class RoundFrame(WinFrame):
+class XURoundFrame(_XUWinFrameBase):
     def _get_veclen(self, x:int, y:int, org_x:int, org_y:int) -> int:
         return math.ceil(math.sqrt((x-org_x)**2 + (y-org_y)**2))
 
@@ -116,7 +116,7 @@ class RoundFrame(WinFrame):
                 return l if l < size else -1
         return self._get13574index(size, x, y, w, h)
 
-class RectFrame(WinFrame):
+class XURectFrame(_XUWinFrameBase):
     # override
     def _get_pattern_index(self, size:int, x:int, y:int, w:int, h:int) -> int:
         match self.get_area(size, x, y, w, h):
@@ -138,10 +138,10 @@ class RectFrame(WinFrame):
 # *****************************************************************************
 class Decorator(XMLUI.HasRef):
     def round_frame(self, tag_name:str):
-        def wrapper(bind_func:Callable[[RoundFrame,XUEvent], str|None]):
+        def wrapper(bind_func:Callable[[XURoundFrame,XUEvent], str|None]):
             # 登録用関数をジェネレート
             def draw(elem:XUElem, event:XUEvent):
-                frame = RoundFrame(elem)
+                frame = XURoundFrame(elem)
                 frame.update()
                 return bind_func(frame, event)
             # 関数登録
@@ -149,10 +149,10 @@ class Decorator(XMLUI.HasRef):
         return wrapper
 
     def rect_frame(self, tag_name:str):
-        def wrapper(bind_func:Callable[[RectFrame,XUEvent], str|None]):
+        def wrapper(bind_func:Callable[[XURectFrame,XUEvent], str|None]):
             # 登録用関数をジェネレート
             def draw(elem:XUElem, event:XUEvent):
-                frame = RectFrame(elem)
+                frame = XURectFrame(elem)
                 frame.update()
                 return bind_func(frame, event)
             # 関数登録

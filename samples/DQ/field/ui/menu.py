@@ -58,7 +58,7 @@ def ui_init(xmlui:XMLUI):
     # コマンドメニューのタイトル
     @field_text.label("title")
     # ---------------------------------------------------------
-    def title(title:text.Label, event:XUEvent):
+    def title(title:text.XULabel, event:XUEvent):
         clip = get_world_clip(XUWinBase.find_parent_win(title)).intersect(title.area)
         pyxel.rect(title.area.x, title.area.y, title.area.w, clip.h, 0)  # タイトルの下地
 
@@ -73,7 +73,7 @@ def ui_init(xmlui:XMLUI):
     # 子メニューごとのタイトル(コマンドメニューと少し場所がずれる)
     # ---------------------------------------------------------
     @field_text.label("child_menu_title")
-    def child_menu_title(child_menu_title:text.Label, event:XUEvent):
+    def child_menu_title(child_menu_title:text.XULabel, event:XUEvent):
         clip = get_world_clip(XUWinBase.find_parent_win(child_menu_title)).intersect(child_menu_title.area)
         clip.h = max(clip.h, 4)  # フレームを隠すように
         pyxel.rect(child_menu_title.area.x, child_menu_title.area.y, child_menu_title.area.w, clip.h, 0)  # タイトルの下地
