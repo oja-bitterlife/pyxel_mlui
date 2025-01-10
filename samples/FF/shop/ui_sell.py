@@ -25,7 +25,7 @@ def ui_init(xmlui:XMLUI):
     # 個数を選択
     # -----------------------------------------------------
     @shop_select.row_list("sell_num", "shop_ui_item")
-    def sell_num(sell_num:select.RowList, event:XUEvent):
+    def sell_num(sell_num:select.XURowList, event:XUEvent):
         for item in sell_num.items:
             sell_num_item(item)
 
@@ -93,7 +93,7 @@ def ui_init(xmlui:XMLUI):
     # 売却アイテム選択
     SELL_WAIT_ATTR = "wait_sell"
     @shop_select.grid("sell_list", "shop_sell_item")
-    def sell_list(sell_list:select.Grid, event:XUEvent):
+    def sell_list(sell_list:select.XUGrid, event:XUEvent):
         for item in sell_list.items:
             sell_item(item, sell_list.enable)
 

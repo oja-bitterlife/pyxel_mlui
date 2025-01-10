@@ -23,7 +23,7 @@ def ui_init(xmlui:XMLUI):
             draw_menu_cursor(dir_item, -5, 0)
 
     @field_select.list("dir_select", "dir_item")
-    def dir_select(dir_select:select.List, event:XUEvent):
+    def dir_select(dir_select:select.XUList, event:XUEvent):
         # 各アイテムの描画
         for item in dir_select.items:
             dir_item(item)

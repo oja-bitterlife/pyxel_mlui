@@ -48,7 +48,7 @@ def ui_init(template):
     # コマンドメニュー
     # ---------------------------------------------------------
     @battle_select.grid("menu_grid", "menu_item")
-    def menu_grid(menu_grid:select.Grid, event:XUEvent):
+    def menu_grid(menu_grid:select.XUGrid, event:XUEvent):
         # 各アイテムの描画
         for item in menu_grid.items:
             menu_item(item)

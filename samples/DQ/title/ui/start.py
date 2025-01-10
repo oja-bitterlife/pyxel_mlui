@@ -11,7 +11,7 @@ def ui_init(xmlui:XMLUI):
 
     # START/CONTINUE選択
     @title_select.list("game_start", "menu_item")
-    def game_start(game_start:select.List, event:XUEvent):
+    def game_start(game_start:select.XUList, event:XUEvent):
         # 選択肢描画
         for item in game_start.items:
             menu_item(item)

@@ -24,7 +24,7 @@ def ui_init(xmlui:XMLUI):
     # 個数を選択
     # -----------------------------------------------------
     @buy_select.row_list("buy_num", "shop_ui_item")
-    def buy_num(buy_num:select.RowList, event:XUEvent):
+    def buy_num(buy_num:select.XURowList, event:XUEvent):
         for item in buy_num.items:
             buy_num_item(item)
 
@@ -86,7 +86,7 @@ def ui_init(xmlui:XMLUI):
 
     # 購入アイテム選択
     @buy_select.list("buy_list", "shop_buy_item")
-    def buy_list(buy_list:select.List, event:XUEvent):
+    def buy_list(buy_list:select.XUList, event:XUEvent):
         for item in buy_list.items:
             buy_item(item, buy_list.enable)
 

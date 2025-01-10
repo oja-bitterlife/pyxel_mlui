@@ -31,7 +31,7 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
                 hand_cursor.draw(area.x, area.y+4)
 
     @action_select.list("command", "battle_action")
-    def command(command:select.List, event:XUEvent):
+    def command(command:select.XUList, event:XUEvent):
         clip = get_world_clip(XUWinBase.find_parent_win(command))
         for item in command.items:
             battle_action(item, clip)

@@ -24,7 +24,7 @@ def ui_init(xmlui:XMLUI):
                 draw_menu_cursor(menu_item, 0, 0)
 
     @field_select.grid("menu_grid", "menu_item")
-    def menu_grid(menu_grid:select.Grid, event:XUEvent):
+    def menu_grid(menu_grid:select.XUGrid, event:XUEvent):
         # 各アイテムの描画
         for item in menu_grid.items:
             menu_item(item)

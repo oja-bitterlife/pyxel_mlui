@@ -17,7 +17,7 @@ def ui_init(xmlui:XMLUI):
 
     # メッセージスピード選択
     @title_select.row_list("game_speed", "menu_item")
-    def game_speed(game_speed:select.RowList, event:XUEvent):
+    def game_speed(game_speed:select.XURowList, event:XUEvent):
         for item in game_speed.items:
             menu_item(item)
 

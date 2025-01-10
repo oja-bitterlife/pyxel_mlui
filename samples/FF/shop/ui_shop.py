@@ -30,7 +30,7 @@ def ui_init(xmlui:XMLUI):
     # かう・うる・でるの選択
     # -----------------------------------------------------
     @shop_select.row_list("shop_act_list", "shop_ui_item")
-    def shop_act(shop_act:select.RowList, event:XUEvent):
+    def shop_act(shop_act:select.XURowList, event:XUEvent):
         # 一時的にdisableになることがある
         if shop_act.enable == False:
             return

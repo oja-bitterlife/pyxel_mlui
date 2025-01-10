@@ -28,7 +28,7 @@ def ui_init(xmlui:XMLUI):
 
     # どうぐ選択リスト
     @field_select.list("tools_list", "tools_item")
-    def tools_list(tools_list:select.List, event:XUEvent):
+    def tools_list(tools_list:select.XUList, event:XUEvent):
         # アイテム表示の準備
         if event.on_init:  # 開く度毎回
             for tools in user_data.tools:

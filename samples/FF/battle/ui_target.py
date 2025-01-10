@@ -12,7 +12,7 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
     target_select = select.Decorator(xmlui)
 
     @target_select.grid("enemy_sel", "select_item")
-    def enemy_sel(enemy_sel:select.Grid, event:XUEvent):
+    def enemy_sel(enemy_sel:select.XUGrid, event:XUEvent):
         battle_data = xmlui.data_ref
         target_idx = battle_data.target[battle_data.player_idx]
 
@@ -39,7 +39,7 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
         hand_cursor.draw(area.x, area.y + 8)
     
     @target_select.list("player_sel", "select_item")
-    def player_sel(player_sel:select.List, event:XUEvent):
+    def player_sel(player_sel:select.XUList, event:XUEvent):
         battle_data = xmlui.data_ref
         target_idx = battle_data.target[battle_data.player_idx]
 

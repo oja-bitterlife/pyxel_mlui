@@ -87,7 +87,7 @@ class XURect:
     def bottom(self) -> int:
         return self.y + self.h
 
-    # 座標取得(w,h = content w,h)
+    # 座標をずらす量を取得(w,h = 内容物のw,h)。配置するためにどれだけ座標をずらすべきか取得する
     @classmethod
     def align_offset(cls, area_w:int, area_h:int, w:int=0, h:int=0, align:Align=Align.CENTER, valign:Align=Align.CENTER) -> tuple[int, int]:
         area = XURect(0, 0, area_w, area_h)
@@ -112,6 +112,7 @@ class XURect:
                 raise ValueError(f"align:{valign} is not supported.")
         return x,y
 
+    # 配置座標取得
     def aligned_pos(self, w:int, h:int, align:Align=Align.CENTER, valign:Align=Align.CENTER) -> tuple[int, int]:
         offset_x, offset_y = self.align_offset(self.w, self.h, w, h, align, valign)
         return self.x + offset_x, self.y + offset_y
@@ -747,7 +748,7 @@ class XUSelectItem(XUElem):
     def __init__(self, elem:XUElem):
         super().__init__(elem.xmlui, elem._element)
 
-# 選択ベース
+# 選択ベースの状態取得用(初期化用引数が不要)
 class XUSelectInfo(_XUUtilBase):
     # クラス定数
     INFO_TAG = "_xmlui_select_info"
@@ -792,7 +793,7 @@ class XUSelectInfo(_XUUtilBase):
     def action(self) -> XUEventItem:
         return XUEventItem(self.selected_item.action)
 
-# XUSelectBase書き込み用
+# 選択ベース
 class XUSelectBase(XUSelectInfo):
     def __init__(self, elem:XUElem, item_tag:str, rows:int, item_w:int, item_h:int):
         super().__init__(elem)
@@ -852,71 +853,6 @@ class XUSelectBase(XUSelectInfo):
             next_y = 0 if x_wrap else y
 
         self.select(next_y*self.rows + next_x)
-
-# グリッド選択
-class XUSelectGrid(XUSelectBase):
-    def __init__(self, elem:XUElem, item_tag:str, rows:int, item_w:int, item_h:int):
-        super().__init__(elem, item_tag, rows, item_w, item_h)
-
-    # 入力に応じた挙動一括。変更があった場合はTrue
-    def _select_by_event(self, input:set[XUEventItem], left_event:XUEventItem, right_event:XUEventItem, up_event:XUEventItem, down_event:XUEventItem, x_wrap:bool, y_wrap:bool) -> bool:
-        old_no = self.selected_no
-
-        if left_event in input:
-            self.next(-1, 0, x_wrap, y_wrap)
-        elif right_event in input:
-            self.next(1, 0, x_wrap, y_wrap)
-        elif up_event in input:
-            self.next(0, -1, x_wrap, y_wrap)
-        elif down_event in input:
-            self.next(0, 1, x_wrap, y_wrap)
-
-        return self.selected_no != old_no
-
-    # 選択一括処理Wrap版
-    def select_by_event(self, input:set[XUEventItem], left_event:XUEventItem, right_event:XUEventItem, up_event:XUEventItem, down_event:XUEventItem) -> bool:
-        return self._select_by_event(input, left_event, right_event, up_event, down_event, True, True)
-
-    # 選択一括処理NoWrap版
-    def select_no_wrap(self, input:set[XUEventItem], left_event:XUEventItem, right_event:XUEventItem, up_event:XUEventItem, down_event:XUEventItem) -> bool:
-        return self._select_by_event(input, left_event, right_event, up_event, down_event, False, False)
-
-# リスト選択
-class _XUSelectListBase(XUSelectBase):
-    def __init__(self, elem:XUElem, item_tag:str, rows:int, item_w:int, item_h:int):
-        super().__init__(elem, item_tag, rows, item_w, item_h)
-        self.next_move = [0, 0]
-
-    # 入力に応じた挙動一括。変更があった場合はTrue
-    def _select_by_event(self, input:set[XUEventItem], prev_event:XUEventItem, next_event:XUEventItem, wrap:bool) -> bool:
-        old_no = self.selected_no
-
-        if prev_event in input:
-            self.next(-self.next_move[0], -self.next_move[1], wrap, wrap)
-        elif next_event in input:
-            self.next(self.next_move[0], self.next_move[1], wrap, wrap)
-
-        return self.selected_no != old_no
-
-    # 選択一括処理Wrap版
-    def select_by_event(self, input:set[XUEventItem], prev_event:XUEventItem, next_event:XUEventItem) -> bool:
-        return self._select_by_event(input, prev_event, next_event, True)
-
-    # 選択一括処理NoWrap版
-    def select_no_wrap(self, input:set[XUEventItem], prev_event:XUEventItem, next_event:XUEventItem) -> bool:
-        return self._select_by_event(input, prev_event, next_event, False)
-
-# 縦方向リスト
-class XUSelectList(_XUSelectListBase):
-    def __init__(self, elem:XUElem, item_tag:str, item_h:int):
-        super().__init__(elem, item_tag, 1, 0, item_h)
-        self.next_move = [0, 1]  # 上下で動く
-
-# 横方向リスト
-class XUSelectRowList(_XUSelectListBase):
-    def __init__(self, elem:XUElem, item_tag:str, item_w:int):
-        super().__init__(elem, item_tag, len(elem.find_by_tagall(item_tag)), item_w, 0)
-        self.next_move = [1, 0]  # 左右で動く
 
 
 # テキスト系
