@@ -43,6 +43,11 @@ class XULabel(XUElem):
 class XUPageItem(XUSelectItem):
     DRAW_COUNT_ATTR = "_xmlui_text_count"
 
+    # 初期化
+    # -----------------------------------------------------
+    def __init__(self, elem:XUElem):
+        super().__init__(elem.xmlui, elem._element)
+
     # 表示カウンタ操作
     # -----------------------------------------------------
     # 現在の表示文字数

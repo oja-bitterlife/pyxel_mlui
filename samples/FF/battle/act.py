@@ -86,10 +86,10 @@ class BattleCmdSetup(BattleMenuAct):
 
         # 職業によってメニューを変える。とりあえずサンプルなので適当に
         job: dict[str, dict[str, bool]] = {
-            "heishi":{"たたかう":True, "ぼうぎょ":True, "にげる":False, "アイテム":False},
+            "heishi":{"たたかう":True, "ぼうぎょ":False, "にげる":False, "アイテム":False},
             "basaka":{"たたかう":True, "まもらぬ":True, "ひかぬ":True, "こびぬ":True},
             "yousei":{"たたかう":True, "ぬすむ":False, "とんずら":False, "アイテム":False},
-            "majyo":{"たたかう":True, "ぼうぎょ":True, "まほう":False, "アイテム":False},
+            "majyo":{"たたかう":True, "ぼうぎょ":False, "まほう":False, "アイテム":False},
         }
         for action,allow in job[self.battle_data.JOBS[self.battle_data.player_idx]].items():
             # コマンド追加
@@ -116,9 +116,9 @@ class BattleCmdSel(BattleMenuAct):
     def waiting(self):
         if self.scene.xmlui.event.check(XUEvent.Key.BTN_A):
             menu = XUSelectInfo(self.menu_win.find_by_id("command"))
-            # if menu.selected_item.value == "工事中":
-            #     self.scene.xmlui.popup("under_construct")
-            #     return
+            if menu.selected_item.value == "工事中":
+                self.scene.xmlui.popup("under_construct")
+                return
 
             # 選択コマンドを記録
             self.battle_data.command[self.battle_data.player_idx] = menu.selected_item.text
