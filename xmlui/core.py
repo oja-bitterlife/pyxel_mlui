@@ -1053,8 +1053,14 @@ class _XUWinBase(XUWinSet):
 
 # ゲージサポート
 # *****************************************************************************
-class XUGageBase(XUElem):
+class XUGageInfo(XUElem):
     # 隙間サイズ(px)
     # 数値最大(=ゲージ分割数)
     # XURectで分割ゲージの各Box
+    pass
+
+class XUGageSet(XUGageInfo):
+    pass
+
+class _XUGageBase(XUGageSet):
     pass
