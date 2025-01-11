@@ -724,23 +724,6 @@ class XMLUI(XUElem, Generic[T]):
 
 # ユーティリティークラス
 # #############################################################################
-# 基本は必要な情報をツリーでぶら下げる
-# Treeが不要ならたぶんXUStateで事足りる
-class _XUUtilBase(XUElem):
-    def __init__(self, elem:XUElem, root_tag:str):
-        super().__init__(elem.xmlui, elem._element)
-
-        # 自前設定が無ければabsorberにしておく
-        if not self.has_attr("use_event"):
-            self.set_attr("use_event", XUEvent.UseEvent.ABSORBER)
-
-        # UtilBase用ルートの作成(状態保存先)
-        if elem.exists_tag(root_tag):
-            self._util_info = elem.find_by_tagall(root_tag)[0]
-        else:
-            self._util_info = XUElem.new(elem.xmlui, root_tag)
-            elem.add_child(self._util_info)
-
 # メニュー系
 # *****************************************************************************
 # 選択クラス用アイテム
@@ -749,16 +732,16 @@ class XUSelectItem(XUElem):
         super().__init__(elem.xmlui, elem._element)
 
 # 選択ベースの状態取得用(初期化用引数が不要)
-class XUSelectInfo(_XUUtilBase):
+class XUSelectInfo(XUElem):
     # クラス定数
     INFO_TAG = "_xmlui_select_info"
     ITEM_TAG = "_xmlui_select_item"
 
     def __init__(self, elem:XUElem):
-        super().__init__(elem, self.INFO_TAG)
+        super().__init__(elem.xmlui, elem._element)
+        self._util_info = elem.find_by_tagall(self.INFO_TAG)[0]
 
     # 処理を途中で抜けるならこっちが早い
-    @property
     def item_iter(self):
         # 直下のみ対象。別の選択が下にくっつくことがあるので下まではみない
         for child in self._util_info._element:
@@ -768,12 +751,12 @@ class XUSelectInfo(_XUUtilBase):
     # listでまとめて返す。扱いやすい
     @property
     def items(self) -> list[XUSelectItem]:
-        return list(self.item_iter)
+        return list(self.item_iter())
 
     # 選択中のitemの番号(Treeの並び順)
     @property
     def selected_no(self) -> int:
-        for i,item in enumerate(self.item_iter):
+        for i,item in enumerate(self.item_iter()):
             if item.selected:
                 return i
         return 0  # デフォルト
@@ -793,15 +776,64 @@ class XUSelectInfo(_XUUtilBase):
     def action(self) -> XUEventItem:
         return XUEventItem(self.selected_item.action)
 
+class XUSelectSet(XUSelectInfo):
+    # 値設定用
+    # -----------------------------------------------------
+    # 選択追加アトリビュートに設定する(元のXMLを汚さない)
+    def select(self, no:int):
+        for i,item in enumerate(self.items):
+            item.set_attr("selected", i == no)
+
+    # 選択を移動させる
+    def next_with_row(self, add_x:int, add_y:int, rows:int, x_wrap=False, y_wrap=False):
+        # キャッシュ
+        no = self.selected_no
+        item_num = self.item_num
+
+        # 行と列の状態取得(半端グリッド対応)
+        row_items = [rows for _ in range(item_num // rows)]
+        if item_num % rows != 0:
+            row_items.append(item_num % rows)
+        cols = [item_num//rows for i in range(rows)]
+        for i in range(item_num % rows):
+            cols[i] += 1
+
+        # 更新
+        x = no % rows
+        y = no // rows
+        next_x = x + add_x
+        next_y = y + add_y
+
+        # wrapモードとmin/maxモードそれぞれで更新後状態調整
+        if next_x < 0:
+            next_x = row_items[y]-1 if x_wrap else x
+        if next_x >= row_items[y]:
+            next_x = 0 if x_wrap else x
+        if next_y < 0:
+            next_y = cols[next_x]-1 if y_wrap else y
+        if next_y >= cols[next_x]:
+            next_y = 0 if x_wrap else y
+
+        self.select(next_y*rows + next_x)
+
+
 # 選択ベース
-class _XUSelectBase(XUSelectInfo):
+class _XUSelectBase(XUSelectSet):
     def __init__(self, elem:XUElem, item_tag:str, rows:int, item_w:int, item_h:int):
+        # UtilBase用ルートの作成(状態保存先)
+        if elem.exists_tag(XUSelectInfo.INFO_TAG):
+            self._util_info = elem.find_by_tagall(XUSelectInfo.INFO_TAG)[0]
+        else:
+            self._util_info = XUElem.new(elem.xmlui, XUSelectInfo.INFO_TAG)
+            elem.add_child(self._util_info)
+
+        # INFO_TAGをぶら下げてからinit
         super().__init__(elem)
         self.rows = rows
         self.item_w = item_w
         self.item_h = item_h
 
-        # infoタグの下になければ自分の直下から探してコピーする
+        # INFO_TAG下にINFO_ITEMがなければ(未初期化)自分の直下から探してコピー(初期化)する
         if not self.items and item_tag:
             for i,child in enumerate([child for child in self._element if child.tag == item_tag]):
                 # タグ名は専用のものに置き換え
@@ -815,44 +847,9 @@ class _XUSelectBase(XUSelectInfo):
         # 選択状態復帰
         self.select(self.selected_no)
 
-    # 値設定用
-    # -----------------------------------------------------
-    # 選択追加アトリビュートに設定する(元のXMLを汚さない)
-    def select(self, no:int):
-        for i,item in enumerate(self.items):
-            item.set_attr("selected", i == no)
-
     # 選択を移動させる
     def next(self, add_x:int, add_y:int, x_wrap=False, y_wrap=False):
-        # キャッシュ
-        no = self.selected_no
-        item_num = self.item_num
-
-        # 行と列の状態取得(半端グリッド対応)
-        rows = [self.rows for _ in range(item_num // self.rows)]
-        if item_num % self.rows != 0:
-            rows.append(item_num % self.rows)
-        cols = [item_num//self.rows for i in range(self.rows)]
-        for i in range(item_num % self.rows):
-            cols[i] += 1
-
-        # 更新
-        x = no % self.rows
-        y = no // self.rows
-        next_x = x + add_x
-        next_y = y + add_y
-
-        # wrapモードとmin/maxモードそれぞれで更新後状態調整
-        if next_x < 0:
-            next_x = rows[y]-1 if x_wrap else x
-        if next_x >= rows[y]:
-            next_x = 0 if x_wrap else x
-        if next_y < 0:
-            next_y = cols[next_x]-1 if y_wrap else y
-        if next_y >= cols[next_x]:
-            next_y = 0 if x_wrap else y
-
-        self.select(next_y*self.rows + next_x)
+        self.next_with_row(add_x, add_y, self.rows, x_wrap, y_wrap)
 
 
 # テキスト系
@@ -955,6 +952,8 @@ class XUWinInfo(XUElem):
     OPENING_COUNT_ATTR = "_xmlui_opening_count"
     CLOSING_COUNT_ATTR = "_xmlui_closing_count"
 
+    # 初期化
+    # -----------------------------------------------------
     def __init__(self, elem:XUElem):
         super().__init__(elem.xmlui, elem._element)
 
@@ -1002,30 +1001,25 @@ class XUWinInfo(XUElem):
         return self.attr_int(self.CLOSING_COUNT_ATTR)
 
 # ウインドウクラスベース
-class _XUWinBase(XUWinInfo):
-    def __init__(self, elem:XUElem):
-        super().__init__(elem)
-
-        # ステートがなければ用意しておく
-        if not self.has_attr(self.WIN_STATE_ATTR):
-            self.win_state = _XUWinBase.WIN_STATE.OPENING
-
-    # override。closeするときに状態をCLOSEDにする
-    # すぐcloseされるので、通常はstart_closeを使うように
-    def close(self):
-        self.win_state = _XUWinBase.WIN_STATE.CLOSED  # finish
-        super().close()
-
+class XUWinSet(XUWinInfo):
+    # ウインドウを閉じる
+    # -----------------------------------------------------
     # closeの開始。子も含めてclosingにする
     def start_close(self):
         self.enable = False  # closingは実質closeなのでイベントは見ない
-        self.win_state = _XUWinBase.WIN_STATE.CLOSING
+        self.win_state = XUWinInfo.WIN_STATE.CLOSING
 
         # 子も順次closing
         for child in self._rec_iter():
             child.enable = False  # 全ての子のイベント通知をoffに
-            if _XUWinBase.is_win(child):  # 子ウインドウも一緒にクローズ
-                _XUWinBase(child).win_state = _XUWinBase.WIN_STATE.CLOSING
+            if XUWinSet.is_win(child):  # 子ウインドウも一緒にクローズ
+                XUWinSet(child).win_state = XUWinInfo.WIN_STATE.CLOSING
+
+    # override。closeするときに状態をCLOSEDにする
+    # すぐcloseされるので、通常はstart_closeを使うように
+    def close(self):
+        self.win_state = XUWinInfo.WIN_STATE.CLOSED  # finish
+        super().close()
 
     # ウインドウの状態管理
     # -----------------------------------------------------
@@ -1033,20 +1027,28 @@ class _XUWinBase(XUWinInfo):
     def update(self):
         win_state = self.attr_str(self.WIN_STATE_ATTR)
         match win_state:
-            case _XUWinBase.WIN_STATE.OPENING:
+            case XUWinInfo.WIN_STATE.OPENING:
                 self.set_attr(self.OPENING_COUNT_ATTR, self.attr_int(self.OPENING_COUNT_ATTR) + 1)
-            case _XUWinBase.WIN_STATE.CLOSING:
+            case XUWinInfo.WIN_STATE.CLOSING:
                 self.set_attr(self.CLOSING_COUNT_ATTR, self.attr_int(self.CLOSING_COUNT_ATTR) + 1)
 
     # win_state管理
     @property
-    def win_state(self) -> "_XUWinBase.WIN_STATE":
-        return _XUWinBase.WIN_STATE.from_str(self.attr_str(self.WIN_STATE_ATTR))
+    def win_state(self) -> "XUWinInfo.WIN_STATE":
+        return XUWinInfo.WIN_STATE.from_str(self.attr_str(self.WIN_STATE_ATTR))
 
     @win_state.setter
-    def win_state(self, win_state:"_XUWinBase.WIN_STATE") -> "_XUWinBase.WIN_STATE":
+    def win_state(self, win_state:"XUWinInfo.WIN_STATE") -> "XUWinInfo.WIN_STATE":
         self.set_attr(self.WIN_STATE_ATTR, win_state)
         return win_state
+
+class _XUWinBase(XUWinSet):
+    def __init__(self, elem:XUElem):
+        super().__init__(elem)
+
+        # ステートがなければ用意しておく
+        if not self.has_attr(self.WIN_STATE_ATTR):
+            self.win_state = XUWinInfo.WIN_STATE.OPENING
 
 
 # ゲージサポート

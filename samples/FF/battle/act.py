@@ -1,4 +1,4 @@
-from xmlui.core import XUElem,XMLUI,XUEvent,XUSelectItem,XUWinInfo,XUSelectInfo
+from xmlui.core import XUElem,XMLUI,XUEvent,XUSelectItem,XUWinSet,XUSelectInfo
 from xmlui.ext.scene import XUEActItem
 from battle.data import BattleData
 
@@ -84,15 +84,18 @@ class BattleCmdSetup(BattleMenuAct):
         command.remove_children()
 
         # 職業によってメニューを変える。とりあえずサンプルなので適当に
-        job = {
-            "heishi":["たたかう", "ぼうぎょ", "にげる", "アイテム"],
-            "basaka":["たたかう", "まもらぬ", "ひかぬ", "こびぬ"],
-            "yousei":["たたかう", "ぬすむ", "とんずら", "アイテム"],
-            "majyo":["たたかう", "ぼうぎょ", "まほう", "アイテム"],
+        job: dict[str, dict[str, bool]] = {
+            "heishi":{"たたかう":True, "ぼうぎょ":True, "にげる":False, "アイテム":False},
+            "basaka":{"たたかう":True, "まもらぬ":True, "ひかぬ":True, "こびぬ":True},
+            "yousei":{"たたかう":True, "ぬすむ":False, "とんずら":False, "アイテム":False},
+            "majyo":{"たたかう":True, "ぼうぎょ":True, "まほう":False, "アイテム":False},
         }
-        for action in job[self.battle_data.JOBS[self.battle_data.player_idx]]:
+        for action,allow in job[self.battle_data.JOBS[self.battle_data.player_idx]].items():
             # コマンド追加
-            item = XUSelectItem(XUElem.new(self.scene.xmlui, "battle_action").set_text(action).set_attr("action", action))
+            item = XUSelectItem(
+                XUElem.new(self.scene.xmlui, "battle_action")
+                .set_text(action)
+                .set_attr("action", action))
             command.add_child(item)
 
         # キャラ移動開始(移動が終わったらあmove_dirを0にする)
@@ -182,7 +185,7 @@ class BattleCmdCharaBack(BattleMenuAct):
 class BattleCmdClose(BattleDataAct):
     def init(self):
         # enemy名(command_menuの上位)ごと閉じる
-        self.target_win = XUWinInfo(self.xmlui.find_by_id("enemy_name_win"))
+        self.target_win = XUWinSet(self.xmlui.find_by_id("enemy_name_win"))
         self.target_win.start_close()
 
     def waiting(self):
