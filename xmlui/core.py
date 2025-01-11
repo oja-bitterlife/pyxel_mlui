@@ -966,10 +966,10 @@ class XUWinInfo(XUElem):
 
     # 一番近いXUWinBaseを持つ親を取得する
     @classmethod
-    def find_parent_win(cls, elem:XUElem) -> "XUWinInfo":
+    def find_parent_win(cls, elem:XUElem) -> Self:
         for parent in elem.ancestors:
-            if XUWinInfo.is_win(parent):
-                return XUWinInfo(parent)
+            if cls.is_win(parent):
+                return cls(parent)
         raise TreeException(elem.xmlui, "Window not found in parents")
 
     # ウインドウの状態

@@ -175,17 +175,17 @@ class BattleCmdCharaBack(BattleMenuAct):
 
             # 全員のターゲットが決まった
             if self.battle_data.player_idx >= len(user_data.player_data):
-                self.act.add_act(BattleCmdClose(self.xmlui))
+                self.act.add_act(BattleCmdClose(self.xmlui, self.menu_win))
             # 次のキャラのコマンド入力
             else:
                 self.act.add_act(BattleCmdSetup(self.xmlui, self.menu_win))
 
             self.finish()
 
-class BattleCmdClose(BattleDataAct):
+class BattleCmdClose(BattleMenuAct):
     def init(self):
         # enemy名(command_menuの上位)ごと閉じる
-        self.target_win = XUWinSet(self.xmlui.find_by_id("enemy_name_win"))
+        self.target_win = XUWinSet.find_parent_win(self.menu_win)
         self.target_win.start_close()
 
     def waiting(self):
