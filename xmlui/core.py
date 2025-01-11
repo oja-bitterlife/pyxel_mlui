@@ -727,8 +727,7 @@ class XMLUI(XUElem, Generic[T]):
 # *****************************************************************************
 # 選択クラス用アイテム
 class XUSelectItem(XUElem):
-    def __init__(self, elem:XUElem):
-        super().__init__(elem.xmlui, elem._element)
+    pass
 
 # 選択の状態取得用
 class XUSelectInfo(XUElem):
@@ -745,7 +744,7 @@ class XUSelectInfo(XUElem):
         # 直下のみ対象。別の選択が下にくっつくことがあるので下まではみない
         for child in self._util_info._element:
             if child.tag == self.ITEM_TAG:
-                yield XUSelectItem(XUElem(self.xmlui, child))
+                yield XUSelectItem(self.xmlui, child)
 
     # listでまとめて返す。扱いやすい
     @property
@@ -836,7 +835,7 @@ class _XUSelectBase(XUSelectSet):
         if not self.items and item_tag:
             for i,child in enumerate([child for child in self._element if child.tag == item_tag]):
                 # タグ名は専用のものに置き換え
-                item = XUSelectItem(XUElem(elem.xmlui, deepcopy(child)))
+                item = XUSelectItem(elem.xmlui, deepcopy(child))
                 item._element.tag = self.ITEM_TAG
                 self._util_info.add_child(item)
 

@@ -1,4 +1,4 @@
-from xmlui.core import XUElem,XMLUI,XUEvent,XUSelectItem,XUWinSet,XUSelectInfo
+from xmlui.core import XUElem,XMLUI,XUEvent,XUWinSet,XUSelectInfo
 from xmlui.ext.scene import XUEActItem
 from battle.data import BattleData
 
@@ -92,10 +92,10 @@ class BattleCmdSetup(BattleMenuAct):
         }
         for action,allow in job[self.battle_data.JOBS[self.battle_data.player_idx]].items():
             # コマンド追加
-            item = XUSelectItem(
-                XUElem.new(self.scene.xmlui, "battle_action")
+            item = (XUElem.new(self.scene.xmlui, "battle_action")
                 .set_text(action)
-                .set_attr("action", action))
+                .set_attr("action", action)
+                .set_attr("value", "" if allow else "工事中"))
             command.add_child(item)
 
         # キャラ移動開始(移動が終わったらあmove_dirを0にする)
@@ -135,13 +135,13 @@ class BattleCmdTargetSel(BattleMenuAct):
         # ターゲット設定
         enemy_sel = self.target_select.find_by_id("enemy_sel")
         for i,enemy in enumerate(enemy_data.data):
-            item = XUSelectItem(XUElem.new(self.scene.xmlui, "select_item"))
+            item = XUElem.new(self.scene.xmlui, "select_item")
             item.set_pos(self.battle_data.enemy_rect[i].x, self.battle_data.enemy_rect[i].y)
             enemy_sel.add_child(item)
 
         player_sel = self.target_select.find_by_id("player_sel")
         for i,player in enumerate(user_data.player_data):
-            item = XUSelectItem(XUElem.new(self.scene.xmlui, "select_item"))
+            item = XUElem.new(self.scene.xmlui, "select_item")
             item.set_pos(self.battle_data.player_rect[i].x, self.battle_data.player_rect[i].y)
             player_sel.add_child(item)
 
