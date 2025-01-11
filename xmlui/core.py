@@ -731,7 +731,7 @@ class XUSelectItem(XUElem):
     def __init__(self, elem:XUElem):
         super().__init__(elem.xmlui, elem._element)
 
-# 選択ベースの状態取得用(初期化用引数が不要)
+# 選択の状態取得用
 class XUSelectInfo(XUElem):
     # クラス定数
     INFO_TAG = "_xmlui_select_info"
@@ -776,6 +776,7 @@ class XUSelectInfo(XUElem):
     def action(self) -> XUEventItem:
         return XUEventItem(self.selected_item.action)
 
+# 選択の状態更新用
 class XUSelectSet(XUSelectInfo):
     # 値設定用
     # -----------------------------------------------------
@@ -815,7 +816,6 @@ class XUSelectSet(XUSelectInfo):
             next_y = 0 if x_wrap else y
 
         self.select(next_y*rows + next_x)
-
 
 # 選択ベース
 class _XUSelectBase(XUSelectSet):
@@ -931,7 +931,7 @@ class XUTextUtil:
 
 # ウインドウサポート
 # *****************************************************************************
-# ウインドウクラス参照用
+# ウインドウ参照用
 class XUWinInfo(XUElem):
     # ウインドウの状態定義
     class WIN_STATE(StrEnum):
@@ -1000,7 +1000,7 @@ class XUWinInfo(XUElem):
     def closing_count(self) -> int:
         return self.attr_int(self.CLOSING_COUNT_ATTR)
 
-# ウインドウクラスベース
+# ウインドウ更新用
 class XUWinSet(XUWinInfo):
     # ウインドウを閉じる
     # -----------------------------------------------------
@@ -1042,6 +1042,7 @@ class XUWinSet(XUWinInfo):
         self.set_attr(self.WIN_STATE_ATTR, win_state)
         return win_state
 
+# ウインドウクラスベース
 class _XUWinBase(XUWinSet):
     def __init__(self, elem:XUElem):
         super().__init__(elem)
