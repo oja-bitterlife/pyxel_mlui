@@ -118,17 +118,25 @@ class BattleCmdSel(BattleMenuAct):
             menu = XUSelectInfo(self.menu_win.find_by_id("command"))
             if menu.selected_item.value == "工事中":
                 self.scene.xmlui.popup("under_construct")
+                self.act.add_act(BattleCmdDeny(self.xmlui, self.menu_win))
+                self.finish()
                 return
 
             # 選択コマンドを記録
             self.battle_data.command[self.battle_data.player_idx] = menu.selected_item.text
-
             self.act.add_act(BattleCmdTargetSel(self.xmlui, self.menu_win))
             self.finish()
 
         # 取りやめ
         if self.xmlui.event.check(XUEvent.Key.BTN_B):
             self.act.add_act(BattleCmdCharaBack(self.xmlui, self.menu_win, self.battle_data.player_idx-1))
+            self.finish()
+
+# 工事中
+class BattleCmdDeny(BattleMenuAct):
+    def waiting(self):
+        if self.xmlui.event.check(XUEvent.Key.BTN_A, XUEvent.Key.BTN_B):
+            self.act.add_act(BattleCmdSel(self.xmlui, self.menu_win))
             self.finish()
 
 # ターゲットの選択
@@ -162,7 +170,6 @@ class BattleCmdTargetSel(BattleMenuAct):
             self.target_select.close()
             self.act.add_act(BattleCmdSel(self.xmlui, self.menu_win))
             self.finish()
-
 
 class BattleCmdCharaBack(BattleMenuAct):
     def __init__(self, xmlui: XMLUI[BattleData], menu_win: XUElem, next_idx:int):
