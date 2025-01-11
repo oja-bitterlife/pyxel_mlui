@@ -9,10 +9,10 @@ user_db = XUEMemoryDB.load("assets/data/user.db")
 class UserSave:
     def __init__(self, name:str):
         self.pc = [
-            {"lv":1, "name":"おじゃ１", "hp":1, "mp":3, "fb":0},
-            {"lv":1, "name":"おじゃ２", "hp":2, "mp":2, "fb":0},
-            {"lv":1, "name":"おじゃ３", "hp":3, "mp":1, "fb":1},
-            {"lv":1, "name":"おじゃ４", "hp":4, "mp":0, "fb":1},
+            {"lv":1, "name":"おじゃあ", "hp":1, "mp":3, "fb":0},
+            {"lv":1, "name":"おじゃい", "hp":2, "mp":2, "fb":0},
+            {"lv":1, "name":"おじゃう", "hp":3, "mp":1, "fb":1},
+            {"lv":1, "name":"おじゃえ", "hp":4, "mp":0, "fb":1},
         ]
         self.gil = 123456
  
