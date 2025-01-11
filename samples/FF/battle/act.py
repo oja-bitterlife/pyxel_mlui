@@ -86,10 +86,10 @@ class BattleCmdSetup(BattleMenuAct):
 
         # 職業によってメニューを変える。とりあえずサンプルなので適当に
         job: dict[str, dict[str, bool]] = {
-            "heishi":{"たたかう":True, "ぼうぎょ":False, "にげる":False, "アイテム":False},
+            "heishi":{"たたかう":True, "ぼうぎょ":True, "にげる":False, "アイテム":False},
             "basaka":{"たたかう":True, "まもらぬ":True, "ひかぬ":True, "こびぬ":True},
             "yousei":{"たたかう":True, "ぬすむ":False, "とんずら":False, "アイテム":False},
-            "majyo":{"たたかう":True, "ぼうぎょ":False, "まほう":False, "アイテム":False},
+            "majyo":{"たたかう":True, "ぼうぎょ":True, "まほう":False, "アイテム":False},
         }
         for action,allow in job[self.battle_data.JOBS[self.battle_data.player_idx]].items():
             # コマンド追加
@@ -124,7 +124,10 @@ class BattleCmdSel(BattleMenuAct):
 
             # 選択コマンドを記録
             self.battle_data.command[self.battle_data.player_idx] = menu.selected_item.text
-            self.act.add_act(BattleCmdTargetSel(self.xmlui, self.menu_win))
+            if menu.selected_item.text == "ぼうぎょ":
+                self.act.add_act(BattleCmdCharaBack(self.xmlui, self.menu_win, self.battle_data.player_idx+1))
+            else:
+                self.act.add_act(BattleCmdTargetSel(self.xmlui, self.menu_win))
             self.finish()
 
         # 取りやめ

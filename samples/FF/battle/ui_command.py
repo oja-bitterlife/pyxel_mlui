@@ -23,7 +23,8 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
             return
 
         # コマンドの表示
-        pyxel.text(area.x, area.y, battle_action.text, 7, system_font.font)
+        col = 14 if battle_action.value == "工事中" else 7
+        pyxel.text(area.x, area.y, battle_action.text, col, system_font.font)
 
         # コマンド選択中はHandIconを表示
         if xmlui.data_ref.scene.current_act == BattleCmdSel:
