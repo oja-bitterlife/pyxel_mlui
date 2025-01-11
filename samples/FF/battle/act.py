@@ -1,8 +1,9 @@
 from xmlui.core import XUElem,XMLUI,XUEvent,XUWinSet,XUSelectInfo
 from xmlui.ext.scene import XUEActItem
-from battle.data import BattleData
 
 from db import user_data,enemy_data
+from battle.data import BattleData
+
 
 # BattleDataを扱えるAct
 class BattleDataAct(XUEActItem):
@@ -115,6 +116,10 @@ class BattleCmdSel(BattleMenuAct):
     def waiting(self):
         if self.scene.xmlui.event.check(XUEvent.Key.BTN_A):
             menu = XUSelectInfo(self.menu_win.find_by_id("command"))
+            # if menu.selected_item.value == "工事中":
+            #     self.scene.xmlui.popup("under_construct")
+            #     return
+
             # 選択コマンドを記録
             self.battle_data.command[self.battle_data.player_idx] = menu.selected_item.text
 

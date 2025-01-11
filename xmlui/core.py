@@ -831,6 +831,10 @@ class _XUSelectBase(XUSelectSet):
         self.item_w = item_w
         self.item_h = item_h
 
+       # 自前設定が無ければabsorberにしておく
+        if not self.has_attr("use_event"):
+            self.set_attr("use_event", XUEvent.UseEvent.ABSORBER)
+
         # INFO_TAG下にINFO_ITEMがなければ(未初期化)自分の直下から探してコピー(初期化)する
         if not self.items and item_tag:
             for i,child in enumerate([child for child in self._element if child.tag == item_tag]):
