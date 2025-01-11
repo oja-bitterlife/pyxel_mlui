@@ -25,7 +25,7 @@ class XURect:
         BOTTOM = "bottom"
 
         @classmethod
-        def from_str(cls, type_:str) -> "XURect.Align":
+        def from_str(cls, type_:str) -> Self:
             for v in cls.__members__.values():
                 if v == type_:
                     return v
@@ -124,8 +124,7 @@ class XURect:
 # イベント管理用
 # #############################################################################
 class XUEventItem(str):
-    def __new__(cls, val:str):
-        return super().__new__(cls, val)
+    pass
 
 class XUEvent:
     REPEAT_HOLD = 15
@@ -262,8 +261,8 @@ class XUElem:
             return super().__eq__(other)
 
     @classmethod
-    def new(cls, xmlui:'XMLUI', tag_name:str) -> "XUElem":
-        return XUElem(xmlui, Element(tag_name))
+    def new(cls, xmlui:'XMLUI', tag_name:str) -> Self:
+        return cls(xmlui, Element(tag_name))
 
     # attribアクセス用
     # *************************************************************************
