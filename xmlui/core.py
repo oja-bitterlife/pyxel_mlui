@@ -337,7 +337,7 @@ class XUElem:
     # ツリー操作用
     # *************************************************************************
     @property
-    def parent(self) -> 'XUElem|None':
+    def parent(self) -> "XUElem|None":
         return self.xmlui._parent_cache.get(self._element, None)
 
     # 兄弟を先に取得するイテレータ
@@ -356,7 +356,7 @@ class XUElem:
 
     # 親以上祖先リスト
     @property
-    def ancestors(self) -> 'list[XUElem]':
+    def ancestors(self) -> "list[XUElem]":
         out:list[XUElem] = []
         parent = self.parent
         while parent:
@@ -364,17 +364,17 @@ class XUElem:
             parent = parent.parent
         return out
 
-    def find_by_id(self, id:str) -> 'XUElem':
+    def find_by_id(self, id:str) -> "XUElem":
         for child in self._rec_iter():
             if child.id == id:
                 return child
         raise TreeException(self, f"ID '{id}' not found in '{self.tag}' and children")
 
-    def find_by_tagall(self, tag:str) -> list['XUElem']:
+    def find_by_tagall(self, tag:str) -> list["XUElem"]:
         return [child for child in self._rec_iter() if child.tag == tag]
 
     # ツリーを遡って親を探す
-    def find_parent_by_id(self, id:str) -> 'XUElem':
+    def find_parent_by_id(self, id:str) -> "XUElem":
         parent = self.parent
         while parent:
             if parent.id == id:
@@ -383,7 +383,7 @@ class XUElem:
         raise TreeException(self, f"Parent '{id}' not found in '{self.tag}' parents")
 
     # openした親
-    def find_owner(self) -> 'XUElem':
+    def find_owner(self) -> "XUElem":
         return self.find_parent_by_id(self.owner)
 
     # すでにツリーに存在するか
@@ -941,7 +941,7 @@ class XUWinInfo(XUElem):
         CLOSED = "closed"
 
         @classmethod
-        def from_str(cls, state:str) -> "XUWinInfo.WIN_STATE":
+        def from_str(cls, state:str) -> Self:
             for v in cls.__members__.values():
                 if v == state:
                     return v
@@ -982,12 +982,12 @@ class XUWinInfo(XUElem):
     # -----------------------------------------------------
     # 現在open中かどうか。open完了もTrue
     @property
-    def is_opening(self):
+    def is_opening(self) -> bool:
         return self.win_state == XUWinInfo.WIN_STATE.OPENING or self.win_state == XUWinInfo.WIN_STATE.OPENED
 
     # 現在close中かどうか。close完了もTrue
     @property
-    def is_closing(self):
+    def is_closing(self) -> bool:
         return self.win_state == XUWinInfo.WIN_STATE.CLOSING or self.win_state == XUWinInfo.WIN_STATE.CLOSED
 
     # openされてからのカウント(≒update_count)
@@ -1034,11 +1034,11 @@ class XUWinSet(XUWinInfo):
 
     # win_state管理
     @property
-    def win_state(self) -> "XUWinInfo.WIN_STATE":
+    def win_state(self) -> XUWinInfo.WIN_STATE:
         return XUWinInfo.WIN_STATE.from_str(self.attr_str(self.WIN_STATE_ATTR))
 
     @win_state.setter
-    def win_state(self, win_state:"XUWinInfo.WIN_STATE") -> "XUWinInfo.WIN_STATE":
+    def win_state(self, win_state:XUWinInfo.WIN_STATE) -> XUWinInfo.WIN_STATE:
         self.set_attr(self.WIN_STATE_ATTR, win_state)
         return win_state
 
