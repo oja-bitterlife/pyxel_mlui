@@ -110,12 +110,11 @@ class XUEActManager:
 
             # 完了したら次のAct
             if act.is_finish:
-                self.next_act()
-
                 # デバッグ表示
                 if not self.is_act_empty:
-                    self.logger.debug(f"next act:{self.current_act}")
+                    self.logger.debug(f"enter act: {self.current_act}")
 
+                self.next_act()
 
     # 状態取得
     # -----------------------------------------------------
