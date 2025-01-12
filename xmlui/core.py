@@ -139,7 +139,7 @@ class XUEvent:
         def __eq__(self, other:object) -> bool:
             if isinstance(other, str):
                 other = other.lower()
-            return self.__eq__(other)
+            return super().__eq__(other)
 
     def __init__(self, init_active=False):
         self.is_active = init_active  # アクティブなイベントかどうか
