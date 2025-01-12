@@ -71,8 +71,8 @@ def ui_init(xmlui:XMLUI):
 
     @common_text.msg("popup_text")
     def popup_text(popup_text:text.XUMsg, event:XUEvent):
-        if XUEvent.Key.BTN_A in event.trg or XUEvent.Key.BTN_B in event.trg:
-            popup_text.close()
+        if event.check(XUEvent.Key.BTN_A, XUEvent.Key.BTN_B):
+            XUWinInfo.find_parent_win(popup_text).close()
 
         # テキスト描画
         area = popup_text.area  # areaは重いので必ずキャッシュ
