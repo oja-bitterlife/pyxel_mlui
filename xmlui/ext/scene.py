@@ -1,4 +1,5 @@
-from typing import Callable
+from typing import Callable,cast
+import logging
 
 import pyxel
 
@@ -72,6 +73,11 @@ class XUEActItem(XUETimeout):
         pass
     # def action(self)は親クラスで定義
 
+# デバッグ表示付き
+class XUEDebugActItem(XUEActItem):
+    def log_enter(self, logger:logging.Logger):
+        logger.debug(f"enter act: {self}")
+
 
 # Act管理クラス。各Itemをコレに登録していく
 # *****************************************************************************
@@ -95,6 +101,10 @@ class XUEActManager:
 
     def next_act(self) -> XUEActItem | None:
         if self._act_queue:
+            # デバッグ表示
+            if XMLUI.debug_enable and isinstance(self.current_act, XUEDebugActItem):
+                self.current_act.log_enter(self.logger)
+
             return self._act_queue.pop(0)
 
     # 状態更新
@@ -110,10 +120,6 @@ class XUEActManager:
 
             # 完了したら次のAct
             if act.is_finish:
-                # デバッグ表示
-                if not self.is_act_empty:
-                    self.logger.debug(f"enter act: {self.current_act}")
-
                 self.next_act()
 
     # 状態取得

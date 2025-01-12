@@ -1,12 +1,12 @@
 from xmlui.core import XUElem,XMLUI,XUEvent,XUWinSet,XUSelectInfo
-from xmlui.ext.scene import XUEActItem
+from xmlui.ext.scene import XUEDebugActItem
 
 from db import user_data,enemy_data
 from battle.data import BattleData
 
 
 # BattleDataを扱えるAct
-class BattleDataAct(XUEActItem):
+class BattleDataAct(XUEDebugActItem):
     def __init__(self, xmlui:XMLUI[BattleData]):
         super().__init__()
         self.xmlui = xmlui
@@ -19,7 +19,7 @@ class BattleDataAct(XUEActItem):
         return self.xmlui.data_ref.scene
 
 # コマンドメニュー下のAct
-class BattleMenuAct(XUEActItem):
+class BattleMenuAct(XUEDebugActItem):
     def __init__(self, xmlui:XMLUI[BattleData], menu_win:XUElem):
         super().__init__()
         self.xmlui = xmlui

@@ -1,7 +1,7 @@
 import random
 
 from xmlui.core import XMLUI,XUWinSet,XUTextUtil
-from xmlui.ext.scene import XUEActItem,XUEActItem
+from xmlui.ext.scene import XUEDebugActItem
 
 from msg_dq import MsgDQ
 from db import user_data, enemy_data
@@ -11,7 +11,7 @@ from battle.data import BattleData
 
 # バトル用シーン遷移ベース
 # #############################################################################
-class BattleActItem(XUEActItem):
+class BattleActItem(XUEDebugActItem):
     def __init__(self, xmlui:XMLUI[BattleData]):
         super().__init__()
         self.xmlui = xmlui
