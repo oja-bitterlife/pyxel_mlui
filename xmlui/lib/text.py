@@ -235,10 +235,10 @@ class XUMsgScr(XUMsg):
 
         # ページ内の各行を分解してLineInfoを作ってリストで返す
         @classmethod
-        def from_page(cls, page:XUPageItem, total_line_no:int, page_text:str) -> list["XUMsgScr.LineInfo"]:
-            out:list[XUMsgScr.LineInfo] = []
+        def from_page(cls, page:XUPageItem, total_line_no:int, page_text:str) -> list[Self]:
+            out:list[Self] = []
             for i,line in enumerate(page_text.splitlines()):
-                out.append(XUMsgScr.LineInfo(page, total_line_no + i, i, line))
+                out.append(cls(page, total_line_no + i, i, line))
             return out
 
     # スクロールバッファを行単位で返す

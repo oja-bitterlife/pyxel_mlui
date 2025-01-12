@@ -12,7 +12,7 @@ class PyxelFont(_XUFontBase):
  
      # フォントサイズ算出
     @classmethod
-    def get_bdf_size(cls, bdf_font_path):
+    def get_bdf_size(cls, bdf_font_path) -> int:
         with open(bdf_font_path, "r") as f:
             for i, line in enumerate(f.readlines()):
                 if i > 100:  # 100行も見りゃええじゃろ...

@@ -3,15 +3,14 @@ import xml.etree.ElementTree
 from xml.etree.ElementTree import Element
 
 # 型を使うよ
-from typing import Callable,Any,Self,Generic,TypeVar
+from typing import Callable,Any,Self
 from enum import StrEnum
-T = TypeVar('T')
 
 # 日本語対応
 import unicodedata
 
 # その他よく使う奴
-import re,math
+import re
 from copy import deepcopy
 
 # 描画領域計算用
@@ -546,7 +545,7 @@ class XUElem:
 
 # XMLでUIライブラリ本体
 # #############################################################################
-class XMLUI(XUElem, Generic[T]):
+class XMLUI[T](XUElem):
     debug_enable = False  # デバッグから参照するフラグ(クラス変数≒システムで一意)
 
     # 初期化

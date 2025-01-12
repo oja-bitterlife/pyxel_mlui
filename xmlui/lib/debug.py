@@ -2,8 +2,6 @@ import logging
 logging.basicConfig()
 
 from xmlui.core import XMLUI
-from typing import TypeVar
-T = TypeVar('T')
 
 
 # ロギング用
@@ -21,7 +19,7 @@ class XULog:
 
 # デバッグ用
 # *********************************************************************
-class DebugXMLUI(XMLUI[T]):
+class DebugXMLUI[T](XMLUI[T]):
     DEBUGEVENT_PRINTTREE = "DEBUG_PRINTTREE"
     DEBUGEVENT_RELOAD = "DEBUG_RELOAD"
 
