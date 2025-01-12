@@ -432,7 +432,7 @@ class XUElem:
 
         # IDがかぶってはいけない
         if self.xmlui.exists_id(id_alias):
-            return self.xmlui.find_by_id(id_alias)
+            raise TreeException(self.xmlui, f"ID '{id_alias}' already exists in XMLUI")
 
         # オープン
         opened:XUElem|None = None
