@@ -43,9 +43,6 @@ class BattleStart(BattleDataAct):
         super().__init__(xmlui)
         self.elem =self.xmlui.find_by_id("ui_battle")
 
-        # enemy_name_winをownerから切り離す
-        self.xmlui.find_by_id("enemy_name_win").set_attr("owner", "")
-
     def init(self):
         self.set_timeout(8)
 

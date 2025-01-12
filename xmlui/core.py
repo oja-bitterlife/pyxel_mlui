@@ -414,19 +414,18 @@ class XUElem:
         self._element.append(child._element)
         self.xmlui._parent_cache[child._element] = self
 
+    # removedを設定する
+    def remove(self):
+        self.set_attr("removed", True)
+
     # 子を全部removedにする
     def remove_children(self):
         for child in self.children:
             child.set_attr("removed", True)
 
-    # 自身をremovedにする(子も全部removed)
-    def remove(self):
-        self.set_attr("removed", True)
-        self.remove_children()
-
     # open/close
     # *************************************************************************
-    # 子に別Element一式を追加する
+    # 子に別ElementTree一式を追加する
     def open(self, id:str, id_alias:str|None=None) -> "XUElem":
         # idがかぶらないよう別名を付けられる
         id_alias = id if id_alias is None else id_alias
@@ -438,7 +437,7 @@ class XUElem:
         # オープン
         opened:XUElem|None = None
         for template in self.xmlui._templates.values():
-            # 複数のテンプレートの中から最初に見つかったidを複製してopenする
+            # 見つかったidを複製してopenする
             if template.exists_id(id):
                 opened = XUElem(self.xmlui, deepcopy(template.find_by_id(id)._element))
                 self.add_child(opened)
@@ -446,21 +445,12 @@ class XUElem:
         if opened == None:
             raise RuntimeError(f"ID '{id}' not found in templates")
 
-        # ownerを設定しておく
-        for child in opened._rec_iter():
-            child.set_attr("owner", id_alias)
-
         return opened
 
-    # クローズ
+    # クローズ。子ごとremoved
     def close(self):
-        # ownerが設定されていればownerを、無ければ自身をremoveする
-        if self.owner and self.xmlui.exists_id(self.owner):
-            target = self.xmlui.find_by_id(self.owner)
-        else:
-            target = self
-
-        target.remove()
+        self.remove()
+        self.remove_children()
 
     # デバッグ用
     # *************************************************************************
@@ -500,10 +490,6 @@ class XUElem:
     @property
     def selected(self) -> bool:  # 選択アイテムの選択状態
         return self.attr_bool("selected", False)
-
-    @property
-    def owner(self) -> str:  # close時のidを設定
-        return self.attr_str("owner", "")
 
     @property
     def x(self) -> int:  # 親からの相対座標x
@@ -661,9 +647,9 @@ class XMLUI[T](XUElem):
         # ActiveStateの取得。Active=最後、なので最後から確認
         active_elems:list[XUElem] = []
         for event in reversed([elem for elem in self._rec_iter()
-                                if elem.enable
+                                if elem.enable and not elem.removed
                                     and (elem.use_event == XUEvent.UseEvent.ABSORBER
-                                    or elem.use_event == XUEvent.UseEvent.LISTENER)]):
+                                        or elem.use_event == XUEvent.UseEvent.LISTENER)]):
             active_elems.append(event)  # イベントを使うelemを回収
             if event.use_event == XUEvent.UseEvent.ABSORBER:  # イベント通知終端
                 break
@@ -701,10 +687,11 @@ class XMLUI[T](XUElem):
     # イベント
     # *************************************************************************
     # イベントを記録する。Trg処理は内部で行っているので現在の状態を入れる
+    # set()なので何度入れてもいい
     def on(self, event_name:str):
         self.event._on(XUEventItem(event_name))
 
-    # override
+    # root側で開く
     def open(self, id:str, id_alias:str|None=None) -> XUElem:
         return self._root.open(id, id_alias)
 
