@@ -157,25 +157,30 @@ class XUEvent:
         self.now = self._receive
 
         # リピート更新
-        self.repeat = self.trg.copy()
-        for key in self._repeat_count.keys():
-            if key not in self.now:  # 押されていなければカウンタリセット
-                self._repeat_count[key] = 0
-        for item in self.now:
-            if self._repeat_count[item] > XUEvent.REPEAT_HOLD and (self._repeat_count[item]-XUEvent.REPEAT_HOLD) % XUEvent.REPEAT_SPAN  == 0:
-                self.repeat.add(item)
+        # -------------------------------------------------
+        self.repeat = self.trg.copy()  # trgは確定で
+
+        # 押されていなければカウンタリセット
+        for event in self._repeat_count.keys():
+            if event not in self.now:
+                self._repeat_count[event] = 0
+
+        # リピートカウンター増加
+        for event in self.now:
+            self._repeat_count[event] = self._repeat_count.get(event, 0) + 1
+
+        # カウンターによって発火
+        for event in self.now:
+            if self._repeat_count[event] > XUEvent.REPEAT_HOLD and (self._repeat_count[event]-XUEvent.REPEAT_HOLD) % XUEvent.REPEAT_SPAN  == 0:
+                self.repeat.add(event)
 
         # 取得し直す
+        # -------------------------------------------------
         self._receive = set([])
 
     # 入力
-    def _on(self, event_name:XUEventItem):
-        if event_name in self._receive:
-            raise ValueError(f"event_name:{event_name} is already registered.")
-        self._receive.add(event_name)
-
-        # リピートカウンター増加
-        self._repeat_count[event_name] = self._repeat_count.get(event_name, 0) + 1
+    def _on(self, event:XUEventItem):
+        self._receive.add(event)
 
     # イベントの確認
     def check(self, *events:XUEventItem) -> bool:
@@ -701,15 +706,6 @@ class XMLUI[T](XUElem):
     # イベントを記録する。Trg処理は内部で行っているので現在の状態を入れる
     def on(self, event_name:str):
         self.event._on(XUEventItem(event_name))
-
-    # イベントが発生していればopenする。すでに開いているチェック付き
-    def open_by_event(self, event_names:list[str]|str, id:str, id_alias:str|None=None) -> XUElem|None:
-        if isinstance(event_names, str):
-            event_names = [event_names]  # 配列で統一
-        for event_name in event_names:
-            if event_name in self.event.trg:
-                return self.root.open(id, id_alias)
-        return None
 
     # override
     def open(self, id:str, id_alias:str|None=None) -> XUElem:
