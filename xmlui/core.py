@@ -249,7 +249,7 @@ class XUEvent:
 # #############################################################################
 class TreeException(RuntimeError):
     def __init__(self, elem:"XUElem", msg:str, *args: object):
-        super().__init__(f"{elem.strtree()}\n{msg}", *args)
+        super().__init__(f"\n{elem.strtree()}\n{msg}", *args)
 
 # XMLのElement管理
 class XUElem:
