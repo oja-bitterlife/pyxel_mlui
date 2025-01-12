@@ -103,14 +103,14 @@ class XURect:
 
         match valign:
             case cls.Align.TOP:
-                y = 0
+                offset_y = 0
             case cls.Align.CENTER:
-                y = (area.h-h)//2
+                offset_y = (area.h-h)//2
             case cls.Align.BOTTOM:
-                y = area.h - h
+                offset_y = area.h - h
             case _:
                 raise ValueError(f"align:{valign} is not supported.")
-        return offset_x,y
+        return offset_x,offset_y
 
     # 配置座標取得
     def aligned_pos(self, w:int, h:int, align:Align=Align.CENTER, valign:Align=Align.CENTER) -> tuple[int, int]:
