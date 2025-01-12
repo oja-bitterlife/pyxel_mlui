@@ -304,8 +304,8 @@ class XUElem:
     # その他
     # *************************************************************************
     @property
-    def root(self) -> "XMLUI":
-        return self.xmlui.root
+    def root(self) -> "XUElem":
+        return self.xmlui._root
 
     # tagアクセス
     @property
@@ -576,9 +576,9 @@ class XMLUI[T](XUElem):
         self.event = XUEvent(True)  # 唯一のactiveとする
 
         # 描画ツリー構築
-        self.root = XUElem.new(self, "root").set_attr("id", "root")
+        self._root = XUElem.new(self, "root").set_attr("id", "root")
         self._over = XUElem.new(self, "oevr").set_attr("id", "over")
-        self.add_child(self.root)  # 普通に使うもの
+        self.add_child(self._root)  # 普通に使うもの
         self.add_child(self._over)  # 上に強制で出す物
 
         # UI描画時の参照先データ
@@ -601,7 +601,7 @@ class XMLUI[T](XUElem):
 
         # 自己参照を外す
         self.xmlui._xmlui = None
-        self.root._xmlui = None
+        self._root._xmlui = None
         self._over._xmlui = None
 
         # キャッシュの削除
@@ -706,7 +706,7 @@ class XMLUI[T](XUElem):
 
     # override
     def open(self, id:str, id_alias:str|None=None) -> XUElem:
-        return self.root.open(id, id_alias)
+        return self._root.open(id, id_alias)
 
     # over側で開く
     def popup(self, id:str, id_alias:str|None=None) -> XUElem:
