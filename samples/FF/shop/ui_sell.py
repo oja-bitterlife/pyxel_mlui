@@ -44,7 +44,7 @@ def ui_init(xmlui:XMLUI):
             sell_list = XUSelectInfo(sell_menu.find_by_id("sell_list"))
             SellList.set(1, [(item.attr_int("item_id"), item.attr_int("num")) for item in sell_list.items if item.attr_int("num") > 0])
 
-            sell_num.close()
+            sell_num.root.find_by_id("sell_menu").close()
 
             # disableにしていたメニューを元に戻す
             win = XUWinInfo.find_parent_win(sell_num)

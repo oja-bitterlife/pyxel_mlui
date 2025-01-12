@@ -38,7 +38,7 @@ def ui_init(xmlui:XMLUI):
 
         # 戻る
         if XUEvent.Key.BTN_B in event.trg:
-            buy_num.close()
+            buy_num.root.find_by_id("buy_menu").close()
 
             # enableにしていたメニューを元に戻す
             win = XUWinInfo.find_parent_win(buy_num)
