@@ -1,6 +1,6 @@
 import pyxel
 
-from xmlui.core import XMLUI,XUEvent,XUWinInfo,XUSelectItem
+from xmlui.core import XMLUI,XUEvent,XUWinInfo,XUWinSet,XUSelectItem
 from xmlui.lib import select
 
 from system_dq import system_font
@@ -39,12 +39,10 @@ def ui_init(xmlui:XMLUI):
             dir_select.select(3)
 
         if XUEvent.Key.BTN_A in event.trg:
-            dir_win = XUWinInfo.find_parent_win(dir_select)
+            dir_win = XUWinSet.find_parent_win(dir_select)
             dir_win.start_close()
             return f"start_talk_{dir_select.action}"
 
         # 閉じる
         if XUEvent.Key.BTN_B in event.trg:
-            XUWinInfo.find_parent_win(dir_select).start_close()
-
-
+            XUWinSet.find_parent_win(dir_select).start_close()

@@ -1,4 +1,4 @@
-from xmlui.core import XMLUI,XUEvent,XUWinInfo
+from xmlui.core import XMLUI,XUEvent,XUWinSet
 
 import msg_dq
 from msg_dq import MsgDQ
@@ -14,16 +14,14 @@ def ui_init(xmlui:XMLUI):
         msg_text.draw(event, True)
 
         # 自分が閉じたらメニューごと閉じる
-        if XUWinInfo.find_parent_win(msg_text).win_state == XUWinInfo.WIN_STATE.CLOSED:
-            XUWinInfo(msg_text.xmlui.find_by_id("menu")).start_close()
-            print("close msg")
-
+        if XUWinSet.find_parent_win(msg_text).win_state == XUWinSet.WIN_STATE.CLOSED:
+            XUWinSet(msg_text.xmlui.find_by_id("menu")).start_close()
 
         # 入力アクション
         # ---------------------------------------------------------
         if XUEvent.Key.BTN_A in event.trg or XUEvent.Key.BTN_B in event.now:
             if msg_text.is_all_finish:
-                XUWinInfo.find_parent_win(msg_text).start_close()  # 閉じる
+                XUWinSet.find_parent_win(msg_text).start_close()  # 閉じる
                 return
 
         if XUEvent.Key.BTN_A in event.trg or XUEvent.Key.BTN_B in event.now:
