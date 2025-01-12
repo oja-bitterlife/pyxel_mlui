@@ -75,8 +75,8 @@ class XUEActItem(XUETimeout):
 
 # デバッグ表示付き
 class XUEDebugActItem(XUEActItem):
-    def log_enter(self, logger:logging.Logger):
-        logger.debug(f"enter act: {self}")
+    def log_start(self, logger:logging.Logger):
+        logger.debug(f"start act: {self}")
 
 
 # Act管理クラス。各Itemをコレに登録していく
@@ -101,10 +101,6 @@ class XUEActManager:
 
     def next_act(self) -> XUEActItem | None:
         if self._act_queue:
-            # デバッグ表示
-            if XMLUI.debug_enable and isinstance(self.current_act, XUEDebugActItem):
-                self.current_act.log_enter(self.logger)
-
             return self._act_queue.pop(0)
 
     # 状態更新
@@ -112,9 +108,16 @@ class XUEActManager:
     def update(self):
         if not self.is_act_empty:
             act = self.current_act
+
+            # 初回だけinitを実行
             if act._init_func:
-                act._init_func()  # 初回はinitも実行
+                # デバッグ表示
+                if XMLUI.debug_enable and isinstance(self.current_act, XUEDebugActItem):
+                    self.current_act.log_start(self.logger)
+
+                act._init_func()
                 act._init_func = None
+
             # Actの実行
             act._update()
 
