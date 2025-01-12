@@ -301,12 +301,18 @@ class XUElem:
             self._element.attrib[key] = str(value)
         return self
 
-    # tagアクセス用
+    # その他
+    # *************************************************************************
+    @property
+    def root(self) -> "XMLUI":
+        return self.xmlui.root
+
+    # tagアクセス
     @property
     def tag(self) -> str:
         return self._element.tag
 
-    # textアクセス用(基本はROで運用)
+    # textアクセス(基本はROで運用)
     @property
     def text(self) -> str:
         return "\n".join([line.strip() for line in self._element.text.splitlines()]) if self._element.text else ""
@@ -315,8 +321,6 @@ class XUElem:
         self._element.text = text
         return self
 
-    # その他
-    # *************************************************************************
     @property
     def area(self) -> XURect:  # 親からの相対座標
         # areaは良く呼ばれるので、一回でもparent探しのdictアクセスを軽減する
@@ -381,19 +385,6 @@ class XUElem:
 
     def find_by_tagall(self, tag:str) -> list["XUElem"]:
         return [child for child in self._rec_iter() if child.tag == tag]
-
-    # ツリーを遡って親を探す
-    def find_parent_by_id(self, id:str) -> "XUElem":
-        parent = self.parent
-        while parent:
-            if parent.id == id:
-                return parent
-            parent = parent.parent
-        raise TreeException(self, f"Parent '{id}' not found in '{self.tag}' parents")
-
-    # openした親
-    def find_owner(self) -> "XUElem":
-        return self.find_parent_by_id(self.owner)
 
     # すでにツリーに存在するか
     def exists_id(self, id:str) -> bool:

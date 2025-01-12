@@ -33,14 +33,14 @@ def ui_init(xmlui:XMLUI):
         sell_num.select_by_event(event.repeat, *XUEvent.Key.LEFT_RIGHT())
 
         if XUEvent.Key.BTN_A in event.trg:
-            sell_menu = sell_num.find_parent_by_id("sell_menu")
+            sell_menu = sell_num.root.find_by_id("sell_menu")
             sell_list = sell_menu.find_by_id("sell_list")
             sell_list.enable = True
 
         # 戻る
         if XUEvent.Key.BTN_B in event.trg:
             # DBの更新
-            sell_menu = sell_num.find_parent_by_id("sell_menu")
+            sell_menu = sell_num.root.find_by_id("sell_menu")
             sell_list = XUSelectInfo(sell_menu.find_by_id("sell_list"))
             SellList.set(1, [(item.attr_int("item_id"), item.attr_int("num")) for item in sell_list.items if item.attr_int("num") > 0])
 
@@ -57,7 +57,7 @@ def ui_init(xmlui:XMLUI):
     # アイテム売却
     # -----------------------------------------------------
     def get_sell_num(selected_item:XUSelectItem):
-        sell_menu = selected_item.find_parent_by_id("sell_menu")
+        sell_menu = selected_item.root.find_by_id("sell_menu")
         sell_num = XUSelectInfo(sell_menu.find_by_id("sell_num"))
 
         return selected_item.attr_int("num") if sell_num.action == "all" else 1

@@ -32,7 +32,7 @@ def ui_init(xmlui:XMLUI):
         buy_num.select_by_event(event.repeat, *XUEvent.Key.LEFT_RIGHT())
 
         if XUEvent.Key.BTN_A in event.trg:
-            buy_menu = buy_num.find_parent_by_id("buy_menu")
+            buy_menu = buy_num.root.find_by_id("buy_menu")
             buy_list = buy_menu.find_by_id("buy_list")
             buy_list.enable = True
 
@@ -64,7 +64,7 @@ def ui_init(xmlui:XMLUI):
 
     # 購入アイテムリスト
     def buy_item(buy_item:XUSelectItem, parent_enable:bool):
-        buy_menu = buy_item.find_parent_by_id("buy_menu")
+        buy_menu = buy_item.root.find_by_id("buy_menu")
 
         area = buy_item.area
 
@@ -92,7 +92,7 @@ def ui_init(xmlui:XMLUI):
 
         buy_list.select_by_event(event.repeat, *XUEvent.Key.UP_DOWN())
         if XUEvent.Key.BTN_A in event.trg:
-            buy_menu = buy_list.find_parent_by_id("buy_menu")
+            buy_menu = buy_list.root.find_by_id("buy_menu")
             price = get_buy_price(buy_menu, buy_list.selected_item)
             user_data.gil -= price
 
