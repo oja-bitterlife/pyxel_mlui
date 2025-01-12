@@ -135,6 +135,12 @@ class XUEvent:
         LISTENER = "listener"
         NONE = "none"
 
+        # 文字列とはlowerで比較する
+        def __eq__(self, other:object) -> bool:
+            if isinstance(other, str):
+                other = other.lower()
+            return self.__eq__(other)
+
     def __init__(self, init_active=False):
         self.is_active = init_active  # アクティブなイベントかどうか
         self.on_init = False
@@ -665,10 +671,10 @@ class XMLUI[T](XUElem):
         active_elems:list[XUElem] = []
         for event in reversed([elem for elem in self._rec_iter()
                                 if elem.enable
-                                    and (elem.use_event.lower() == XUEvent.UseEvent.ABSORBER
-                                    or elem.use_event.lower() == XUEvent.UseEvent.LISTENER)]):
+                                    and (elem.use_event == XUEvent.UseEvent.ABSORBER
+                                    or elem.use_event == XUEvent.UseEvent.LISTENER)]):
             active_elems.append(event)  # イベントを使うelemを回収
-            if event.use_event.lower() == XUEvent.UseEvent.ABSORBER:  # イベント通知終端
+            if event.use_event == XUEvent.UseEvent.ABSORBER:  # イベント通知終端
                 break
 
         # 親情報の更新
