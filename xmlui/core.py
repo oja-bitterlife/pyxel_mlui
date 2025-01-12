@@ -26,7 +26,7 @@ class XURect:
         @classmethod
         def from_str(cls, type_:str) -> Self:
             for v in cls.__members__.values():
-                if v == type_:
+                if v == type_.lower():
                     return v
             raise RuntimeError(f"Invalid Align type: {type_}")
 
@@ -665,10 +665,10 @@ class XMLUI[T](XUElem):
         active_elems:list[XUElem] = []
         for event in reversed([elem for elem in self._rec_iter()
                                 if elem.enable
-                                    and (elem.use_event == XUEvent.UseEvent.ABSORBER
-                                    or elem.use_event == XUEvent.UseEvent.LISTENER)]):
+                                    and (elem.use_event.lower() == XUEvent.UseEvent.ABSORBER
+                                    or elem.use_event.lower() == XUEvent.UseEvent.LISTENER)]):
             active_elems.append(event)  # イベントを使うelemを回収
-            if event.use_event == XUEvent.UseEvent.ABSORBER:  # イベント通知終端
+            if event.use_event.lower() == XUEvent.UseEvent.ABSORBER:  # イベント通知終端
                 break
 
         # 親情報の更新
