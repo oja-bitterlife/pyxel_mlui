@@ -32,6 +32,20 @@ class BattleMenuAct(XUEDebugActItem):
     def scene(self):
         return self.xmlui.data_ref.scene
 
+# リザルト系Act
+class BattlePlayAct(XUEDebugActItem):
+    def __init__(self, xmlui:XMLUI[BattleData], result:XUElem):
+        super().__init__()
+        self.xmlui = xmlui
+        self.result = result
+
+    @property
+    def battle_data(self):
+        return self.xmlui.data_ref
+    @property
+    def scene(self):
+        return self.xmlui.data_ref.scene
+
 
 # バトルコマンド関係
 # *****************************************************************************
@@ -200,45 +214,43 @@ class BattleCmdClose(BattleMenuAct):
 
     def waiting(self):
         if self.target_win.removed:
-            self.act.add_act(BattlePlayStart(self.xmlui))
+            self.act.add_act(BattlePlayStart(self.xmlui, self.xmlui.open("result")))
             self.finish()
 
 # アクション
 # ---------------------------------------------------------
-class BattlePlayStart(BattleDataAct):
+class BattlePlayStart(BattlePlayAct):
+    # プレイヤ側を先に
     def init(self):
-        # プレイヤ側を先に
         self.battle_data.player_idx = -1
-        self.act.add_act(BattlePlayPlayer(self.xmlui))
+        self.act.add_act(BattlePlayPlayer(self.xmlui, self.result))
         self.finish()
 
-class BattlePlayPlayer(BattleDataAct):
+class BattlePlayPlayer(BattlePlayAct):
+    # プレイヤーの行動
     def init(self):
-        # 次のキャラへ
-        self.battle_data.player_idx += 1
+        self.battle_data.player_idx += 1  # 次のキャラへ
+        self.result.open("result_who")  # キャラ名表示
 
-    def action(self):
-        # プレイヤーの行動
         if self.battle_data.player_idx < len(user_data.player_data):
-            self.act.add_act(BattlePlayAction(self.xmlui))
-
-        # 敵の行動開始
+            self.act.add_act(BattlePlayAction(self.xmlui, self.result))
         else:
-            self.act.add_act(BattlePlayEnemy(self.xmlui))
+            # 敵の行動開始
+            self.act.add_act(BattlePlayEnemy(self.xmlui, self.result))
 
-class BattlePlayAction(BattleDataAct):
+class BattlePlayAction(BattlePlayAct):
     def init(self):
         self.set_timeout(15)
 
-class BattlePlayEnemy(BattleDataAct):
+class BattlePlayEnemy(BattlePlayAct):
     def init(self):
         self.set_timeout(15)
 
     def action(self):
-        self.act.add_act(BattlePlayBack(self.xmlui))
+        self.act.add_act(BattlePlayBack(self.xmlui, self.result))
 
-class BattlePlayDamage(BattleDataAct):
+class BattlePlayDamage(BattlePlayAct):
     pass
 
-class BattlePlayBack(BattleDataAct):
+class BattlePlayBack(BattlePlayAct):
     pass

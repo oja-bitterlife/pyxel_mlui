@@ -8,7 +8,7 @@
             <status x="16" y="16"/>
         </round_win>
         <round_win x="0" y="170" w="96" h="80" id="enemy_name_win">
-            <enemy_names x="16" y="16"/>
+            <enemy_names x="10" y="16"/>
         </round_win>
     </ui_battle>
 
@@ -26,12 +26,19 @@
 
 
     <info>行動結果</info>
-    <result x="0" y="170">
-        <round_win w="96" h="32" id="result_who"/>
-        <round_win x="88" w="96" h="32" id="result_action"/>
-        <round_win y="24" w="96" h="32" id="result_target"/>
-        <round_win x="88" y="24" w="96" h="32" id="result_effect"/>
-    </result>
+    <result x="0" y="170" id="result"/>
+    <round_win w="96" h="32" id="result_who">
+        <result_who x="10" y="16"/>
+    </round_win>
+    <round_win x="88" w="96" h="32" id="result_action">
+        <result_action x="10" y="16"/>
+    </round_win>
+    <round_win y="24" w="96" h="32" id="result_target">
+        <result_target x="10" y="16"/>
+    </round_win>
+    <round_win x="88" y="24" w="96" h="32" id="result_effect">
+        <result_effect x="10" y="16"/>
+    </round_win>
 
 
 </xmlui>
