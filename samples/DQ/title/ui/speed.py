@@ -1,6 +1,6 @@
 from enum import StrEnum
 
-from xmlui.core import XMLUI,XUEvent,XUSelectItem
+from xmlui.core import XMLUI,XUEvent
 from xmlui.lib import select
 
 from title.ui.item import menu_item

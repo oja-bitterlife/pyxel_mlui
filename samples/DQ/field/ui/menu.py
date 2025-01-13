@@ -53,7 +53,7 @@ def ui_init(xmlui:XMLUI):
 
         # 閉じる
         if XUEvent.Key.BTN_B in event.trg:
-            XUWinInfo.find_parent_win(menu_grid).start_close()
+            XUWinInfo.find_parent_win(menu_grid).setter.start_close()
 
     # コマンドメニューのタイトル
     @field_text.label("title")

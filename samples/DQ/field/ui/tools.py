@@ -1,6 +1,6 @@
 import pyxel
 
-from xmlui.core import XMLUI,XUEvent,XUWinInfo,XUWinSet,XUSelectItem,XUTextUtil,XUElem
+from xmlui.core import XMLUI,XUEvent,XUWinInfo,XUSelectItem,XUTextUtil,XUElem
 from xmlui.lib import select
 
 from msg_dq import MsgDQ
@@ -54,7 +54,7 @@ def ui_init(xmlui:XMLUI):
             msg = tools_effect(tools_list.selected_no, data)
 
             # メッセージウインドウを開く
-            XUWinSet.find_parent_win(tools_list).start_close()
+            XUWinInfo.find_parent_win(tools_list).setter.start_close()
             msg_win = tools_list.xmlui.find_by_id("menu").open("message")
             msg_text = MsgDQ(msg_win.find_by_id("msg_text"))
             msg_text.append_msg(msg)  # systemメッセージ
@@ -62,7 +62,7 @@ def ui_init(xmlui:XMLUI):
         # 閉じる
         # ---------------------------------------------------------
         if XUEvent.Key.BTN_B in event.trg:
-            XUWinSet.find_parent_win(tools_list).start_close()
+            XUWinInfo.find_parent_win(tools_list).setter.start_close()
 
 
     # どうぐ処理

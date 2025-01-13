@@ -1,6 +1,6 @@
 import pyxel
 
-from xmlui.core import XMLUI,XUEvent,XUEventItem,XUWinSet
+from xmlui.core import XMLUI,XUEvent,XUEventItem,XUWinInfo
 from xmlui.lib.debug import DebugXMLUI
 from xmlui.ext.scene import XUEFadeScene,XUEActItem
 
@@ -95,7 +95,7 @@ class Field(XUEFadeScene):
                 menu = self.xmlui.find_by_id("menu")
                 if self.bg.check_stairs(menu, self.player.block_x, self.player.block_y):
                     # バトル開始
-                    XUWinSet(menu).start_close()
+                    XUWinInfo(menu).setter.start_close()
                     self.fade_close()
                 else:
                     msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
@@ -107,7 +107,7 @@ class Field(XUEFadeScene):
                 door = self.field_obj.find_door(self.player.block_x, self.player.block_y)
                 if door != None:
                     self.field_obj.open(door)
-                    XUWinSet(menu).start_close()
+                    XUWinInfo(menu).setter.start_close()
                 else:
                     msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
                     msg_text.append_msg("とびらがない")  # systemメッセージ
@@ -131,4 +131,4 @@ class Field(XUEFadeScene):
             # メッセージウインドウの時はメニューごと閉じる
             if event[len("close_win:"):].strip() == "message":
                 menu = self.xmlui.find_by_id("menu")
-                XUWinSet(menu).start_close()
+                XUWinInfo(menu).setter.start_close()
