@@ -230,6 +230,8 @@ class BattlePlayPlayer(BattlePlayAct):
     # プレイヤーの行動
     def init(self):
         self.battle_data.player_idx += 1  # 次のキャラへ
+        self.battle_data.damage.clear()
+
         self.result.open("result_who")  # キャラ名表示
         self.set_timeout(2)
 
@@ -308,7 +310,6 @@ class BattlePlayPlayerDamage(BattlePlayAct):
     # ダメージ表示完了待ち
     def waiting(self):
         if all([damage.is_finish for damage in self.battle_data.damage]):
-            self.battle_data.damage.clear()
             self.finish()
 
 class BattlePlayDeffence(BattlePlayAct):

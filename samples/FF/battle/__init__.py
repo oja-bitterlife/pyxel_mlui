@@ -112,12 +112,14 @@ class Battle(XUEFadeScene):
 
                 if damage.target >= 0:
                     area = battle_data.enemy_rect[damage.target]
+                    offset_y -= self.enemy_img.height
                 else:
                     area = battle_data.player_rect[abs(damage.target)-1]
-                    
+                    offset_y -= area.h
+
                 damage_text = XUTextUtil.format_zenkaku(f"{damage.damage}")
                 x = area.center_x - system_font.text_width(damage_text)//2
-                y = area.y + self.enemy_img.height - offset_y - system_font.size
+                y = area.y - offset_y - system_font.size
                 pyxel.text(x, y, damage_text, 8, system_font.font)
 
         # UIの表示
