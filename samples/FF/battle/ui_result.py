@@ -28,3 +28,9 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
             target_name = enemy_data.data[target_idx]["name"]
 
         pyxel.text(result_target.area.x, result_target.area.y, target_name, 7, system_font.font)
+
+
+    @result_text.label("result_action")
+    def result_action(result_action:text.XULabel, event:XUEvent):
+        text = "　２かいヒット"
+        pyxel.text(result_action.area.x, result_action.area.y, text, 7, system_font.font)

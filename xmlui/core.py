@@ -714,10 +714,18 @@ class XUSelectInfo(XUElem):
     INFO_TAG = "_xmlui_select_info"
     ITEM_TAG = "_xmlui_select_item"
 
+    # 初期化
+    # -----------------------------------------------------
     def __init__(self, elem:XUElem):
         super().__init__(elem.xmlui, elem._element)
         self._util_info = elem.find_by_tagall(self.INFO_TAG)[0]
 
+    @property
+    def setter(self) -> "_XUWinSet":
+        return _XUWinSet(self)
+
+    # 選択アイテム
+    # -----------------------------------------------------
     # 処理を途中で抜けるならこっちが早い
     def item_iter(self):
         # 直下のみ対象。別の選択が下にくっつくことがあるので下まではみない
@@ -730,6 +738,13 @@ class XUSelectInfo(XUElem):
     def items(self) -> list[XUSelectItem]:
         return list(self.item_iter())
 
+    # itemの数
+    @property
+    def item_num(self) -> int:
+        return len(self.items)
+
+    # 選択状態
+    # -----------------------------------------------------
     # 選択中のitemの番号(Treeの並び順)
     @property
     def selected_no(self) -> int:
@@ -743,18 +758,15 @@ class XUSelectInfo(XUElem):
     def selected_item(self) -> XUSelectItem:
         return self.items[self.selected_no]
 
-    # itemの数
-    @property
-    def item_num(self) -> int:
-        return len(self.items)
-
+    # その他
+    # -----------------------------------------------------
     # __eq__だとpylanceの型認識がおかしくなるのでactionを使う
     @property
     def action(self) -> XUEventItem:
         return XUEventItem(self.selected_item.action)
 
 # 選択の状態更新用
-class XUSelectSet(XUSelectInfo):
+class _XUSelectSet(XUSelectInfo):
     # 値設定用
     # -----------------------------------------------------
     # 選択追加アトリビュートに設定する(元のXMLを汚さない)
@@ -795,7 +807,7 @@ class XUSelectSet(XUSelectInfo):
         self.select(next_y*rows + next_x)
 
 # 選択ベース
-class _XUSelectBase(XUSelectSet):
+class _XUSelectBase(_XUSelectSet):
     def __init__(self, elem:XUElem, item_tag:str, rows:int, item_w:int, item_h:int):
         # UtilBase用ルートの作成(状態保存先)
         if elem.exists_tag(XUSelectInfo.INFO_TAG):
@@ -938,6 +950,10 @@ class XUWinInfo(XUElem):
     def __init__(self, elem:XUElem):
         super().__init__(elem.xmlui, elem._element)
 
+    @property
+    def setter(self) -> "_XUWinSet":
+        return _XUWinSet(self)
+
     # ウインドウclass管理
     # -----------------------------------------------------
     # XUWinBaseを使ったElementかどうか。attributeの有無でチェック
@@ -982,7 +998,7 @@ class XUWinInfo(XUElem):
         return self.attr_int(self.CLOSING_COUNT_ATTR)
 
 # ウインドウ更新用
-class XUWinSet(XUWinInfo):
+class _XUWinSet(XUWinInfo):
     # ウインドウを閉じる
     # -----------------------------------------------------
     # closeの開始。子も含めてclosingにする
@@ -993,8 +1009,8 @@ class XUWinSet(XUWinInfo):
         # 子も順次closing
         for child in self._rec_iter():
             child.enable = False  # 全ての子のイベント通知をoffに
-            if XUWinSet.is_win(child):  # 子ウインドウも一緒にクローズ
-                XUWinSet(child).win_state = XUWinInfo.WIN_STATE.CLOSING
+            if XUWinInfo.is_win(child):  # 子ウインドウも一緒にクローズ
+                _XUWinSet(child).win_state = XUWinInfo.WIN_STATE.CLOSING
 
     # override。closeするときに状態をCLOSEDにする
     # すぐcloseされるので、通常はstart_closeを使うように
@@ -1024,7 +1040,7 @@ class XUWinSet(XUWinInfo):
         return win_state
 
 # ウインドウクラスベース
-class _XUWinBase(XUWinSet):
+class _XUWinBase(_XUWinSet):
     def __init__(self, elem:XUElem):
         super().__init__(elem)
 
@@ -1041,8 +1057,8 @@ class XUGageInfo(XUElem):
     # XURectで分割ゲージの各Box
     pass
 
-class XUGageSet(XUGageInfo):
+class _XUGageSet(XUGageInfo):
     pass
 
-class _XUGageBase(XUGageSet):
+class _XUGageBase(_XUGageSet):
     pass

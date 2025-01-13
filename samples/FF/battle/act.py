@@ -1,4 +1,4 @@
-from xmlui.core import XUElem,XMLUI,XUEvent,XUWinSet,XUSelectInfo
+from xmlui.core import XUElem,XMLUI,XUEvent,XUWinInfo,XUSelectInfo
 from xmlui.ext.scene import XUEDebugActItem
 
 from db import user_data,enemy_data
@@ -209,8 +209,8 @@ class BattleCmdCharaBack(BattleMenuAct):
 class BattleCmdClose(BattleMenuAct):
     def init(self):
         # enemy名(command_menuの上位)ごと閉じる
-        self.target_win = XUWinSet.find_parent_win(self.menu_win)
-        self.target_win.start_close()
+        self.target_win = XUWinInfo.find_parent_win(self.menu_win)
+        self.target_win.setter.start_close()
 
     def waiting(self):
         if self.target_win.removed:
@@ -243,12 +243,15 @@ class BattlePlayPlayer(BattlePlayAct):
 
 class BattlePlayPlayerAction(BattlePlayAct):
     def init(self):
+        # ぼうぎょ
         if self.battle_data.command[self.battle_data.player_idx] == "ぼうぎょ":
             self.act.add_act(
                 BattlePlayFront(self.xmlui, self.result),  # 前に出るのを待って
                 BattlePlayDeffence(self.xmlui, self.result),  # ぼうぎょを表示
                 BattlePlayBack(self.xmlui, self.result),  # 後ろにさがって
+                BattlePlayCloseWin(self.xmlui, self.result),  # ウインドウを閉じて
                 BattlePlayPlayer(self.xmlui, self.result))  # 次のキャラへ
+        # こうげき
         else:
             self.act.add_act(
                 BattlePlayPlayerTarget(self.xmlui, self.result),  # ターゲット表示
@@ -256,6 +259,7 @@ class BattlePlayPlayerAction(BattlePlayAct):
                 BattlePlayPlayerAttack(self.xmlui, self.result),  # 攻撃エフェクト
                 BattlePlayBack(self.xmlui, self.result),  # 後ろにさがって
                 BattlePlayPlayerDamage(self.xmlui, self.result),  # ヒット数表示
+                BattlePlayCloseWin(self.xmlui, self.result),  # ウインドウを閉じて
                 BattlePlayPlayer(self.xmlui, self.result))  # 次のキャラへ
 
         # 移動も開始しておく
@@ -276,19 +280,37 @@ class BattlePlayFront(BattlePlayAct):
             self.finish()
 
 class BattlePlayBack(BattlePlayAct):
-    pass
-
+    def init(self):
+        self.battle_data.player_move_dir[self.battle_data.player_idx] = 1  # 後ろにさがる
+    def waiting(self):
+        if self.battle_data.player_move_dir[self.battle_data.player_idx] == 0:
+            self.finish()
 
 class BattlePlayPlayerAttack(BattlePlayAct):
-    pass
+    def init(self):
+        self.set_timeout(8)
 
 class BattlePlayPlayerDamage(BattlePlayAct):
-    pass
+    def init(self):
+        self.result.open("result_action")  # ヒット数表示
+        self.set_timeout(15)
+
+    # ダメージ表示完了待ち
+    def waiting(self):
+        pass
 
 class BattlePlayDeffence(BattlePlayAct):
     pass
 
-
+class BattlePlayCloseWin(BattlePlayAct):
+    def waiting(self):
+        children = [child for child in self.result.children if XUWinInfo.is_win(child)]
+        if not children:
+            self.finish()
+        else:
+            win = XUWinInfo(children[-1])
+            if not win.is_closing:
+                win.setter.start_close()
 
 class BattlePlayEnemyAction(BattlePlayAct):
     pass
