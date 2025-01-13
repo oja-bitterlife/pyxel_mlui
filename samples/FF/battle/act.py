@@ -258,7 +258,8 @@ class BattlePlayPlayerAction(BattlePlayAct):
                 BattlePlayFront(self.xmlui, self.result),  # 前に出るのを待って
                 BattlePlayPlayerAttack(self.xmlui, self.result),  # 攻撃エフェクト
                 BattlePlayBack(self.xmlui, self.result),  # 後ろにさがって
-                BattlePlayPlayerDamage(self.xmlui, self.result),  # ヒット数表示
+                BattlePlayPlayerHit(self.xmlui, self.result),  # ヒット数表示
+                BattlePlayPlayerDamage(self.xmlui, self.result),  # ダメージ表示
                 BattlePlayCloseWin(self.xmlui, self.result),  # ウインドウを閉じて
                 BattlePlayPlayer(self.xmlui, self.result))  # 次のキャラへ
 
@@ -286,23 +287,27 @@ class BattlePlayBack(BattlePlayAct):
 
 class BattlePlayPlayerAttack(BattlePlayAct):
     def init(self):
+        self.set_timeout(10)
+
+    # 攻撃エフェクト再生終了待ち
+
+# ヒット数表示開始
+class BattlePlayPlayerHit(BattlePlayAct):
+    def init(self):
+        self.result.open("result_action")
+        self.set_timeout(2)
+
+# ダメージ表示
+class BattlePlayPlayerDamage(BattlePlayAct):
+    def init(self):
         import random
         target = self.battle_data.target[self.battle_data.player_idx]
         self.battle_data.damage.append(BattleDamage(random.randint(0, 9999), target))
 
-    # 攻撃エフェクト再生終了待ち
+    # ダメージ表示完了待ち
     def waiting(self):
         if not self.battle_data.damage:
             self.finish()
-
-class BattlePlayPlayerDamage(BattlePlayAct):
-    def init(self):
-        self.result.open("result_action")  # ヒット数表示
-        self.set_timeout(15)
-
-    # ダメージ表示完了待ち
-    def waiting(self):
-        pass
 
 class BattlePlayDeffence(BattlePlayAct):
     def init(self):

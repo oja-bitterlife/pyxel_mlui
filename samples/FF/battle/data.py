@@ -5,7 +5,7 @@ from xmlui.ext.timer import XUETimeout
 
 class BattleDamage(XUETimeout):
     def __init__(self, damage:int, target:int):
-        super().__init__(30)
+        super().__init__(24)
         self.damage = damage
         self.target = target
 

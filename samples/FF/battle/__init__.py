@@ -99,14 +99,23 @@ class Battle(XUEFadeScene):
         # ダメージ表示
         for damage in battle_data.damage:
             damage.update()
-            offset_y = int(math.sin(damage.alpha*math.pi)*-16)
+
+            if damage.count < 10:
+                alpha = damage.count/10
+                alpha = min(1, abs(alpha - 0.5)*2)
+                offset_y = int((1-pow(alpha, 2)) * 32)
+            else:
+                alpha = (damage.count-10)/10
+                alpha = min(1, abs(alpha - 0.5)*2)
+                offset_y = int((1-pow(alpha, 2)) * 16)
+
             if damage.target >= 0:
                 area = battle_data.enemy_rect[damage.target]
             else:
                 area = battle_data.player_rect[abs(damage.target)-1]
                 
             damage_text = XUTextUtil.format_zenkaku(f"{damage.damage}")
-            pyxel.text(area.x, area.y, damage_text, 8, system_font.font)
+            pyxel.text(area.x, area.y-offset_y, damage_text, 8, system_font.font)
 
         battle_data.damage = [damage for damage in battle_data.damage if not damage.is_finish]  # リスト更新
 
