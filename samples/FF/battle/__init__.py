@@ -2,14 +2,14 @@ import math
 import pyxel
 
 # バトル画面
-from xmlui.core import XURect,XUSelectInfo,XUTextUtil
+from xmlui.core import XURect,XUTextUtil
 from xmlui.lib.debug import DebugXMLUI
 from xmlui.ext.scene import XUEFadeScene
 
 # ui
 import ui_common
 from FF.battle import ui_command,ui_status,act,ui_target,ui_result
-from FF.battle.act import BattleStart
+from FF.battle.act import BattleStart,BattlePlayPlayerDamage
 from FF.battle.data import BattleData
 
 # データ
@@ -97,29 +97,28 @@ class Battle(XUEFadeScene):
             pyxel.blt(x, rect.y, img, 0, 0, rect.w, rect.h, 0)
 
         # ダメージ表示
-        for damage in battle_data.damage:
-            damage.update()
+        if isinstance(self.current_act, BattlePlayPlayerDamage):
+            for damage in battle_data.damage:
+                damage.update()
 
-            if damage.count < 10:
-                alpha = damage.count/10
-                alpha = min(1, abs(alpha - 0.5)*2)
-                offset_y = int((1-pow(alpha, 2)) * 32)
-            else:
-                alpha = (damage.count-10)/10
-                alpha = min(1, abs(alpha - 0.5)*2)
-                offset_y = int((1-pow(alpha, 2)) * 16)
+                if damage.count < 10:
+                    alpha = damage.count/10
+                    alpha = min(1, abs(alpha - 0.5)*2)
+                    offset_y = int((1-pow(alpha, 2)) * 32)
+                else:
+                    alpha = (damage.count-10)/10
+                    alpha = min(1, abs(alpha - 0.5)*2)
+                    offset_y = int((1-pow(alpha, 2)) * 16)
 
-            if damage.target >= 0:
-                area = battle_data.enemy_rect[damage.target]
-            else:
-                area = battle_data.player_rect[abs(damage.target)-1]
-                
-            damage_text = XUTextUtil.format_zenkaku(f"{damage.damage}")
-            x = area.center_x - system_font.text_width(damage_text)//2
-            y = area.y + self.enemy_img.height - offset_y - system_font.size
-            pyxel.text(x, y, damage_text, 8, system_font.font)
-
-        battle_data.damage = [damage for damage in battle_data.damage if not damage.is_finish]  # リスト更新
+                if damage.target >= 0:
+                    area = battle_data.enemy_rect[damage.target]
+                else:
+                    area = battle_data.player_rect[abs(damage.target)-1]
+                    
+                damage_text = XUTextUtil.format_zenkaku(f"{damage.damage}")
+                x = area.center_x - system_font.text_width(damage_text)//2
+                y = area.y + self.enemy_img.height - offset_y - system_font.size
+                pyxel.text(x, y, damage_text, 8, system_font.font)
 
         # UIの表示
         self.xmlui.draw()

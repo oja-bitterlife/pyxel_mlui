@@ -287,9 +287,15 @@ class BattlePlayBack(BattlePlayAct):
 
 class BattlePlayPlayerAttack(BattlePlayAct):
     def init(self):
+        # 攻撃エフェクト再生
         self.set_timeout(10)
 
-    # 攻撃エフェクト再生終了待ち
+        # ダメージ設定
+        import random
+        target = self.battle_data.target[self.battle_data.player_idx]
+        self.battle_data.damage.append(BattleDamage(random.randint(0, 9999), random.randint(1, 99), target))
+
+    # 攻撃エフェクト終了待ち
 
 # ヒット数表示開始
 class BattlePlayPlayerHit(BattlePlayAct):
@@ -299,14 +305,10 @@ class BattlePlayPlayerHit(BattlePlayAct):
 
 # ダメージ表示
 class BattlePlayPlayerDamage(BattlePlayAct):
-    def init(self):
-        import random
-        target = self.battle_data.target[self.battle_data.player_idx]
-        self.battle_data.damage.append(BattleDamage(random.randint(0, 9999), random.randint(1, 99), target))
-
     # ダメージ表示完了待ち
     def waiting(self):
-        if not self.battle_data.damage:
+        if all([damage.is_finish for damage in self.battle_data.damage]):
+            self.battle_data.damage.clear()
             self.finish()
 
 class BattlePlayDeffence(BattlePlayAct):
