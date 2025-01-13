@@ -58,12 +58,10 @@ class BattleStart(BattleDataAct):
 # ターン開始
 class BattleTurnStart(BattleDataAct):
     def init(self):
-        self.set_timeout(0)
-
-    def action(self):
         self.battle_data.player_idx = 0
         self.battle_data.target = [0, 0, 0, 0]
         self.act.add_act(BattleCmdStart(self.xmlui))
+        self.finish()
 
 # コマンド
 # ---------------------------------------------------------
@@ -209,16 +207,13 @@ class BattleCmdClose(BattleMenuAct):
 # ---------------------------------------------------------
 class BattlePlayStart(BattleDataAct):
     def init(self):
-        self.set_timeout(0)
-        self.battle_data.player_idx = -1
-
-    def action(self):
         # プレイヤ側を先に
+        self.battle_data.player_idx = -1
         self.act.add_act(BattlePlayPlayer(self.xmlui))
+        self.finish()
 
 class BattlePlayPlayer(BattleDataAct):
     def init(self):
-        self.set_timeout(0)
         # 次のキャラへ
         self.battle_data.player_idx += 1
 

@@ -118,10 +118,6 @@ class XUEActManager:
                 act._init_func()
                 act._init_func = None
 
-                # __init__/initでfinishされた
-                if act.is_finish:
-                    act.action()  # 完了呼び出し
-
             # Actの実行
             act._update()
 
