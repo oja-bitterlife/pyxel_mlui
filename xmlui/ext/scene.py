@@ -46,9 +46,9 @@ class XUEActItem(XUETimeout):
             # waitingの中でfinish()が呼ばれた
             if self.is_finish:
                 self.action()  # 完了呼び出し
-
-        # is_finishの時はなにもしないのでactionが2つ呼ばれることはない
-        super()._update()
+            else:
+                # タイマー完了チェック
+                super()._update()
 
     # 呼び出しManagerを返す(Actの中で次のActをaddする用)
     @property
@@ -109,7 +109,7 @@ class XUEActManager:
         if not self.is_act_empty:
             act = self.current_act
 
-            # 初回だけinitを実行
+            # 初回だけinitを実行(is_finishは無視)
             if act._init_func:
                 # デバッグ表示
                 if XMLUI.debug_enable and isinstance(self.current_act, XUEDebugActItem):
@@ -117,6 +117,10 @@ class XUEActManager:
 
                 act._init_func()
                 act._init_func = None
+
+                # __init__/initでfinishされた
+                if act.is_finish:
+                    act.action()  # 完了呼び出し
 
             # Actの実行
             act._update()

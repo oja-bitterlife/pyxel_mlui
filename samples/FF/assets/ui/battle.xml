@@ -12,14 +12,26 @@
         </round_win>
     </ui_battle>
 
+    <info>コマンドメニュー</info>
     <round_win x="32" w="64" h="80" id="menu">
         <command x="16" y="16" item_h="16" id="command">
         </command>
     </round_win>
 
+    <info>ターゲット選択(透明)</info>
     <target_select abs_x="0" abs_y="0" id="target_select">
         <enemy_sel id="enemy_sel" use_event="listener"/>
         <player_sel id="player_sel" use_event="listener"/>
     </target_select>
+
+
+    <info>行動結果</info>
+    <result x="0" y="170">
+        <round_win w="96" h="32" id="result_who"/>
+        <round_win x="88" w="96" h="32" id="result_action"/>
+        <round_win y="24" w="96" h="32" id="result_target"/>
+        <round_win x="88" y="24" w="96" h="32" id="result_effect"/>
+    </result>
+
 
 </xmlui>

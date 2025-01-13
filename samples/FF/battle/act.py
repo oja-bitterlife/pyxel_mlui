@@ -210,9 +210,37 @@ class BattleCmdClose(BattleMenuAct):
 class BattlePlayStart(BattleDataAct):
     def init(self):
         self.set_timeout(0)
+        self.battle_data.player_idx = -1
 
-class BattlePlayMove(BattleDataAct):
-    pass
+    def action(self):
+        # プレイヤ側を先に
+        self.act.add_act(BattlePlayPlayer(self.xmlui))
+
+class BattlePlayPlayer(BattleDataAct):
+    def init(self):
+        self.set_timeout(0)
+        # 次のキャラへ
+        self.battle_data.player_idx += 1
+
+    def action(self):
+        # プレイヤーの行動
+        if self.battle_data.player_idx < len(user_data.player_data):
+            self.act.add_act(BattlePlayAction(self.xmlui))
+
+        # 敵の行動開始
+        else:
+            self.act.add_act(BattlePlayEnemy(self.xmlui))
+
+class BattlePlayAction(BattleDataAct):
+    def init(self):
+        self.set_timeout(15)
+
+class BattlePlayEnemy(BattleDataAct):
+    def init(self):
+        self.set_timeout(15)
+
+    def action(self):
+        self.act.add_act(BattlePlayBack(self.xmlui))
 
 class BattlePlayDamage(BattleDataAct):
     pass
