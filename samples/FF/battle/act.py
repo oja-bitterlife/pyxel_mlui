@@ -108,7 +108,7 @@ class BattleCmdSetup(BattleMenuAct):
                 .set_attr("value", "" if allow else "工事中"))
             command.add_child(item)
 
-        # キャラ移動開始(移動が終わったらあmove_dirを0にする)
+        # キャラ移動開始(移動が終わったらmove_dirが0になってる)
         self.battle_data.player_move_dir[self.battle_data.player_idx] = -1
         self.battle_data.player_offset[self.battle_data.player_idx] = 0
 
@@ -231,26 +231,64 @@ class BattlePlayPlayer(BattlePlayAct):
     def init(self):
         self.battle_data.player_idx += 1  # 次のキャラへ
         self.result.open("result_who")  # キャラ名表示
-
-        if self.battle_data.player_idx < len(user_data.player_data):
-            self.act.add_act(BattlePlayAction(self.xmlui, self.result))
-        else:
-            # 敵の行動開始
-            self.act.add_act(BattlePlayEnemy(self.xmlui, self.result))
-
-class BattlePlayAction(BattlePlayAct):
-    def init(self):
-        self.set_timeout(15)
-
-class BattlePlayEnemy(BattlePlayAct):
-    def init(self):
-        self.set_timeout(15)
+        self.set_timeout(2)
 
     def action(self):
-        self.act.add_act(BattlePlayBack(self.xmlui, self.result))
+        if self.battle_data.player_idx < len(user_data.player_data):
+            self.act.add_act(BattlePlayPlayerAction(self.xmlui, self.result))
+        else:
+            # 敵の行動開始
+            self.act.add_act(BattlePlayEnemyAction(self.xmlui, self.result))
+        self.finish()
 
-class BattlePlayDamage(BattlePlayAct):
-    pass
+class BattlePlayPlayerAction(BattlePlayAct):
+    def init(self):
+        if self.battle_data.command[self.battle_data.player_idx] == "ぼうぎょ":
+            self.act.add_act(
+                BattlePlayFront(self.xmlui, self.result),  # 前に出るのを待って
+                BattlePlayDeffence(self.xmlui, self.result),  # ぼうぎょを表示
+                BattlePlayBack(self.xmlui, self.result),  # 後ろにさがって
+                BattlePlayPlayer(self.xmlui, self.result))  # 次のキャラへ
+        else:
+            self.act.add_act(
+                BattlePlayPlayerTarget(self.xmlui, self.result),  # ターゲット表示
+                BattlePlayFront(self.xmlui, self.result),  # 前に出るのを待って
+                BattlePlayPlayerAttack(self.xmlui, self.result),  # 攻撃エフェクト
+                BattlePlayBack(self.xmlui, self.result),  # 後ろにさがって
+                BattlePlayPlayerDamage(self.xmlui, self.result),  # ヒット数表示
+                BattlePlayPlayer(self.xmlui, self.result))  # 次のキャラへ
+
+        # 移動も開始しておく
+        self.battle_data.player_move_dir[self.battle_data.player_idx] = -1
+        self.battle_data.player_offset[self.battle_data.player_idx] = 0
+
+        self.finish()
+
+class BattlePlayPlayerTarget(BattlePlayAct):
+    def init(self):
+        self.result.open("result_target")  # ターゲット表示
+        self.set_timeout(2)
+
+class BattlePlayFront(BattlePlayAct):
+    # キャラ移動待ち
+    def waiting(self):
+        if self.battle_data.player_move_dir[self.battle_data.player_idx] == 0:
+            self.finish()
 
 class BattlePlayBack(BattlePlayAct):
+    pass
+
+
+class BattlePlayPlayerAttack(BattlePlayAct):
+    pass
+
+class BattlePlayPlayerDamage(BattlePlayAct):
+    pass
+
+class BattlePlayDeffence(BattlePlayAct):
+    pass
+
+
+
+class BattlePlayEnemyAction(BattlePlayAct):
     pass
