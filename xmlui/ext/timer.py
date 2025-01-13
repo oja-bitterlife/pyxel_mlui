@@ -30,7 +30,7 @@ class _XUETimerBase:
         return max(0, min(1, float(self.count)/float(self._count_max)))
 
     # タイマー更新
-    def _update(self):
+    def update(self):
         raise NotImplementedError()
 
     # タイマーアクション
@@ -44,7 +44,7 @@ class _XUETimerBase:
 # ---------------------------------------------------------
 # 時間がきたら一度きりの実行
 class XUETimeout(_XUETimerBase):
-    def _update(self):
+    def update(self):
         # 完了済み
         if self.is_finish:
             return
@@ -59,7 +59,7 @@ class XUETimeout(_XUETimerBase):
 
 # 時間ごとに何度も実行
 class XUEInterval(_XUETimerBase):
-    def _update(self):
+    def update(self):
         # 完了済み
         if self.is_finish:
             return
@@ -76,7 +76,7 @@ class XUEInterval(_XUETimerBase):
 # ---------------------------------------------------------
 # カウントアップ
 class XUECountUp(_XUETimerBase):
-    def _update(self):
+    def update(self):
         # 完了済み
         if self.is_finish:
             return
@@ -90,7 +90,7 @@ class XUECountUp(_XUETimerBase):
 
 # カウントダウン。0も含める
 class XUECountDown(_XUETimerBase):
-    def _update(self):
+    def update(self):
         # 完了済み
         if self.is_finish:
             return

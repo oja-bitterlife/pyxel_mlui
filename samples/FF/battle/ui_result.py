@@ -42,6 +42,6 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
             if action == "ぼうぎょ":
                 text = "ぼうぎょ"
             else:
-                text = "　２かいヒット"
+                text = "９９かいヒット"
 
             pyxel.text(result_action.area.x, result_action.area.y, text, 7, system_font.font)

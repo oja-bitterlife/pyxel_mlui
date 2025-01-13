@@ -48,7 +48,7 @@ class BG:
 
     def draw(self, scroll_x, scroll_y):
         # アニメ付き背景であれば更新
-        self.tile_anim._update()
+        self.tile_anim.update()
 
         # 地形描画
         for y,line in enumerate(self.blocks):

@@ -6,7 +6,7 @@ class FieldObj:
         self.tile_anim = XUETilemap(1)
 
     def draw(self, scroll_x, scroll_y):
-        self.tile_anim._update()
+        self.tile_anim.update()
 
         for field_obj in fieldobj_data.data:
             if field_obj["closed"]:

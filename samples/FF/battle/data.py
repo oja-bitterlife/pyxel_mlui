@@ -3,9 +3,11 @@ from xmlui.ext.scene import XUEFadeScene
 
 from xmlui.ext.timer import XUETimeout
 
-class _BattleDamage(XUETimeout):
+class BattleDamage(XUETimeout):
     def __init__(self, damage:int, target:int):
         super().__init__(30)
+        self.damage = damage
+        self.target = target
 
 # バトル中のデータ持ち運び用
 class BattleData:
@@ -32,4 +34,4 @@ class BattleData:
         self.command = ["", "", "", ""]
 
         # ダメージ表示
-        self.damage:list[_BattleDamage] = []
+        self.damage:list[BattleDamage] = []

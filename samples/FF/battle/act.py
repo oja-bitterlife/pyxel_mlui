@@ -2,7 +2,7 @@ from xmlui.core import XUElem,XMLUI,XUEvent,XUWinInfo,XUSelectInfo
 from xmlui.ext.scene import XUEDebugActItem
 
 from db import user_data,enemy_data
-from battle.data import BattleData
+from battle.data import BattleData,BattleDamage
 
 
 # BattleDataを扱えるAct
@@ -253,8 +253,8 @@ class BattlePlayPlayerAction(BattlePlayAct):
                 BattlePlayPlayer(self.xmlui, self.result))  # 次のキャラへ
         # こうげき
         else:
+            self.result.open("result_target")  # ターゲット表示
             self.act.add_act(
-                BattlePlayPlayerTarget(self.xmlui, self.result),  # ターゲット表示
                 BattlePlayFront(self.xmlui, self.result),  # 前に出るのを待って
                 BattlePlayPlayerAttack(self.xmlui, self.result),  # 攻撃エフェクト
                 BattlePlayBack(self.xmlui, self.result),  # 後ろにさがって
@@ -262,18 +262,14 @@ class BattlePlayPlayerAction(BattlePlayAct):
                 BattlePlayCloseWin(self.xmlui, self.result),  # ウインドウを閉じて
                 BattlePlayPlayer(self.xmlui, self.result))  # 次のキャラへ
 
-        # 移動も開始しておく
+        self.finish()
+
+class BattlePlayFront(BattlePlayAct):
+    def init(self):
+        # 移動開始
         self.battle_data.player_move_dir[self.battle_data.player_idx] = -1
         self.battle_data.player_offset[self.battle_data.player_idx] = 0
 
-        self.finish()
-
-class BattlePlayPlayerTarget(BattlePlayAct):
-    def init(self):
-        self.result.open("result_target")  # ターゲット表示
-        self.set_timeout(2)
-
-class BattlePlayFront(BattlePlayAct):
     # キャラ移動待ち
     def waiting(self):
         if self.battle_data.player_move_dir[self.battle_data.player_idx] == 0:
@@ -282,13 +278,22 @@ class BattlePlayFront(BattlePlayAct):
 class BattlePlayBack(BattlePlayAct):
     def init(self):
         self.battle_data.player_move_dir[self.battle_data.player_idx] = 1  # 後ろにさがる
+
+    # キャラ移動待ち
     def waiting(self):
         if self.battle_data.player_move_dir[self.battle_data.player_idx] == 0:
             self.finish()
 
 class BattlePlayPlayerAttack(BattlePlayAct):
     def init(self):
-        self.set_timeout(8)
+        import random
+        target = self.battle_data.target[self.battle_data.player_idx]
+        self.battle_data.damage.append(BattleDamage(random.randint(0, 9999), target))
+
+    # 攻撃エフェクト再生終了待ち
+    def waiting(self):
+        if not self.battle_data.damage:
+            self.finish()
 
 class BattlePlayPlayerDamage(BattlePlayAct):
     def init(self):

@@ -1,7 +1,8 @@
+import math
 import pyxel
 
 # バトル画面
-from xmlui.core import XURect
+from xmlui.core import XURect,XUSelectInfo,XUTextUtil
 from xmlui.lib.debug import DebugXMLUI
 from xmlui.ext.scene import XUEFadeScene
 
@@ -13,6 +14,7 @@ from FF.battle.data import BattleData
 
 # データ
 from db import enemy_data,user_data
+from system import system_font
 
 class Battle(XUEFadeScene):
     def __init__(self):
@@ -93,6 +95,20 @@ class Battle(XUEFadeScene):
             x += battle_data.player_offset[i]
 
             pyxel.blt(x, rect.y, img, 0, 0, rect.w, rect.h, 0)
+
+        # ダメージ表示
+        for damage in battle_data.damage:
+            damage.update()
+            offset_y = int(math.sin(damage.alpha*math.pi)*-16)
+            if damage.target >= 0:
+                area = battle_data.enemy_rect[damage.target]
+            else:
+                area = battle_data.player_rect[abs(damage.target)-1]
+                
+            damage_text = XUTextUtil.format_zenkaku(f"{damage.damage}")
+            pyxel.text(area.x, area.y, damage_text, 8, system_font.font)
+
+        battle_data.damage = [damage for damage in battle_data.damage if not damage.is_finish]  # リスト更新
 
         # UIの表示
         self.xmlui.draw()

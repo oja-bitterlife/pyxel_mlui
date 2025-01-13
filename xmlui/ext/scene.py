@@ -39,7 +39,7 @@ class XUEActItem(XUETimeout):
             return super().alpha
 
     # override
-    def _update(self):
+    def update(self):
         if not self.is_finish:
             self.waiting()
 
@@ -48,7 +48,7 @@ class XUEActItem(XUETimeout):
                 self.action()  # 完了呼び出し
             else:
                 # タイマー完了チェック
-                super()._update()
+                super().update()
 
     # 呼び出しManagerを返す(Actの中で次のActをaddする用)
     @property
@@ -119,7 +119,7 @@ class XUEActManager:
                 act._init_func = None
 
             # Actの実行
-            act._update()
+            act.update()
 
             # 完了したら次のAct
             if act.is_finish:
