@@ -300,7 +300,9 @@ class BattlePlayPlayerDamage(BattlePlayAct):
         pass
 
 class BattlePlayDeffence(BattlePlayAct):
-    pass
+    def init(self):
+        self.result.open("result_action")  # 防御表示
+        self.set_timeout(15)
 
 class BattlePlayCloseWin(BattlePlayAct):
     def waiting(self):
