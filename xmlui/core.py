@@ -889,6 +889,12 @@ class XUTextUtil:
         val = cls.format_dict(str(val), all_params)  # \n\pを先に変換しておく
         return unicodedata.normalize("NFKC", val).translate(_hankaku_zenkaku_dict)
 
+    # 数値を全角文字列に変換する(右詰め)
+    @classmethod
+    def number_zenkaku(cls, val:int, length:int=0) -> str:
+        out = "".join(["０１２３４５６７８９"["0123456789".index(n)] for n in str(val)])
+        return out if len(out) > length else "　"*(length-len(out)) + out
+
     # 行・ページ分割
     # -----------------------------------------------------
     # ページごとに行・ワードラップ分割

@@ -4,9 +4,10 @@ from xmlui.ext.scene import XUEFadeScene
 from xmlui.ext.timer import XUETimeout
 
 class BattleDamage(XUETimeout):
-    def __init__(self, damage:int, target:int):
+    def __init__(self, damage:int, hit:int, target:int):
         super().__init__(24)
         self.damage = damage
+        self.hit = hit
         self.target = target
 
 # バトル中のデータ持ち運び用

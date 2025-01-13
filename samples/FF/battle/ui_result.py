@@ -42,6 +42,8 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
             if action == "ぼうぎょ":
                 text = "ぼうぎょ"
             else:
-                text = "９９かいヒット"
+                hit = xmlui.data_ref.damage[0].hit if xmlui.data_ref.damage else 0
+                text = XUTextUtil.number_zenkaku(hit)
+                text += XUTextUtil.format_zenkaku("かいヒット")
 
             pyxel.text(result_action.area.x, result_action.area.y, text, 7, system_font.font)

@@ -302,7 +302,7 @@ class BattlePlayPlayerDamage(BattlePlayAct):
     def init(self):
         import random
         target = self.battle_data.target[self.battle_data.player_idx]
-        self.battle_data.damage.append(BattleDamage(random.randint(0, 9999), target))
+        self.battle_data.damage.append(BattleDamage(random.randint(0, 9999), random.randint(1, 99), target))
 
     # ダメージ表示完了待ち
     def waiting(self):
