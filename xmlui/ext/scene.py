@@ -21,9 +21,6 @@ class XUEActItem(XUETimeout):
         self._init_func:Callable|None = None
         self._manager:XUEActManager|None = None
 
-        # SceneBaseで使われるもの
-        self.use_key_event = True  # キーイベントの取得要求
-
     # コンストラクタではなくinit()の中で時間を設定する。
     def set_timeout(self, wait:int):
         self._count_max = wait
@@ -69,7 +66,10 @@ class XUEActItem(XUETimeout):
         pass
     def waiting(self):
         pass
+
     # def action(self)は親クラスで定義
+    # waigingの中でfinishされるか、timeoutされるかで呼ばれる
+    # __init__,initでfinishされたときは呼ばれない
 
 # デバッグ表示付き
 class XUEDebugActItem(XUEActItem):
@@ -161,12 +161,9 @@ class _XUESceneBase(XUEActManager):
     def run(self):
         # update。終了していたらなにもしない
         if not self.is_end:
-            # actがempty(updateを使う)か、actがuse_keyか
-            if self.is_act_empty or self.current_act.use_key_event:
-                self.input.check(self.xmlui)  # xmluiのキーイベントサポート
-
             # イベント処理
-            for event in self.xmlui.event.trg:
+            self.input.check(self.xmlui)  # xmluiのキーイベントサポート
+            for event in self.xmlui.event.trg:  # 一発系のイベントのみ扱う
                 self.event(event)
 
             # ActがあればActの更新。なければidle
