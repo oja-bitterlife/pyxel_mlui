@@ -159,7 +159,7 @@ class _XUESceneBase(XUEActManager):
     # シーンマネージャから呼ばれるもの
     # -----------------------------------------------------
     def run(self):
-        # (事実上の)Update。終了していたらなにもしない
+        # update。終了していたらなにもしない
         if not self.is_end:
             # actがempty(updateを使う)か、actがuse_keyか
             if self.is_act_empty or self.current_act.use_key_event:
@@ -175,8 +175,9 @@ class _XUESceneBase(XUEActManager):
             else:
                 self.idle()
 
-        # drawはend以降も呼ぶ(endの状態を描画)
-        self.draw()
+        # updateでendになる可能性があるのでdrawの前に再チェック
+        if not self.is_end:
+            self.draw()
 
     # オーバーライドして使う物
     # -----------------------------------------------------

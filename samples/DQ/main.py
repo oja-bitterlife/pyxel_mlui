@@ -18,8 +18,7 @@ scene_manager = XUESceneManager(Title())
 
 # Main
 def update(): # フレームの更新処理
-    # シーン更新
-    scene_manager.update()
+    pass
 
 def draw(): # 描画処理
     # ゲームの描画コード
