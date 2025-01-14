@@ -13,6 +13,11 @@ import unicodedata
 import re
 from copy import deepcopy
 
+# ログも基本機能に
+import logging
+logging.basicConfig()
+
+
 # 描画領域計算用
 # #############################################################################
 class XURect:
@@ -468,6 +473,15 @@ class XUElem:
         XUElem._strtree_count = 0
         return self._rec_strtree("  ", "")
 
+    @property
+    def logger(self) -> logging.Logger:
+        logger = logging.getLogger("XMLUI")
+        if XMLUI.debug_enable:
+            logger.setLevel(logging.DEBUG)
+        else:
+            logger.setLevel(logging.ERROR)
+        return logger
+
     # xmluiで特別な意味を持つアトリビュート一覧
     # わかりやすく全てプロパティを用意しておく(デフォルト値も省略せず書く)
     # 面倒でも頑張って書く
@@ -534,7 +548,7 @@ class XUElem:
 # XMLでUIライブラリ本体
 # #############################################################################
 class XMLUI[T](XUElem):
-    debug_enable = False  # デバッグから参照するフラグ(クラス変数≒システムで一意)
+    debug_enable = True  # デバッグから参照するフラグ(クラス変数≒システムで一意)
 
     # 初期化
     # *************************************************************************
@@ -597,6 +611,11 @@ class XMLUI[T](XUElem):
     class HasRef:
         def __init__(self, xmlui:"XMLUI"):
             self.xmlui = xmlui
+
+    # 削除完了通知
+    def __del__(self):
+        self.logger.info("XMLUI was deleted.")
+
 
     # UI描画に使う参照データ
     # *************************************************************************

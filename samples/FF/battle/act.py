@@ -368,4 +368,4 @@ class BattlePlayEnemyFlush(BattlePlayAct):
         # ダメージ設定
         import random
         target = -random.randint(0, len(user_data.player_data)-1) -1
-        self.battle_data.damage.append(BattleDamage(random.randint(4, 9), 1, target))
+        self.battle_data.damage.append(BattleDamage(random.randint(1, 9), 1, target))
