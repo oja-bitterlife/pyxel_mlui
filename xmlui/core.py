@@ -198,7 +198,9 @@ class XUEvent:
 
     # 入力
     # -----------------------------------------------------
-    def _on(self, event:XUEventItem):
+    # イベントを記録する。Trg処理は内部で行っているので現在の状態を入れる
+    # set()なので何度入れてもいい
+    def _record(self, event:XUEventItem):
         self._receive.add(event)
 
     # イベントの確認
@@ -447,10 +449,9 @@ class XUElem:
 
     # イベント
     # *************************************************************************
-    # イベントを記録する。Trg処理は内部で行っているので現在の状態を入れる
-    # set()なので何度入れてもいい
-    def on(self, event_name:str):
-        self.xmlui.event._on(XUEventItem(event_name, self))
+    # xmluiにイベントを送る
+    def send_event(self, event_name:str):
+        self.xmlui.event._record(XUEventItem(event_name, self))
 
     # open/close
     # *************************************************************************
@@ -712,11 +713,9 @@ class XMLUI[T](XUElem):
             event.on_init = elem.update_count == 0  # やっぱりinitialize情報がどこかに欲しい
             elem.set_attr("update_count", elem.update_count+1)  # 1スタート(0は初期化時)
 
-            # 登録されている関数を実行。戻り値はイベント
+            # 登録されている関数を実行
             if elem.tag in self._draw_funcs:
-                result = self._draw_funcs[elem.tag](elem, event)
-                if result is not None:
-                    self.event._on(result)
+                self._draw_funcs[elem.tag](elem, event)
 
         # removedなElementをTreeから削除
         for child in self.children:

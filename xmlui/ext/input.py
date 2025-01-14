@@ -49,11 +49,11 @@ class XUEInput(XUEInputInfo):
                 # 定義されたキーのどれか１つでも押されていたら押された扱い
                 for key in keys:
                     if pyxel.btn(key):
-                        xmlui.on(event)
+                        xmlui.send_event(event)
                         break
 
         # デバッグ用
         if pyxel.btnp(pyxel.KEY_TAB):
-            xmlui.on(debug.DebugXMLUI.DEBUGEVENT_PRINTTREE)
+            xmlui.send_event(debug.DebugXMLUI.DEBUGEVENT_PRINTTREE)
         if pyxel.btnp(pyxel.KEY_F5):
-            xmlui.on(debug.DebugXMLUI.DEBUGEVENT_RELOAD)
+            xmlui.send_event(debug.DebugXMLUI.DEBUGEVENT_RELOAD)
