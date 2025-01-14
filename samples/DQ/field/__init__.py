@@ -112,6 +112,14 @@ class Field(XUEFadeScene):
                     msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
                     msg_text.append_msg("とびらがない")  # systemメッセージ
 
+            # ウインドウクローズ
+            case "close_win":
+                # メッセージウインドウの時はメニューごと閉じる
+                if event.elem.id == "message":
+                    menu = self.xmlui.find_by_id("menu")
+                    XUWinInfo(menu).setter.start_close()
+
+
         # 会話イベントチェック
         for talk_event in self.npc.TALK_EVENTS:
             if talk_event == event:
@@ -126,9 +134,3 @@ class Field(XUEFadeScene):
                 else:
                     msg_text.append_msg("だれもいません")  # systemメッセージ
 
-        # ウインドウが閉じたときの対応
-        if event.startswith("close_win:"):
-            # メッセージウインドウの時はメニューごと閉じる
-            if event[len("close_win:"):].strip() == "message":
-                menu = self.xmlui.find_by_id("menu")
-                XUWinInfo(menu).setter.start_close()
