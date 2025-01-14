@@ -188,7 +188,25 @@ class _XUESceneBase(XUEActManager):
     def closed(self):
         self.xmlui.logger.warning("scene.closed is not implemented")
 
-# シーンクラス。継承して使おう
+
+# シーン管理。mainの中で各シーンを実行する
+# *****************************************************************************
+class XUESceneManager:
+    def __init__(self, start_scene:_XUESceneBase):
+        self.current_scene:_XUESceneBase = start_scene
+
+    def run(self):
+        # next_sceneが設定されていたら次のシーンへ
+        if self.current_scene._next_scene is not None:
+            self.current_scene = self.current_scene._next_scene
+            self.current_scene._next_scene = None
+
+        # シーン実行
+        self.current_scene.run()
+
+
+# フェード付きシーンクラス。継承して使おう
+# *****************************************************************************
 class XUEFadeScene(_XUESceneBase):
     # デフォルトフェードカラー
     FADE_COLOR = 0
@@ -224,8 +242,6 @@ class XUEFadeScene(_XUESceneBase):
             super().__init__(scene)
             self.set_timeout(close_count)
 
-            self.use_key_event = False  # フェード中は動かさない
-
         def waiting(self):
             self.scene.alpha = self.alpha
 
@@ -251,6 +267,12 @@ class XUEFadeScene(_XUESceneBase):
     # シーンマネージャから呼ばれるもの
     # -----------------------------------------------------
     def run(self):
+        # フェードアウト中はキー入力を止める
+        self.input.enable = True
+        if not self.is_act_empty and isinstance(self.current_act, XUEFadeScene.FadeOut):
+            self.input.enable = False
+
+        # シーン再生
         super().run()
 
         # フェードを上から描画
@@ -258,18 +280,3 @@ class XUEFadeScene(_XUESceneBase):
             pyxel.dither(self.alpha)  # フェードで
             pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.FADE_COLOR)
             pyxel.dither(1.0)  # 戻しておく
-
-# シーン管理。mainの中で各シーンを実行する
-# *****************************************************************************
-class XUESceneManager:
-    def __init__(self, start_scene:_XUESceneBase):
-        self.current_scene:_XUESceneBase = start_scene
-
-    def run(self):
-        # next_sceneが設定されていたら次のシーンへ
-        if self.current_scene._next_scene is not None:
-            self.current_scene = self.current_scene._next_scene
-            self.current_scene._next_scene = None
-
-        # シーン実行
-        self.current_scene.run()

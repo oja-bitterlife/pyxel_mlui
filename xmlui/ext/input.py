@@ -37,14 +37,20 @@ class XUEInputInfo:
 # インプット管理クラス、状態更新用
 # どこかで作ってcheck()を１回呼び出すように
 class XUEInput(XUEInputInfo):
+    def __init__(self):
+        super().__init__()
+        self.enable = True
+
     # 全ボタン一気に調べてイベント設定
     def check(self, xmlui:XMLUI):
-        for event,keys in self.key_config.items():
-            # 定義されたキーのどれか１つでも押されていたら押された扱い
-            for key in keys:
-                if pyxel.btn(key):
-                    xmlui.on(event)
-                    break
+        # enableの時だけ
+        if self.enable:
+            for event,keys in self.key_config.items():
+                # 定義されたキーのどれか１つでも押されていたら押された扱い
+                for key in keys:
+                    if pyxel.btn(key):
+                        xmlui.on(event)
+                        break
 
         # デバッグ用
         if pyxel.btnp(pyxel.KEY_TAB):
