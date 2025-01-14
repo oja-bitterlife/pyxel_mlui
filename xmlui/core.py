@@ -605,6 +605,9 @@ class XMLUI[T](XUElem):
         # UI描画時の参照先データ
         self._data_ref:T|None = None
 
+        # デバッグ用
+        self.is_updating = False
+
     # XMLUIそのものを閉じる
     def close(self):
         # 参照データの削除
@@ -636,7 +639,6 @@ class XMLUI[T](XUElem):
     # 削除完了通知
     def __del__(self):
         self.logger.info("XMLUI was deleted.")
-
 
     # UI描画に使う参照データ
     # *************************************************************************
@@ -681,6 +683,8 @@ class XMLUI[T](XUElem):
     # 更新
     # *************************************************************************
     def draw(self):
+        self.is_updating = True
+
         # イベントの更新
         self.event.update()
 
@@ -724,6 +728,12 @@ class XMLUI[T](XUElem):
         # 最後に自分もカウントアップ
         self.set_attr("update_count", self.update_count+1)
 
+        self.is_updating = False
+
+    def check_drawing(self, func_name:str):
+        if self.debug_enable and self.is_updating:
+            self.logger.warning(f"XMLUI is drawing. cannot call: {func_name}")
+
     # open/close
     # *************************************************************************
     # root側で開く
@@ -757,6 +767,7 @@ class XUSelectInfo(XUElem):
 
     @property
     def setter(self) -> "_XUWinSet":
+        self.xmlui.check_drawing(__name__)  # draw中に呼ぶべきでない
         return _XUWinSet(self)
 
     # 選択アイテム
@@ -993,6 +1004,7 @@ class XUWinInfo(XUElem):
 
     @property
     def setter(self) -> "_XUWinSet":
+        self.xmlui.check_drawing(__name__)  # draw中に呼ぶべきでない
         return _XUWinSet(self)
 
     # ウインドウclass管理
