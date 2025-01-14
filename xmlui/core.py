@@ -605,9 +605,6 @@ class XMLUI[T](XUElem):
         # UI描画時の参照先データ
         self._data_ref:T|None = None
 
-        # デバッグ用
-        self.is_updating = False
-
     # XMLUIそのものを閉じる
     def close(self):
         # 参照データの削除
@@ -683,8 +680,6 @@ class XMLUI[T](XUElem):
     # 更新
     # *************************************************************************
     def draw(self):
-        self.is_updating = True
-
         # イベントの更新
         self.event.update()
 
@@ -698,7 +693,7 @@ class XMLUI[T](XUElem):
             if event.use_event == XUEvent.UseEvent.ABSORBER:  # イベント通知終端
                 break
 
-        # 親情報の更新
+        # 親情報の更新(外部での更新に対応)
         self._parent_cache = {c:XUElem(self, p) for p in self._element.iter() for c in p}
 
         # 更新処理(直前のリストを利用。daww中にAddChildされたElementは処理されれない)
@@ -725,14 +720,11 @@ class XMLUI[T](XUElem):
             if child.removed:
                 self._parent_cache[child._element]._element.remove(child._element)
 
+        # remove後の親情報に更新
+        self._parent_cache = {c:XUElem(self, p) for p in self._element.iter() for c in p}
+
         # 最後に自分もカウントアップ
         self.set_attr("update_count", self.update_count+1)
-
-        self.is_updating = False
-
-    def check_drawing(self, func_name:str):
-        if self.debug_enable and self.is_updating:
-            self.logger.warning(f"XMLUI is drawing. cannot call: {func_name}")
 
     # open/close
     # *************************************************************************
@@ -767,7 +759,6 @@ class XUSelectInfo(XUElem):
 
     @property
     def setter(self) -> "_XUWinSet":
-        self.xmlui.check_drawing(__name__)  # draw中に呼ぶべきでない
         return _XUWinSet(self)
 
     # 選択アイテム
@@ -1004,7 +995,6 @@ class XUWinInfo(XUElem):
 
     @property
     def setter(self) -> "_XUWinSet":
-        self.xmlui.check_drawing(__name__)  # draw中に呼ぶべきでない
         return _XUWinSet(self)
 
     # ウインドウclass管理
