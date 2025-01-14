@@ -9,7 +9,7 @@ from xmlui.ext.scene import XUEFadeScene
 # ui
 import ui_common
 from FF.battle import ui_command,ui_status,act,ui_target,ui_result
-from FF.battle.act import BattleStart,BattlePlayDamage
+from FF.battle.act import BattleStart,BattlePlayDamage,BattlePlayEnemyFlush
 from FF.battle.data import BattleData
 
 # データ
@@ -73,9 +73,12 @@ class Battle(XUEFadeScene):
 
         # 敵の表示
         for i in range(len(enemy_data.data)):
-            rect = battle_data.enemy_rect[i].copy()
-            x = rect.x - int(128*self.alpha)  # スライドイン
-            pyxel.blt(x, rect.y, self.enemy_img, 0, 0, rect.w, rect.h, 0)
+            if isinstance(self.current_act, BattlePlayEnemyFlush) and i == battle_data.enemy_idx and self.xmlui.update_count % 2:
+                continue
+            else:
+                rect = battle_data.enemy_rect[i].copy()
+                x = rect.x - int(128*self.alpha)  # スライドイン
+                pyxel.blt(x, rect.y, self.enemy_img, 0, 0, rect.w, rect.h, 0)
 
         # プレイヤの表示
         front_target = 256-80
