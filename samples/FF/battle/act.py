@@ -351,7 +351,6 @@ class BattlePlayCloseWin(BattlePlayAct):
 class BattlePlayEnemyAction(BattlePlayAct):
     def init(self):
         # こうげき
-        self.result.open("result_target")  # ターゲット表示
         self.act.add_act(
             BattlePlayEnemyFlush(self.xmlui, self.result),  # flushさせて
             BattlePlayHit(self.xmlui, self.result),  # ヒット数表示
@@ -362,10 +361,13 @@ class BattlePlayEnemyAction(BattlePlayAct):
 
 class BattlePlayEnemyFlush(BattlePlayAct):
     def init(self):
-        # 攻撃エフェクト再生
-        self.set_timeout(10)
+        self.result.open("result_target")  # ターゲット表示
 
         # ダメージ設定
         import random
         target = -random.randint(0, len(user_data.player_data)-1) -1
         self.battle_data.damage.append(BattleDamage(random.randint(1, 9), 1, target))
+
+        # 攻撃エフェクト再生
+        self.set_timeout(10)
+

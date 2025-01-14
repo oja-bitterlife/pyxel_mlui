@@ -36,7 +36,8 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
                 target_name = enemy_data.data[target_idx]["name"]
         # 敵側
         else:
-            target_name = "未設定"
+            target = abs(xmlui.data_ref.damage[0].target)-1
+            target_name = user_data.player_data[target]["name"]
 
         pyxel.text(result_target.area.x, result_target.area.y, target_name, 7, system_font.font)
 
