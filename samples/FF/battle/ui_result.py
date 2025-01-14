@@ -14,14 +14,18 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
     @result_text.label("result_who")
     def result_who(result_who:text.XULabel, event:XUEvent):
         # プレイヤターン
-        if xmlui.data_ref.player_idx < len(user_data.player_data):
+        if xmlui.data_ref.is_player_turn:
             text = user_data.player_data[xmlui.data_ref.player_idx]["name"]
-            pyxel.text(result_who.area.x, result_who.area.y, text, 7, system_font.font)
+        # 敵側
+        else:
+            text = enemy_data.data[xmlui.data_ref.enemy_idx]["name"]
+
+        pyxel.text(result_who.area.x, result_who.area.y, text, 7, system_font.font)
 
     @result_text.label("result_target")
     def result_target(result_target:text.XULabel, event:XUEvent):
         # プレイヤターン
-        if xmlui.data_ref.player_idx < len(user_data.player_data):
+        if xmlui.data_ref.is_player_turn:
             target_idx = xmlui.data_ref.target[xmlui.data_ref.player_idx]
 
             if target_idx < 0:
@@ -30,8 +34,11 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
                 target_name = user_data.player_data[target_idx]["name"]
             else:
                 target_name = enemy_data.data[target_idx]["name"]
+        # 敵側
+        else:
+            target_name = "未設定"
 
-            pyxel.text(result_target.area.x, result_target.area.y, target_name, 7, system_font.font)
+        pyxel.text(result_target.area.x, result_target.area.y, target_name, 7, system_font.font)
 
 
     @result_text.label("result_action")
@@ -45,5 +52,8 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
                 hit = xmlui.data_ref.damage[0].hit if xmlui.data_ref.damage else 0
                 text = XUTextUtil.number_zenkaku(hit, 2)
                 text += XUTextUtil.format_zenkaku("かいヒット")
+        # 敵側
+        else:
+            text = XUTextUtil.format_zenkaku("　１かいヒット")
 
-            pyxel.text(result_action.area.x, result_action.area.y, text, 7, system_font.font)
+        pyxel.text(result_action.area.x, result_action.area.y, text, 7, system_font.font)
