@@ -442,6 +442,13 @@ class XUElem:
         for child in self.children:
             child.set_attr("removed", True)
 
+    # イベント
+    # *************************************************************************
+    # イベントを記録する。Trg処理は内部で行っているので現在の状態を入れる
+    # set()なので何度入れてもいい
+    def on(self, event_name:str):
+        self.xmlui.event._on(XUEventItem(event_name, self))
+
     # open/close
     # *************************************************************************
     # 子に別ElementTree一式を追加する
@@ -707,7 +714,7 @@ class XMLUI[T](XUElem):
             if elem.tag in self._draw_funcs:
                 result = self._draw_funcs[elem.tag](elem, event)
                 if result is not None:
-                    self.on(result)
+                    elem.on(result)
 
         # removedなElementをTreeから削除
         for child in self.children:
@@ -717,13 +724,8 @@ class XMLUI[T](XUElem):
         # 最後に自分もカウントアップ
         self.set_attr("update_count", self.update_count+1)
 
-    # イベント
+    # open/close
     # *************************************************************************
-    # イベントを記録する。Trg処理は内部で行っているので現在の状態を入れる
-    # set()なので何度入れてもいい
-    def on(self, event_name:str):
-        self.event._on(XUEventItem(event_name, self))
-
     # root側で開く
     def open(self, id:str, id_alias:str|None=None) -> XUElem:
         return self._root.open(id, id_alias)
