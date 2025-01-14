@@ -269,9 +269,10 @@ class XUESceneManager:
         self.current_scene:_XUESceneBase = start_scene
 
     def run(self):
-        # next_sceneが設定されていたら
+        # next_sceneが設定されていたら次のシーンへ
         if self.current_scene._next_scene is not None:
             self.current_scene = self.current_scene._next_scene
             self.current_scene._next_scene = None
 
+        # シーン実行
         self.current_scene.run()
