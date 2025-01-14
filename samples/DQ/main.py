@@ -26,7 +26,7 @@ def draw(): # 描画処理
     pyxel.cls(0)
 
     # シーン描画
-    scene_manager.draw()
+    scene_manager.run()
 
 # アプリケーションの実行
 pyxel.run(update, draw)

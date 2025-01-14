@@ -59,7 +59,7 @@ class Field(XUEFadeScene):
         self.set_next_scene(Battle())
 
     # 何もしていない(actがない)ときだけここにくる、Idle関数
-    def update(self):
+    def idle(self):
         # プレイヤの移動。移動できれば移動Actが返る
         player_move_act = self.player.move(self.xmlui.event.now, [
             self.npc.hit_check,  # 当たり判定リスト

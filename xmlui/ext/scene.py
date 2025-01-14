@@ -1,10 +1,8 @@
 from typing import Callable,cast
-import logging
 
 import pyxel
 
 from xmlui.core import XMLUI,XUEventItem
-from xmlui.lib.debug import XULog
 from xmlui.ext.input import XUEInput
 from xmlui.ext.timer import XUETimeout
 
@@ -75,8 +73,9 @@ class XUEActItem(XUETimeout):
 
 # デバッグ表示付き
 class XUEDebugActItem(XUEActItem):
-    def log_start(self, logger:logging.Logger):
-        logger.debug(f"start act: {self}")
+    def log_start(self):
+        if XMLUI.debug_enable:
+            print(f"start act: {self}")
 
 
 # Act管理クラス。各Itemをコレに登録していく
@@ -84,7 +83,6 @@ class XUEDebugActItem(XUEActItem):
 class XUEActManager:
     def __init__(self):
         self._act_queue:list[XUEActItem] = []
-        self.logger = XULog().logger
 
     # キュー操作
     # -----------------------------------------------------
@@ -112,8 +110,8 @@ class XUEActManager:
             # 初回だけinitを実行(is_finishは無視)
             if act._init_func:
                 # デバッグ表示
-                if XMLUI.debug_enable and isinstance(self.current_act, XUEDebugActItem):
-                    self.current_act.log_start(self.logger)
+                if isinstance(self.current_act, XUEDebugActItem):
+                    self.current_act.log_start()
 
                 act._init_func()
                 act._init_func = None
@@ -152,48 +150,45 @@ class _XUESceneBase(XUEActManager):
     def set_next_scene(self, scene:"XUEFadeScene"):
         self._next_scene = scene
 
-    # シーン終了(closedの中でset_next_sceneをする)
-    def close_scene(self):
+    # シーン終了(closedの中でset_next_sceneをするように)
+    def close(self):
         if not self.is_end:
             self.closed()
             self.is_end = True
 
     # シーンマネージャから呼ばれるもの
     # -----------------------------------------------------
-    def update_scene(self):
-        # 終了していたらなにもしない
-        if self.is_end:
-            return
-
-        # actがempty(updateを使う)か、actがuse_keyか
-        if self.is_act_empty or self.current_act.use_key_event:
-            self.input.check(self.xmlui)  # xmluiのキーイベントサポート
-
-        # イベント処理
-        for event in self.xmlui.event.trg:
-            self.event(event)
-
-        # ActがあればActの更新。なければ通常のUpdate
-        if not self.is_act_empty:
-            super().update()
-        else:
-            self.update()
-
-    def draw_scene(self):
+    def run(self):
+        # (事実上の)Update。終了していたらなにもしない
         if not self.is_end:
-            self.draw()
+            # actがempty(updateを使う)か、actがuse_keyか
+            if self.is_act_empty or self.current_act.use_key_event:
+                self.input.check(self.xmlui)  # xmluiのキーイベントサポート
+
+            # イベント処理
+            for event in self.xmlui.event.trg:
+                self.event(event)
+
+            # ActがあればActの更新。なければidle
+            if not self.is_act_empty:
+                super().update()  # actのUpdate
+            else:
+                self.idle()
+
+        # drawはend以降も呼ぶ(endの状態を描画)
+        self.draw()
 
     # オーバーライドして使う物
     # -----------------------------------------------------
     def event(self, event:XUEventItem):
         pass
-    def update(self):
+    def idle(self):
         pass
     def draw(self):
         pass
     # フェードアウト完了時に呼ばれる。主に次シーン設定を行う
     def closed(self):
-        self.logger.warning("scene.closed is not implemented")
+        self.xmlui.logger.warning("scene.closed is not implemented")
 
 # シーンクラス。継承して使おう
 class XUEFadeScene(_XUESceneBase):
@@ -238,7 +233,7 @@ class XUEFadeScene(_XUESceneBase):
 
         # フェードアウトが終わったら終了
         def action(self):
-            self.scene.close_scene()
+            self.scene.close()
 
     # 初期化
     # -----------------------------------------------------
@@ -257,14 +252,8 @@ class XUEFadeScene(_XUESceneBase):
 
     # シーンマネージャから呼ばれるもの
     # -----------------------------------------------------
-    def draw_scene(self):
-        if self.is_end:
-            return
-
-        # フェード描画
-        # -------------------------------------------------
-        # 画面の描画
-        self.draw()
+    def run(self):
+        super().run()
 
         # フェードを上から描画
         if self.alpha > 0:  # 無駄な描画をしないよう
@@ -278,14 +267,10 @@ class XUESceneManager:
     def __init__(self, start_scene:_XUESceneBase):
         self.current_scene:_XUESceneBase = start_scene
 
-    def update(self):
+    def run(self):
         # next_sceneが設定されていたら
         if self.current_scene._next_scene is not None:
             self.current_scene = self.current_scene._next_scene
             self.current_scene._next_scene = None
 
-        self.current_scene.update_scene()
-
-    def draw(self):
-        # drawはend以降も呼ぶ(endの状態を描画)
-        self.current_scene.draw_scene()
+        self.current_scene.run()
