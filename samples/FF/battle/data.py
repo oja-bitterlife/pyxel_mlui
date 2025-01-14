@@ -3,6 +3,8 @@ from xmlui.ext.scene import XUEFadeScene
 
 from xmlui.ext.timer import XUETimeout
 
+from db import user_data
+
 class BattleDamage(XUETimeout):
     def __init__(self, damage:int, hit:int, target:int):
         super().__init__(24)
@@ -18,6 +20,7 @@ class BattleData:
         self.scene = scene
 
         # 敵
+        self.enemy_idx = -1
         self.enemy_rect:list[XURect] = []  # 基準位置
 
         # プレイヤ
@@ -36,3 +39,7 @@ class BattleData:
 
         # ダメージ表示
         self.damage:list[BattleDamage] = []
+
+    @property
+    def is_player_turn(self) -> bool:
+        return self.enemy_idx < 0

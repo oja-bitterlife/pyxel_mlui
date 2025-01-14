@@ -9,7 +9,7 @@ from xmlui.ext.scene import XUEFadeScene
 # ui
 import ui_common
 from FF.battle import ui_command,ui_status,act,ui_target,ui_result
-from FF.battle.act import BattleStart,BattlePlayPlayerDamage
+from FF.battle.act import BattleStart,BattlePlayDamage
 from FF.battle.data import BattleData
 
 # データ
@@ -97,7 +97,7 @@ class Battle(XUEFadeScene):
             pyxel.blt(x, rect.y, img, 0, 0, rect.w, rect.h, 0)
 
         # ダメージ表示
-        if isinstance(self.current_act, BattlePlayPlayerDamage):
+        if isinstance(self.current_act, BattlePlayDamage):
             for damage in battle_data.damage:
                 damage.update()
 

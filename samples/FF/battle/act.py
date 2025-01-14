@@ -75,6 +75,13 @@ class BattleTurnStart(BattleDataAct):
         self.battle_data.player_idx = 0
         self.battle_data.target = [0, 0, 0, 0]
         self.act.add_act(BattleCmdStart(self.xmlui))
+
+        # 2週目以降
+        elem =self.xmlui.find_by_id("ui_battle")
+        if not elem.exists_id("enemy_name_win"):
+            # 閉じていたenemy_name_winを復活させる
+            self.xmlui.open("enemy_name_win")
+
         self.finish()
 
 # コマンド
@@ -223,23 +230,37 @@ class BattlePlayStart(BattlePlayAct):
     # プレイヤ側を先に
     def init(self):
         self.battle_data.player_idx = -1
-        self.act.add_act(BattlePlayPlayer(self.xmlui, self.result))
+        self.battle_data.enemy_idx = -1
+        self.act.add_act(BattlePlayUnitSelect(self.xmlui, self.result))
         self.finish()
 
-class BattlePlayPlayer(BattlePlayAct):
-    # プレイヤーの行動
+# プレイヤ・敵のアクション開始
+class BattlePlayUnitSelect(BattlePlayAct):
     def init(self):
-        self.battle_data.player_idx += 1  # 次のキャラへ
-        self.battle_data.damage.clear()
+        # 次のプレイヤへ
+        self.battle_data.player_idx += 1
+
+        # プレイヤが完了していれば敵を進める
+        if self.battle_data.player_idx >= len(user_data.player_data):
+            self.battle_data.enemy_idx += 1
+
+            # 敵も終了していたら仕切り直し
+            if self.battle_data.enemy_idx >= len(enemy_data.data):
+                self.result.close()
+                self.act.add_act(BattleTurnStart(self.xmlui))
+                self.finish()
+                return
 
         self.result.open("result_who")  # キャラ名表示
+        self.battle_data.damage.clear()
         self.set_timeout(2)
 
     def action(self):
-        if self.battle_data.player_idx < len(user_data.player_data):
+        # プレイヤーの行動
+        if self.battle_data.is_player_turn:
             self.act.add_act(BattlePlayPlayerAction(self.xmlui, self.result))
+        # 敵の行動
         else:
-            # 敵の行動開始
             self.act.add_act(BattlePlayEnemyAction(self.xmlui, self.result))
         self.finish()
 
@@ -252,7 +273,7 @@ class BattlePlayPlayerAction(BattlePlayAct):
                 BattlePlayDeffence(self.xmlui, self.result),  # ぼうぎょを表示
                 BattlePlayBack(self.xmlui, self.result),  # 後ろにさがって
                 BattlePlayCloseWin(self.xmlui, self.result),  # ウインドウを閉じて
-                BattlePlayPlayer(self.xmlui, self.result))  # 次のキャラへ
+                BattlePlayUnitSelect(self.xmlui, self.result))  # 次のキャラへ
         # こうげき
         else:
             self.result.open("result_target")  # ターゲット表示
@@ -260,10 +281,10 @@ class BattlePlayPlayerAction(BattlePlayAct):
                 BattlePlayFront(self.xmlui, self.result),  # 前に出るのを待って
                 BattlePlayPlayerAttack(self.xmlui, self.result),  # 攻撃エフェクト
                 BattlePlayBack(self.xmlui, self.result),  # 後ろにさがって
-                BattlePlayPlayerHit(self.xmlui, self.result),  # ヒット数表示
-                BattlePlayPlayerDamage(self.xmlui, self.result),  # ダメージ表示
+                BattlePlayHit(self.xmlui, self.result),  # ヒット数表示
+                BattlePlayDamage(self.xmlui, self.result),  # ダメージ表示
                 BattlePlayCloseWin(self.xmlui, self.result),  # ウインドウを閉じて
-                BattlePlayPlayer(self.xmlui, self.result))  # 次のキャラへ
+                BattlePlayUnitSelect(self.xmlui, self.result))  # 次のキャラへ
 
         self.finish()
 
@@ -300,13 +321,13 @@ class BattlePlayPlayerAttack(BattlePlayAct):
     # 攻撃エフェクト終了待ち
 
 # ヒット数表示開始
-class BattlePlayPlayerHit(BattlePlayAct):
+class BattlePlayHit(BattlePlayAct):
     def init(self):
         self.result.open("result_action")
         self.set_timeout(2)
 
 # ダメージ表示
-class BattlePlayPlayerDamage(BattlePlayAct):
+class BattlePlayDamage(BattlePlayAct):
     # ダメージ表示完了待ち
     def waiting(self):
         if all([damage.is_finish for damage in self.battle_data.damage]):
@@ -328,4 +349,23 @@ class BattlePlayCloseWin(BattlePlayAct):
                 win.setter.start_close()
 
 class BattlePlayEnemyAction(BattlePlayAct):
-    pass
+    def init(self):
+        # こうげき
+        self.result.open("result_target")  # ターゲット表示
+        self.act.add_act(
+            BattlePlayEnemyFlush(self.xmlui, self.result),  # flushさせて
+            BattlePlayHit(self.xmlui, self.result),  # ヒット数表示
+            BattlePlayDamage(self.xmlui, self.result),  # ダメージ表示
+            BattlePlayCloseWin(self.xmlui, self.result),  # ウインドウを閉じて
+            BattlePlayUnitSelect(self.xmlui, self.result))  # 次のキャラへ
+        self.finish()
+
+class BattlePlayEnemyFlush(BattlePlayAct):
+    def init(self):
+        # 攻撃エフェクト再生
+        self.set_timeout(10)
+
+        # ダメージ設定
+        import random
+        target = -random.randint(0, len(user_data.player_data)-1) -1
+        self.battle_data.damage.append(BattleDamage(random.randint(4, 9), 1, target))
