@@ -1,4 +1,4 @@
-from xmlui.core import XMLUI,XUEvent
+from xmlui.core import XMLUI,XUEvent,XUEventItem
 from xmlui.lib import select
 
 from title.ui.item import menu_item
@@ -23,6 +23,6 @@ def ui_init(xmlui:XMLUI):
         if event.check(XUEvent.Key.BTN_A):
             match game_start.action:
                 case "start" as action:
-                    return action
+                    return game_start.on(action)
                 case _:
                     game_start.xmlui.popup("under_construct")

@@ -1,6 +1,6 @@
 import pyxel
 
-from xmlui.core import XMLUI,XUEvent,XUWinInfo,XUSelectItem
+from xmlui.core import XMLUI,XUEvent,XUEventItem,XUWinInfo,XUSelectItem
 from xmlui.lib import select,text
 
 from ui_common import get_world_clip,draw_menu_cursor,KOJICHU_COL,get_text_color
@@ -40,9 +40,9 @@ def ui_init(xmlui:XMLUI):
                 case "tools":
                     menu_grid.open("tools")
                 case "stairs":
-                    return "down_stairs"
+                    return menu_grid.on("down_stairs")
                 case "door":
-                    return "open_door"
+                    return menu_grid.on("open_door")
                 case _:
                     menu_grid.xmlui.popup("under_construct")
 

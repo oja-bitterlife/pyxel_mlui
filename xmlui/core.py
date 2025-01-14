@@ -129,10 +129,13 @@ class XURect:
 # #############################################################################
 class XUEventItem(str):
     elem: "XUElem"
-    def __new__(cls, event:str, elem:"XUElem") -> Self:
-        self = super().__new__(cls, event)
+    def __new__(cls, event_name:str, elem:"XUElem") -> Self:
+        self = super().__new__(cls, event_name)
         self.elem = elem
         return self
+
+    def __str__(self) -> str:
+        return f"[{self, self.elem.tag, self.elem}]"
 
 class XUEvent:
     REPEAT_HOLD = 15
@@ -591,7 +594,7 @@ class XMLUI[T](XUElem):
         self._templates:dict[str,XUElem] = {}  # dict[file_path, dom]
 
         # 処理関数の登録
-        self._draw_funcs:dict[str, Callable[[XUElem, XUEvent], str|None]] = {}
+        self._draw_funcs:dict[str, Callable[[XUElem, XUEvent], None]] = {}
 
         # イベント管理
         self.event = XUEvent(True)  # 唯一のactiveとする
@@ -667,13 +670,13 @@ class XMLUI[T](XUElem):
 
     # 処理関数登録
     # *************************************************************************
-    def set_drawfunc(self, tag_name:str, func:Callable[[XUElem,XUEvent], str|None]):
+    def set_drawfunc(self, tag_name:str, func:Callable[[XUElem,XUEvent], None]):
         # 処理関数の登録
         self._draw_funcs[tag_name] = func
 
     # デコレータも用意
     def tag_draw(self, tag_name:str):
-        def wrapper(bind_func:Callable[[XUElem,XUEvent], str|None]):
+        def wrapper(bind_func:Callable[[XUElem,XUEvent], None]):
             self.set_drawfunc(tag_name, bind_func)
         return wrapper
 
@@ -713,7 +716,7 @@ class XMLUI[T](XUElem):
             if elem.tag in self._draw_funcs:
                 result = self._draw_funcs[elem.tag](elem, event)
                 if result is not None:
-                    elem.on(result)
+                    self.event._on(result)
 
         # removedなElementをTreeから削除
         for child in self.children:

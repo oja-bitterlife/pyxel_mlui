@@ -88,7 +88,7 @@ class XURowList(_XUListBase):
 # *****************************************************************************
 class Decorator(XMLUI.HasRef):
     def grid(self, tag_name:str, init_item_tag:str):
-        def wrapper(bind_func:Callable[[XUGrid,XUEvent], str|None]):
+        def wrapper(bind_func:Callable[[XUGrid,XUEvent], None]):
             # 登録用関数をジェネレート
             def draw(elem:XUElem, event:XUEvent):
                 return bind_func(XUGrid(elem, init_item_tag), event)
@@ -97,7 +97,7 @@ class Decorator(XMLUI.HasRef):
         return wrapper
 
     def list(self, tag_name:str, init_item_tag:str):
-        def wrapper(bind_func:Callable[[XUList,XUEvent], str|None]):
+        def wrapper(bind_func:Callable[[XUList,XUEvent], None]):
             # 登録用関数をジェネレート
             def draw(elem:XUElem, event:XUEvent):
                 return bind_func(XUList(elem, init_item_tag), event)
@@ -106,7 +106,7 @@ class Decorator(XMLUI.HasRef):
         return wrapper
 
     def row_list(self, tag_name:str, init_item_tag:str):
-        def wrapper(bind_func:Callable[[XURowList,XUEvent], str|None]):
+        def wrapper(bind_func:Callable[[XURowList,XUEvent], None]):
             # 登録用関数をジェネレート
             def draw(elem:XUElem, event:XUEvent):
                 return bind_func(XURowList(elem, init_item_tag), event)

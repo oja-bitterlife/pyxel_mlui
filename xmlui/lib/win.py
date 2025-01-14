@@ -141,7 +141,7 @@ class XURectFrame(_XUWinFrameBase):
 # *****************************************************************************
 class Decorator(XMLUI.HasRef):
     def round_frame(self, tag_name:str):
-        def wrapper(bind_func:Callable[[XURoundFrame,XUEvent], str|None]):
+        def wrapper(bind_func:Callable[[XURoundFrame,XUEvent], None]):
             # 登録用関数をジェネレート
             def draw(elem:XUElem, event:XUEvent):
                 frame = XURoundFrame(elem)
@@ -152,7 +152,7 @@ class Decorator(XMLUI.HasRef):
         return wrapper
 
     def rect_frame(self, tag_name:str):
-        def wrapper(bind_func:Callable[[XURectFrame,XUEvent], str|None]):
+        def wrapper(bind_func:Callable[[XURectFrame,XUEvent], None]):
             # 登録用関数をジェネレート
             def draw(elem:XUElem, event:XUEvent):
                 frame = XURectFrame(elem)

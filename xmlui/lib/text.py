@@ -1,7 +1,7 @@
 import math
 from typing import Any,Callable,Self
 
-from xmlui.core import XURect,XUElem,XUEvent,XMLUI,XUSelectItem,_XUSelectBase,XUTextUtil
+from xmlui.core import XURect,XMLUI,XUElem,XUEvent,XUSelectItem,_XUSelectBase,XUTextUtil
 
 # フォントを扱う
 # #############################################################################
@@ -271,7 +271,7 @@ class XUMsgScr(XUMsg):
 # *****************************************************************************
 class Decorator(XMLUI.HasRef):
     def label(self, tag_name:str):
-        def wrapper(bind_func:Callable[[XULabel,XUEvent], str|None]):
+        def wrapper(bind_func:Callable[[XULabel,XUEvent], None]):
             # 登録用関数をジェネレート
             def draw(elem:XUElem, event:XUEvent):
                 return bind_func(XULabel(elem), event)
@@ -280,7 +280,7 @@ class Decorator(XMLUI.HasRef):
         return wrapper
 
     def msg(self, tag_name:str, speed_attr:str|None=None):
-        def wrapper(bind_func:Callable[[XUMsg,XUEvent], str|None]):
+        def wrapper(bind_func:Callable[[XUMsg,XUEvent], None]):
             # 登録用関数をジェネレート
             def draw(elem:XUElem, event:XUEvent):
                 msg = XUMsg(elem)
@@ -292,7 +292,7 @@ class Decorator(XMLUI.HasRef):
         return wrapper
 
     def msg_scr(self, tag_name:str, speed_attr:str|None=None):
-        def wrapper(bind_func:Callable[[XUMsgScr,XUEvent], str|None]):
+        def wrapper(bind_func:Callable[[XUMsgScr,XUEvent], None]):
             # 登録用関数をジェネレート
             def draw(elem:XUElem, event:XUEvent):
                 msg = XUMsgScr(elem)
