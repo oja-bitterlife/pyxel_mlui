@@ -22,7 +22,7 @@ class XUEInputInfo:
 
     # その時のキー定義に合わせて構築し直すようプロパティで
     @property
-    def key_config(self) -> dict[XUEventItem, list[int]]:
+    def key_config(self) -> dict[XUEvent.Key, list[int]]:
         return {
             XUEvent.Key.LEFT: self.CFG_LEFT,
             XUEvent.Key.RIGHT: self.CFG_RIGHT,

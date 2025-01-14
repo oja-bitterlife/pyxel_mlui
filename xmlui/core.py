@@ -128,7 +128,11 @@ class XURect:
 # イベント管理用
 # #############################################################################
 class XUEventItem(str):
-    pass
+    elem: "XUElem"
+    def __new__(cls, event:str, elem:"XUElem") -> Self:
+        self = super().__new__(cls, event)
+        self.elem = elem
+        return self
 
 class XUEvent:
     REPEAT_HOLD = 15
@@ -190,47 +194,57 @@ class XUEvent:
         self._receive = set([])
 
     # 入力
+    # -----------------------------------------------------
     def _on(self, event:XUEventItem):
         self._receive.add(event)
 
     # イベントの確認
-    def check(self, *events:XUEventItem) -> bool:
+    # -----------------------------------------------------
+    def check(self, *events:str) -> bool:
         for key in events:
             if key in self.trg:
                 return True
         return False
-    def check_repeat(self, *events:XUEventItem) -> bool:
+    def check_repeat(self, *events:str) -> bool:
         for key in events:
             if key in self.repeat:
                 return True
         return False
-    def check_now(self, *events:XUEventItem) -> bool:
+    def check_now(self, *events:str) -> bool:
         for key in events:
             if key in self.now:
                 return True
         return False
-    def check_release(self, *events:XUEventItem) -> bool:
+    def check_release(self, *events:str) -> bool:
         for key in events:
             if key in self.release:
                 return True
         return False
 
+    # 複製
+    # -----------------------------------------------------
+    def copy(self):
+        new = XUEvent()
+        new.is_active = self.is_active
+        new.on_init = self.on_init
+        new._repeat_count = self._repeat_count.copy()
+        new.now = self.now.copy()
+        new.trg = self.trg.copy()
+        new.release = self.release.copy()
+        new.repeat = self.repeat.copy()
+        return new
+
     # キー入力イベント
     # *************************************************************************
-    class Key:
-        # キーイベント定義
-        LEFT  = XUEventItem("CUR_L")
-        RIGHT = XUEventItem("CUR_R")
-        UP    = XUEventItem("CUR_U")
-        DOWN  = XUEventItem("CUR_D")
-        BTN_A = XUEventItem("BTN_A")
-        BTN_B = XUEventItem("BTN_B")
-        BTN_X = XUEventItem("BTN_X")
-        BTN_Y = XUEventItem("BTN_Y")
-
-        # インスタンスを作らず、クラスのまま使用する
-        def __init__(self) -> None:
-            raise PermissionError("This class is not instantiable")
+    class Key(StrEnum):
+        LEFT  = "CUR_L"
+        RIGHT = "CUR_R"
+        UP    = "CUR_U"
+        DOWN  = "CUR_D"
+        BTN_A = "BTN_A"
+        BTN_B = "BTN_B"
+        BTN_X = "BTN_X"
+        BTN_Y = "BTN_Y"
 
         # まとめてアクセス
         @classmethod
@@ -683,7 +697,7 @@ class XMLUI[T](XUElem):
                 continue
 
             # active/inactiveどちらのeventを使うか決定
-            event = deepcopy(self.event) if elem in active_elems else XUEvent()
+            event = self.event.copy() if elem in active_elems else XUEvent()
 
             # updateカウンタ更新
             event.on_init = elem.update_count == 0  # やっぱりinitialize情報がどこかに欲しい
@@ -708,7 +722,7 @@ class XMLUI[T](XUElem):
     # イベントを記録する。Trg処理は内部で行っているので現在の状態を入れる
     # set()なので何度入れてもいい
     def on(self, event_name:str):
-        self.event._on(XUEventItem(event_name))
+        self.event._on(XUEventItem(event_name, self))
 
     # root側で開く
     def open(self, id:str, id_alias:str|None=None) -> XUElem:
@@ -779,10 +793,10 @@ class XUSelectInfo(XUElem):
 
     # その他
     # -----------------------------------------------------
-    # __eq__だとpylanceの型認識がおかしくなるのでactionを使う
+    # actionが自身のactionではなくselectedのものを返すように
     @property
-    def action(self) -> XUEventItem:
-        return XUEventItem(self.selected_item.action)
+    def action(self) -> str:
+        return self.selected_item.action
 
 # 選択の状態更新用
 class _XUSelectSet(XUSelectInfo):
