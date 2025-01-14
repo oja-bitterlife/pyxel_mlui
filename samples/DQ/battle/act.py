@@ -172,4 +172,4 @@ class ReturnKing(BattleActItem):
     def init(self):
         self.set_timeout(45)  # ちょっと待機
     def action(self):
-        self.xmlui.send_event("dead")
+        self.xmlui.on("dead")

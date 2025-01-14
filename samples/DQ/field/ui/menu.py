@@ -40,9 +40,9 @@ def ui_init(xmlui:XMLUI):
                 case "tools":
                     menu_grid.open("tools")
                 case "stairs":
-                    return menu_grid.send_event("down_stairs")
+                    return menu_grid.on("down_stairs")
                 case "door":
-                    return menu_grid.send_event("open_door")
+                    return menu_grid.on("open_door")
                 case _:
                     menu_grid.xmlui.popup("under_construct")
 

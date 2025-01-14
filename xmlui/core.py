@@ -200,7 +200,7 @@ class XUEvent:
     # -----------------------------------------------------
     # イベントを記録する。Trg処理は内部で行っているので現在の状態を入れる
     # set()なので何度入れてもいい
-    def _record(self, event:XUEventItem):
+    def _on(self, event:XUEventItem):
         self._receive.add(event)
 
     # イベントの確認
@@ -449,9 +449,9 @@ class XUElem:
 
     # イベント
     # *************************************************************************
-    # xmluiにイベントを送る
-    def send_event(self, event_name:str):
-        self.xmlui.event._record(XUEventItem(event_name, self))
+    # イベント発生
+    def on(self, event_name:str):
+        self.xmlui.event._on(XUEventItem(event_name, self))
 
     # open/close
     # *************************************************************************

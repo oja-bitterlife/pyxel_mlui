@@ -23,6 +23,6 @@ def ui_init(xmlui:XMLUI):
         if event.check(XUEvent.Key.BTN_A):
             match game_start.action:
                 case "start" as action:
-                    game_start.send_event(action)
+                    game_start.on(action)
                 case _:
                     game_start.xmlui.popup("under_construct")
