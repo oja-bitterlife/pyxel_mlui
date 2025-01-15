@@ -13,8 +13,8 @@ from battle import Battle
 
 # 最初はタイトル
 #scene_manager = XUESceneManager(Title())
-scene_manager = XUESceneManager(Field())
-#scene_manager = XUESceneManager(Battle())
+#scene_manager = XUESceneManager(Field())
+scene_manager = XUESceneManager(Battle())
 
 # Main
 def update(): # フレームの更新処理

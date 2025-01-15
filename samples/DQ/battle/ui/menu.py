@@ -54,11 +54,7 @@ def ui_init(template):
             menu_item(item)
 
         # メニュー選択
-        menu_grid.select_by_event(event.trg, *XUEvent.Key.CURSOR())
-
-        # 選択アイテムの表示
-        if event.check_trg(XUEvent.Key.BTN_A):
-            return menu_grid.action
+        menu_grid.action_by_event(event.trg, XUEvent.Key.BTN_A, *XUEvent.Key.CURSOR())
 
 
     @battle_dq.msg_dq("msg_text")

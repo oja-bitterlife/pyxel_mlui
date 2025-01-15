@@ -35,15 +35,15 @@ class Battle(XUEFadeScene):
             PlayerMsg(xmlui, "{name}が　あらわれた！", enemy_data.data),
             CmdStart(xmlui))
 
+        # 画像読み込み
         self.enemy_img = pyxel.Image.from_image(filename="assets/images/slime.png")
         self.enemy_bg = pyxel.Image.from_image(filename="assets/images/enemy_bg.png")
         self.field_img = pyxel.Image.from_image(filename="assets/images/field.png")
 
 
     def event(self, event:XUEventItem):
-        match event:
-            case "dead":
-                self.close()
+        if event.name == "dead":
+            self.close()
 
     def closed(self):
         # 読みこんだUIの削除
