@@ -23,16 +23,19 @@ class FieldObj:
     
     # 周りにドアがあるか調べる。鍵の数チェックは今回はナシで
     def find_door(self, block_x:int, block_y:int):
-        for i,field_obj in enumerate(fieldobj_data.data):
+        for door_no,field_obj in enumerate(fieldobj_data.data):
             if field_obj["block_x"] == block_x-1 and field_obj["block_y"] == block_y and field_obj["type"] == "door":
-                return i
+                return door_no
             if field_obj["block_x"] == block_x+1 and field_obj["block_y"] == block_y and field_obj["type"] == "door":
-                return i
+                return door_no
             if field_obj["block_x"] == block_x and field_obj["block_y"]-1 == block_y and field_obj["type"] == "door":
-                return i
+                return door_no
             if field_obj["block_x"] == block_x and field_obj["block_y"]+1 == block_y and field_obj["type"] == "door":
-                return i
+                return door_no
         return None
 
     def open(self, data_no:int):
         fieldobj_data.open(data_no)
+
+    def is_opened(self, data_no:int):
+        return fieldobj_data.is_opened(data_no)

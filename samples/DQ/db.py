@@ -135,6 +135,10 @@ class FieldObjData:
         self.opened_ids.append(id)
         self.reload()
 
+    # 開き済みチェック
+    def is_opened(self, id) -> bool:
+        return id in self.opened_ids
+
 fieldobj_data = FieldObjData(1)
 
 

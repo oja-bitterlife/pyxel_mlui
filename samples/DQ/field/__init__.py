@@ -108,7 +108,7 @@ class Field(XUEFadeScene):
                 case "cmd_door":
                     menu = self.xmlui.find_by_id("menu")
                     door = self.field_obj.find_door(self.player.block_x, self.player.block_y)
-                    if door != None:
+                    if door != None and not self.field_obj.is_opened(door):
                         self.field_obj.open(door)
                         XUWinInfo(menu).setter.start_close()
                     else:
