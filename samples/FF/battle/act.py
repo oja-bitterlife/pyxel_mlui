@@ -318,7 +318,18 @@ class BattlePlayPlayerAttack(BattlePlayAct):
         # ダメージ設定
         import random
         target = self.battle_data.target[self.battle_data.player_idx]
-        self.battle_data.damage.append(BattleDamage(random.randint(0, 9999), random.randint(1, 99), target))
+        damage = random.randint(0, 9999)
+        hit = random.randint(1, 99)
+        # パーティーアタック
+        if target < 0:
+            player_no = abs(target) - 1
+            damage = 1
+            hit = 1
+            # 死にそうになってたらミスするように
+            if user_data.player_data[player_no]["hp"] <= damage:
+                damage = 0
+                hit = 0
+        self.battle_data.damage.append(BattleDamage(damage, hit, target))
 
     # 攻撃エフェクト終了待ち
 
@@ -380,14 +391,15 @@ class BattlePlayEnemyFlush(BattlePlayAct):
 
         # ダメージ設定
         import random
-        target = random.randint(0, len(user_data.player_data)-1)
+        player_no = random.randint(0, len(user_data.player_data)-1)
         damage = random.randint(1, 3)
         hit = 1
-        if user_data.player_data[target]["hp"] <= damage:
-            # 死にそうになってたらミスするように
+
+        # 死にそうになってたらミスするように
+        if user_data.player_data[player_no]["hp"] <= damage:
             damage = 0
             hit = 0
-        self.battle_data.damage.append(BattleDamage(damage, hit, -target-1))
+        self.battle_data.damage.append(BattleDamage(damage, hit, -player_no-1))
 
         # 攻撃エフェクト再生
         self.set_timeout(10)

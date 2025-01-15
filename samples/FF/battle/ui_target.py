@@ -22,13 +22,13 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
 
         # カーソル移動
         input = ""
-        if XUEvent.Key.LEFT in event.repeat:
+        if event.check_repeat(XUEvent.Key.LEFT):
             input = "next_l"
-        elif XUEvent.Key.RIGHT in event.repeat:
+        elif event.check_repeat(XUEvent.Key.RIGHT):
             input = "next_r"
-        elif XUEvent.Key.UP in event.repeat:
+        elif event.check_repeat(XUEvent.Key.UP):
             input = "next_u"
-        elif XUEvent.Key.DOWN in event.repeat:
+        elif event.check_repeat(XUEvent.Key.DOWN):
             input = "next_d"
 
         if input:
@@ -50,7 +50,7 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
         target_idx = -target_idx - 1
 
         # カーソル移動
-        if XUEvent.Key.LEFT in event.repeat:
+        if event.check_repeat(XUEvent.Key.LEFT):
             battle_data.target[battle_data.player_idx] = 1
         elif player_sel.select_by_event(event.repeat, *XUEvent.Key.UP_DOWN()):
             battle_data.target[battle_data.player_idx] = -player_sel.selected_no - 1
