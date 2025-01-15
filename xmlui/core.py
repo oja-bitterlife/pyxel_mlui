@@ -138,7 +138,7 @@ class XUEventItem:
             return self.name == other.name
         elif isinstance(other, str):
             return self.name == other
-        return self.__eq__(other)
+        return super().__eq__(other)
 
     # setで使う
     def __hash__(self) -> int:

@@ -36,10 +36,9 @@ class Title(XUEFadeScene):
         self.set_next_scene(Field())
 
     def event(self, event:XUEventItem):
-        match event:
-            # スタートが決定された
-            case "start":
-                self.close()
+        # スタートが決定された
+        if(event == "start"):
+            self.close()
 
     def draw(self):
         # 背景絵
