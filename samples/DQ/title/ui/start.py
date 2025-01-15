@@ -17,12 +17,4 @@ def ui_init(xmlui:XMLUI):
             menu_item(item)
 
         # メニュー選択
-        game_start.select_by_event(event.trg, *XUEvent.Key.UP_DOWN())
-
-        # メニュー決定
-        if event.check(XUEvent.Key.BTN_A):
-            match game_start.action:
-                case "start" as action:
-                    game_start.on(action)
-                case _:
-                    game_start.xmlui.popup("under_construct")
+        game_start.action_by_event(event.trg, XUEvent.Key.BTN_A, *XUEvent.Key.UP_DOWN())

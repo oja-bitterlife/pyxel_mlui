@@ -37,6 +37,19 @@ class XUGrid(_XUSelectBase):
     def select_no_wrap(self, input:set[XUEventItem], left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
         return self._select_by_event(input, left_event, right_event, up_event, down_event, False, False)
 
+    # 選択+Action処理Wrap版
+    def action_by_event(self, input:set[XUEventItem], action_event:str, left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
+        if action_event in input:
+            self.on(self.selected_item.action, self)
+            return False
+        return self._select_by_event(input, left_event, right_event, up_event, down_event, True, True)
+
+    # 選択+Action処理NoWrap版
+    def action_no_wrap(self, input:set[XUEventItem], action_event:str, left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
+        if action_event in input:
+            self.on(self.selected_item.action, self)
+            return False
+        return self._select_by_event(input, left_event, right_event, up_event, down_event, False, False)
 
 # リスト選択
 # *****************************************************************************
@@ -62,6 +75,20 @@ class _XUListBase(_XUSelectBase):
 
     # 選択一括処理NoWrap版
     def select_no_wrap(self, input:set[XUEventItem], prev_event:str, next_event:str) -> bool:
+        return self._select_by_event(input, prev_event, next_event, False)
+
+    # 選択+Action処理Wrap版
+    def action_by_event(self, input:set[XUEventItem], action_event:str, prev_event:str, next_event:str) -> bool:
+        if action_event in input:
+            self.on(self.selected_item.action)
+            return False
+        return self._select_by_event(input, prev_event, next_event, True)
+
+    # 選択+action処理NoWrap版
+    def action_no_wrap(self, input:set[XUEventItem], action_event:str, prev_event:str, next_event:str) -> bool:
+        if action_event in input:
+            self.on(self.selected_item.action)
+            return False
         return self._select_by_event(input, prev_event, next_event, False)
 
 # 縦方向リスト
