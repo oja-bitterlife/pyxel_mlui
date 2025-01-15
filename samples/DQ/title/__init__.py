@@ -23,6 +23,7 @@ class Title(XUEFadeScene):
         start.ui_init(self.xmlui)
         speed.ui_init(self.xmlui)
 
+        # 背景読み込み
         self.img = pyxel.Image.from_image(filename="assets/images/title.png")
 
         self.xmlui.open("game_title")  # game_title以下表示開始
@@ -38,7 +39,7 @@ class Title(XUEFadeScene):
         match event:
             # スタートが決定された
             case "start":
-                self.fade_close()
+                self.close()
 
     def draw(self):
         # 背景絵

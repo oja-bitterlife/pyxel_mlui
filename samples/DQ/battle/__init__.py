@@ -43,7 +43,7 @@ class Battle(XUEFadeScene):
     def event(self, event:XUEventItem):
         match event:
             case "dead":
-                self.fade_close()
+                self.close()
 
     def closed(self):
         # 読みこんだUIの削除

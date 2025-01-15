@@ -43,7 +43,7 @@ class Shop(XUEFadeScene):
             case "start_sell":
                 ui_sell.init_sell_list(self.xmlui)
             case "exit":
-                self.fade_close()
+                self.close()
 
     def draw(self):
         # プレイヤの表示

@@ -247,7 +247,7 @@ class XUEFadeScene(_XUESceneBase):
 
         # フェードアウトが終わったら終了
         def action(self):
-            self.scene.close()
+            super(XUEFadeScene, self.scene).close()  # 親のcloseを呼び出す
 
     # 初期化
     # -----------------------------------------------------
@@ -259,7 +259,7 @@ class XUEFadeScene(_XUESceneBase):
         self.add_act(XUEFadeScene.FadeIn(self, open_count))
 
     # フェードアウトを開始する
-    def fade_close(self):
+    def close(self):
         # Actを全て破棄してフェードアウト開始
         self.clear_act()
         self.add_act(XUEFadeScene.FadeOut(self, self.CLOSE_COUNT))
