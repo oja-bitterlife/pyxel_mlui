@@ -45,16 +45,16 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
     @result_text.label("result_action")
     def result_action(result_action:text.XULabel, event:XUEvent):
         # プレイヤターン
-        if xmlui.data_ref.player_idx < len(user_data.player_data):
+        if xmlui.data_ref.is_player_turn:
             action = xmlui.data_ref.command[xmlui.data_ref.player_idx]
             if action == "ぼうぎょ":
                 text = "ぼうぎょ"
-            else:
-                hit = xmlui.data_ref.damage[0].hit if xmlui.data_ref.damage else 0
-                text = XUTextUtil.number_zenkaku(hit, 2)
-                text += XUTextUtil.format_zenkaku("かいヒット")
-        # 敵側
+
+        hit = xmlui.data_ref.damage[0].hit if xmlui.data_ref.damage else 0
+        if hit > 0:
+            text = XUTextUtil.number_zenkaku(hit, 2)
+            text += XUTextUtil.format_zenkaku("かいヒット")
         else:
-            text = XUTextUtil.format_zenkaku("　１かいヒット")
+            text = XUTextUtil.format_zenkaku("ミス")
 
         pyxel.text(result_action.area.x, result_action.area.y, text, 7, system_font.font)
