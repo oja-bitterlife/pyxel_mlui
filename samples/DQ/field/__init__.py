@@ -72,6 +72,22 @@ class Field(XUEFadeScene):
             self.add_act(player_move_act)
             return
 
+    # 死亡でFieldに飛ばされた
+    @classmethod
+    def create_with_dead(cls) -> "Field":
+        self = cls()
+
+        user_data.hp = 1
+        self.player.x = 8*16
+        self.player.y = 9*16
+
+        # メッセージウインドウを開く
+        self.add_act(MenuOpenAct(self.xmlui))
+        msg_text = MsgDQ(self.xmlui.find_by_id("menu").open("message").find_by_id("msg_text"))
+        talk = "おお　{name}！\nしんでしまうとは　なにごとだ！\\p…………\\pちょっと　いってみたかったの\\pがんばってね"
+        msg_text.append_talk(talk, user_data.data)  # talkでテキスト開始
+
+        return self
 
     def draw(self):
         # プレイヤを中心に世界が動く。さす勇

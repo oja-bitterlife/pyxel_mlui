@@ -47,19 +47,6 @@ class Player:
         self.anim_pat = [32, 33]
         self.tile = XUETilemap(1)
 
-        # 死亡でFieldに飛ばされた時
-        self.is_dead = user_data.hp <= 0
-        if self.is_dead:
-            user_data.hp = 1
-            self.x = 8*16
-            self.y = 9*16
-
-            # メッセージウインドウを開く
-            menu = self.xmlui.open("menu")
-            msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
-            talk = "おお　{name}！\nしんでしまうとは　なにごとだ！\\p…………\\pちょっと　いってみたかったの\\pがんばってね"
-            msg_text.append_talk(talk, user_data.data)  # talkでテキスト開始
-
     def move(self, hitcheck_funcs:list[Callable[[int,int],bool]]):
         event = self.xmlui.event
         if event.check_now(XUEvent.Key.UP) and all([not hit(self.block_x, self.block_y-1) for hit in hitcheck_funcs]):

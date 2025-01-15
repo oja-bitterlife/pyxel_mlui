@@ -51,7 +51,7 @@ class Battle(XUEFadeScene):
 
         # 王様の前に戻る
         from field import Field
-        self.set_next_scene(Field())
+        self.set_next_scene(Field.create_with_dead())
 
     def draw(self):
         battle_data:BattleData = self.xmlui.data_ref
