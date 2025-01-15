@@ -39,18 +39,8 @@ def ui_init(xmlui:XMLUI):
         for item in shop_act.items:
             shop_act_item(item)
 
-        shop_act.select_by_event(event.repeat, *XUEvent.Key.LEFT_RIGHT())
-        if XUEvent.Key.BTN_A in event.trg:
-            shop_act_win = XUWinInfo.find_parent_win(shop_act)
+        if shop_act.action_by_event(event.repeat, XUEvent.Key.BTN_A, *XUEvent.Key.LEFT_RIGHT()) == XUEvent.Key.BTN_A:
             shop_act.enable = False
-            match shop_act.action:
-                case "buy":
-                    return "start_buy"
-                case "sell":
-                    return "start_sell"
-                case "exit":
-                    # バトルへ
-                    return "exit"
 
     # メッセージ
     # *************************************************************************

@@ -37,12 +37,12 @@ class Shop(XUEFadeScene):
         self.xmlui.close()
 
     def event(self, event:XUEventItem):
-        match event:
+        match event.name:
             case "start_buy":
                 ui_buy.init_buy_list(self.xmlui)
             case "start_sell":
                 ui_sell.init_sell_list(self.xmlui)
-            case "exit":
+            case "shop_exit":
                 self.close()
 
     def draw(self):

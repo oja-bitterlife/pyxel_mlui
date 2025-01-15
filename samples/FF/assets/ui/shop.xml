@@ -9,9 +9,9 @@
             </round_win>
             <round_win y="32" w="112" h="32">
                 <shop_act_list x="16" y="16" item_w="32" id="shop_act_list">
-                    <shop_ui_item action="buy">かう</shop_ui_item>
-                    <shop_ui_item action="sell">うる</shop_ui_item>
-                    <shop_ui_item action="exit">でる</shop_ui_item>
+                    <shop_ui_item action="start_buy">かう</shop_ui_item>
+                    <shop_ui_item action="start_sell">うる</shop_ui_item>
+                    <shop_ui_item action="shop_exit">でる</shop_ui_item>
                 </shop_act_list>
             </round_win>
             <round_win x="112" y="32" w="112" h="32">
