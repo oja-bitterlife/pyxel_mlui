@@ -42,7 +42,7 @@ class XUGrid(_XUSelectBase):
     def action_by_event(self, inputs:set[XUEventItem], action_event:str, left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
         for input in inputs:
             if action_event == input.name:
-                self.on(self.selected_item.action)
+                self.selected_item.on(self.selected_item.action)
                 return False
         return self._select_by_event(inputs, left_event, right_event, up_event, down_event, True, True)
 
@@ -50,7 +50,7 @@ class XUGrid(_XUSelectBase):
     def action_no_wrap(self, inputs:set[XUEventItem], action_event:str, left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
         for input in inputs:
             if action_event == input.name:
-                self.on(self.selected_item.action)
+                self.selected_item.on(self.selected_item.action)
                 return False
         return self._select_by_event(inputs, left_event, right_event, up_event, down_event, False, False)
 
@@ -85,7 +85,7 @@ class _XUListBase(_XUSelectBase):
     def action_by_event(self, inputs:set[XUEventItem], action_event:str, prev_event:str, next_event:str) -> bool:
         for input in inputs:
             if action_event == input.name:
-                self.on(self.selected_item.action)
+                self.selected_item.on(self.selected_item.action)
                 return False
         return self._select_by_event(inputs, prev_event, next_event, True)
 
@@ -93,7 +93,7 @@ class _XUListBase(_XUSelectBase):
     def action_no_wrap(self, inputs:set[XUEventItem], action_event:str, prev_event:str, next_event:str) -> bool:
         for input in inputs:
             if action_event == input.name:
-                self.on(self.selected_item.action)
+                self.selected_item.on(self.selected_item.action)
                 return False
         return self._select_by_event(inputs, prev_event, next_event, False)
 

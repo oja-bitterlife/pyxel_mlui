@@ -30,29 +30,15 @@ def ui_init(xmlui:XMLUI):
             menu_item(item)
 
         # メニュー選択
-        menu_grid.select_by_event(event.trg, *XUEvent.Key.CURSOR())
+        menu_grid.action_by_event(event.trg, XUEvent.Key.BTN_A, *XUEvent.Key.CURSOR())
 
-        # 選択アイテムの表示
-        if XUEvent.Key.BTN_A in event.trg:
-            match menu_grid.action:
-                case "talk":
-                    menu_grid.open("talk_dir")
-                case "tools":
-                    menu_grid.open("tools")
-                case "stairs":
-                    return menu_grid.on("down_stairs")
-                case "door":
-                    return menu_grid.on("open_door")
-                case _:
-                    menu_grid.xmlui.popup("under_construct")
-
-        # アイテムの無効化(アイテムカーソル用)
+        # メッセージ表示中はカーソルが非表示になるように
         is_message_oepn = menu_grid.xmlui.exists_id("message")
         for item in menu_grid.items:
-            item.enable = event.is_active and not is_message_oepn
+            item.enable = event.is_active and not is_message_oepn  # disableにしておけばカーソル非表示
 
         # 閉じる
-        if XUEvent.Key.BTN_B in event.trg:
+        if event.check_trg(XUEvent.Key.BTN_B):
             XUWinInfo.find_parent_win(menu_grid).setter.start_close()
 
     # コマンドメニューのタイトル

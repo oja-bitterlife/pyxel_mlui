@@ -19,12 +19,11 @@ def ui_init(xmlui:XMLUI):
 
         # 入力アクション
         # ---------------------------------------------------------
-        if XUEvent.Key.BTN_A in event.trg or XUEvent.Key.BTN_B in event.now:
+        if event.check_trg(XUEvent.Key.BTN_A) or event.check_now(XUEvent.Key.BTN_B):
             if msg_text.is_all_finish:
                 XUWinInfo.find_parent_win(msg_text).setter.start_close()  # 閉じる
                 return
 
-        if XUEvent.Key.BTN_A in event.trg or XUEvent.Key.BTN_B in event.now:
             if msg_text.is_next_wait:
                 msg_text.page_no += 1  # 次ページへ
                 return

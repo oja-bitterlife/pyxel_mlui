@@ -18,6 +18,7 @@ class NPCManager:
         WEST = "start_talk_west"
         SOUTH = "start_talk_south"
         NORTH = "start_talk_north"
+
     # 全方向定義
     TALK_EVENTS = [TALK_EVENT.EAST, TALK_EVENT.WEST, TALK_EVENT.SOUTH, TALK_EVENT.NORTH]
 
@@ -43,7 +44,7 @@ class NPCManager:
         return None
 
     # 会話イベントチェック
-    def check_talk(self, talk_event:TALK_EVENT, block_x:int, block_y:int) -> str | None:
+    def check_talk(self, talk_event:str, block_x:int, block_y:int) -> str | None:
         match talk_event:
             case self.TALK_EVENT.EAST:
                 return self._talk_check(block_x+1, block_y)

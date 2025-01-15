@@ -42,7 +42,7 @@ def ui_init(xmlui:XMLUI):
 
         # どうぐを使用した
         # ---------------------------------------------------------
-        if XUEvent.Key.BTN_A in event.trg:
+        if event.check_trg(XUEvent.Key.BTN_A):
             # どうぐデータ取得
             try:
                 data = tools_data.get_data(tools_list.action)
@@ -61,7 +61,7 @@ def ui_init(xmlui:XMLUI):
 
         # 閉じる
         # ---------------------------------------------------------
-        if XUEvent.Key.BTN_B in event.trg:
+        if event.check_trg(XUEvent.Key.BTN_B):
             XUWinInfo.find_parent_win(tools_list).setter.start_close()
 
 
