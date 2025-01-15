@@ -115,7 +115,7 @@ class Field(XUEFadeScene):
             # ウインドウクローズ
             case "close_win":
                 # メッセージウインドウの時はメニューごと閉じる
-                if event.elem.id == "message":
+                if event.sender.id == "message":
                     menu = self.xmlui.find_by_id("menu")
                     XUWinInfo(menu).setter.start_close()
 

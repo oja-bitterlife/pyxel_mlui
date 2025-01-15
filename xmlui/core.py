@@ -128,14 +128,14 @@ class XURect:
 # イベント管理用
 # #############################################################################
 class XUEventItem(str):
-    elem: "XUElem"
-    def __new__(cls, event_name:str, elem:"XUElem") -> Self:
+    sender: "XUElem"
+    def __new__(cls, event_name:str, sender:"XUElem") -> Self:
         self = super().__new__(cls, event_name)
-        self.elem = elem
+        self.sender = sender
         return self
 
     def __str__(self) -> str:
-        return f"[{self, self.elem.tag, self.elem}]"
+        return f"[{self, self.sender.tag, self.sender}]"
 
 class XUEvent:
     REPEAT_HOLD = 15
