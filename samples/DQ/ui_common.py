@@ -71,7 +71,8 @@ def ui_init(xmlui:XMLUI):
 
     @common_text.msg("popup_text")
     def popup_text(popup_text:text.XUMsg, event:XUEvent):
-        if event.check(XUEvent.Key.BTN_A, XUEvent.Key.BTN_B):
+        print(popup_text)
+        if event.check_trg(XUEvent.Key.BTN_A, XUEvent.Key.BTN_B):
             XUWinInfo.find_parent_win(popup_text).close()
 
         # テキスト描画

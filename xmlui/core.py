@@ -136,8 +136,6 @@ class XUEventItem:
     def __eq__(self, other:object) -> bool:
         if isinstance(other, XUEventItem):
             return self.name == other.name
-        elif isinstance(other, str):
-            return self.name == other
         return super().__eq__(other)
 
     # setで使う
@@ -212,25 +210,29 @@ class XUEvent:
 
     # イベントの確認
     # -----------------------------------------------------
-    def check(self, *events:str) -> bool:
-        for key in events:
-            if key in self.trg:
-                return True
+    def check_now(self, *events:str) -> bool:
+        for event in events:
+            for item in self.now:
+                if event == item.name:
+                    return True
+        return False
+    def check_trg(self, *events:str) -> bool:
+        for event in events:
+            for item in self.trg:
+                if event == item.name:
+                    return True
         return False
     def check_repeat(self, *events:str) -> bool:
-        for key in events:
-            if key in self.repeat:
-                return True
-        return False
-    def check_now(self, *events:str) -> bool:
-        for key in events:
-            if key in self.now:
-                return True
+        for event in events:
+            for item in self.repeat:
+                if event == item.name:
+                    return True
         return False
     def check_release(self, *events:str) -> bool:
-        for key in events:
-            if key in self.release:
-                return True
+        for event in events:
+            for item in self.release:
+                if event == item.name:
+                    return True
         return False
 
     # 複製

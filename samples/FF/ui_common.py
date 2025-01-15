@@ -46,7 +46,7 @@ def ui_init(xmlui:debug.DebugXMLUI):
 
     @common_text.msg("popup_text")
     def popup_text(popup_text:text.XUMsg, event:XUEvent):
-        if event.check(XUEvent.Key.BTN_A, XUEvent.Key.BTN_B):
+        if event.check_trg(XUEvent.Key.BTN_A, XUEvent.Key.BTN_B):
             win = XUWinInfo.find_parent_win(popup_text)
             print(win)
             XUWinInfo.find_parent_win(popup_text).close()

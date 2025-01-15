@@ -130,7 +130,7 @@ class BattleCmdSetup(BattleMenuAct):
 # コマンド選択
 class BattleCmdSel(BattleMenuAct):
     def waiting(self):
-        if self.scene.xmlui.event.check(XUEvent.Key.BTN_A):
+        if self.scene.xmlui.event.check_trg(XUEvent.Key.BTN_A):
             menu = XUSelectInfo(self.menu_win.find_by_id("command"))
             if menu.selected_item.value == "工事中":
                 self.scene.xmlui.popup("under_construct")
@@ -147,14 +147,14 @@ class BattleCmdSel(BattleMenuAct):
             self.finish()
 
         # 取りやめ
-        if self.xmlui.event.check(XUEvent.Key.BTN_B):
+        if self.xmlui.event.check_trg(XUEvent.Key.BTN_B):
             self.act.add_act(BattleCmdCharaBack(self.xmlui, self.menu_win, self.battle_data.player_idx-1))
             self.finish()
 
 # 工事中
 class BattleCmdDeny(BattleMenuAct):
     def waiting(self):
-        if self.xmlui.event.check(XUEvent.Key.BTN_A, XUEvent.Key.BTN_B):
+        if self.xmlui.event.check_trg(XUEvent.Key.BTN_A, XUEvent.Key.BTN_B):
             self.act.add_act(BattleCmdSel(self.xmlui, self.menu_win))
             self.finish()
 
@@ -179,13 +179,13 @@ class BattleCmdTargetSel(BattleMenuAct):
 
     def waiting(self):
         # ターゲット決定
-        if self.xmlui.event.check(XUEvent.Key.BTN_A):
+        if self.xmlui.event.check_trg(XUEvent.Key.BTN_A):
             self.target_select.close()
             self.act.add_act(BattleCmdCharaBack(self.xmlui, self.menu_win, self.battle_data.player_idx+1))
             self.finish()
 
         # 取りやめ
-        if self.xmlui.event.check(XUEvent.Key.BTN_B):
+        if self.xmlui.event.check_trg(XUEvent.Key.BTN_B):
             self.target_select.close()
             self.act.add_act(BattleCmdSel(self.xmlui, self.menu_win))
             self.finish()

@@ -57,7 +57,7 @@ def ui_init(template):
         menu_grid.select_by_event(event.trg, *XUEvent.Key.CURSOR())
 
         # 選択アイテムの表示
-        if event.check(XUEvent.Key.BTN_A):
+        if event.check_trg(XUEvent.Key.BTN_A):
             return menu_grid.action
 
 

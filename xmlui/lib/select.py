@@ -15,41 +15,44 @@ class XUGrid(_XUSelectBase):
         super().__init__(elem, init_item_tag, rows, item_w, item_h)
 
     # 入力に応じた挙動一括。変更があった場合はTrue
-    def _select_by_event(self, input:set[XUEventItem], left_event:str, right_event:str, up_event:str, down_event:str, x_wrap:bool, y_wrap:bool) -> bool:
+    def _select_by_event(self, inputs:set[XUEventItem], left_event:str, right_event:str, up_event:str, down_event:str, x_wrap:bool, y_wrap:bool) -> bool:
         old_no = self.selected_no
 
-        if left_event in input:
-            self.next(-1, 0, x_wrap, y_wrap)
-        elif right_event in input:
-            self.next(1, 0, x_wrap, y_wrap)
-        elif up_event in input:
-            self.next(0, -1, x_wrap, y_wrap)
-        elif down_event in input:
-            self.next(0, 1, x_wrap, y_wrap)
+        for input in inputs:
+            if left_event == input.name:
+                self.next(-1, 0, x_wrap, y_wrap)
+            elif right_event == input.name:
+                self.next(1, 0, x_wrap, y_wrap)
+            elif up_event == input.name:
+                self.next(0, -1, x_wrap, y_wrap)
+            elif down_event == input.name:
+                self.next(0, 1, x_wrap, y_wrap)
 
         return self.selected_no != old_no
 
     # 選択一括処理Wrap版
-    def select_by_event(self, input:set[XUEventItem], left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
-        return self._select_by_event(input, left_event, right_event, up_event, down_event, True, True)
+    def select_by_event(self, inputs:set[XUEventItem], left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
+        return self._select_by_event(inputs, left_event, right_event, up_event, down_event, True, True)
 
     # 選択一括処理NoWrap版
-    def select_no_wrap(self, input:set[XUEventItem], left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
-        return self._select_by_event(input, left_event, right_event, up_event, down_event, False, False)
+    def select_no_wrap(self, inputs:set[XUEventItem], left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
+        return self._select_by_event(inputs, left_event, right_event, up_event, down_event, False, False)
 
     # 選択+Action処理Wrap版
-    def action_by_event(self, input:set[XUEventItem], action_event:str, left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
-        if action_event in input:
-            self.on(self.selected_item.action, self)
-            return False
-        return self._select_by_event(input, left_event, right_event, up_event, down_event, True, True)
+    def action_by_event(self, inputs:set[XUEventItem], action_event:str, left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
+        for input in inputs:
+            if action_event == input.name:
+                self.on(self.selected_item.action)
+                return False
+        return self._select_by_event(inputs, left_event, right_event, up_event, down_event, True, True)
 
     # 選択+Action処理NoWrap版
-    def action_no_wrap(self, input:set[XUEventItem], action_event:str, left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
-        if action_event in input:
-            self.on(self.selected_item.action, self)
-            return False
-        return self._select_by_event(input, left_event, right_event, up_event, down_event, False, False)
+    def action_no_wrap(self, inputs:set[XUEventItem], action_event:str, left_event:str, right_event:str, up_event:str, down_event:str) -> bool:
+        for input in inputs:
+            if action_event == input.name:
+                self.on(self.selected_item.action)
+                return False
+        return self._select_by_event(inputs, left_event, right_event, up_event, down_event, False, False)
 
 # リスト選択
 # *****************************************************************************
@@ -59,37 +62,40 @@ class _XUListBase(_XUSelectBase):
         self.next_move = next_move
 
     # 入力に応じた挙動一括。変更があった場合はTrue
-    def _select_by_event(self, input:set[XUEventItem], prev_event:str, next_event:str, wrap:bool) -> bool:
+    def _select_by_event(self, inputs:set[XUEventItem], prev_event:str, next_event:str, wrap:bool) -> bool:
         old_no = self.selected_no
 
-        if prev_event in input:
-            self.next(-self.next_move[0], -self.next_move[1], wrap, wrap)
-        elif next_event in input:
-            self.next(self.next_move[0], self.next_move[1], wrap, wrap)
+        for input in inputs:
+            if prev_event == input.name:
+                self.next(-self.next_move[0], -self.next_move[1], wrap, wrap)
+            elif next_event == input.name:
+                self.next(self.next_move[0], self.next_move[1], wrap, wrap)
 
         return self.selected_no != old_no
 
     # 選択一括処理Wrap版
-    def select_by_event(self, input:set[XUEventItem], prev_event:str, next_event:str) -> bool:
-        return self._select_by_event(input, prev_event, next_event, True)
+    def select_by_event(self, inputs:set[XUEventItem], prev_event:str, next_event:str) -> bool:
+        return self._select_by_event(inputs, prev_event, next_event, True)
 
     # 選択一括処理NoWrap版
-    def select_no_wrap(self, input:set[XUEventItem], prev_event:str, next_event:str) -> bool:
-        return self._select_by_event(input, prev_event, next_event, False)
+    def select_no_wrap(self, inputs:set[XUEventItem], prev_event:str, next_event:str) -> bool:
+        return self._select_by_event(inputs, prev_event, next_event, False)
 
     # 選択+Action処理Wrap版
-    def action_by_event(self, input:set[XUEventItem], action_event:str, prev_event:str, next_event:str) -> bool:
-        if action_event in input:
-            self.on(self.selected_item.action)
-            return False
-        return self._select_by_event(input, prev_event, next_event, True)
+    def action_by_event(self, inputs:set[XUEventItem], action_event:str, prev_event:str, next_event:str) -> bool:
+        for input in inputs:
+            if action_event == input.name:
+                self.on(self.selected_item.action)
+                return False
+        return self._select_by_event(inputs, prev_event, next_event, True)
 
     # 選択+action処理NoWrap版
-    def action_no_wrap(self, input:set[XUEventItem], action_event:str, prev_event:str, next_event:str) -> bool:
-        if action_event in input:
-            self.on(self.selected_item.action)
-            return False
-        return self._select_by_event(input, prev_event, next_event, False)
+    def action_no_wrap(self, inputs:set[XUEventItem], action_event:str, prev_event:str, next_event:str) -> bool:
+        for input in inputs:
+            if action_event == input.name:
+                self.on(self.selected_item.action)
+                return False
+        return self._select_by_event(inputs, prev_event, next_event, False)
 
 # 縦方向リスト
 # ---------------------------------------------------------
