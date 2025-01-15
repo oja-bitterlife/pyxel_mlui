@@ -6,7 +6,7 @@ from xmlui.lib.debug import DebugXMLUI
 from xmlui.ext.scene import XUEFadeScene
 
 import ui_common
-from FF.shop import ui_shop,ui_buy,ui_sell
+from shop import ui_shop,ui_buy,ui_sell
 
 class Shop(XUEFadeScene):
     def __init__(self):
@@ -32,7 +32,7 @@ class Shop(XUEFadeScene):
         ]
 
     def closed(self):
-        from FF.battle import Battle
+        from battle import Battle
         self.set_next_scene(Battle())
         self.xmlui.close()
 

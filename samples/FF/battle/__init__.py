@@ -8,9 +8,9 @@ from xmlui.ext.scene import XUEFadeScene
 
 # ui
 import ui_common
-from FF.battle import ui_command,ui_status,act,ui_target,ui_result
-from FF.battle.act import BattleStart,BattlePlayDamage,BattlePlayEnemyFlush
-from FF.battle.data import BattleData
+from battle import ui_command,ui_status,act,ui_target,ui_result
+from battle.act import BattleStart,BattlePlayDamage,BattlePlayEnemyFlush
+from battle.data import BattleData
 
 # データ
 from db import enemy_data,user_data

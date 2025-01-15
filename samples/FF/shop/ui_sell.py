@@ -5,9 +5,9 @@ from xmlui.lib import select,text
 from system import system_font, hand_cursor
 
 from db import user_data
-from FF.ui_common import get_world_clip
-from FF.shop.shop_list import SellList
-from FF.shop.ui_shop import set_shop_msg
+from ui_common import get_world_clip
+from shop.shop_list import SellList
+from shop.ui_shop import set_shop_msg
 
 def ui_init(xmlui:XMLUI):
     shop_select = select.Decorator(xmlui)
