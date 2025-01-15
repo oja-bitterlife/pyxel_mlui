@@ -127,15 +127,22 @@ class XURect:
 
 # イベント管理用
 # #############################################################################
-class XUEventItem(str):
-    sender: "XUElem"
-    def __new__(cls, event_name:str, sender:"XUElem") -> Self:
-        self = super().__new__(cls, event_name)
+class XUEventItem:
+    def __init__(self, name:str, sender:"XUElem"):
+        self.name = name
         self.sender = sender
-        return self
 
-    def __str__(self) -> str:
-        return f"[{self, self.sender.tag, self.sender}]"
+    # イベント名で比較する
+    def __eq__(self, other:object) -> bool:
+        if isinstance(other, XUEventItem):
+            return self.name == other.name
+        elif isinstance(other, str):
+            return self.name == other
+        return self.__eq__(other)
+
+    # setで使う
+    def __hash__(self) -> int:
+        return self.name.__hash__()
 
 class XUEvent:
     REPEAT_HOLD = 15
