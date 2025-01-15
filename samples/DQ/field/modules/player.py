@@ -60,14 +60,15 @@ class Player:
             talk = "おお　{name}！\nしんでしまうとは　なにごとだ！\\p…………\\pちょっと　いってみたかったの\\pがんばってね"
             msg_text.append_talk(talk, user_data.data)  # talkでテキスト開始
 
-    def move(self, event_now:set[XUEventItem], hitcheck_funcs:list[Callable[[int,int],bool]]):
-        if XUEvent.Key.UP in event_now and all([not hit(self.block_x, self.block_y-1) for hit in hitcheck_funcs]):
+    def move(self, hitcheck_funcs:list[Callable[[int,int],bool]]):
+        event = self.xmlui.event
+        if event.check_now(XUEvent.Key.UP) and all([not hit(self.block_x, self.block_y-1) for hit in hitcheck_funcs]):
             return PlayerMoveAct(self, 0, -16)
-        if XUEvent.Key.DOWN in event_now and all([not hit(self.block_x, self.block_y+1) for hit in hitcheck_funcs]):
+        if event.check_now(XUEvent.Key.DOWN) and all([not hit(self.block_x, self.block_y+1) for hit in hitcheck_funcs]):
             return PlayerMoveAct(self, 0, 16)
-        if XUEvent.Key.LEFT in event_now and all([not hit(self.block_x-1, self.block_y) for hit in hitcheck_funcs]):
+        if event.check_now(XUEvent.Key.LEFT) and all([not hit(self.block_x-1, self.block_y) for hit in hitcheck_funcs]):
             return PlayerMoveAct(self, -16, 0)
-        if XUEvent.Key.RIGHT in event_now and all([not hit(self.block_x+1, self.block_y) for hit in hitcheck_funcs]):
+        if event.check_now(XUEvent.Key.RIGHT) and all([not hit(self.block_x+1, self.block_y) for hit in hitcheck_funcs]):
             return PlayerMoveAct(self, 16, 0)
         return None
 

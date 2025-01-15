@@ -60,16 +60,14 @@ class Field(XUEFadeScene):
 
     # 何もしていない(actがない)ときだけここにくる、Idle関数
     def idle(self):
-        # Act中で無ければメニューオープン可能
+        # メニューオープン
         if self.xmlui.event.check_now(XUEvent.Key.BTN_A):
             self.add_act(MenuOpenAct(self.xmlui))
             return
 
-        # プレイヤの移動。移動できれば移動Actが返る
-        player_move_act = self.player.move(self.xmlui.event.now, [
-            self.npc.hit_check,  # 当たり判定リスト
-            self.bg.hit_check,
-            self.field_obj.hit_check])
+        # プレイヤの移動
+        hit_list = [self.npc.hit_check, self.bg.hit_check, self.field_obj.hit_check]  # 当たり判定リスト
+        player_move_act = self.player.move(hit_list)  # 当たり判定。移動できれば移動Actが返る
         if player_move_act:
             self.add_act(player_move_act)
             return
