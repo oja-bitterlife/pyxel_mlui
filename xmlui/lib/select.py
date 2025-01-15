@@ -81,7 +81,6 @@ class _XUListBase(_XUSelectBase):
 
         return hit_event if self.selected_no != old_no else ""
 
-
     # 選択一括処理Wrap版
     def select_by_event(self, inputs:set[XUEventItem], prev_event:str, next_event:str) -> str:
         return self._select_by_event(inputs, prev_event, next_event, True)

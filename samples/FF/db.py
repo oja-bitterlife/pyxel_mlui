@@ -9,10 +9,10 @@ user_db = XUEMemoryDB.load("assets/data/user.db")
 class UserSave:
     def __init__(self, name:str):
         self.pc = [
-            {"lv":1, "name":"おじゃあ", "hp":1, "mp":3, "fb":0},
-            {"lv":1, "name":"おじゃい", "hp":2, "mp":2, "fb":0},
-            {"lv":1, "name":"おじゃう", "hp":3, "mp":1, "fb":1},
-            {"lv":1, "name":"おじゃえ", "hp":4, "mp":0, "fb":1},
+            {"id":1, "lv":1, "name":"おじゃあ", "hp":1, "mp":3, "fb":0},
+            {"id":2, "lv":1, "name":"おじゃい", "hp":2, "mp":2, "fb":0},
+            {"id":3, "lv":1, "name":"おじゃう", "hp":3, "mp":1, "fb":1},
+            {"id":4, "lv":1, "name":"おじゃえ", "hp":4, "mp":0, "fb":1},
         ]
         self.gil = 123456
  
@@ -47,6 +47,12 @@ class UserData:
 
     def get_lives(self):
         return [data for data in self.player_data if data["hp"] > 0]
+
+    def set_hp(self, index, hp):
+        id = self.player_data[index]["id"]
+        user_db.execute("UPDATE user_data SET hp=? WHERE id=?", [hp, id])
+        user_db.connection.commit()
+        self.reload_db()
 
 user_data = UserData()
 

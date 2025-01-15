@@ -264,6 +264,8 @@ class BattlePlayUnitSelect(BattlePlayAct):
             self.act.add_act(BattlePlayEnemyAction(self.xmlui, self.result))
         self.finish()
 
+# プレイヤ専用アクション
+# ---------------------------------------------------------
 class BattlePlayPlayerAction(BattlePlayAct):
     def init(self):
         # ぼうぎょ
@@ -320,6 +322,13 @@ class BattlePlayPlayerAttack(BattlePlayAct):
 
     # 攻撃エフェクト終了待ち
 
+class BattlePlayDeffence(BattlePlayAct):
+    def init(self):
+        self.result.open("result_action")  # 防御表示
+        self.set_timeout(15)
+
+# プレイヤ・敵・共通アクション
+# ---------------------------------------------------------
 # ヒット数表示開始
 class BattlePlayHit(BattlePlayAct):
     def init(self):
@@ -333,11 +342,15 @@ class BattlePlayDamage(BattlePlayAct):
         if all([damage.is_finish for damage in self.battle_data.damage]):
             self.finish()
 
-class BattlePlayDeffence(BattlePlayAct):
-    def init(self):
-        self.result.open("result_action")  # 防御表示
-        self.set_timeout(15)
+    # ダメージの反映
+    def action(self):
+        for damage in self.battle_data.damage:
+            if damage.target < 0:
+                target = abs(damage.target) - 1
+                user_data.set_hp(target, user_data.player_data[target]["hp"] - damage.damage)
 
+
+# サブウインドウを1つずつ閉じる
 class BattlePlayCloseWin(BattlePlayAct):
     def waiting(self):
         children = [child for child in self.result.children if XUWinInfo.is_win(child)]
@@ -348,6 +361,8 @@ class BattlePlayCloseWin(BattlePlayAct):
             if not win.is_closing:
                 win.setter.start_close()
 
+# 敵アクション
+# ---------------------------------------------------------
 class BattlePlayEnemyAction(BattlePlayAct):
     def init(self):
         # こうげき
@@ -365,8 +380,14 @@ class BattlePlayEnemyFlush(BattlePlayAct):
 
         # ダメージ設定
         import random
-        target = -random.randint(0, len(user_data.player_data)-1) -1
-        self.battle_data.damage.append(BattleDamage(random.randint(1, 9), 1, target))
+        target = random.randint(0, len(user_data.player_data)-1)
+        damage = random.randint(1, 3)
+        hit = 1
+        if user_data.player_data[target]["hp"] <= damage:
+            # 死にそうになってたらミスするように
+            damage = 0
+            hit = 0
+        self.battle_data.damage.append(BattleDamage(damage, hit, -target-1))
 
         # 攻撃エフェクト再生
         self.set_timeout(10)
