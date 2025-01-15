@@ -19,7 +19,12 @@ def ui_init(xmlui:XMLUI):
             col = KOJICHU_COL if menu_item.value == "工事中" else get_text_color()
             pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, col, system_font.font)
 
+
             # カーソル表示
+            is_message_oepn = xmlui.exists_id("message")  # メッセージウインドウ表示以降は表示しない
+            if is_message_oepn:
+                menu_item.enable = False
+
             if menu_item.selected and menu_item.enable:
                 draw_menu_cursor(menu_item, 0, 0)
 
@@ -31,11 +36,6 @@ def ui_init(xmlui:XMLUI):
 
         # メニュー選択
         menu_grid.action_by_event(event.trg, XUEvent.Key.BTN_A, *XUEvent.Key.CURSOR())
-
-        # メッセージ表示中はカーソルが非表示になるように
-        is_message_oepn = menu_grid.xmlui.exists_id("message")
-        for item in menu_grid.items:
-            item.enable = event.is_active and not is_message_oepn  # disableにしておけばカーソル非表示
 
         # 閉じる
         if event.check_trg(XUEvent.Key.BTN_B):
