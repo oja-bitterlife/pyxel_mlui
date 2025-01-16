@@ -68,6 +68,11 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
         # コマンド選択中のみ表示
         if xmlui.data_ref.is_cmd_selecting:
             for i in range(xmlui.data_ref.player_idx):
+                command = xmlui.data_ref.command[i]
+                # ぼうぎょの時はターゲット非表示
+                if command == "ぼうぎょ":
+                    continue
+
                 target = xmlui.data_ref.target[i]
                 # プレイヤ側
                 if target < 0:
