@@ -54,7 +54,17 @@ def ui_init(template):
             menu_item(item)
 
         # メニュー選択
-        menu_grid.action_by_event(event.trg, XUEvent.Key.BTN_A, *XUEvent.Key.CURSOR())
+        menu_grid.select_by_event(event.trg, *XUEvent.Key.CURSOR())
+        if event.check_trg(XUEvent.Key.BTN_A):
+            match menu_grid.selected_item.action:
+                case "attack" | "spel" | "run":
+                    # 選択されたらメニューは閉じる
+                    XUWinInfo(menu_grid.xmlui.find_by_id("menu")).setter.close()
+                    # イベント発行
+                    menu_grid.on(menu_grid.selected_item.action)
+                case _:
+                    # 工事中
+                    menu_grid.xmlui.popup("under_construct")
 
 
     @battle_dq.msg_dq("msg_text")

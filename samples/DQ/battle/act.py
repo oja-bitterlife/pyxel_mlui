@@ -66,9 +66,6 @@ class CmdStart(BattleActItem):
 class CmdCheck(BattleActItem):
     def waiting(self):
         if self.xmlui.event.check_trg("attack"):
-            # 選択されたらメニューは閉じる
-            XUWinInfo(self.xmlui.find_by_id("menu")).setter.start_close()
-
             # ダメージ計算
             enemy_data.data["hit"] = XUTextUtil.format_zenkaku(random.randint(1, 100))
 
@@ -81,9 +78,6 @@ class CmdCheck(BattleActItem):
             self.finish()
 
         if self.xmlui.event.check_trg("run"):
-            # 選択されたらメニューは閉じる
-            XUWinInfo(self.xmlui.find_by_id("menu")).setter.start_close()
-
             # 逃げる
             self.act.add_act(
                 PlayerMsg(self.xmlui, "{name}は　にげだした", user_data.data),
@@ -94,17 +88,12 @@ class CmdCheck(BattleActItem):
             self.finish()
 
         if self.xmlui.event.check_trg("spel"):
-            # 選択されたらメニューは閉じる
-            XUWinInfo(self.xmlui.find_by_id("menu")).setter.start_close()
-
             self.act.add_act(
                 PlayerMsg(self.xmlui, "じゅもんを　おぼえていない", {}),
                 CmdStart(self.xmlui))  # コマンド選択に戻る
 
             self.finish()
 
-        if self.xmlui.event.check_trg("tools"):
-            self.xmlui.popup("under_construct")
 
 # 敵の行動
 # *****************************************************************************
