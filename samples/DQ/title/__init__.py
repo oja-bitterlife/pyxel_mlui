@@ -35,16 +35,16 @@ class Title(XUEFadeScene):
         from field import Field
         self.set_next_scene(Field())
 
-    def event(self, event:XUEventItem):
-        match event.name:
-            case "start":
-                self.close()  # スタートが決定された
-            case "continue":
-                self.xmlui.popup("under_construct")
-    
     def draw(self):
         # 背景絵
         pyxel.blt(0, 0, self.img, 0, 0, self.img.width, self.img.height)
 
         # UIの表示
         self.xmlui.draw()
+
+    def event(self, event:XUEventItem):
+        match event.name:
+            case "start":
+                self.close()  # スタートが決定された
+            case "continue":
+                self.xmlui.popup("under_construct")

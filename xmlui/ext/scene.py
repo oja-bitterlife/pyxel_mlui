@@ -178,15 +178,15 @@ class _XUESceneBase(XUEActManager):
 
     # オーバーライドして使う物
     # -----------------------------------------------------
-    def event(self, event:XUEventItem):
-        pass
+    # フェードアウト完了時に呼ばれる。主に次シーン設定を行う
+    def closed(self):
+        self.xmlui.logger.warning("scene.closed is not implemented")
     def idle(self):
         pass
     def draw(self):
         pass
-    # フェードアウト完了時に呼ばれる。主に次シーン設定を行う
-    def closed(self):
-        self.xmlui.logger.warning("scene.closed is not implemented")
+    def event(self, event:XUEventItem):
+        pass
 
 
 # シーン管理。mainの中で各シーンを実行する

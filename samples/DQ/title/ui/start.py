@@ -19,4 +19,5 @@ def ui_init(xmlui:XMLUI):
         # メニュー選択
         game_start.select_by_event(event.trg, *XUEvent.Key.UP_DOWN())
         if event.check_trg(XUEvent.Key.BTN_A):
+            # ゲームメインへイベント通知
             game_start.on(game_start.selected_item.action)
