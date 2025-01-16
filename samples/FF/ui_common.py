@@ -48,7 +48,6 @@ def ui_init(xmlui:debug.DebugXMLUI):
     def popup_text(popup_text:text.XUMsg, event:XUEvent):
         if event.check_trg(XUEvent.Key.BTN_A, XUEvent.Key.BTN_B):
             win = XUWinInfo.find_parent_win(popup_text)
-            print(win)
             XUWinInfo.find_parent_win(popup_text).close()
 
         # テキスト描画
@@ -72,7 +71,9 @@ def ui_init(xmlui:debug.DebugXMLUI):
 
         # 表示領域が無ければ完了なので閉じる
         if round_win.is_closing and clip.is_empty:
-            round_win.close()  # 即座にclose
+            # 子の終了待ち
+            if not round_win.find_child_win():
+                round_win.finish()  # 完了
         
         # 背景
         pyxel.rect(area.x, area.y, area.w, min(area.h, clip.h+1), 0)

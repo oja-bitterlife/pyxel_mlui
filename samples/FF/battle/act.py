@@ -217,7 +217,7 @@ class BattleCmdClose(BattleMenuAct):
     def init(self):
         # enemy名(command_menuの上位)ごと閉じる
         self.target_win = XUWinInfo.find_parent_win(self.menu_win)
-        self.target_win.setter.start_close()
+        self.target_win.setter.close()
 
     def waiting(self):
         if self.target_win.removed:
@@ -370,7 +370,7 @@ class BattlePlayCloseWin(BattlePlayAct):
         else:
             win = XUWinInfo(children[-1])
             if not win.is_closing:
-                win.setter.start_close()
+                win.setter.close()
 
 # 敵アクション
 # ---------------------------------------------------------
