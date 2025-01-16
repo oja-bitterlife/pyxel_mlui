@@ -95,8 +95,10 @@ def ui_init(xmlui:XMLUI):
 
         # 表示領域が無ければ完了なので閉じる
         if round_win.is_closing and clip.is_empty:
-            round_win.finish()  # 完了
-            round_win.on("round_win_closed")  # ウインドウ閉じたイベント発行
+            # 子の終了待ち
+            if not round_win.find_child_win():
+                round_win.finish()  # 完了
+                round_win.on("round_win_closed")  # ウインドウ閉じたイベント発行
             return
         
         # 背景

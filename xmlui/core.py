@@ -162,11 +162,10 @@ class XUEvent:
         self.is_active = init_active  # アクティブなイベントかどうか
         self.on_init = False
         self._repeat_count:dict[XUEventItem,int] = {}
-        self.clear()
 
-    def clear(self):
         self._receive:set[XUEventItem] = set([])  # 次の状態受付
 
+        # 現在の状態保存場所
         self.now:set[XUEventItem] = set([])
         self.trg:set[XUEventItem] = set([])
         self.release:set[XUEventItem] = set([])
@@ -624,6 +623,9 @@ class XMLUI[T](XUElem):
 
         # 登録関数のクリア
         self._draw_funcs = {}
+
+        # イベントのクリア
+        self.event = XUEvent()
 
         # ワーキングツリー全体のattribを全てクリア(attribに変な参照を突っ込んじゃった対策)
         for child in self.children:

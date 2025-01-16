@@ -140,21 +140,30 @@ class XUEActManager:
 class _XUESceneBase(XUEActManager):
     def __init__(self, xmlui:XMLUI):
         super().__init__()
-        self.xmlui = xmlui
+        self._xmlui = xmlui
         self.input = XUEInput()  # xmluiのキーイベントサポート
 
         self._next_scene:XUEFadeScene|None = None
         self.is_end = False  # このシーンが終了したかどうか
-
-    # シーン遷移
-    def set_next_scene(self, scene:"XUEFadeScene"):
-        self._next_scene = scene
 
     # シーン終了(closedの中でset_next_sceneをするように)
     def close(self):
         if not self.is_end:
             self.closed()
             self.is_end = True
+            self._xmlui = None
+
+    # シーン遷移
+    def set_next_scene(self, scene:"XUEFadeScene"):
+        self._next_scene = scene
+
+    # UIライブラリ参照
+    # -----------------------------------------------------
+    @property
+    def xmlui(self) -> XMLUI:
+        if self._xmlui is None:
+            raise RuntimeError("xmlui is not set")
+        return self._xmlui
 
     # シーンマネージャから呼ばれるもの
     # -----------------------------------------------------
@@ -253,6 +262,8 @@ class XUEFadeScene(_XUESceneBase):
     # -----------------------------------------------------
     def __init__(self, xmlui:XMLUI, open_count=OPEN_COUNT):
         super().__init__(xmlui)
+        self.screen_w = xmlui.screen_w
+        self.screen_h = xmlui.screen_h
         self.alpha = 0.0
 
         # フェードインから
@@ -278,5 +289,5 @@ class XUEFadeScene(_XUESceneBase):
         # フェードを上から描画
         if self.alpha > 0:  # 無駄な描画をしないよう
             pyxel.dither(self.alpha)  # フェードで
-            pyxel.rect(0, 0, self.xmlui.screen_w, self.xmlui.screen_h, self.FADE_COLOR)
+            pyxel.rect(0, 0, self.screen_w, self.screen_h, self.FADE_COLOR)
             pyxel.dither(1.0)  # 戻しておく
