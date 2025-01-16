@@ -98,7 +98,7 @@ def ui_init(xmlui:XMLUI):
 
             # DBの更新
             buy_num = XUSelectInfo(buy_menu.find_by_id("buy_num"))
-            BuyList.add(buy_list.selected_item.attr_int("item_id"), int(buy_num.action))
+            BuyList.add(buy_list.selected_item.attr_int("item_id"), int(buy_num.selected_item.action))
 
             # メッセージ更新
             msg = text.XUMsg(buy_list.xmlui.find_by_id("shop_msg"))
@@ -115,7 +115,7 @@ def ui_init(xmlui:XMLUI):
 
 # かうメニュースタート
 # *************************************************************************
-def init_buy_list(xmlui:XMLUI):
+def start_buy_shop(xmlui:XMLUI):
     buy_menu = XUWinInfo.find_parent_win(xmlui.find_by_id("shop_act_list")).open("buy_menu")
 
     buy_list = buy_menu.find_by_id("buy_list")

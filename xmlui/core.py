@@ -518,6 +518,7 @@ class XUElem:
     # xmluiで特別な意味を持つアトリビュート一覧
     # わかりやすく全てプロパティを用意しておく(デフォルト値も省略せず書く)
     # 面倒でも頑張って書く
+    # 予約語だけどアクセスできるとややこしくなるものはコメントアウトしておく
     # *************************************************************************
     @property
     def id(self) -> str:  # ID。xmlではかぶらないように(精神論)
@@ -533,6 +534,8 @@ class XUElem:
     @property
     def selected(self) -> bool:  # 選択アイテムの選択状態
         return self.attr_bool("selected", False)
+
+    # def action(self) -> str:  # イベント情報取得
 
     @property
     def x(self) -> int:  # 親からの相対座標x
@@ -755,6 +758,10 @@ class XUSelectItem(XUElem):
     @property
     def action(self) -> str:  # イベント情報取得
         return self.attr_str("action", "")
+
+    # actionをonにする
+    def on_action(self):
+        self.on(self.action)
 
 # 選択の状態取得用
 class XUSelectInfo(XUElem):

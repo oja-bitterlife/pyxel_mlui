@@ -136,7 +136,7 @@ def ui_init(xmlui:XMLUI):
 
 # うるメニュースタート
 # *************************************************************************
-def init_sell_list(xmlui:XMLUI):
+def start_sell_shop(xmlui:XMLUI):
     sell_menu = XUWinInfo.find_parent_win(xmlui.find_by_id("shop_act_list")).open("sell_menu")
 
     sell_list = sell_menu.find_by_id("sell_list")

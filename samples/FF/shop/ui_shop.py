@@ -39,8 +39,11 @@ def ui_init(xmlui:XMLUI):
         for item in shop_act.items:
             shop_act_item(item)
 
-        if shop_act.action_by_event(event.repeat, XUEvent.Key.BTN_A, *XUEvent.Key.LEFT_RIGHT()) == XUEvent.Key.BTN_A:
+        shop_act.select_by_event(event.repeat, *XUEvent.Key.LEFT_RIGHT())
+        if event.check_trg(XUEvent.Key.BTN_A):
+            # メニュー非表示
             shop_act.enable = False
+            shop_act.selected_item.on_action()
 
     # メッセージ
     # *************************************************************************
