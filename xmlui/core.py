@@ -532,10 +532,6 @@ class XUElem:
         self.set_attr("value", val)
 
     @property
-    def action(self) -> str:  # イベント情報取得
-        return self.attr_str("action", "")
-
-    @property
     def selected(self) -> bool:  # 選択アイテムの選択状態
         return self.attr_bool("selected", False)
 
@@ -754,7 +750,9 @@ class XMLUI[T](XUElem):
 # *****************************************************************************
 # 選択クラス用アイテム
 class XUSelectItem(XUElem):
-    pass
+    @property
+    def action(self) -> str:  # イベント情報取得
+        return self.attr_str("action", "")
 
 # 選択の状態取得用
 class XUSelectInfo(XUElem):
@@ -805,13 +803,6 @@ class XUSelectInfo(XUElem):
     @property
     def selected_item(self) -> XUSelectItem:
         return self.items[self.selected_no]
-
-    # その他
-    # -----------------------------------------------------
-    # actionが自身のactionではなくselectedのものを返すように
-    @property
-    def action(self) -> str:
-        return self.selected_item.action
 
 # 選択の状態更新用
 class _XUSelectSet(XUSelectInfo):

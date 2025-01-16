@@ -54,8 +54,8 @@ def ui_init(xmlui:XMLUI):
     def get_buy_price(buy_menu:XUElem, buy_item:XUElem) -> int:
         buy_num = XUSelectInfo(buy_menu.find_by_id("buy_num"))
 
-        price = int(buy_item.value) * int(buy_num.action)
-        match buy_num.action:  # 割引
+        price = int(buy_item.value) * int(buy_num.selected_item.action)
+        match buy_num.selected_item.action:  # 割引
             case "4":
                 price -= price * 26 // 256
             case "10":

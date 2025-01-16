@@ -60,7 +60,7 @@ def ui_init(xmlui:XMLUI):
         sell_menu = selected_item.root.find_by_id("sell_menu")
         sell_num = XUSelectInfo(sell_menu.find_by_id("sell_num"))
 
-        return selected_item.attr_int("num") if sell_num.action == "all" else 1
+        return selected_item.attr_int("num") if sell_num.selected_item.action == "all" else 1
 
     def get_sell_price(selected_item:XUSelectItem):
         value = selected_item.attr_int("value")

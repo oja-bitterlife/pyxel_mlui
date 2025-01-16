@@ -24,7 +24,7 @@ def ui_init(xmlui:XMLUI):
         # メニュー選択。カーソルが動いたらTrueが返る
         if game_speed.select_by_event(event.trg, *XUEvent.Key.LEFT_RIGHT()):
             # メッセージスピードをその場で切り替える
-            match game_speed.action:
+            match game_speed.selected_item.action:
                 case MSG_SPEED.SLOW:
                     user_config.msg_spd = user_config.MsgSpd.SLOW
                 case MSG_SPEED.NORMAL:
