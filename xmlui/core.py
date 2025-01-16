@@ -1046,20 +1046,19 @@ class XUWinInfo(XUElem):
 class _XUWinSet(XUWinInfo):
     # ウインドウを閉じる
     # -----------------------------------------------------
-    # closeの開始。子も含めてclosingにする
-    def start_close(self):
+    # override。closeの開始。子も含めてclosingにする
+    def close(self):
         self.enable = False  # closingは実質closeなのでイベントは見ない
         self.win_state = XUWinInfo.WIN_STATE.CLOSING
 
-        # 子も順次closing
+        # 子ウインドウも一緒にクローズ
         for child in self._rec_iter():
             child.enable = False  # 全ての子のイベント通知をoffに
-            if XUWinInfo.is_win(child):  # 子ウインドウも一緒にクローズ
+            if XUWinInfo.is_win(child):
                 _XUWinSet(child).win_state = XUWinInfo.WIN_STATE.CLOSING
 
-    # override。closeするときに状態をCLOSEDにする
-    # すぐcloseされるので、通常はstart_closeを使うように
-    def close(self):
+    # closeを完了させる
+    def finish(self):
         self.win_state = XUWinInfo.WIN_STATE.CLOSED  # finish
         super().close()
 

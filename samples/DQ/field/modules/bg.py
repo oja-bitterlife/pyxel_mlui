@@ -63,7 +63,7 @@ class BG:
         return not data.movable
 
     # 階段チェック
-    def check_stairs(self, menu:XUElem, block_x:int, block_y:int) -> bool:
+    def check_stairs(self, block_x:int, block_y:int) -> bool:
         type_ = self.blocks[block_y][block_x]
         data = bgtype_data[type_]
         return data.name == 'stair'

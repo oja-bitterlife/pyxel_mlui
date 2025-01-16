@@ -19,7 +19,6 @@ def ui_init(xmlui:XMLUI):
             col = KOJICHU_COL if menu_item.value == "工事中" else get_text_color()
             pyxel.text(menu_item.area.x+6, menu_item.area.y, menu_item.text, col, system_font.font)
 
-
             # カーソル表示
             is_message_oepn = xmlui.exists_id("message")  # メッセージウインドウ表示以降は表示しない
             if is_message_oepn:
@@ -34,12 +33,27 @@ def ui_init(xmlui:XMLUI):
         for item in menu_grid.items:
             menu_item(item)
 
-        # メニュー選択
-        menu_grid.action_by_event(event.trg, XUEvent.Key.BTN_A, *XUEvent.Key.CURSOR())
-
-        # 閉じる
+        # キャンセル
         if event.check_trg(XUEvent.Key.BTN_B):
-            XUWinInfo.find_parent_win(menu_grid).setter.start_close()
+            XUWinInfo.find_parent_win(menu_grid).setter.close()
+
+        # メニュー選択
+        menu_grid.select_by_event(event.trg, *XUEvent.Key.CURSOR())
+        if event.check_trg(XUEvent.Key.BTN_A):
+            match menu_grid.selected_item.action:
+                # 子ウインドウopen
+                case "cmd_talk":
+                    menu_grid.open("talk_dir")
+                case "cmd_tools":
+                    menu_grid.open("tools")
+
+                # ゲームメインへ通知
+                case "cmd_stairs" | "cmd_door":
+                    menu_grid.on(menu_grid.selected_item.action)
+
+                # 工事中
+                case _:
+                    xmlui.popup("under_construct")
 
     # コマンドメニューのタイトル
     @field_text.label("title")

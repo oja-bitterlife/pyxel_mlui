@@ -105,53 +105,47 @@ class Field(XUEFadeScene):
 
     # メニューで起こったイベントの処理を行う
     def event(self, event:XUEventItem):
-        # コマンドメニュー
+        # コマンドメニューイベント
+        # -------------------------------------------------
         if event.name.startswith("cmd_"):
+            menu_win = XUWinInfo(self.xmlui.find_by_id("menu"))
             match event.name:
-                case "cmd_talk":
-                    event.sender.open("talk_dir")
-                case "cmd_tools":
-                    event.sender.open("tools")
                 case "cmd_stairs":
-                    menu = self.xmlui.find_by_id("menu")
-                    if self.bg.check_stairs(menu, self.player.block_x, self.player.block_y):
+                    if self.bg.check_stairs(self.player.block_x, self.player.block_y):
                         # バトル開始
-                        XUWinInfo(menu).setter.start_close()
+                        menu_win.setter.close()
                         self.close()
                     else:
-                        msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
+                        msg_text = MsgDQ(menu_win.open("message").find_by_id("msg_text"))
                         msg_text.append_msg("かいだんがない")  # systemメッセージ
                 case "cmd_door":
-                    menu = self.xmlui.find_by_id("menu")
                     door = self.field_obj.find_door(self.player.block_x, self.player.block_y)
-                    if door != None and not self.field_obj.is_opened(door):
+                    if door and not self.field_obj.is_opened(door):
                         self.field_obj.open(door)
-                        XUWinInfo(menu).setter.start_close()
+                        menu_win.setter.close()
                     else:
-                        msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
+                        msg_text = MsgDQ(menu_win.open("message").find_by_id("msg_text"))
                         msg_text.append_msg("とびらがない")  # systemメッセージ
                 case _:
-                    self.xmlui.popup("under_construct")
+                    raise Exception("unknown cmd")
             return
 
-        # ウインドウクローズ
-        if event.name == "close_win":
-            # メッセージウインドウの時はメニューごと閉じる
-            if event.sender.id == "message":
-                menu = self.xmlui.find_by_id("menu")
-                XUWinInfo(menu).setter.start_close()
+        # メッセージウインドウがcloseされた時はメニューごと閉じる
+        if event.name == "round_win_closed" and event.sender.id == "message":
+            menu_win = XUWinInfo(self.xmlui.find_by_id("menu"))
+            menu_win.setter.close()
             return
 
         # 会話イベントチェック
         if event.name.startswith("start_talk_"):
-            menu = self.xmlui.find_by_id("menu")
+            menu_win = XUWinInfo(self.xmlui.find_by_id("menu"))
 
             # メッセージウインドウを開く
-            msg_text = MsgDQ(menu.open("message").find_by_id("msg_text"))
+            msg_text = MsgDQ(menu_win.open("message").find_by_id("msg_text"))
 
+            # テキストの設定
             talk = self.npc.check_talk(event.name, self.player.block_x, self.player.block_y)
-            if talk is not None:
+            if talk:
                 msg_text.append_talk(talk, user_data.data)  # talkでテキスト開始
             else:
                 msg_text.append_msg("だれもいません")  # systemメッセージ
-
