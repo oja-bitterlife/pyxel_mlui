@@ -45,7 +45,7 @@ def ui_init(xmlui:XMLUI):
         if event.check_trg(XUEvent.Key.BTN_A):
             # どうぐデータ取得
             try:
-                data = tools_data.get_data(tools_list.action)
+                data = tools_data.get_data(tools_list.selected_item.action)
             except:
                 tools_list.xmlui.popup("under_construct")
                 return
@@ -54,7 +54,7 @@ def ui_init(xmlui:XMLUI):
             msg = tools_effect(tools_list.selected_no, data)
 
             # メッセージウインドウを開く
-            XUWinInfo.find_parent_win(tools_list).setter.start_close()
+            XUWinInfo.find_parent_win(tools_list).setter.close()
             msg_win = tools_list.xmlui.find_by_id("menu").open("message")
             msg_text = MsgDQ(msg_win.find_by_id("msg_text"))
             msg_text.append_msg(msg)  # systemメッセージ
@@ -62,7 +62,7 @@ def ui_init(xmlui:XMLUI):
         # 閉じる
         # ---------------------------------------------------------
         if event.check_trg(XUEvent.Key.BTN_B):
-            XUWinInfo.find_parent_win(tools_list).setter.start_close()
+            XUWinInfo.find_parent_win(tools_list).setter.close()
 
 
     # どうぐ処理

@@ -40,9 +40,9 @@ def ui_init(xmlui:XMLUI):
 
         if event.check_trg(XUEvent.Key.BTN_A):
             dir_win = XUWinInfo.find_parent_win(dir_select)
-            dir_win.setter.start_close()
-            dir_win.on(f"start_talk_{dir_select.action}")
+            dir_win.setter.close()
+            dir_win.on(f"start_talk_{dir_select.selected_item.action}")
 
         # 閉じる
         if event.check_trg(XUEvent.Key.BTN_B):
-            XUWinInfo.find_parent_win(dir_select).setter.start_close()
+            XUWinInfo.find_parent_win(dir_select).setter.close()

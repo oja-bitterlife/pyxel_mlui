@@ -43,9 +43,9 @@ def ui_init(xmlui:XMLUI):
             match menu_grid.selected_item.action:
                 # 子ウインドウopen
                 case "cmd_talk":
-                    menu_grid.open("talk_dir")
+                    menu_grid.selected_item.open("talk_dir")
                 case "cmd_tools":
-                    menu_grid.open("tools")
+                    menu_grid.selected_item.open("tools")
 
                 # ゲームメインへ通知
                 case "cmd_stairs" | "cmd_door":
