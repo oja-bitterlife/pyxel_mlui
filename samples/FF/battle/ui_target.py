@@ -11,6 +11,7 @@ from db import enemy_data
 def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
     target_select = select.Decorator(xmlui)
 
+    # 敵側選択カーソル
     @target_select.grid("enemy_sel", "select_item")
     def enemy_sel(enemy_sel:select.XUGrid, event:XUEvent):
         battle_data = xmlui.data_ref
@@ -38,6 +39,7 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
         area = enemy_sel.items[target_idx].area
         hand_cursor.draw(area.x, area.y + 8)
     
+    # プレイヤー側選択カーソル
     @target_select.list("player_sel", "select_item")
     def player_sel(player_sel:select.XUList, event:XUEvent):
         battle_data = xmlui.data_ref
@@ -59,20 +61,25 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
         area = player_sel.selected_item.area
         hand_cursor.draw(area.x + battle_data.player_offset[player_sel.selected_no], area.y+8)
 
+
+    # ターゲットの上にでる選択者番号
     @xmlui.tag_draw("target_result")
     def target_result(target_result:XUElem, event:XUEvent):
         # コマンド選択中のみ表示
         if xmlui.data_ref.is_cmd_selecting:
             for i in range(xmlui.data_ref.player_idx):
                 target = xmlui.data_ref.target[i]
+                # プレイヤ側
                 if target < 0:
                     target = -target - 1
                     x = xmlui.data_ref.player_rect[target].x + (i+1)*system_font.size
                     y = xmlui.data_ref.player_rect[target].y - system_font.size
+                # 敵側
                 else:
                     x = xmlui.data_ref.enemy_rect[target].x + (i+1)*system_font.size
                     y = xmlui.data_ref.enemy_rect[target].y - system_font.size
 
+                # 点滅ウェイト
                 count = xmlui.update_count//4
-                if count % 4 == i:
+                if count % 4 == i:  # 順番が来たときだけ表示
                     pyxel.text(x, y, f"{i+1}", 7, system_font.font)
