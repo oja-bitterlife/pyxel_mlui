@@ -96,6 +96,8 @@ class BattleCmdStart(BattleDataAct):
 # メニューの設定とキャラ進め
 class BattleCmdSetup(BattleMenuAct):
     def init(self):
+        self.battle_data.is_cmd_selecting = True
+
         # コマンドのリセット
         command = self.menu_win.find_by_id("command")
         command.remove_children()
@@ -229,6 +231,8 @@ class BattleCmdClose(BattleMenuAct):
 class BattlePlayStart(BattlePlayAct):
     # プレイヤ側を先に
     def init(self):
+        self.battle_data.is_cmd_selecting = False
+
         self.battle_data.player_idx = -1
         self.battle_data.enemy_idx = -1
         self.act.add_act(BattlePlayUnitSelect(self.xmlui, self.result))

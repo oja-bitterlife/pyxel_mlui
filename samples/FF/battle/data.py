@@ -40,6 +40,9 @@ class BattleData:
         # ダメージ表示
         self.damage:list[BattleDamage] = []
 
+        # プレイヤ行動中
+        self.is_cmd_selecting = False
+
     @property
     def is_player_turn(self) -> bool:
         return self.enemy_idx < 0

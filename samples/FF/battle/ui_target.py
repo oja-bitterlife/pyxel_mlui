@@ -1,6 +1,6 @@
 import pyxel
 
-from xmlui.core import XUEvent
+from xmlui.core import XUElem,XUEvent
 from xmlui.lib import select,debug
 
 from system import system_font,hand_cursor
@@ -58,3 +58,19 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
         # カーソル表示
         area = player_sel.selected_item.area
         hand_cursor.draw(area.x + battle_data.player_offset[player_sel.selected_no], area.y+8)
+
+    @xmlui.tag_draw("target_result")
+    def target_result(target_result:XUElem, event:XUEvent):
+        # コマンド選択中のみ表示
+        if xmlui.data_ref.is_cmd_selecting:
+            for i in range(xmlui.data_ref.player_idx):
+                target = xmlui.data_ref.target[i]
+                if target < 0:
+                    target = -target - 1
+                    x = xmlui.data_ref.player_rect[target].x + (i+1)*system_font.size
+                    y = xmlui.data_ref.player_rect[target].y - system_font.size
+                else:
+                    x = xmlui.data_ref.enemy_rect[target].x + (i+1)*system_font.size
+                    y = xmlui.data_ref.enemy_rect[target].y - system_font.size
+
+                pyxel.text(x, y, f"{i+1}", 7, system_font.font)

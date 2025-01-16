@@ -10,6 +10,8 @@
         <round_win x="0" y="170" w="96" h="80" id="enemy_name_win">
             <enemy_names x="10" y="16"/>
         </round_win>
+
+        <target_result/>
     </ui_battle>
 
     <info>コマンドメニュー</info>
