@@ -73,4 +73,6 @@ def ui_init(xmlui:debug.DebugXMLUI[BattleData]):
                     x = xmlui.data_ref.enemy_rect[target].x + (i+1)*system_font.size
                     y = xmlui.data_ref.enemy_rect[target].y - system_font.size
 
-                pyxel.text(x, y, f"{i+1}", 7, system_font.font)
+                count = xmlui.update_count//4
+                if count % 4 == i:
+                    pyxel.text(x, y, f"{i+1}", 7, system_font.font)
