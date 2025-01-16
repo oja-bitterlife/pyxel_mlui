@@ -1057,6 +1057,12 @@ class _XUWinSet(XUWinInfo):
             if XUWinInfo.is_win(child):
                 _XUWinSet(child).win_state = XUWinInfo.WIN_STATE.CLOSING
 
+    # 子ウインドウを返す
+    def find_child_win(self) -> list[XUWinInfo]:
+        child_win =  [XUWinInfo(child) for child in self._rec_iter() if XUWinInfo.is_win(child)]
+        # 閉じ終わっていたら除外する
+        return [win for win in child_win if win.win_state != XUWinInfo.WIN_STATE.CLOSED]
+
     # closeを完了させる
     def finish(self):
         self.win_state = XUWinInfo.WIN_STATE.CLOSED  # finish
