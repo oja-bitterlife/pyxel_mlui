@@ -8,9 +8,9 @@ XMLUI.debug_enable = True
 
 # 作成するシーン選択
 from xmlui.ext.scene import XUESceneManager
-# from shop import Field
+from scenes import field
 
-# scene_manager = XUESceneManager(Field())
+scene_manager = XUESceneManager(field.Field())
 
 # Main
 def update():
