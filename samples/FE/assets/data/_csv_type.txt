@@ -1,0 +1,15 @@
+# 読み込み用
+data_unit_base: ユニットの名前やクラス、初期パラメータ
+data_unit_class: クラス名とクラスチェンジ先、クラス特性
+data_unit_levelup: ユニットのレベルアップ時上昇確率
+data_item: アイテムの種類
+
+# デバッグ用データ
+debug_weapon_type: weapon_typeの詳細
+debug_move_type: move_typeの詳細
+
+# ユーザーデータ格納先
+user_system: ステージやゴールド等全体データ
+user_unit_state: 各ユニットの現在パラメータ
+user_unit_stocks: 各ユニットの保有アイテム
+
