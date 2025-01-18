@@ -7,6 +7,7 @@ class XUEMemoryDB(sqlite3.Connection):
     # 空のメモリDB作成
     def __init__(self):
         super().__init__(":memory:")
+        self.row_factory = sqlite3.Row 
 
         # sqlite_sequenceテーブル(AUTO_INCREMENT用)を作っておく
         self.execute("CREATE TABLE _dummy (id INTEGER PRIMARY KEY AUTOINCREMENT);")
