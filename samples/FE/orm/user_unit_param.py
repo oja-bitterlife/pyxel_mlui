@@ -18,7 +18,7 @@ class USER_UNIT_PARAM:
         sql = f"""
             SELECT * FROM user_unit_params WHERE UNIT_NAME='{unit_name}'
         """
-        data = dict(db.cursor.execute(sql).fetchone())
+        data = dict(db.execute(sql).fetchone())
 
         self.unit_name=unit_name
         self.class_name=data["CLASS_NAME"]

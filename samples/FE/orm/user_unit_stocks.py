@@ -8,7 +8,7 @@ class USER_UNIT_STOCK_ITEM:
     equip:bool|None
 
     def save(self):
-        db.cursor.execute(f"INSERT INTO USER_UNIT_STOCKS VALUES (?, ?, ?)", (self.unit_name, self.item_name, self.equip))
+        db.execute(f"INSERT INTO USER_UNIT_STOCKS VALUES (?, ?, ?)", (self.unit_name, self.item_name, self.equip))
 
 # ユニットの所持品を調べる
 class USER_UNIT_STOCKS:
@@ -18,7 +18,7 @@ class USER_UNIT_STOCKS:
 
     @property
     def stocks(self) -> list[USER_UNIT_STOCK_ITEM]:
-        rows = self.cursor.execute(f"SELECT * FROM USER_UNIT_STOCKS WHERE unit_name = '{self.unit_name}'").fetchall()
+        rows = db.execute(f"SELECT * FROM USER_UNIT_STOCKS WHERE unit_name = '{self.unit_name}'").fetchall()
         return [USER_UNIT_STOCK_ITEM(item["UNIT_NAME"], item["ITEM_NAME"], item["EQUIP"]) for item in rows]
 
     @property

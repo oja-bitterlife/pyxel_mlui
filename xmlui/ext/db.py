@@ -4,6 +4,8 @@ import sqlite3,csv
 # DB関係
 # ゲームではストレージに書き込まないのでmemory_dbに移して使う
 class XUEMemoryDB(sqlite3.Connection):
+    # DB作成
+    # -----------------------------------------------------
     # 空のメモリDB作成
     def __init__(self):
         super().__init__(":memory:")
@@ -13,23 +15,24 @@ class XUEMemoryDB(sqlite3.Connection):
         self.execute("CREATE TABLE _dummy (id INTEGER PRIMARY KEY AUTOINCREMENT);")
         self.execute("DROP TABLE _dummy")
 
-    # DB読み込み
-    # -----------------------------------------------------
-    # DBを読み込んでメモリDB上に展開する
+    # メモリDBを作成してDBをデータを読み込んでおく
     @classmethod
     def load(cls, db_path) -> Self:
         self = cls()
         self.attach(db_path)
         return self
 
+    # DB読み込み
+    # -----------------------------------------------------
     # 別DBを取り込む
     def attach(self, db_path):
+        # 一旦テンポラリDBに展開
         tmp_conn = sqlite3.connect(":memory:")
         with open(db_path, "rb") as f:
             tmp_conn.deserialize(f.read())
             f.close()
 
-        # 取り込み
+        # dumpを使って取り込み
         for sql in tmp_conn.iterdump():
             self.execute(sql)
         tmp_conn.close()
