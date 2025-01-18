@@ -1,7 +1,7 @@
 from xmlui.ext.db import XUEMemoryDB
 
-game_db = XUEMemoryDB.load("assets/data/game.db")
-user_db = XUEMemoryDB.load("assets/data/user.db")
+game_db = XUEMemoryDB.load("assets/data/game.db").cursor
+user_db = XUEMemoryDB.load("assets/data/user.db").cursor
 
 # ユーザーデータ
 # *****************************************************************************
