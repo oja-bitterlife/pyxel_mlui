@@ -3,8 +3,8 @@ from enum import Enum
 
 from xmlui.ext.db import XUEMemoryDB
 
-game_db = XUEMemoryDB.load("assets/data/game.db").cursor
-user_db = XUEMemoryDB.load("assets/data/user.db").cursor
+game_db = XUEMemoryDB.load("assets/data/game.db")
+user_db = XUEMemoryDB.load("assets/data/user.db")
 
 
 # システムデータ
@@ -59,7 +59,7 @@ class UserData:
     @hp.setter
     def hp(self, value):
         user_db.execute("UPDATE user_data SET hp=?", [value])
-        user_db.connection.commit()
+        user_db.commit()
         self.reload_db()
 
     @property
@@ -68,12 +68,12 @@ class UserData:
     @mp.setter
     def mp(self, value):
         user_db.execute("UPDATE user_data SET mp=?", [value])
-        user_db.connection.commit()
+        user_db.commit()
         self.reload_db()
 
     def set_level(self, level):
         user_db.execute("UPDATE user_data SET level=?", [level])
-        user_db.connection.commit()
+        user_db.commit()
         self.reload_db()
 
 user_data = UserData()

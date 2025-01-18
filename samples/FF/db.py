@@ -1,7 +1,7 @@
 from xmlui.ext.db import XUEMemoryDB
 
-game_db = XUEMemoryDB.load("assets/data/game.db").cursor
-user_db = XUEMemoryDB.load("assets/data/user.db").cursor
+game_db = XUEMemoryDB.load("assets/data/game.db")
+user_db = XUEMemoryDB.load("assets/data/user.db")
 
 # ユーザーデータ
 # *****************************************************************************
@@ -42,7 +42,7 @@ class UserData:
     @gil.setter
     def gil(self, value):
         user_db.execute("UPDATE party_data SET gil=?", [value])
-        user_db.connection.commit()
+        user_db.commit()
         self.reload_db()
 
     def get_lives(self):
@@ -51,7 +51,7 @@ class UserData:
     def set_hp(self, index, hp):
         id = self.player_data[index]["id"]
         user_db.execute("UPDATE user_data SET hp=? WHERE id=?", [hp, id])
-        user_db.connection.commit()
+        user_db.commit()
         self.reload_db()
 
 user_data = UserData()
