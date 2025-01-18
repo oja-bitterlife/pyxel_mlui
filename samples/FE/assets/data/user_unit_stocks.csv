@@ -1,6 +1,7 @@
-UNIT_ID, WEAPON_ID, ITEM_ID
-1, 1, NULL
-2, 1, NULL
-3, 2, NULL
-4, 4, NULL
-5, 5, NULL
+UNIT_NAME, ITEM_NAME, EQUIP
+オジャス, レイピア
+オジャル, てつのつるぎ
+オジャル, てやり
+オジャダ, てつのつるぎ
+オジャドン, ゆみ
+オジャナ, ライブ

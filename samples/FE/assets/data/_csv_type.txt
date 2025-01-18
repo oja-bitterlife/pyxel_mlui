@@ -11,6 +11,7 @@ debug_move_type: move_typeの詳細
 
 # ユーザーデータ格納先
 user_system: ステージやゴールド等全体データ
-user_unit_state: 各ユニットの現在パラメータ
+user_unit_params: 各ユニットの最大パラメータ
+user_unit_state: 各ユニットの現在パラメータ(ダメージや一時的変化)
 user_unit_stocks: 各ユニットの保有アイテム
 
