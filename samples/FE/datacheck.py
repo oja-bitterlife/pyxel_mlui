@@ -5,20 +5,18 @@ import sys
 sys.path.append("..")
 sys.path.append("../..")
 
+from orm import db
 
-from xmlui.ext.db import XUEMemoryDB
+# キャラチェック
+db.cursor.execute("SELECT * FROM data_unit_init")
 
-db = XUEMemoryDB.empty()
-db.attach("assets/data/game.db")
-db.attach("assets/data/user.db")
+from orm.user_unit_stocks import USER_UNIT_STOCKS
+USER_UNIT_STOCKS.insert_initdata()
 
-csvs = [
-    "data_item",
-    "data_unit_class",
-    "data_unit_init",
-    "data_unit_levelup",
-]
-for csv_name in csvs:
-    print(f"import: {csv_name}")
-    db.import_csv(csv_name, f"assets/data/{csv_name}.csv")
+print("保有アイテム")
+print(list(USER_UNIT_STOCKS("オジャス").stocks))
+print(list(USER_UNIT_STOCKS("オジャダ").stocks))
+print(list(USER_UNIT_STOCKS("オジャル").stocks))
+print(list(USER_UNIT_STOCKS("オジャドン").stocks))
+print(list(USER_UNIT_STOCKS("オジャナ").stocks))
 

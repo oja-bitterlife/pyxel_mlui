@@ -52,7 +52,7 @@ class XUEMemoryDB:
             # CSVを読み込み(１行目はヘッダー)
             dict_reader = csv.DictReader(f, skipinitialspace=True)
             if dict_reader.fieldnames is None:
-                raise ValueError("csv header is None")
+                raise ValueError(f"csv header is None: {csv_path}")
 
             # SQLの構築
             columns = ",".join([header for header in dict_reader.fieldnames])
@@ -60,7 +60,10 @@ class XUEMemoryDB:
             sql = f"INSERT INTO {table_name} ({columns}) VALUES ({values})"
 
             # 一気にINSERT
-            self._conn.executemany(sql, [tuple(dict.values()) for dict in dict_reader])
+            try:
+                self._conn.executemany(sql, [tuple(dict.values()) for dict in dict_reader])
+            except Exception as e:
+                raise RuntimeError(f"csv import error: {csv_path}") from e
 
         f.close()
 
