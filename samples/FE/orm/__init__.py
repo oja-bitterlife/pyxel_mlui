@@ -19,6 +19,7 @@ csvs = [
     "data_unit_class",
     "data_unit_levelup",
     "user_unit_params",
+    "user_unit_state",
     "user_unit_stocks",
 ]
 for csv_name in csvs:

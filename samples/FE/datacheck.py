@@ -17,11 +17,11 @@ print(list(USER_UNIT_STOCKS("オジャドン").stocks))
 print(list(USER_UNIT_STOCKS("オジャナ").stocks))
 
 print("ユニットデータ")
-unit_names = USER_UNITS.get_all_names()
+unit_names = USER_UNITS.get_unit_names()
 print(unit_names)
 
 for name in unit_names:
-    print(USER_UNITS(name).load())
+    print(USER_UNITS.load_param(name), USER_UNITS.load_state(name))
 
 print("保有アイテム")
 for name in unit_names:

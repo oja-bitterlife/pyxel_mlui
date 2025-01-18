@@ -1,4 +1,4 @@
-from orm import db,XUEMemoryDB
+from orm import db
 import dataclasses
 
 @dataclasses.dataclass()
@@ -7,7 +7,7 @@ class USER_UNIT_STOCK_ITEM:
     item_name:str
     equip:bool|None
 
-    def save(self, db:XUEMemoryDB):
+    def save(self):
         db.cursor.execute(f"INSERT INTO USER_UNIT_STOCKS VALUES (?, ?, ?)", (self.unit_name, self.item_name, self.equip))
 
 # ユニットの所持品を調べる
