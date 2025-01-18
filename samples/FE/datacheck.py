@@ -9,7 +9,7 @@ from orm import db
 
 # キャラチェック
 from orm.user_unit_stocks import USER_UNIT_STOCKS
-from orm.user_unit import USER_UNITS
+from samples.FE.orm.user_units import USER_UNITS
 
 # ステージ開始時初期化
 # *****************************************************************************
