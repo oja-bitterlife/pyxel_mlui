@@ -56,7 +56,9 @@ class XUEMemoryDB:
 
             # 一気にINSERT
             try:
-                self._conn.executemany(sql, [tuple(dict.values()) for dict in dict_reader])
+                cur = self.begin()
+                cur.executemany(sql, [tuple(dict.values()) for dict in dict_reader])
+                self.commit()
             except Exception as e:
                 raise RuntimeError(f"csv import error: {csv_path}") from e
 
@@ -69,7 +71,6 @@ class XUEMemoryDB:
     def close(self):
         self._conn.close()
 
-
     # DB操作
     # -----------------------------------------------------
     # 新しいカーソルを作成する
@@ -78,10 +79,14 @@ class XUEMemoryDB:
         return self._conn.cursor()
 
     # トランザクション
-    def begin(self, cursor:sqlite3.Cursor|None):
+    def begin(self, cursor:sqlite3.Cursor|None=None) -> sqlite3.Cursor:
         if cursor is not None:
-            cursor.execute("BEGIN TRANSACTION")
+            return cursor.execute("BEGIN TRANSACTION")
         else:
-            self._conn.execute("BEGIN TRANSACTION")
+            return self._conn.execute("BEGIN TRANSACTION")
+
     def commit(self):
         self._conn.commit()
+
+    def rollback(self):
+        self._conn.rollback()
