@@ -19,6 +19,13 @@ class XUEMemoryDB:
         conn.execute("DROP TABLE _dummy")
         return cls(conn)
 
+    # 新しいカーソルを作成する
+    @property
+    def cursor(self) -> sqlite3.Cursor:
+        return self._conn.cursor()
+
+    # DB読み込み
+    # -----------------------------------------------------
     # DBを読み込んでメモリDB上に展開する
     @classmethod
     def load(cls, db_path) -> Self:
@@ -57,13 +64,9 @@ class XUEMemoryDB:
 
         f.close()
 
-
+    # close
+    # -----------------------------------------------------
     # 閉じる、、、んだけど、たぶんcursor.connection.close()を呼ぶ気がする
     # :memory:なので閉じ忘れても特に問題はないはず
     def close(self):
         self._conn.close()
-
-    # 新しいカーソルを作成する
-    @property
-    def cursor(self) -> sqlite3.Cursor:
-        return self._conn.cursor()
