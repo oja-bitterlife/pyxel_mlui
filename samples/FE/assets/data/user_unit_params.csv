@@ -1,1 +1,6 @@
-UNIT_NAME, LV, HP, POWER, SKIL, SPEED, DEFENSE, MOVE
+UNIT_NAME, CLASS_NAME, LV, HP, POWER, SKIL, SPEED, DEFENSE, MOVE
+オジャス, ロード, 1, 18, 5, 6, 7, 7, 7
+オジャダ, Ｐナイト, 1, 16, 5, 6, 12, 7, 8
+オジャル, Ｓナイト, 1, 20, 6, 7, 7, 7, 10
+オジャドン, アーチャー, 1, 18, 5, 5, 4, 6, 5
+オジャナ, シスター, 1, 18, 1, 5, 5, 5, 5

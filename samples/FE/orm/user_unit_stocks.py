@@ -16,14 +16,6 @@ class USER_UNIT_STOCKS:
         self.unit_name = unit_name
         self.cursor = db.cursor
 
-    @classmethod
-    def insert_initdata(cls):
-        USER_UNIT_STOCK_ITEM("オジャス", "レイピア", True).save(db)
-        USER_UNIT_STOCK_ITEM("オジャダ", "てやり", None).save(db)
-        USER_UNIT_STOCK_ITEM("オジャル", "やり", True).save(db)
-        USER_UNIT_STOCK_ITEM("オジャドン", "ゆみ", True).save(db)
-        USER_UNIT_STOCK_ITEM("オジャナ", "ライブ", True).save(db)
-
     @property
     def stocks(self) -> list[USER_UNIT_STOCK_ITEM]:
         rows = self.cursor.execute(f"SELECT * FROM USER_UNIT_STOCKS WHERE unit_name = '{self.unit_name}'").fetchall()
