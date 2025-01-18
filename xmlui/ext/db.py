@@ -3,31 +3,23 @@ import sqlite3,csv
 
 # DB関係
 # ゲームではストレージに書き込まないのでmemory_dbに移して使う
-class XUEMemoryDB:
-    # コネクションラッパー。通常自分で呼び出すことはない
-    def __init__(self, conn:sqlite3.Connection):
-        self._conn:sqlite3.Connection = conn
-        self._conn.row_factory = sqlite3.Row 
-
-    # 空のメモリDB作成。主にデバッグ用
-    @classmethod
-    def empty(cls) -> Self:
-        conn = sqlite3.connect(":memory:")
+class XUEMemoryDB(sqlite3.Connection):
+    # 空のメモリDB作成
+    def __init__(self):
+        super().__init__(":memory:")
 
         # sqlite_sequenceテーブル(AUTO_INCREMENT用)を作っておく
-        conn.execute("CREATE TABLE _dummy (id INTEGER PRIMARY KEY AUTOINCREMENT);")
-        conn.execute("DROP TABLE _dummy")
-        return cls(conn)
+        self.execute("CREATE TABLE _dummy (id INTEGER PRIMARY KEY AUTOINCREMENT);")
+        self.execute("DROP TABLE _dummy")
 
     # DB読み込み
     # -----------------------------------------------------
     # DBを読み込んでメモリDB上に展開する
     @classmethod
     def load(cls, db_path) -> Self:
-        conn = sqlite3.connect(":memory:")
-        with open(db_path, "rb") as f:
-            conn.deserialize(f.read())
-        return cls(conn)
+        self = cls()
+        self.attach(db_path)
+        return self
 
     # 別DBを取り込む
     def attach(self, db_path):
@@ -38,7 +30,7 @@ class XUEMemoryDB:
 
         # 取り込み
         for sql in tmp_conn.iterdump():
-            self._conn.execute(sql)
+            self.execute(sql)
         tmp_conn.close()
 
     # CSVを読み込んでメモリDB上にINSERT
@@ -64,29 +56,11 @@ class XUEMemoryDB:
 
         f.close()
 
-    # close
-    # -----------------------------------------------------
-    # 閉じる、、、んだけど、たぶんcursor.connection.close()を呼ぶ気がする
-    # :memory:なので閉じ忘れても特に問題はないはず
-    def close(self):
-        self._conn.close()
-
     # DB操作
     # -----------------------------------------------------
-    # 新しいカーソルを作成する
-    @property
-    def cursor(self) -> sqlite3.Cursor:
-        return self._conn.cursor()
-
     # トランザクション
     def begin(self, cursor:sqlite3.Cursor|None=None) -> sqlite3.Cursor:
-        if cursor is not None:
-            return cursor.execute("BEGIN TRANSACTION")
+        if cursor is None:
+            return self.execute("BEGIN TRANSACTION")
         else:
-            return self._conn.execute("BEGIN TRANSACTION")
-
-    def commit(self):
-        self._conn.commit()
-
-    def rollback(self):
-        self._conn.rollback()
+            return cursor.execute("BEGIN TRANSACTION")

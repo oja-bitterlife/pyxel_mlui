@@ -11,10 +11,4 @@ class USER_UNITS:
         sql = f"""
             SELECT UNIT_NAME FROM user_unit_params
         """
-        return [row[0] for row in db.cursor.execute(sql).fetchall()]
-
-    @classmethod
-    def reset_unit_hps(cls):
-        for unit_name in cls.get_unit_names():
-            state = cls.load(unit_name)
-            state.reset_hp()
+        return [row[0] for row in db.execute(sql).fetchall()]

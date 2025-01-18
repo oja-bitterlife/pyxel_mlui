@@ -3,13 +3,13 @@ from xmlui.ext.db import XUEMemoryDB
 print("start load database")
 
 # DBの読み込み
-db = XUEMemoryDB.empty()
+db = XUEMemoryDB()
 db.attach("assets/data/game.db")
 db.attach("assets/data/user.db")
 
 # 読み込んだテーブルの一覧
 print("loaded tables:")
-raws = db.cursor.execute("SELECT * from sqlite_master where type='table'").fetchall()
+raws = db.execute("SELECT * from sqlite_master where type='table'").fetchall()
 for raw in raws:
     print(f"  {raw['name']}")
 

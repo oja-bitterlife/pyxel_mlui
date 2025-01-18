@@ -17,7 +17,7 @@ class USER_UNIT_STATE(USER_UNIT_PARAM):
         sql = f"""
             SELECT * FROM user_unit_state WHERE UNIT_NAME='{unit_name}'
         """
-        data = dict(db.cursor.execute(sql).fetchone())
+        data = dict(db.execute(sql).fetchone())
 
         self.map_x=data["MAP_X"]
         self.map_y=data["MAP_Y"]
@@ -27,9 +27,15 @@ class USER_UNIT_STATE(USER_UNIT_PARAM):
     def set_hp(self, hp:int):
         self.now_hp = hp
         sql = f"""
-            UPDATE user_unit_state SET NOW_HP={hp} WHERE UNIT_NAME='{self.unit_name}'
+            UPDATE user_unit_state SET NOW_HP=? WHERE UNIT_NAME='{self.unit_name}'
         """
-        db.cursor.execute(sql)
+        db.execute(sql, (hp,))
 
-    def reset_hp(self):
-        self.set_hp(self.hp)
+    @classmethod
+    def reset(cls, unit_name:str, map_x:int, map_y:int):
+        param = USER_UNIT_PARAM(unit_name)
+        cur = db.cursor
+        row = db.execute("SELECT COUNT(*) FROM user_unit_state WHERE UNIT_NAME='{unit_name}'").fetchone()
+        if row is None:
+
+            pass
