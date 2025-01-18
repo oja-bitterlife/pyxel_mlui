@@ -31,21 +31,20 @@ class USER_UNIT_PARAM:
         self.defense=data["DEFENSE"]
         self.move=data["MOVE"]
 
+
 # 現在の状態(書き換え可)
 @dataclasses.dataclass
-class USER_UNIT_STATE:
-    param:USER_UNIT_PARAM  # paramへのアクセスもできるようにしておく
-
+class USER_UNIT_STATE(USER_UNIT_PARAM):
     map_x:int
     map_y:int
     now_hp:int
     now_exp:int
 
-    def __init__(self, param:USER_UNIT_PARAM):
-        self.param = param
+    def __init__(self, unit_name:str):
+        super().__init__(unit_name)
 
         sql = f"""
-            SELECT * FROM user_unit_state WHERE UNIT_NAME='{param.unit_name}'
+            SELECT * FROM user_unit_state WHERE UNIT_NAME='{unit_name}'
         """
         data = dict(db.cursor.execute(sql).fetchone())
 
@@ -54,15 +53,21 @@ class USER_UNIT_STATE:
         self.now_hp=data["NOW_HP"]
         self.now_exp=data["NOW_EXP"]
 
+    def set_hp(self, hp:int):
+        self.now_hp = hp
+        sql = f"""
+            UPDATE user_unit_state SET NOW_HP={hp} WHERE UNIT_NAME='{self.unit_name}'
+        """
+        db.cursor.execute(sql)
+
+    def reset_hp(self):
+        self.set_hp(self.hp)
+
+
 class USER_UNITS:
     @classmethod
-    def load_param(cls, unit_name:str) -> USER_UNIT_PARAM:
-        return USER_UNIT_PARAM(unit_name)
-
-    @classmethod
-    def load_state(cls, unit_name:str) -> USER_UNIT_STATE:
-        param = cls.load_param(unit_name)
-        return USER_UNIT_STATE(param)
+    def load(cls, unit_name:str) -> USER_UNIT_STATE:
+        return USER_UNIT_STATE(unit_name)
 
     @classmethod
     def get_unit_names(cls):
@@ -70,3 +75,9 @@ class USER_UNITS:
             SELECT UNIT_NAME FROM user_unit_params
         """
         return [row[0] for row in db.cursor.execute(sql).fetchall()]
+
+    @classmethod
+    def reset_unit_hps(cls):
+        for unit_name in cls.get_unit_names():
+            state = cls.load(unit_name)
+            state.reset_hp()

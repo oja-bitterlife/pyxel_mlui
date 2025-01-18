@@ -19,11 +19,6 @@ class XUEMemoryDB:
         conn.execute("DROP TABLE _dummy")
         return cls(conn)
 
-    # 新しいカーソルを作成する
-    @property
-    def cursor(self) -> sqlite3.Cursor:
-        return self._conn.cursor()
-
     # DB読み込み
     # -----------------------------------------------------
     # DBを読み込んでメモリDB上に展開する
@@ -73,3 +68,20 @@ class XUEMemoryDB:
     # :memory:なので閉じ忘れても特に問題はないはず
     def close(self):
         self._conn.close()
+
+
+    # DB操作
+    # -----------------------------------------------------
+    # 新しいカーソルを作成する
+    @property
+    def cursor(self) -> sqlite3.Cursor:
+        return self._conn.cursor()
+
+    # トランザクション
+    def begin(self, cursor:sqlite3.Cursor|None):
+        if cursor is not None:
+            cursor.execute("BEGIN TRANSACTION")
+        else:
+            self._conn.execute("BEGIN TRANSACTION")
+    def commit(self):
+        self._conn.commit()

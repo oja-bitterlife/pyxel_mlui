@@ -11,18 +11,17 @@ from orm import db
 from orm.user_unit_stocks import USER_UNIT_STOCKS
 from orm.user_unit import USER_UNITS
 
-print(list(USER_UNIT_STOCKS("オジャダ").stocks))
-print(list(USER_UNIT_STOCKS("オジャル").stocks))
-print(list(USER_UNIT_STOCKS("オジャドン").stocks))
-print(list(USER_UNIT_STOCKS("オジャナ").stocks))
+# ステージ開始時初期化
+# *****************************************************************************
+# HPの初期化
+USER_UNITS.reset_unit_hps()
 
-print("ユニットデータ")
+# ユニット情報
+# *****************************************************************************
 unit_names = USER_UNITS.get_unit_names()
 print(unit_names)
 
 for name in unit_names:
-    print(USER_UNITS.load_param(name), USER_UNITS.load_state(name))
-
-print("保有アイテム")
-for name in unit_names:
-    print(list(USER_UNIT_STOCKS(name).stocks))
+    print("ユニットデータ", USER_UNITS.load(name))
+    print("保有アイテム", list(USER_UNIT_STOCKS(name).stocks))
+    print()
