@@ -42,15 +42,19 @@ class XUEMemoryDB:
     # CSVを読み込んでメモリDB上にINSERT
     def import_csv(self, table_name:str, csv_path:str):
         with open(csv_path, "r", encoding="utf-8") as f:
+            # CSVを読み込み(１行目はヘッダー)
             dict_reader = csv.DictReader(f, skipinitialspace=True)
             if dict_reader.fieldnames is None:
                 raise ValueError("csv header is None")
 
-            for dict in dict_reader:
-                columns = ",".join([header for header in dict.keys()])
-                values = ",".join(["?"] * len(dict.values()))
-                sql = f"INSERT INTO {table_name} ({columns}) VALUES ({values})"
-                self._conn.execute(sql, tuple(dict.values()))
+            # SQLの構築
+            columns = ",".join([header for header in dict_reader.fieldnames])
+            values = ",".join(["?"] * len(dict_reader.fieldnames))
+            sql = f"INSERT INTO {table_name} ({columns}) VALUES ({values})"
+
+            # 一気にINSERT
+            self._conn.executemany(sql, [tuple(dict.values()) for dict in dict_reader])
+
         f.close()
 
 
