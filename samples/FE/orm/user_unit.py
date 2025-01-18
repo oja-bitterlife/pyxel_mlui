@@ -1,8 +1,9 @@
 from orm import db,XUEMemoryDB
 import dataclasses
 
-# @dataclasses.dataclass
-# class USER_UNIT_ITEM:
+@dataclasses.dataclass
+class USER_UNIT_PARAM:
+    unit_name:str
 
 class USER_UNITS:
     def __init__(self, unit_name:str):
@@ -13,7 +14,8 @@ class USER_UNITS:
         sql = f"""
             SELECT * FROM user_unit_params WHERE UNIT_NAME='{self.unit_name}'
         """
-        print(dict(self.cursor.execute(sql).fetchone()))
+        data = dict(self.cursor.execute(sql).fetchone())
+        return USER_UNIT_PARAM(unit_name=data["UNIT_NAME"])
 
     @classmethod
     def get_all_names(cls):

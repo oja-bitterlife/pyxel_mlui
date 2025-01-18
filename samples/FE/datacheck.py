@@ -21,7 +21,7 @@ unit_names = USER_UNITS.get_all_names()
 print(unit_names)
 
 for name in unit_names:
-    USER_UNITS(name).load()
+    print(USER_UNITS(name).load())
 
 print("保有アイテム")
 for name in unit_names:
