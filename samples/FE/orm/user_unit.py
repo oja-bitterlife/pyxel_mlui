@@ -11,7 +11,13 @@ class USER_UNITS:
 
     def load(self):
         sql = f"""
-            SELECT * FROM user_unit_params
+            SELECT * FROM user_unit_params WHERE UNIT_NAME='{self.unit_name}'
         """
-        row = self.cursor.execute(sql).fetchone()
-        print(row)
+        print(dict(self.cursor.execute(sql).fetchone()))
+
+    @classmethod
+    def get_all_names(cls):
+        sql = f"""
+            SELECT UNIT_NAME FROM user_unit_params
+        """
+        return [row[0] for row in db.cursor.execute(sql).fetchall()]
