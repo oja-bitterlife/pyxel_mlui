@@ -56,8 +56,7 @@ class USER_ENEMY_STATE:
     # DBに状態を保存する
     def save(self):
         sql = f"""
-            UPDATE user_enemy_state
-                SET MAP_X=?, MAP_Y=?, NOW_HP=?, MOVED=?, DEAD=? WHERE ENEMY_ID=?
+            UPDATE user_enemy_state SET MAP_X=?, MAP_Y=?, NOW_HP=?, MOVED=?, DEAD=? WHERE ENEMY_ID=?
         """
         db.execute(sql, (self.map_x, self.map_y, self.now_hp, self.moved, self.dead, self.unit_id))
 
