@@ -1,0 +1,2 @@
+# 敵ユニットゲーム中変数
+ENEMY_ID, MAP_X, MAP_Y, NOW_HP, MOVED, DEAD

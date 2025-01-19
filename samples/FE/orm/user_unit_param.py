@@ -4,6 +4,7 @@ from orm import db
 
 @dataclasses.dataclass
 class USER_UNIT_PARAM:
+    unit_id:int
     unit_name:str
     class_name:str
     lv:int
@@ -20,12 +21,13 @@ class USER_UNIT_PARAM:
         """
         data = dict(db.execute(sql).fetchone())
 
-        self.unit_name=unit_name
-        self.class_name=data["CLASS_NAME"]
-        self.lv=data["LV"]
-        self.hp=data["HP"]
-        self.power=data["POWER"]
-        self.skil=data["SKIL"]
-        self.speed=data["SPEED"]
-        self.defense=data["DEFENSE"]
-        self.move=data["MOVE"]
+        self.unit_id = data["UNIT_ID"]
+        self.unit_name = data["UNIT_NAME"]
+        self.class_name = data["CLASS_NAME"]
+        self.lv = data["LV"]
+        self.hp = data["HP"]
+        self.power = data["POWER"]
+        self.skil = data["SKIL"]
+        self.speed = data["SPEED"]
+        self.defense = data["DEFENSE"]
+        self.move = data["MOVE"]

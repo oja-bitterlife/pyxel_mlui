@@ -1,7 +1,2 @@
-# 味方ユニット変化データ
-UNIT_NAME, MAP_X, MAP_Y, NOW_HP, NOW_EXP, MOVED
-オジャス, 0, 0, 0, 0, 0
-オジャダ, 1, 0, 0, 0, 0
-オジャル, 2, 0, 0, 0, 0
-オジャドン, 3, 0, 0, 0, 0
-オジャナ, 4, 0, 0, 0, 0
+# 味方ユニットゲーム中変数
+UNIT_ID, MAP_X, MAP_Y, NOW_HP, NOW_EXP, MOVED, DEAD
