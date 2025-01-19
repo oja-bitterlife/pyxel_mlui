@@ -41,26 +41,30 @@ class XUEMemoryDB(sqlite3.Connection):
 
     # CSVを読み込んでメモリDB上にINSERT
     def import_csv(self, table_name:str, csv_path:str):
+        lines = []
         with open(csv_path, "r", encoding="utf-8") as f:
-            # CSVを読み込み(１行目はヘッダー)
-            dict_reader = csv.DictReader(f, skipinitialspace=True)
-            if dict_reader.fieldnames is None:
-                raise ValueError(f"csv header is None: {csv_path}")
+            # 先頭に#があればコメント行
+            lines = [line for line in f.readlines() if not line.strip().startswith("#")]
+            f.close()
 
-            # SQLの構築
-            columns = ",".join([header for header in dict_reader.fieldnames])
-            values = ",".join(["?"] * len(dict_reader.fieldnames))
-            sql = f"INSERT INTO {table_name} ({columns}) VALUES ({values})"
+        # CSVを読み込み(１行目はヘッダー)
+        dict_reader = csv.DictReader(lines, skipinitialspace=True)
+        if dict_reader.fieldnames is None:
+            raise ValueError(f"csv header is None: {csv_path}")
 
-            # 一気にINSERT
-            try:
-                cur = self.begin()
-                cur.executemany(sql, [tuple(dict.values()) for dict in dict_reader])
-                self.commit()
-            except Exception as e:
-                raise RuntimeError(f"csv import error: {csv_path}") from e
+        # SQLの構築
+        columns = ",".join([header for header in dict_reader.fieldnames])
+        values = ",".join(["?"] * len(dict_reader.fieldnames))
+        sql = f"INSERT INTO {table_name} ({columns}) VALUES ({values})"
 
-        f.close()
+        # 一気にINSERT
+        try:
+            cur = self.begin()
+            cur.executemany(sql, [tuple(dict.values()) for dict in dict_reader])
+            self.commit()
+        except Exception as e:
+            raise RuntimeError(f"csv import error: {csv_path}") from e
+
 
     # DB操作
     # -----------------------------------------------------

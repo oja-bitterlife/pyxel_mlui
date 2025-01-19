@@ -1,3 +1,4 @@
+# 味方ユニット変化データ
 UNIT_NAME, MAP_X, MAP_Y, NOW_HP, NOW_EXP, MOVED
 オジャス, 0, 0, 0, 0, 0
 オジャダ, 1, 0, 0, 0, 0

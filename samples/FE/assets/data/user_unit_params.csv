@@ -1,3 +1,4 @@
+# 味方ユニットレベルアップ時以外変わらないデータ
 UNIT_NAME, CLASS_NAME, LV, HP, POWER, SKIL, SPEED, DEFENSE, MOVE
 オジャス, ロード, 1, 18, 5, 6, 7, 7, 7
 オジャダ, Ｐナイト, 1, 16, 5, 6, 12, 7, 8
