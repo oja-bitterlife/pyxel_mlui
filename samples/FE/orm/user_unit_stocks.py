@@ -14,7 +14,7 @@ class USER_UNIT_STOCKS:
 
     @property
     def stocks(self) -> list[USER_UNIT_STOCK_ITEM]:
-        rows = db.execute(f"SELECT * FROM USER_UNIT_STOCKS WHERE UNIT_ID='{self.unit_id}'").fetchall()
+        rows = db.execute(f"SELECT * FROM USER_UNIT_STOCKS WHERE UNIT_ID=?", (self.unit_id,)).fetchall()
         return [USER_UNIT_STOCK_ITEM(item["UNIT_ID"], item["ITEM_NAME"], item["EQUIP"]) for item in rows]
 
     @property
