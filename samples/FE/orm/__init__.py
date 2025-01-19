@@ -15,12 +15,11 @@ for raw in raws:
 
 # CSVの読み込み
 csvs = [
+    "data_enemy_init",
     "data_item",
     "data_unit_class",
     "data_unit_init",
     "data_unit_levelup",
-    "user_unit_state",
-    "user_unit_stocks",
 ]
 for csv_name in csvs:
     db.import_csv(csv_name, f"assets/data/{csv_name}.csv")

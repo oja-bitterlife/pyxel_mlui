@@ -26,3 +26,6 @@ for name in unit_names:
     print("ユニットデータ", unit)
     print("保有アイテム", list(USER_UNIT_STOCKS(unit.unit_id).stocks))
     print()
+
+for enemy in USER_UNITS.get_map_enemies(1):
+    print(enemy)

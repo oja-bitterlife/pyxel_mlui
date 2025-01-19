@@ -6,8 +6,8 @@ from orm.user_unit_stocks import USER_UNIT_STOCKS
 # 現在の状態(書き換え可)
 @dataclasses.dataclass
 class USER_UNIT_STATE:
-    unit_name:str
     unit_id:int
+    unit_name:str
     map_x:int
     map_y:int
     now_hp:int
