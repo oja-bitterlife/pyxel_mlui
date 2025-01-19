@@ -9,6 +9,6 @@ class USER_UNITS:
     @classmethod
     def get_unit_names(cls):
         sql = f"""
-            SELECT UNIT_NAME FROM user_unit_params
+            SELECT UNIT_NAME FROM data_unit_init
         """
         return [row[0] for row in db.execute(sql).fetchall()]

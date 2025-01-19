@@ -1,45 +1,70 @@
 import dataclasses
 
 from orm import db
-from orm.user_unit_param import USER_UNIT_PARAM
 
 # 現在の状態(書き換え可)
 @dataclasses.dataclass
-class USER_UNIT_STATE(USER_UNIT_PARAM):
+class USER_UNIT_STATE:
+    unit_id:int
     map_x:int
     map_y:int
     now_hp:int
-    now_exp:int
+    class_name:str
+    lv:int
+    hp:int
+    power:int
+    skil:int
+    speed:int
+    defense:int
+    move:int
+    exp:int
     moved:bool
     dead:bool
 
     def __init__(self, unit_name:str):
-        super().__init__(unit_name)
-
         sql = f"""
-            SELECT * FROM user_unit_state WHERE UNIT_ID='{self.unit_id}'
-        """
-        data = dict(db.execute(sql).fetchone())
+            SELECT * FROM user_unit_state
+                WHERE UNIT_ID=(SELECT UNIT_ID FROM data_unit_init WHERE UNIT_NAME=?)
 
+        """
+        data = dict(db.execute(sql, (unit_name,)).fetchone())
+
+        self.unit_id = data["UNIT_ID"]
         self.map_x = data["MAP_X"]
         self.map_y = data["MAP_Y"]
         self.now_hp = data["NOW_HP"]
-        self.now_exp = data["NOW_EXP"]
+        self.class_name = data["CLASS_NAME"]
+        self.lv = data["LV"]
+        self.hp = data["HP"]
+        self.power = data["POWER"]
+        self.skil = data["SKIL"]
+        self.speed = data["SPEED"]
+        self.defense = data["DEFENSE"]
+        self.move = data["MOVE"]
+        self.exp = data["EXP"]
         self.moved = data["MOVED"]
-        self.dead = data["MOVED"]
+        self.dead = data["DEAD"]
 
     def set_hp(self, hp:int):
         self.now_hp = hp
         sql = f"""
-            UPDATE user_unit_state SET NOW_HP=? WHERE UNIT_NAME='{self.unit_name}'
+            UPDATE user_unit_state SET NOW_HP=? WHERE UNIT_ID=?
         """
-        db.execute(sql, (hp,))
+        db.execute(sql, (hp, self.unit_id))
 
     @classmethod
     def reset(cls, unit_name:str, map_x:int, map_y:int):
-        param = USER_UNIT_PARAM(unit_name)
-        row = db.execute(f"SELECT COUNT(*) FROM user_unit_state WHERE UNIT_ID='{param.unit_id}'").fetchone()
+        sql = f"""
+            SELECT COUNT(*) FROM user_unit_state
+                WHERE UNIT_ID=(SELECT UNIT_ID FROM data_unit_init WHERE UNIT_NAME=?)
+        """
+        row = db.execute(sql, (unit_name,)).fetchone()
         if row[0] == 0:
-            db.execute("INSERT INTO user_unit_state (UNIT_ID, MAP_X, MAP_Y, NOW_HP) VALUES (?, ?, ?, ?)", (param.unit_id, map_x, map_y, param.hp))
-        else:
-            db.execute(f"UPDATE user_unit_state SET MAP_X=?, MAP_Y=?, MOVED=0 WHERE UNIT_ID='{param.unit_id}'", (map_x, map_y))
+            sql = f"""
+                INSERT INTO user_unit_state (UNIT_ID,MAP_X,MAP_Y,NOW_HP,CLASS_NAME,LV,HP,POWER,SKIL,SPEED,DEFENSE,MOVE,EXP) 
+                    SELECT UNIT_ID,?,?,HP,CLASS_NAME,LV,HP,POWER,SKIL,SPEED,DEFENSE,MOVE,EXP FROM data_unit_init
+                        WHERE UNIT_ID=(SELECT UNIT_ID FROM data_unit_init WHERE UNIT_NAME=?)
+            """
+            db.execute(sql, (map_x, map_y, unit_name))
+        # else:
+        #     db.execute(f"UPDATE user_unit_state SET MAP_X=?, MAP_Y=?, MOVED=0 WHERE UNIT_ID='{param.unit_id}'", (map_x, map_y))

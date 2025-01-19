@@ -17,8 +17,8 @@ for raw in raws:
 csvs = [
     "data_item",
     "data_unit_class",
+    "data_unit_init",
     "data_unit_levelup",
-    "user_unit_params",
     "user_unit_state",
     "user_unit_stocks",
 ]
