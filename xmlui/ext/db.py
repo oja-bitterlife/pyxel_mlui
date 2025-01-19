@@ -19,7 +19,9 @@ class XUEMemoryDB(sqlite3.Connection):
     @classmethod
     def load(cls, db_path) -> Self:
         self = cls()
-        self.attach(db_path)
+        with open(db_path, "rb") as f:
+            self.deserialize(f.read())
+            f.close()
         return self
 
     # DB読み込み
