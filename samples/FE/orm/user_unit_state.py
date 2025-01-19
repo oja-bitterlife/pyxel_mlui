@@ -54,17 +54,17 @@ class USER_UNIT_STATE:
 
     @classmethod
     def reset(cls, unit_name:str, map_x:int, map_y:int):
+        # 一旦削除
         sql = f"""
-            SELECT COUNT(*) FROM user_unit_state
+            DELETE FROM user_unit_state
                 WHERE UNIT_ID=(SELECT UNIT_ID FROM data_unit_init WHERE UNIT_NAME=?)
         """
-        row = db.execute(sql, (unit_name,)).fetchone()
-        if row[0] == 0:
-            sql = f"""
-                INSERT INTO user_unit_state (UNIT_ID,MAP_X,MAP_Y,NOW_HP,CLASS_NAME,LV,HP,POWER,SKIL,SPEED,DEFENSE,MOVE,EXP) 
-                    SELECT UNIT_ID,?,?,HP,CLASS_NAME,LV,HP,POWER,SKIL,SPEED,DEFENSE,MOVE,EXP FROM data_unit_init
-                        WHERE UNIT_ID=(SELECT UNIT_ID FROM data_unit_init WHERE UNIT_NAME=?)
-            """
-            db.execute(sql, (map_x, map_y, unit_name))
-        # else:
-        #     db.execute(f"UPDATE user_unit_state SET MAP_X=?, MAP_Y=?, MOVED=0 WHERE UNIT_ID='{param.unit_id}'", (map_x, map_y))
+        db.execute(sql, (unit_name,))
+
+        # インサートしなおす
+        sql = f"""
+            INSERT INTO user_unit_state (UNIT_ID,MAP_X,MAP_Y,NOW_HP,CLASS_NAME,LV,HP,POWER,SKIL,SPEED,DEFENSE,MOVE,EXP) 
+                SELECT UNIT_ID,?,?,HP,CLASS_NAME,LV,HP,POWER,SKIL,SPEED,DEFENSE,MOVE,EXP FROM data_unit_init
+                    WHERE UNIT_ID=(SELECT UNIT_ID FROM data_unit_init WHERE UNIT_NAME=?)
+        """
+        db.execute(sql, (map_x, map_y, unit_name))
