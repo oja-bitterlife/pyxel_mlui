@@ -5,6 +5,7 @@ from orm import db
 # 現在の状態(書き換え可)
 @dataclasses.dataclass
 class USER_UNIT_STATE:
+    unit_name:str
     unit_id:int
     map_x:int
     map_y:int
@@ -22,13 +23,21 @@ class USER_UNIT_STATE:
     dead:bool
 
     def __init__(self, unit_name:str):
+        self.unit_name = unit_name
+
+        # 現在のデータ取得
         sql = f"""
             SELECT * FROM user_unit_state
                 WHERE UNIT_ID=(SELECT UNIT_ID FROM data_unit_init WHERE UNIT_NAME=?)
 
         """
-        data = dict(db.execute(sql, (unit_name,)).fetchone())
+        data = db.execute(sql, (unit_name,)).fetchone()
+        # データが無ければ初期データを引っ張ってきておく
+        if data is None:
+            self.initialize(unit_name)
+            data = db.execute(sql, (unit_name, )).fetchone()
 
+        # 取得したデータを設定
         self.unit_id = data["UNIT_ID"]
         self.map_x = data["MAP_X"]
         self.map_y = data["MAP_Y"]
@@ -45,26 +54,34 @@ class USER_UNIT_STATE:
         self.moved = data["MOVED"]
         self.dead = data["DEAD"]
 
-    def set_hp(self, hp:int):
-        self.now_hp = hp
+    # DBに状態を保存する
+    def save(self):
         sql = f"""
-            UPDATE user_unit_state SET NOW_HP=? WHERE UNIT_ID=?
+            UPDATE user_unit_state
+                SET MAP_X=?, MAP_Y=?, NOW_HP=?, CLASS_NAME=?, LV=?,
+                    HP=?, POWER=?, SKIL=?, SPEED=?, DEFENSE=?, MOVE=?,
+                    EXP=?, MOVED=?, DEAD=?
+                WHERE UNIT_ID=?
         """
-        db.execute(sql, (hp, self.unit_id))
+        db.execute(sql, (self.map_x, self.map_y, self.now_hp, self.class_name, self.lv,
+            self.hp, self.power, self.skil, self.speed, self.defense, self.move,
+            self.exp, self.moved, self.dead,
+            self.unit_id
+        ))
+
+    # マップ開始時のリセット
+    def reset(self, map_x:int, map_y:int):
+        self.now_hp = self.hp
+        self.map_x = map_x
+        self.map_y = map_y
+        self.save()
 
     @classmethod
-    def reset(cls, unit_name:str, map_x:int, map_y:int):
-        # 一旦削除
-        sql = f"""
-            DELETE FROM user_unit_state
-                WHERE UNIT_ID=(SELECT UNIT_ID FROM data_unit_init WHERE UNIT_NAME=?)
-        """
-        db.execute(sql, (unit_name,))
-
-        # インサートしなおす
+    def initialize(cls, unit_name:str):
+        # 各パラメータをstate側に移す
         sql = f"""
             INSERT INTO user_unit_state (UNIT_ID,MAP_X,MAP_Y,NOW_HP,CLASS_NAME,LV,HP,POWER,SKIL,SPEED,DEFENSE,MOVE,EXP) 
-                SELECT UNIT_ID,?,?,HP,CLASS_NAME,LV,HP,POWER,SKIL,SPEED,DEFENSE,MOVE,EXP FROM data_unit_init
+                SELECT UNIT_ID,0,0,HP,CLASS_NAME,LV,HP,POWER,SKIL,SPEED,DEFENSE,MOVE,EXP FROM data_unit_init
                     WHERE UNIT_ID=(SELECT UNIT_ID FROM data_unit_init WHERE UNIT_NAME=?)
         """
-        db.execute(sql, (map_x, map_y, unit_name))
+        db.execute(sql, (unit_name,))

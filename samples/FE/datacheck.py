@@ -19,11 +19,6 @@ check_stage = 1
 unit_names = USER_UNITS.get_unit_names()
 print(unit_names)
 
-# ステージ開始時初期化
-# *****************************************************************************
-for i,name in enumerate(unit_names):
-    USER_UNIT_STATE.reset(name, i, 0)
-
 # ユニット情報
 # *****************************************************************************
 for name in unit_names:
