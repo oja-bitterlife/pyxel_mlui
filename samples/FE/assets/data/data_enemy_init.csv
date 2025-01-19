@@ -1,4 +1,5 @@
 # マップの敵キャラ初期配置
+# UNIT_IDはAUTO_INCREMENT
 MAP_ID, MAP_X, MAP_Y, UNIT_NAME, CLASS_NAME, LV, HP, POWER, SKIL, SPEED, DEFENSE, MOVE, EXP, ITEM1, ITEM2, ITEM3
 1, -3, -3, オジヤへい, とうぞく, 1, 16, 3, 1, 9, 2, 7, 40, てつのつるぎ
 1, -9, 0, オジヤへい, かいぞく, 1, 18, 5, 1, 6, 4, 6, 24, おの
