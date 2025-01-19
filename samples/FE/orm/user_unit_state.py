@@ -10,6 +10,7 @@ class USER_UNIT_STATE(USER_UNIT_PARAM):
     map_y:int
     now_hp:int
     now_exp:int
+    moved:bool
 
     def __init__(self, unit_name:str):
         super().__init__(unit_name)
@@ -23,6 +24,7 @@ class USER_UNIT_STATE(USER_UNIT_PARAM):
         self.map_y=data["MAP_Y"]
         self.now_hp=data["NOW_HP"]
         self.now_exp=data["NOW_EXP"]
+        self.moved=data["MOVED"]
 
     def set_hp(self, hp:int):
         self.now_hp = hp
@@ -34,8 +36,8 @@ class USER_UNIT_STATE(USER_UNIT_PARAM):
     @classmethod
     def reset(cls, unit_name:str, map_x:int, map_y:int):
         param = USER_UNIT_PARAM(unit_name)
-        cur = db.cursor
         row = db.execute("SELECT COUNT(*) FROM user_unit_state WHERE UNIT_NAME='{unit_name}'").fetchone()
         if row is None:
-
-            pass
+            db.execute("INSERT INTO user_unit_state SET MAP_X=?, MAP_Y=?, NOW_HP=? WHERE UNIT_NAME='{unit_name}'", (map_x, map_y, param.hp))
+        else:
+            db.execute("UPDATE user_unit_state SET MAP_X=?, MAP_Y=?, MOVED=0 WHERE UNIT_NAME='{unit_name}'", (map_x, map_y))
