@@ -22,7 +22,7 @@ print(unit_names)
 # ユニット情報
 # *****************************************************************************
 for name in unit_names:
-    state = USER_UNITS.load(name)
-    print("ユニットデータ", state)
-    print("保有アイテム", list(USER_UNIT_STOCKS(name).stocks))
+    unit = USER_UNIT_STATE(name)
+    print("ユニットデータ", unit)
+    print("保有アイテム", list(USER_UNIT_STOCKS(unit.unit_id).stocks))
     print()

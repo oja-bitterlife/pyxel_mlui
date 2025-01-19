@@ -5,16 +5,12 @@ import dataclasses
 class USER_UNIT_STOCK_ITEM:
     unit_id:str
     item_name:str
-    equip:bool|None
-
-    def save(self):
-        db.execute(f"INSERT INTO USER_UNIT_STOCKS (UNIT_ID, ITEM_NAME, EQUIP) VALUES (?, ?, ?)", (self.unit_id, self.item_name, self.equip))
+    equip:bool
 
 # ユニットの所持品を調べる
 class USER_UNIT_STOCKS:
     def __init__(self, unit_id:int):
         self.unit_id = unit_id
-        self.cursor = db.cursor
 
     @property
     def stocks(self) -> list[USER_UNIT_STOCK_ITEM]:
@@ -27,3 +23,7 @@ class USER_UNIT_STOCKS:
             if stock.equip:
                 return stock
         return None
+
+    @classmethod
+    def append(cls, unit_id:int, item_name:str, equip:bool=False):
+        db.execute(f"INSERT INTO USER_UNIT_STOCKS (UNIT_ID, ITEM_NAME, EQUIP) VALUES (?, ?, ?)", (unit_id, item_name, equip))
