@@ -3,14 +3,14 @@ import pyxel
 from xmlui.lib.debug import DebugXMLUI
 from xmlui.ext.scene import XUEFadeScene
 
-from scenes.unit import UNITS
+from scenes.unit import Units
 
 class Field(XUEFadeScene):
     def __init__(self):
         super().__init__(DebugXMLUI(pyxel.width, pyxel.height))
 
         self.stage = 1
-        self.units = UNITS(self.stage)
+        self.units = Units(self.stage)
 
         print(self.units)
         # UIの読み込み

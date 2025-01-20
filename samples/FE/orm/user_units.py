@@ -1,7 +1,7 @@
 from orm import db
-from orm.user_enemy_state import USER_ENEMY_STATE
+from orm.user_enemy_state import UserEnemyState
 
-class USER_UNITS:
+class UserUnits:
     @classmethod
     def get_unit_names(cls) -> list[str]:
         sql = f"""
@@ -17,8 +17,8 @@ class USER_UNITS:
         return db.execute(sql, (unit_name,)).fetchone()[0]
 
     @classmethod
-    def get_map_enemies(cls, map_id:int) -> list[USER_ENEMY_STATE]:
+    def get_map_enemies(cls, map_id:int) -> list[UserEnemyState]:
         sql = f"""
             SELECT ENEMY_ID FROM data_enemy_init WHERE MAP_ID=?
         """
-        return [USER_ENEMY_STATE(data[0]) for data in db.execute(sql, (map_id,)).fetchall()]
+        return [UserEnemyState(data[0]) for data in db.execute(sql, (map_id,)).fetchall()]

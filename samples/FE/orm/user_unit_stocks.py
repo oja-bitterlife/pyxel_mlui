@@ -2,23 +2,23 @@ from orm import db
 import dataclasses
 
 @dataclasses.dataclass()
-class USER_UNIT_STOCK_ITEM:
+class UserUnitStockItem:
     unit_id:str
     item_name:str
     equip:bool
 
 # ユニットの所持品を調べる
-class USER_UNIT_STOCKS:
+class UserUnitStocks:
     def __init__(self, unit_id:int):
         self.unit_id = unit_id
 
     @property
-    def stocks(self) -> list[USER_UNIT_STOCK_ITEM]:
+    def stocks(self) -> list[UserUnitStockItem]:
         rows = db.execute(f"SELECT * FROM USER_UNIT_STOCKS WHERE UNIT_ID=?", (self.unit_id,)).fetchall()
-        return [USER_UNIT_STOCK_ITEM(item["UNIT_ID"], item["ITEM_NAME"], item["EQUIP"]) for item in rows]
+        return [UserUnitStockItem(item["UNIT_ID"], item["ITEM_NAME"], item["EQUIP"]) for item in rows]
 
     @property
-    def equiped(self) -> USER_UNIT_STOCK_ITEM | None:
+    def equiped(self) -> UserUnitStockItem | None:
         for stock in self.stocks:
             if stock.equip:
                 return stock

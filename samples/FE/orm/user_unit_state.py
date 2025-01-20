@@ -1,11 +1,11 @@
 import dataclasses
 
 from orm import db
-from orm.user_unit_stocks import USER_UNIT_STOCKS
+from orm.user_unit_stocks import UserUnitStocks
 
 # 現在の状態(書き換え可)
 @dataclasses.dataclass
-class USER_UNIT_STATE:
+class UserUnitState:
     unit_id:int
     unit_name:str
     map_x:int
@@ -94,8 +94,8 @@ class USER_UNIT_STATE:
         row = db.execute(sql, (unit_name,)).fetchone()
         if row is not None:
             if row["ITEM1"] is not None:
-                USER_UNIT_STOCKS.append(row["UNIT_ID"], row["ITEM1"], True)
+                UserUnitStocks.append(row["UNIT_ID"], row["ITEM1"], True)
             if row["ITEM2"] is not None:
-                USER_UNIT_STOCKS.append(row["UNIT_ID"], row["ITEM2"])
+                UserUnitStocks.append(row["UNIT_ID"], row["ITEM2"])
             if row["ITEM3"] is not None:
-                USER_UNIT_STOCKS.append(row["UNIT_ID"], row["ITEM2"])
+                UserUnitStocks.append(row["UNIT_ID"], row["ITEM2"])

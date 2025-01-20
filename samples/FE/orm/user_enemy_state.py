@@ -4,7 +4,7 @@ from orm import db
 
 # 現在の状態(書き換え可)
 @dataclasses.dataclass
-class USER_ENEMY_STATE:
+class UserEnemyState:
     enemy_id:int
     enemy_name:str
     map_x:int
