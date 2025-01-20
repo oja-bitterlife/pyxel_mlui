@@ -41,6 +41,34 @@ class XUEMemoryDB(sqlite3.Connection):
 
     # CSVを読み込んでメモリDB上にINSERT
     def import_csv(self, table_name:str, csv_path:str):
+        csv = XUEDictCSV(csv_path)
+
+        # SQLの構築
+        columns = ",".join(csv.fields)
+        values = ",".join(["?"] * len(csv.fields))
+        sql = f"INSERT INTO {table_name} ({columns}) VALUES ({values})"
+
+        # 一気にINSERT
+        try:
+            cur = self.begin()
+            cur.executemany(sql, [tuple(row.values()) for row in csv.rows])
+            self.commit()
+        except Exception as e:
+            raise RuntimeError(f"csv insert error: {csv_path}") from e
+
+
+    # DB操作
+    # -----------------------------------------------------
+    # トランザクション
+    def begin(self, cursor:sqlite3.Cursor|None=None) -> sqlite3.Cursor:
+        if cursor is None:
+            return self.execute("BEGIN TRANSACTION")
+        else:
+            return cursor.execute("BEGIN TRANSACTION")
+
+
+class XUEDictCSV:
+    def __init__(self, csv_path:str):
         lines = []
         with open(csv_path, "r", encoding="utf-8") as f:
             # 先頭に#があればコメント行
@@ -52,25 +80,11 @@ class XUEMemoryDB(sqlite3.Connection):
         if dict_reader.fieldnames is None:
             raise ValueError(f"csv header is None: {csv_path}")
 
-        # SQLの構築
-        columns = ",".join([header for header in dict_reader.fieldnames])
-        values = ",".join(["?"] * len(dict_reader.fieldnames))
-        sql = f"INSERT INTO {table_name} ({columns}) VALUES ({values})"
+        self.fields:list[str] = [header for header in dict_reader.fieldnames]
+        self.rows: list[dict[str,str]] = [dict for dict in dict_reader]
 
-        # 一気にINSERT
-        try:
-            cur = self.begin()
-            cur.executemany(sql, [tuple(dict.values()) for dict in dict_reader])
-            self.commit()
-        except Exception as e:
-            raise RuntimeError(f"csv import error: {csv_path}") from e
-
-
-    # DB操作
-    # -----------------------------------------------------
-    # トランザクション
-    def begin(self, cursor:sqlite3.Cursor|None=None) -> sqlite3.Cursor:
-        if cursor is None:
-            return self.execute("BEGIN TRANSACTION")
-        else:
-            return cursor.execute("BEGIN TRANSACTION")
+    def find(self, key:str, value:str) -> dict[str,str]|None:
+        for item in self.rows:
+            if item[key] == value:
+                return item
+        return None
