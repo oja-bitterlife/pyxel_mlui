@@ -42,7 +42,7 @@ class XUEMemoryDB(sqlite3.Connection):
 
     # CSVを読み込んでメモリDB上にINSERT
     def import_csv(self, table_name:str, csv_path:str):
-        csv = XUEDictCSV(csv_path)
+        csv = XUECSVDict(csv_path)
 
         # SQLの構築
         columns = ",".join(csv.fields)
@@ -69,7 +69,7 @@ class XUEMemoryDB(sqlite3.Connection):
 
 # CSVを扱う
 # *****************************************************************************
-class XUEDictCSV:
+class XUECSVDict:
     def __init__(self, csv_path:str):
         lines = []
         with open(csv_path, "r", encoding="utf-8") as f:
@@ -98,3 +98,19 @@ class XUEDictCSV:
             if item[key] == value:
                 return i
         return -1
+
+# ただの配列。コメント除外を付けておく
+class XUECSVArray[T]:
+    def __init__(self, csv_path:str):
+        lines = []
+        with open(csv_path, "r", encoding="utf-8") as f:
+            # 先頭に#があればコメント行
+            lines = [line for line in f.readlines() if not line.strip().startswith("#")]
+            f.close()
+
+        # CSVを読み込み(１行目はヘッダー)
+        reader = csv.reader(lines)
+        if type(T) == int or type(T) == float or type(T) == bool:
+            self.rows:list[list[T]] = [[T(item) for item in row] for row in reader]
+        else:
+            self.rows:list[list[str]] = [[item for item in row] for row in reader]
