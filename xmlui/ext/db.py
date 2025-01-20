@@ -1,7 +1,8 @@
 from typing import Self
 import sqlite3,csv
 
-# DB関係
+# SQLite用
+# *****************************************************************************
 # ゲームではストレージに書き込まないのでmemory_dbに移して使う
 class XUEMemoryDB(sqlite3.Connection):
     # DB作成
@@ -56,7 +57,6 @@ class XUEMemoryDB(sqlite3.Connection):
         except Exception as e:
             raise RuntimeError(f"csv insert error: {csv_path}") from e
 
-
     # DB操作
     # -----------------------------------------------------
     # トランザクション
@@ -67,6 +67,8 @@ class XUEMemoryDB(sqlite3.Connection):
             return cursor.execute("BEGIN TRANSACTION")
 
 
+# CSVを扱う
+# *****************************************************************************
 class XUEDictCSV:
     def __init__(self, csv_path:str):
         lines = []
@@ -83,8 +85,16 @@ class XUEDictCSV:
         self.fields:list[str] = [header for header in dict_reader.fieldnames]
         self.rows: list[dict[str,str]] = [dict for dict in dict_reader]
 
+    # 行を探して返す。見つからなかったらNone
     def find(self, key:str, value:str) -> dict[str,str]|None:
         for item in self.rows:
             if item[key] == value:
                 return item
         return None
+
+    # 行番号を探して返す。見つからなかったら-1
+    def index(self, key:str, value:str) -> int:
+        for i,item in enumerate(self.rows):
+            if item[key] == value:
+                return i
+        return -1
