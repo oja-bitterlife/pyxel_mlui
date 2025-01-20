@@ -34,3 +34,7 @@ class Field(XUEFadeScene):
 
     def closed(self):
         self.xmlui.close()  # 読みこんだUIの削除
+
+
+    def draw(self):
+        self.units.draw(0, 0)
