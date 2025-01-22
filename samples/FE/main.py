@@ -6,6 +6,9 @@ pyxel.init(256, 256)
 from xmlui.core import XMLUI
 XMLUI.debug_enable = True
 
+# システムで使う物
+from system import system_font,system_palette
+
 # 作成するシーン選択
 from xmlui.ext.scene import XUESceneManager
 from scenes import field
