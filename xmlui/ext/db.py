@@ -99,10 +99,8 @@ class XUECSVDict:
                 return i
         return -1
 
-# ただの配列。コメント除外を付けておく
-class XUECSVArray[T]:
-    rows:list[list[T]]
-
+# ただのint配列。コメント除外を付けておく
+class XUECSVArray:
     def __init__(self, csv_path:str):
         lines = []
         with open(csv_path, "r", encoding="utf-8") as f:
@@ -110,11 +108,5 @@ class XUECSVArray[T]:
             lines = [line for line in f.readlines() if not line.strip().startswith("#")]
             f.close()
 
-        # CSVを読み込み(１行目はヘッダー)
-        reader = csv.reader(lines)
-
-        # プリミティブタイプしか扱えない
-        if type(T) == int or type(T) == float or type(T) == bool or type(T) == str:
-            self.rows:list[list[T]] = [[T(item) for item in row] for row in reader]
-        else:
-            raise TypeError(f"XUECSVArray type error: {T}")
+        # CSVを読み込み
+        self.rows:list[list] = [[int(item) for item in row] for row in csv.reader(lines)]

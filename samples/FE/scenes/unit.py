@@ -20,7 +20,7 @@ class Unit(UserUnitState):
 class Units:
     # ステージごとに初期化する
     def __init__(self, stage_no:int):
-        unit_map_place = XUECSVDict(f"assets/stage/stage{stage_no}_units.csv")
+        unit_map_place = XUECSVDict(f"assets/stage/units-{stage_no}.csv")
 
         # ユニット読み込みと配置
         self.units:dict[str,Unit] = {}

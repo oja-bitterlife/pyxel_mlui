@@ -14,7 +14,7 @@ class TileSet:
             self.tileset = json.load(f)
         
     def get_tile_rect(self, tile_no:int) -> XURect:
-        tile = self.tileset[tile_no]["spriteSourceSize"]
+        tile = self.tileset["frames"][tile_no]["spriteSourceSize"]
         return XURect(tile["x"], tile["y"], tile["w"], tile["h"])
 
 class TileMap:
@@ -22,7 +22,7 @@ class TileMap:
 
     # ステージごとに初期化する
     def __init__(self, stage_no:int):
-        self.tilemap = XUECSVArray[int](f"assets/stage/tilemap-{stage_no}.csv")
+        self.tilemap = XUECSVArray(f"assets/stage/tilemap-{stage_no}.csv")
         self.tileset = TileSet(f"assets/stage/tileset-{stage_no}.json", f"assets/stage/tileset-{stage_no}.png")
 
     def draw(self, screen_x:int, screen_y:int):
