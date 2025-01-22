@@ -4,6 +4,7 @@ from xmlui.lib.debug import DebugXMLUI
 from xmlui.ext.scene import XUEFadeScene
 
 from scenes.unit import Units
+from scenes.tilemap import TileMap 
 
 class Field(XUEFadeScene):
     def __init__(self):
@@ -12,7 +13,6 @@ class Field(XUEFadeScene):
         self.stage = 1
         self.units = Units(self.stage)
 
-        print(self.units)
         # UIの読み込み
         # self.xmlui.load_template("assets/ui/field.xml")
         # self.xmlui.load_template("assets/ui/common.xml")
@@ -32,9 +32,12 @@ class Field(XUEFadeScene):
         # 画像読み込み
         # pyxel.images[1].load(0, 0, "assets/images/field_tile.png" )
 
+        self.tilemap = TileMap(1)
+
     def closed(self):
         self.xmlui.close()  # 読みこんだUIの削除
 
 
     def draw(self):
         self.units.draw(0, 0)
+        self.tilemap.draw(0, 0)
