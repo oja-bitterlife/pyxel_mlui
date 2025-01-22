@@ -14,7 +14,7 @@ class TileSet:
             self.tileset = json.load(f)
         
     def get_tile_rect(self, tile_no:int) -> XURect:
-        tile = self.tileset["frames"][tile_no]["spriteSourceSize"]
+        tile = self.tileset["frames"][tile_no]["frame"]
         return XURect(tile["x"], tile["y"], tile["w"], tile["h"])
 
 class TileMap:
