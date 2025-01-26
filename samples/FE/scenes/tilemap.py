@@ -1,3 +1,4 @@
+from typing import cast,Any
 import json
 import pyxel
 
@@ -5,10 +6,12 @@ from xmlui.core import XURect
 from xmlui.ext.db import XUECSVArray
 from xmlui.ext.timer import XUEInterval
 
+# マップセット管理
 class XUETileSet:
     def __init__(self, img:pyxel.Image|int, tiles:list[XURect]):
         self.img = img
         self.tiles = tiles
+        self.size = tiles[0].to_offset()
 
     @classmethod
     def from_aseprite(cls, img_path:str, json_path:str) -> "XUETileSet":
@@ -27,51 +30,65 @@ class XUETileSet:
         # tilesetを作成
         return XUETileSet(img, tiles)
 
-class XUETileMap(XUEInterval):
+# ユニットやマップブロック1つに対応
+class XUETileAnim(XUEInterval):
     DEFAULT_ANIM_SPEED = 15  # 30FPSで15カウント=0.5秒
-    DEFAULT_BLOCK_SIZE = 16
-    DEFAULT_COLOR_KEY = 0
 
-    # ステージごとに初期化する
-    def __init__(self, tileset:XUETileSet, tilemap_csv:str, speed:int=DEFAULT_ANIM_SPEED, block_size:int=DEFAULT_BLOCK_SIZE, color_key=DEFAULT_COLOR_KEY):
+    def __init__(self, tileset:XUETileSet, tile_no:int, speed:int=DEFAULT_ANIM_SPEED):
         super().__init__(speed)
-        self.tilemap = XUECSVArray(tilemap_csv)
         self.tileset = tileset
 
-        self.block_size = block_size
-        self.color_key = color_key
+        # 初期値(変更しないもの)
+        self._tileset = tileset
+        self.init_tile_no = tile_no
 
-        self.anim_no = 0
+        # 変更して使うもの
+        self.anim_no = tile_no
 
-        self.tile_offset_u = 0
-        self.tile_offset_v = 0
+    # 表示
+    def draw(self, x:int, y:int, *, rotate:float|None=None, scale:float|None=None):
+        uv_rect = self.tileset.tiles[self.anim_no]
+        pyxel.blt(x, y, self.tileset.img, uv_rect.x, uv_rect.y, uv_rect.w, uv_rect.h, 0, rotate=rotate, scale=scale)
+
+    # アニメーションするときはここでanim_noを切り替えるように
+    # def action(self):
+
+    # アニメーションするときはupdate(XUEIntervalで定義)を呼ぶように
+    # def update(self):
+
+# 並べて表示するもの。主にマップ用
+class XUETileMap[T:XUETileAnim]:
+    # ステージごとに初期化する
+    def __init__(self, tileset:XUETileSet, tilemap_csv:str, speed:int=XUETileAnim.DEFAULT_ANIM_SPEED):
+        super().__init__()
+        self.tileset = tileset
+        self.tilemap = XUECSVArray(tilemap_csv)
+
+        # アニメするタイルオブジェクトを用意
+        self.tile_anims:dict[int, XUETileAnim] = {}
+        for tile_no in set([tile for row in self.tilemap.rows for tile in row]):
+            # 0は非表示
+            if tile_no > 0:
+                self.tile_anims[tile_no] = XUETileAnim(tileset, tile_no, speed)
+
+                # Type指定があればcastしておく
+                if T is not Any:
+                    self.tile_anims[tile_no] = cast(T, self.tile_anims[tile_no])
+
+    def update(self):
+        # 全部更新
+        for anim in self.tile_anims.values():
+            anim.update()
 
     def draw(self, screen_x:int, screen_y:int, *, rotate:float|None=None, scale:float|None=None):
         for y,row in enumerate(self.tilemap.rows):
             for x,tile_no in enumerate(row):
                 # 0は非表示
                 if tile_no > 0:
-                    tile_rect = self.tileset.tiles[tile_no]
-                    tile_rect.x += self.tile_offset_u
-                    tile_rect.y += self.tile_offset_v
-                    draw_x = x*self.block_size - screen_x
-                    draw_y = y*self.block_size - screen_y
-                    pyxel.blt(draw_x, draw_y, self.tileset.img, tile_rect.x, tile_rect.y, tile_rect.w, tile_rect.h, self.color_key, rotate=rotate, scale=scale)
-
-
-    # override: 一定時間ごとにanimを切り替え
-    def action(self):
-        self.change_anim(self.anim_no + 1)
-
-    def change_anim(self, anim_no:int):
-        self.anim_no = anim_no
-        self.anim_changed()
-
-    # アクションが切り替わったときに呼ばれる
-    # 継承側で表示uv切り替えを行う
-    def anim_changed(self):
-        pass
-
+                    anim = self.tile_anims[tile_no]
+                    draw_x = screen_x + x * self.tileset.size.w
+                    draw_y = screen_y + y * self.tileset.size.h
+                    anim.draw(draw_x, draw_y, rotate=rotate, scale=scale)
 
 class TileMap(XUETileMap):
     # ステージごとに初期化する

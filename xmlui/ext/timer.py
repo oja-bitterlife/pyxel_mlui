@@ -59,6 +59,10 @@ class XUETimeout(_XUETimerBase):
 
 # 時間ごとに何度も実行
 class XUEInterval(_XUETimerBase):
+    def __init__(self, count:int):
+        super().__init__(count)
+        self.action_count = 0  # いままで何回呼ばれたか
+
     def update(self):
         # 完了済み
         if self.is_finish:
@@ -71,6 +75,7 @@ class XUEInterval(_XUETimerBase):
         if self.count >= self._count_max:
             self.action()
             self._count = 0  # intervalはカウントし直し
+            self.action_count += 1  # 何回呼ばれたかを更新する
 
 # 指定時間までずっと発火
 # ---------------------------------------------------------
