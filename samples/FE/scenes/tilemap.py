@@ -1,4 +1,4 @@
-from typing import cast,Any
+from typing import cast,Any,Self
 import json
 import pyxel
 
@@ -40,10 +40,15 @@ class XUETileAnim(XUEInterval):
 
         # 初期値(変更しないもの)
         self._tileset = tileset
-        self.init_tile_no = tile_no
+        self.tile_no = tile_no
 
         # 変更して使うもの
         self.anim_no = tile_no
+
+    # ジェネリクスだけでは実現不可能だったので、ベースクラスを作ったあとconvertする
+    @classmethod
+    def from_base(cls, anim:"XUETileAnim") -> Self:
+        return cls(anim.tileset, anim.tile_no, anim._count_max)
 
     # 表示
     def draw(self, x:int, y:int, *, rotate:float|None=None, scale:float|None=None):
@@ -65,21 +70,27 @@ class XUETileMap[T:XUETileAnim]:
         self.tilemap = XUECSVArray(tilemap_csv)
 
         # アニメするタイルオブジェクトを用意
-        self.tile_anims:dict[int, XUETileAnim] = {}
+        self.tile_anims:dict[int, T] = {}
         for tile_no in set([tile for row in self.tilemap.rows for tile in row]):
             # 0は非表示
             if tile_no > 0:
-                self.tile_anims[tile_no] = XUETileAnim(tileset, tile_no, speed)
+                self.tile_anims[tile_no] = self.convert(XUETileAnim(tileset, tile_no, speed))
 
                 # Type指定があればcastしておく
                 if T is not Any:
                     self.tile_anims[tile_no] = cast(T, self.tile_anims[tile_no])
 
+    # コレをオーバーライドして実際に使うTileAnimに変換する
+    def convert(self, anim:XUETileAnim) -> T:
+        return cast(T, anim)
+
+    # アニメーション更新
     def update(self):
         # 全部更新
         for anim in self.tile_anims.values():
             anim.update()
 
+    # 全体を描画
     def draw(self, screen_x:int, screen_y:int, *, rotate:float|None=None, scale:float|None=None):
         for y,row in enumerate(self.tilemap.rows):
             for x,tile_no in enumerate(row):
@@ -90,9 +101,18 @@ class XUETileMap[T:XUETileAnim]:
                     draw_y = screen_y + y * self.tileset.size.h
                     anim.draw(draw_x, draw_y, rotate=rotate, scale=scale)
 
+
+class TileAnim(XUETileAnim):
+    def action(self):
+        pass
+        # print("action")
+
 class TileMap(XUETileMap):
     # ステージごとに初期化する
     def __init__(self, stage_no:int):
         super().__init__(
             XUETileSet.from_aseprite(f"assets/stage/tileset-{stage_no}.png", f"assets/stage/tileset-{stage_no}.json"),
             f"assets/stage/tilemap-{stage_no}.csv")
+
+    def convert(self, anim:XUETileAnim) -> TileAnim:
+        return TileAnim.from_base(anim)

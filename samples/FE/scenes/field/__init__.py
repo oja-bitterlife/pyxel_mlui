@@ -40,4 +40,5 @@ class Field(XUEFadeScene):
 
     def draw(self):
         self.units.draw(0, 0)
+        self.tilemap.update()
         self.tilemap.draw(0, 0)
