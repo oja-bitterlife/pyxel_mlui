@@ -104,8 +104,10 @@ class XUETileMap[T:XUETileAnim]:
 
 class TileAnim(XUETileAnim):
     def action(self):
-        pass
-        # print("action")
+        match self.tile_no:
+            case 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9:
+                offset = [0, 48, 64]
+                self.anim_no = self.tile_no + offset[self.action_count % len(offset)]
 
 class TileMap(XUETileMap):
     # ステージごとに初期化する
