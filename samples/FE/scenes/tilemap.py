@@ -7,7 +7,7 @@ class TileAnim(XUETileAnim):
                 offset = [0, 48, 64]
                 self.anim_no = self.tile_no + offset[self.action_count % len(offset)]
 
-class TileMap(XUETileMap):
+class TileMap(XUETileMap[XUETileAnim]):
     # ステージごとに初期化する
     def __init__(self, stage_no:int):
         super().__init__(
