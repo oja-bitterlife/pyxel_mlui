@@ -36,6 +36,7 @@ class XUETileSet:
         uv_rect = self.tiles[no]
         pyxel.blt(x, y, self.img, uv_rect.x, uv_rect.y, uv_rect.w, uv_rect.h, 0, rotate=rotate, scale=scale)
 
+
 # ユニットやマップブロック1つに対応
 class XUETileAnim(XUEInterval):
     DEFAULT_ANIM_SPEED = 15  # 30FPSで15カウント=0.5秒
@@ -43,21 +44,32 @@ class XUETileAnim(XUEInterval):
     def __init__(self, tileset:XUETileSet, tile_no_list:list[int]|int, speed:int=DEFAULT_ANIM_SPEED):
         super().__init__(speed)
         self.tileset = tileset
+        self.change_anim(tile_no_list)
 
-        # アニメーションを配列で保存
-        if isinstance(tile_no_list, int):
-            tile_no_list = [tile_no_list]
-        self.tile_no_list = tile_no_list
+    # 表示
+    def draw(self, x:int, y:int, *, rotate:float|None=None, scale:float|None=None):
+        self.tileset.draw(self.anim_no, x, y, rotate=rotate, scale=scale)
 
+    # アニメーションを設定しなおす
+    def change_anim(self, tile_no_list:list[int]|int):
+        self.tile_no_list = [tile_no_list] if isinstance(tile_no_list, int) else tile_no_list
+
+    # 現在の表示タイル番号を取得
+    @property
+    def anim_no(self):
+        return self.tile_no_list[self.action_count % len(self.tile_no_list)]
+
+    # ジェネリクス用
+    # -----------------------------------------------------
     # ジェネリクスだけでは実現不可能だったので、ベースクラスを作ったあとconvertする
     @classmethod
     def from_base(cls, anim:"XUETileAnim") -> Self:
         return cls(anim.tileset, anim.tile_no_list, anim._count_max)
 
-    # 表示
-    def draw(self, x:int, y:int, *, rotate:float|None=None, scale:float|None=None):
-        tile_no = self.action_count % len(self.tile_no_list)
-        self.tileset.draw(tile_no, x, y, rotate=rotate, scale=scale)
+    # convertされた後に呼ばれる
+    def converted(self):
+        pass
+
 
 # 並べて表示するもの。主にマップ用
 class XUETileMap[T:XUETileAnim]:
@@ -73,6 +85,7 @@ class XUETileMap[T:XUETileAnim]:
             # 0は非表示
             if tile_no > 0:
                 self.tile_anims[tile_no] = self.convert(XUETileAnim(tileset, tile_no, speed))
+                self.tile_anims[tile_no].converted()
 
     # コレをオーバーライドして実際に使うTileAnimに変換する
     def convert(self, anim:XUETileAnim) -> T:
