@@ -91,14 +91,13 @@ class XUETileMap[T:XUETileAnim]:
     def convert(self, anim:XUETileAnim) -> T:
         return cast(T, anim)
 
-    # アニメーション更新
-    def update(self):
-        # 全部更新
+    # 全体を描画
+    def draw(self, screen_x:int, screen_y:int, *, rotate:float|None=None, scale:float|None=None):
+        # アニメ更新
         for anim in self.tile_anims.values():
             anim.update()
 
-    # 全体を描画
-    def draw(self, screen_x:int, screen_y:int, *, rotate:float|None=None, scale:float|None=None):
+        # 描画
         for y,row in enumerate(self.tilemap.rows):
             for x,tile_no in enumerate(row):
                 # 0は非表示

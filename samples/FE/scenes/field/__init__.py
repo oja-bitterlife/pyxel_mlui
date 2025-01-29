@@ -32,7 +32,7 @@ class Field(XUEFadeScene):
         # 画像読み込み
         # pyxel.images[1].load(0, 0, "assets/images/field_tile.png" )
 
-        self.tilemap = TileMap(1)
+        self.tilemap = TileMap(stage_no=1)
 
     def closed(self):
         self.xmlui.close()  # 読みこんだUIの削除
@@ -40,5 +40,4 @@ class Field(XUEFadeScene):
 
     def draw(self):
         self.units.draw(0, 0)
-        self.tilemap.update()
         self.tilemap.draw(0, 0)
