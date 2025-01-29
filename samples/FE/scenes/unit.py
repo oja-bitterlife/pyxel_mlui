@@ -34,4 +34,4 @@ class Units:
 
     def draw(self, screen_x:int, screen_y:int):
         for unit in self.units.values():
-            unit.draw(screen_x, screen_y)
+            unit.draw(-screen_x, -screen_y)

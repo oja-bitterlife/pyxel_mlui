@@ -103,6 +103,6 @@ class XUETileMap[T:XUETileAnim]:
                 # 0は非表示
                 if tile_no > 0:
                     anim = self.tile_anims[tile_no]
-                    draw_x = screen_x + x * self.tileset.size.w
-                    draw_y = screen_y + y * self.tileset.size.h
+                    draw_x = x * self.tileset.size.w - screen_x
+                    draw_y = y * self.tileset.size.h - screen_y
                     anim.draw(draw_x, draw_y, rotate=rotate, scale=scale)
