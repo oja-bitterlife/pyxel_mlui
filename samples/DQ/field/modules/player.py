@@ -1,11 +1,8 @@
 from typing import Callable
 
-from xmlui.core import XMLUI,XUEvent,XUEventItem
-from xmlui.ext.tilemap import XUETilemap
+from xmlui.core import XMLUI,XUEvent,XURect
+from xmlui.ext.tilemap import XUETileAnim, XUETileSet
 from xmlui.ext.scene import XUEActItem
-
-from msg_dq import MsgDQ
-from db import user_data
 
 class PlayerMoveAct(XUEActItem):
     def __init__(self, player:"Player", move_x:int, move_y:int):
@@ -44,8 +41,7 @@ class Player:
         self.move_y = 0
 
         # 表示イメージ設定
-        self.anim_pat = [32, 33]
-        self.tile = XUETilemap(1)
+        self.tile = XUETileAnim(XUETileSet(1, [XURect(0, 32, 16, 16), XURect(16, 32, 16,16)]), [0, 1])
 
     def move(self, hitcheck_funcs:list[Callable[[int,int],bool]]):
         event = self.xmlui.event
@@ -73,4 +69,4 @@ class Player:
 
     def draw(self):
         self.tile.update()
-        self.tile.draw(127, 127-8, self.anim_pat)
+        self.tile.draw(127, 127-8)

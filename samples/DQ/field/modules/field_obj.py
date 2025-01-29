@@ -1,16 +1,19 @@
-from xmlui.ext.tilemap import XUETilemap
+from xmlui.core import XURect
+from xmlui.ext.tilemap import XUETileSet
 from db import fieldobj_data
 
 class FieldObj:
     def __init__(self):
-        self.tile_anim = XUETilemap(1)
+        rects = []
+        for field_obj in fieldobj_data.data:
+            pat = field_obj["anim_pat"]
+            rects.append(XURect(pat%16*16, pat//16*16, 16, 16))
+        self.tile_obj = XUETileSet(1, rects)
 
     def draw(self, scroll_x, scroll_y):
-        self.tile_anim.update()
-
-        for field_obj in fieldobj_data.data:
+        for i,field_obj in enumerate(fieldobj_data.data):
             if field_obj["closed"]:
-                self.tile_anim.draw(field_obj["block_x"]*16+scroll_x, field_obj["block_y"]*16+scroll_y, field_obj["anim_pat"])
+                self.tile_obj.draw(i, field_obj["block_x"]*16+scroll_x, field_obj["block_y"]*16+scroll_y)
 
     # ぶつかりチェック
     def hit_check(self, block_x:int, block_y:int):

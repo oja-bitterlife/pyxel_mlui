@@ -1,16 +1,18 @@
 from enum import StrEnum
 
-from xmlui.ext.tilemap import XUETilemap
+from xmlui.core import XURect
+from xmlui.ext.tilemap import XUETileAnim, XUETileSet
 from db import npc_data
 
 class NPC:
     def __init__(self, data:dict):
         self.data = data
-        self.tile = XUETilemap(1)
+        rects = [XURect(pat%16*16, pat//16*16, 16, 16) for pat in self.data["anim_pat"]]
+        self.tile = XUETileAnim(XUETileSet(1, rects), list(range(len(rects))))
 
     def draw(self, offset_x:int, offset_y:int):
         self.tile.update()
-        self.tile.draw(self.data["block_x"]*16 + offset_x, self.data["block_y"]*16 + offset_y, self.data["anim_pat"])
+        self.tile.draw(self.data["block_x"]*16 + offset_x, self.data["block_y"]*16 + offset_y)
 
 class NPCManager:
     class TALK_EVENT(StrEnum):

@@ -1,7 +1,7 @@
 import dataclasses
 
-from xmlui.core import XUElem
-from xmlui.ext.tilemap import XUETilemap
+from xmlui.core import XURect
+from xmlui.ext.tilemap import XUETileSet
 
 @dataclasses.dataclass
 class BGType:
@@ -44,17 +44,20 @@ class BG:
     ]
 
     def __init__(self) -> None:
-        self.tile_anim = XUETilemap(1)
+        rects = []
+        for data in bgtype_data:
+            if isinstance(data.anim_pat, int):
+                rects.append(XURect(data.anim_pat%16*16, data.anim_pat//16*16, 16, 16))
+            else:
+                rects.append(XURect(0, 0, 0, 0))
+    
+        self.tile_bg = XUETileSet(1, rects)
 
     def draw(self, scroll_x, scroll_y):
-        # アニメ付き背景であれば更新
-        self.tile_anim.update()
-
         # 地形描画
         for y,line in enumerate(self.blocks):
             for x,type_ in enumerate(line):
-                data = bgtype_data[type_]
-                self.tile_anim.draw(x*16+scroll_x, y*16+scroll_y, data.anim_pat)
+                self.tile_bg.draw(type_, x*16+scroll_x, y*16+scroll_y)
 
     # ぶつかりチェック
     def hit_check(self, block_x:int, block_y:int) -> bool:

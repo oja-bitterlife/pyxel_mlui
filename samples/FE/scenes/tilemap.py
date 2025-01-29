@@ -2,7 +2,7 @@ from xmlui.ext.tilemap import XUETileAnim,XUETileMap,XUETileSet
 
 class TileAnim(XUETileAnim):
     def action(self):
-        match self.tile_no:
+        match self.tile_no_list:
             case 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9:
                 offset = [0, 48, 64]
                 self.anim_no = self.tile_no + offset[self.action_count % len(offset)]
