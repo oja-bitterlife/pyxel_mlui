@@ -4,8 +4,8 @@ print("start load database")
 
 # DBの読み込み
 db = XUEMemoryDB()
-db.attach("assets/data/game.db")
-db.attach("assets/data/user.db")
+db.attach(XUEMemoryDB("assets/data/game.db"))
+db.attach(XUEMemoryDB("assets/data/user.db"))
 
 # 読み込んだテーブルの一覧
 print("loaded tables:")

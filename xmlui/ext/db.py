@@ -7,8 +7,8 @@ import sqlite3,csv
 class XUEMemoryDB(sqlite3.Connection):
     # DB作成
     # -----------------------------------------------------
-    # 空のメモリDB作成
-    def __init__(self):
+    def __init__(self, db_path:str|None=None):
+        # 空のメモリDB作成
         super().__init__(":memory:", isolation_level=None)
         self.row_factory = sqlite3.Row 
 
@@ -16,29 +16,18 @@ class XUEMemoryDB(sqlite3.Connection):
         self.execute("CREATE TABLE _dummy (id INTEGER PRIMARY KEY AUTOINCREMENT);")
         self.execute("DROP TABLE _dummy")
 
-    # メモリDBを作成してDBをデータを読み込んでおく
-    @classmethod
-    def load(cls, db_path) -> Self:
-        self = cls()
-        with open(db_path, "rb") as f:
-            self.deserialize(f.read())
-            f.close()
-        return self
+        # DB名が指定してあれば読み込みもする
+        if db_path is not None:
+            with open(db_path, "rb") as f:
+                self.deserialize(f.read())
+                f.close()
 
-    # DB読み込み
-    # -----------------------------------------------------
     # 別DBを取り込む
-    def attach(self, db_path):
-        # 一旦テンポラリDBに展開
-        tmp_conn = sqlite3.connect(":memory:")
-        with open(db_path, "rb") as f:
-            tmp_conn.deserialize(f.read())
-            f.close()
-
+    def attach(self, tmp_db:"XUEMemoryDB"):
         # dumpを使って取り込み
-        for sql in tmp_conn.iterdump():
+        for sql in tmp_db.iterdump():
             self.execute(sql)
-        tmp_conn.close()
+        tmp_db.close()
 
     # CSVを読み込んでメモリDB上にINSERT
     def import_csv(self, table_name:str, csv_path:str):
