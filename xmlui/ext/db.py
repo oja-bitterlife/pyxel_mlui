@@ -62,9 +62,9 @@ class XUEMemoryDB(sqlite3.Connection):
     # トランザクション
     def begin(self, cursor:sqlite3.Cursor|None=None) -> sqlite3.Cursor:
         if cursor is None:
-            return self.execute("BEGIN TRANSACTION")
+            return self.execute("BEGIN")
         else:
-            return cursor.execute("BEGIN TRANSACTION")
+            return cursor.execute("BEGIN")
 
 
 # CSVを扱う
