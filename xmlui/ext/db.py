@@ -23,7 +23,10 @@ class XUEMemoryDB(sqlite3.Connection):
                 f.close()
 
     # 別DBを取り込む
-    def attach(self, tmp_db:"XUEMemoryDB"):
+    def attach(self, db_path:str):
+        # 一旦テンポラリDBに展開
+        tmp_db = XUEMemoryDB(db_path)
+
         # dumpを使って取り込み
         for sql in tmp_db.iterdump():
             self.execute(sql)
