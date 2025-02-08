@@ -9,7 +9,7 @@ class XUEMemoryDB(sqlite3.Connection):
     # -----------------------------------------------------
     # 空のメモリDB作成
     def __init__(self):
-        super().__init__(":memory:")
+        super().__init__(":memory:", isolation_level=None)
         self.row_factory = sqlite3.Row 
 
         # sqlite_sequenceテーブル(AUTO_INCREMENT用)を作っておく
