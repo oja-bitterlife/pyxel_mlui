@@ -1,0 +1,37 @@
+# タイトル画面用
+[xmlui.game_title]
+id = "game_title"
+
+    [xmlui.game_title.game_start]
+    abs_x = 100
+    abs_y = 128
+    item_h = 16
+    use_event = "listener"
+
+        [[xmlui.game_title.game_start.menu_item]]
+        action = "start"
+        text = "START"
+
+        [[xmlui.game_title.game_start.menu_item]]
+        action = "continue"
+        value = "工事中"
+        text = "CONTINUE"
+
+    [xmlui.game_title.game_speed]
+    abs_x = 48
+    abs_y = 200
+    item_w = 64
+    use_event = "listener"
+
+        [[xmlui.game_title.game_speed.menu_item]]
+        action = "slow"
+        text = "SLOW"
+
+        [[xmlui.game_title.game_speed.menu_item]]
+        action = "normal"
+        selected = true
+        text = "NORMAL"
+
+        [[xmlui.game_title.game_speed.menu_item]]
+        action = "fast"
+        text = "FAST"
