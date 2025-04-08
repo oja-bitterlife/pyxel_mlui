@@ -1,4 +1,4 @@
-# TOML(?)でUIを構築しようライブラリ for Pyxel
+# xML(?)でUIを構築しようライブラリ for Pyxel
 
 SQLiteをガッツリ使いたくなったのでXMLに保存してた状態をSQLiteに保存するよう方針を変更します。
 
