@@ -1,22 +1,9 @@
 # TOMLとSQLiteを使うよ
-import toml,sqlite3,sqlalchemy
-
-# SQLAlchemy関連のインポート
-from sqlalchemy import (
-    create_engine,
-    Column,
-    Integer,
-    String,
-    Boolean,
-    MetaData,
-    Table,
-)
-from sqlalchemy.orm import sessionmaker, declarative_base, Query
-
+import toml,sqlite3
 
 # 型を使うよ
 from typing import Callable,Any,Self
-from enum import StrEnum
+from enum import StrEnum,Enum,auto
 
 # 日本語対応
 import unicodedata
@@ -29,149 +16,99 @@ from copy import deepcopy
 import logging
 logging.basicConfig()
 
+# SQLのテーブル定義
+class XUDBColumn:
+    class ValueType(Enum):
+        Integer = auto()
+        Real = auto()
+        String = auto()
+        Boolean = auto()
 
-# 描画領域計算用
-# #############################################################################
-class XURect:
-    class Align(StrEnum):
-        CENTER = "center"
-        LEFT = "left"
-        RIGHT = "right"
-        TOP = "top"
-        BOTTOM = "bottom"
+    def __init__(self, value_type:ValueType, *, default:Any=None, primary_key:bool=False, unique:bool=False, autoincrement:bool=False, nullable:bool=True):
+        self.value_type = value_type
+        self.default = default
+        self.primary_key = primary_key
+        self.unique = unique
+        self.autoincrement = autoincrement
+        self.nullable = nullable
 
-        @classmethod
-        def from_str(cls, type_:str) -> Self:
-            for v in cls.__members__.values():
-                if v == type_.lower():
-                    return v
-            raise RuntimeError(f"Invalid Align type: {type_}")
-
-    def __init__(self, x:int, y:int, w:int, h:int):
-        self.x = x
-        self.y = y
-        self.w = max(0, w)
-        self.h = max(0, h)
-
-    def copy(self) -> "XURect":
-        return XURect(self.x, self.y, self.w, self.h)
-
-    # 変換
-    def intersect(self, other:"XURect") -> "XURect":
-        right = min(self.x+self.w, other.x+other.w)
-        left = max(self.x, other.x)
-        bottom = min(self.y+self.h, other.y+other.h)
-        top = max(self.y, other.y)
-        return XURect(left, top, right-left, bottom-top)
-
-    def inflate(self, w, h) -> "XURect":
-        return XURect(self.x-w, self.y-h, self.w+w*2, self.h+h*2)
-
-    # offset化
-    def to_offset(self) -> "XURect":
-        return XURect(0, 0, self.w, self.h)
-
-    # 内包チェック
-    def contains_x(self, x:int) -> bool:
-        return self.x <= x < self.x+self.w
-
-    def contains_y(self, y:int) -> bool:
-        return self.y <= y < self.y+self.h
-
-    def contains(self, x, y) -> bool:
-        return self.x <= x < self.x+self.w and self.y <= y < self.y+self.h
-
-    # 空チェック
-    @property
-    def is_empty(self) -> int:
-        return self.w <= 0 or self.h <= 0
-
-    # 座標取得
-    @property
-    def center_x(self) -> int:
-        return self.x + self.w//2
-
-    @property
-    def center_y(self) -> int:
-        return self.y + self.h//2
-
-    @property
-    def right(self) -> int:
-        return self.x + self.w
-
-    @property
-    def bottom(self) -> int:
-        return self.y + self.h
-
-    # 座標をずらす量を取得(w,h = 内容物のw,h)。配置するためにどれだけ座標をずらすべきか取得する
-    @classmethod
-    def align_offset(cls, area_w:int, area_h:int, w:int=0, h:int=0, align:Align=Align.CENTER, valign:Align=Align.CENTER) -> tuple[int, int]:
-        area = XURect(0, 0, area_w, area_h)
-        match align:
-            case cls.Align.LEFT:
-                offset_x = 0
-            case cls.Align.CENTER:
-                offset_x = (area.w-w)//2
-            case cls.Align.RIGHT:
-                offset_x = area.w - w
+    def to_sql(self):
+        match self.value_type:
+            case XUDBColumn.ValueType.Integer | XUDBColumn.ValueType.Boolean:
+                sql = "INTEGER"
+            case XUDBColumn.ValueType.String:
+                sql = "TEXT"
+            case XUDBColumn.ValueType.Real:
+                sql = "REAL"
             case _:
-                raise ValueError(f"align:{align} is not supported.")
+                raise Exception("unknown type")
 
-        match valign:
-            case cls.Align.TOP:
-                offset_y = 0
-            case cls.Align.CENTER:
-                offset_y = (area.h-h)//2
-            case cls.Align.BOTTOM:
-                offset_y = area.h - h
-            case _:
-                raise ValueError(f"align:{valign} is not supported.")
-        return offset_x,offset_y
+        if self.default is not None:
+            sql += f" DEFAULT {self.default}"
 
-    # 配置座標取得
-    def aligned_pos(self, w:int, h:int, align:Align=Align.CENTER, valign:Align=Align.CENTER) -> tuple[int, int]:
-        offset_x, offset_y = self.align_offset(self.w, self.h, w, h, align, valign)
-        return self.x + offset_x, self.y + offset_y
+        if self.primary_key:
+            sql += " PRIMARY KEY"
+        if self.unique:
+            sql += " UNIQUE"
+        if self.autoincrement:
+            sql += " AUTOINCREMENT"
+        if not self.nullable or self.default is not None:
+            sql += " NOT NULL"
+        return sql
 
-    def __repr__(self) -> str:
-        return f"RECT({self.x}, {self.y}, {self.w}, {self.h})"
-
-
-# SQLAlchemyのBase
-TOMLUI_Base = declarative_base()
-
-# SQLAlchemyのモデル定義
-class XUStateCore(TOMLUI_Base):
+class XUDBStateCore:
     __tablename__ = "STATE_CORE"
+    core = {
+        "id": XUDBColumn(XUDBColumn.ValueType.Integer, primary_key=True, autoincrement=True),  # UIパーツごとに一意のID
+        "value": XUDBColumn(XUDBColumn.ValueType.String),  # 汎用値取得
+        "selected": XUDBColumn(XUDBColumn.ValueType.Integer),  # 選択アイテムの選択状態
+        "x": XUDBColumn(XUDBColumn.ValueType.Integer, default=0),  # 親からの相対座標x
+        "y": XUDBColumn(XUDBColumn.ValueType.Integer, default=0),  # 親からの相対座標y
+        "abs_x": XUDBColumn(XUDBColumn.ValueType.Integer),  # 絶対座標x
+        "abs_y": XUDBColumn(XUDBColumn.ValueType.Integer),  # 絶対座標y
+        "w": XUDBColumn(XUDBColumn.ValueType.Integer, default=256),  # elementの幅
+        "h": XUDBColumn(XUDBColumn.ValueType.Integer, default=256),  # elementの高さ
+        "update_count": XUDBColumn(XUDBColumn.ValueType.Integer, default=0),  # updateが行われた回数
+        "use_event": XUDBColumn(XUDBColumn.ValueType.String),  # eventの検知方法, listener or absorber or none
+        "enable": XUDBColumn(XUDBColumn.ValueType.Boolean, default=True),  # イベント有効フラグ(表示は使う側でどうするか決める)
+        "removed": XUDBColumn(XUDBColumn.ValueType.Boolean, default=False),  # 内部管理用削除済みフラグ
+    }
 
-    id = Column(Integer, primary_key=True, autoincrement=True)  # UIパーツごとに一意のID
-    value = Column(String)  # 汎用値取得
-    selected = Column(Integer)  # 選択アイテムの選択状態
-    x = Column(Integer)  # 親からの相対座標x
-    y = Column(Integer)  # 親からの相対座標y
-    abs_x = Column(Integer)  # 絶対座標x
-    abs_y = Column(Integer)  # 絶対座標y
-    w = Column(Integer)  # elementの幅
-    h = Column(Integer)  # elementの高さ
-    update_count = Column(Integer)  # updateが行われた回数
-    use_event = Column(String)  # eventの検知方法, listener or absorber or none
-    enable = Column(Boolean)  # イベント有効フラグ(表示は使う側でどうするか決める)
-    removed = Column(Boolean)  # 内部管理用削除済みフラグ
-
+    def create_state_table(self, db:sqlite3.Connection):
+        # 状態管理コアテーブル
+        table_sql = ",\n".join([f"{column_key} {column.to_sql()}" for column_key,column in self.core.items()])
+        db.execute(f"CREATE TABLE IF NOT EXISTS STATE_CORE ({table_sql})")
 
 # TOMLのElement管理
 class TOMLUI:
     def __init__(self):
-        # SQLAlchemyのエンジン作成
-        self.engine = create_engine("sqlite:///:memory:")
+        # UIの状態テーブルの作成
+        self.db:sqlite3.Connection = sqlite3.connect(":memory:")
+        self.db.row_factory = sqlite3.Row
 
-        # テーブル作成
-        TOMLUI_Base.metadata.create_all(self.engine)
+        self.state_core = XUDBStateCore()
+        self.state_core.create_state_table(self.db)
 
-        # セッション作成
-        Session = sessionmaker(bind=self.engine)
-        self.session = Session()
+    # TOMLを読み込んでメモリDB上にINSERT
+    def import_toml(self, path:str):
+        def __rec_import_toml(toml_dict:dict):
+            # 要素ごとにinsertしていく
+            for key,value in toml_dict.items():
+                if isinstance(value,dict):
+                    __rec_import_toml(value)
+                else:
+                    if key in self.state_core.core.keys():
+                        self.db.execute(f"INSERT INTO STATE_CORE ({key}) VALUES (?)", (value,))
 
-    # # テーブルアクセス
-    # def query(self, cls:type) -> Query[Any]:
-    #     return self.session.query(cls)
+        __rec_import_toml(toml.load(path))
+
+tomlui = TOMLUI()
+tomlui.import_toml("samples/DQ/assets/ui/title.toml")
+
+from tomlui.ext import orm
+
+orm = orm.XUEDB()
+#session = orm.import_toml("samples/DQ/assets/ui/title.toml")
+orm.import_sqlite3(tomlui.db)
+
+
