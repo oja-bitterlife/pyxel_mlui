@@ -59,7 +59,10 @@ class XUDBColumn:
 class XUDBStateCore:
     __tablename__ = "STATE_CORE"
     core = {
-        "id": XUDBColumn(XUDBColumn.ValueType.Integer, primary_key=True, autoincrement=True),  # UIパーツごとに一意のID
+        "id": XUDBColumn(XUDBColumn.ValueType.Integer, primary_key=True),  # UIパーツごとに一意のID
+        "parent": XUDBColumn(XUDBColumn.ValueType.Integer),  # 親id
+        "tag": XUDBColumn(XUDBColumn.ValueType.String),  # タグ名
+        "text": XUDBColumn(XUDBColumn.ValueType.String),  # ラベル
         "value": XUDBColumn(XUDBColumn.ValueType.String),  # 汎用値取得
         "selected": XUDBColumn(XUDBColumn.ValueType.Integer),  # 選択アイテムの選択状態
         "x": XUDBColumn(XUDBColumn.ValueType.Integer, default=0),  # 親からの相対座標x
@@ -79,8 +82,7 @@ class XUDBStateCore:
         table_sql = ",\n".join([f"{column_key} {column.to_sql()}" for column_key,column in self.core.items()])
         db.execute(f"CREATE TABLE IF NOT EXISTS STATE_CORE ({table_sql})")
 
-# TOMLのElement管理
-class TOMLUI:
+class TOMLUI():
     def __init__(self):
         # UIの状態テーブルの作成
         self.db:sqlite3.Connection = sqlite3.connect(":memory:")
@@ -89,26 +91,47 @@ class TOMLUI:
         self.state_core = XUDBStateCore()
         self.state_core.create_state_table(self.db)
 
+        # UIごとの連番ID
+        self.id_count = 0
+
     # TOMLを読み込んでメモリDB上にINSERT
     def import_toml(self, path:str):
-        def __rec_import_toml(toml_dict:dict):
-            # 要素ごとにinsertしていく
-            for key,value in toml_dict.items():
-                if isinstance(value,dict):
-                    __rec_import_toml(value)
-                else:
-                    if key in self.state_core.core.keys():
-                        self.db.execute(f"INSERT INTO STATE_CORE ({key}) VALUES (?)", (value,))
+        def __rec_import_toml(table:Any, toml_dict:dict, parent:int|None=None):
+            # データ初期化
+            self.id_count += 1  # IDをインクリメントしていく
+            data = {"id": self.id_count, "parent": parent, "tag": table}
 
-        __rec_import_toml(toml.load(path))
+            # まずはvalue
+            for key,value in toml_dict.items():
+                if not isinstance(value, dict) and not (isinstance(value, list) and isinstance(value[0], dict)):
+                    if key in self.state_core.core.keys():
+                        data[key] = value
+
+            # valueをDBに
+            sql = f"INSERT INTO STATE_CORE ({",".join(data.keys())}) VALUES ({",".join(["?"] * len(data))})"
+            self.db.execute(sql, tuple(data.values()))
+
+            # 次にchildren
+            parent = self.id_count  # 親の更新
+            for key,value in toml_dict.items():
+                if isinstance(value, dict):
+                    __rec_import_toml(key, value, parent)
+                if (isinstance(value, list) and isinstance(value[0], dict)):
+                    for v in value:
+                        __rec_import_toml(key, v, parent)
+
+        __rec_import_toml("root", toml.load(path))
 
 tomlui = TOMLUI()
 tomlui.import_toml("samples/DQ/assets/ui/title.toml")
 
 from tomlui.ext import orm
-
-orm = orm.XUEDB()
-#session = orm.import_toml("samples/DQ/assets/ui/title.toml")
-orm.import_sqlite3(tomlui.db)
+from tomlui.ext.orm import XUEStateCore,XUEORM
 
 
+orm = orm.XUEORM()
+#session = XUEStateCore.create_session_from_toml(orm, "samples/DQ/assets/ui/title.toml")
+session = XUEStateCore.create_session_from_sqlite3(orm, tomlui.db)
+
+for result in orm.execute(session, "SELECT * FROM STATE_CORE"):
+    print(result)
