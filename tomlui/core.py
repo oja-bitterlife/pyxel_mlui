@@ -83,6 +83,9 @@ class XUDBStateCore:
         db.execute(f"CREATE TABLE IF NOT EXISTS STATE_CORE ({table_sql})")
 
 class TOMLUI():
+    # UIごとの連番ID
+    id_count = 0
+
     def __init__(self):
         # UIの状態テーブルの作成
         self.db:sqlite3.Connection = sqlite3.connect(":memory:")
@@ -90,9 +93,6 @@ class TOMLUI():
 
         self.state_core = XUDBStateCore()
         self.state_core.create_state_table(self.db)
-
-        # UIごとの連番ID
-        self.id_count = 0
 
     # TOMLを読み込んでメモリDB上にINSERT
     def import_toml(self, path:str):
@@ -121,17 +121,3 @@ class TOMLUI():
                         __rec_import_toml(key, v, parent)
 
         __rec_import_toml("root", toml.load(path))
-
-tomlui = TOMLUI()
-tomlui.import_toml("samples/DQ/assets/ui/title.toml")
-
-from tomlui.ext import orm
-from tomlui.ext.orm import XUEStateCore,XUEORM
-
-
-orm = orm.XUEORM()
-#session = XUEStateCore.create_session_from_toml(orm, "samples/DQ/assets/ui/title.toml")
-session = XUEStateCore.create_session_from_sqlite3(orm, tomlui.db)
-
-for result in orm.execute(session, "SELECT * FROM STATE_CORE"):
-    print(result)

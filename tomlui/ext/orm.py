@@ -1,5 +1,6 @@
 import sqlalchemy,toml,sqlite3
 from sqlalchemy.orm.session import Session, SessionTransaction
+from typing import Callable,Any,Self
 
 from tomlui import core
 
@@ -30,48 +31,28 @@ class XUEORM:
 
 class XUEStateCore(Base):
     __tablename__ = core.XUDBStateCore.__tablename__
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True)
     parent = Column(Integer)
     tag = Column(String)
     text = Column(String)
     value = Column(String)
     selected = Column(Integer)
-    x = Column(Integer)
-    y = Column(Integer)
+    x = Column(Integer, default=0)
+    y = Column(Integer, default=0)
     abs_x = Column(Integer)
     abs_y = Column(Integer)
-    w = Column(Integer)
-    h = Column(Integer)
-    update_count = Column(Integer)
+    w = Column(Integer, default=256)
+    h = Column(Integer, default=256)
+    update_count = Column(Integer, default=0)
     use_event = Column(String)
-    enable = Column(Boolean)
-    removed = Column(Boolean)
+    enable = Column(Boolean, default=True)
+    removed = Column(Boolean, default=False)
 
     @classmethod
     def create_session_from_toml(cls, orm:XUEORM, path:str) -> Session:
-        Base.metadata.create_all(orm.engine, tables=[cls.__table__])
-
-        def __import_toml(session:Session, toml_dict:dict):
-            obj = cls()
-            for key,value in toml_dict.items():
-                if isinstance(value, dict):
-                    __import_toml(session, value)
-                if isinstance(value, list):
-                    for v in value:
-                        if isinstance(v, dict):
-                            __import_toml(session, v)
-                        else:
-                            obj.__setattr__(key, value)
-                else:
-                    obj.__setattr__(key, value)
-            print(obj.__dict__)
-            session.add(obj)
-
-        session = orm.mk_session()
-        __import_toml(session, toml.load(path))
-        session.commit()
-
-        return session
+        tmp = core.TOMLUI()
+        tmp.import_toml("samples/DQ/assets/ui/title.toml")
+        return XUEStateCore.create_session_from_sqlite3(orm, tmp.db)
 
     @classmethod
     def create_session_from_sqlite3(cls, orm:XUEORM, db:sqlite3.Connection) -> Session:
