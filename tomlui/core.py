@@ -1,8 +1,8 @@
 # TOMLとSQLiteを使うよ
-import toml,sqlite3
+import toml,sqlite3,sqlalchemy
 
 # 型を使うよ
-from typing import Callable,Any,Self
+from typing import Callable,Any,Self,cast
 from enum import StrEnum,Enum,auto
 
 # 日本語対応
@@ -16,103 +16,94 @@ from copy import deepcopy
 import logging
 logging.basicConfig()
 
-# SQLのテーブル定義
-class XUDBColumn:
-    class ValueType(Enum):
-        Integer = auto()
-        Real = auto()
-        String = auto()
-        Boolean = auto()
+# SQLAlchemy関連のインポート
+from sqlalchemy import (
+    create_engine,
+    Column,
+    Integer,
+    REAL,
+    String,
+    Boolean,
+    MetaData,
+    Table,
+)
+from sqlalchemy.orm import sessionmaker, declarative_base
 
-    def __init__(self, value_type:ValueType, *, default:Any=None, primary_key:bool=False, unique:bool=False, autoincrement:bool=False, nullable:bool=True):
-        self.value_type = value_type
-        self.default = default
-        self.primary_key = primary_key
-        self.unique = unique
-        self.autoincrement = autoincrement
-        self.nullable = nullable
+ORMBase = declarative_base()
 
-    def to_sql(self):
-        match self.value_type:
-            case XUDBColumn.ValueType.Integer | XUDBColumn.ValueType.Boolean:
-                sql = "INTEGER"
-            case XUDBColumn.ValueType.String:
-                sql = "TEXT"
-            case XUDBColumn.ValueType.Real:
-                sql = "REAL"
-            case _:
-                raise Exception("unknown type")
+class XUStateBase:
+    id = Column(Integer, primary_key=True, autoincrement=True)  # UIパーツごとに一意のID
+    parent = Column(Integer)  # 親id
+    tag = Column(String, nullable=False)  # タグ名
+    text = Column(String)  # ラベル
+    value = Column(String)  # 汎用値取得
+    selected = Column(Integer)  # 選択アイテムの選択状態
+    x = Column(Integer, default=0)  # 親からの相対座標x
+    y = Column(Integer, default=0)  # 親からの相対座標y
+    abs_x = Column(Integer)  # 絶対座標x
+    abs_y = Column(Integer)  # 絶対座標y
+    w = Column(Integer, default=256)  # elementの幅
+    h = Column(Integer, default=256)  # elementの高さ
+    update_count = Column(Integer, default=0)  # updateが行われた回数
+    use_event = Column(String)  # eventの検知方法, listener or absorber or none
+    enable = Column(Boolean, default=True)  # イベント有効フラグ(表示は使う側でどうするか決める)
+    removed = Column(Boolean, default=False)  # 内部管理用削除済みフラグ
 
-        if self.default is not None:
-            sql += f" DEFAULT {self.default}"
 
-        if self.primary_key:
-            sql += " PRIMARY KEY"
-        if self.unique:
-            sql += " UNIQUE"
-        if self.autoincrement:
-            sql += " AUTOINCREMENT"
-        if not self.nullable or self.default is not None:
-            sql += " NOT NULL"
-        return sql
-
-class XUDBStateCore:
+class XUStateCore(XUStateBase, ORMBase):
     __tablename__ = "STATE_CORE"
-    core = {
-        "id": XUDBColumn(XUDBColumn.ValueType.Integer, primary_key=True),  # UIパーツごとに一意のID
-        "parent": XUDBColumn(XUDBColumn.ValueType.Integer),  # 親id
-        "tag": XUDBColumn(XUDBColumn.ValueType.String),  # タグ名
-        "text": XUDBColumn(XUDBColumn.ValueType.String),  # ラベル
-        "value": XUDBColumn(XUDBColumn.ValueType.String),  # 汎用値取得
-        "selected": XUDBColumn(XUDBColumn.ValueType.Integer),  # 選択アイテムの選択状態
-        "x": XUDBColumn(XUDBColumn.ValueType.Integer, default=0),  # 親からの相対座標x
-        "y": XUDBColumn(XUDBColumn.ValueType.Integer, default=0),  # 親からの相対座標y
-        "abs_x": XUDBColumn(XUDBColumn.ValueType.Integer),  # 絶対座標x
-        "abs_y": XUDBColumn(XUDBColumn.ValueType.Integer),  # 絶対座標y
-        "w": XUDBColumn(XUDBColumn.ValueType.Integer, default=256),  # elementの幅
-        "h": XUDBColumn(XUDBColumn.ValueType.Integer, default=256),  # elementの高さ
-        "update_count": XUDBColumn(XUDBColumn.ValueType.Integer, default=0),  # updateが行われた回数
-        "use_event": XUDBColumn(XUDBColumn.ValueType.String),  # eventの検知方法, listener or absorber or none
-        "enable": XUDBColumn(XUDBColumn.ValueType.Boolean, default=True),  # イベント有効フラグ(表示は使う側でどうするか決める)
-        "removed": XUDBColumn(XUDBColumn.ValueType.Boolean, default=False),  # 内部管理用削除済みフラグ
-    }
 
-    def create_state_table(self, db:sqlite3.Connection):
-        # 状態管理コアテーブル
-        table_sql = ",\n".join([f"{column_key} {column.to_sql()}" for column_key,column in self.core.items()])
-        db.execute(f"CREATE TABLE IF NOT EXISTS STATE_CORE ({table_sql})")
+class XUStateSelect(XUStateBase, ORMBase):
+    __tablename__ = "STATE_SELECT"
+
+    item_w = Column(Integer, default=0)  # 選択item配置間隔x
+    item_h = Column(Integer, default=0)  # 選択item配置間隔y
+
+class XUStateSelectItem(XUStateBase, ORMBase):
+    __tablename__ = "STATE_SELECT_ITEM"
+    action = Column(String)  # ラベル
 
 class TOMLUI():
-    # UIごとの連番ID
-    id_count = 0
-
     def __init__(self):
-        # UIの状態テーブルの作成
-        self.db:sqlite3.Connection = sqlite3.connect(":memory:")
-        self.db.row_factory = sqlite3.Row
+        # sqlalchemyの初期化
+        self.engine = create_engine("sqlite:///:memory:")
+        self.inspector = sqlalchemy.inspect(self.engine)  # デバッグ用
+        self.mk_session = sessionmaker(bind=self.engine)
 
-        self.state_core = XUDBStateCore()
-        self.state_core.create_state_table(self.db)
+        # テーブル作成
+        ORMBase.metadata.create_all(self.engine)
 
-    # TOMLを読み込んでメモリDB上にINSERT
-    def import_toml(self, path:str):
+        # セッション開始
+        self.session = self.mk_session()
+
+    # TOMLを読み込んで辞書ツリーで返すユーティリティ
+    def load_toml(self, path:str):
         def __rec_import_toml(table:Any, toml_dict:dict, parent:int|None=None):
-            # データ初期化
-            self.id_count += 1  # IDをインクリメントしていく
-            data = {"id": self.id_count, "parent": parent, "tag": table}
 
-            # まずはvalue
+            # 自分のデータを処理する
+            data = {"tag":table, "parent":parent}
             for key,value in toml_dict.items():
+                # 無視するキー
+                if key == "type":
+                    continue
+
+                # 子は後回しでまずは自分だけ
                 if not isinstance(value, dict) and not (isinstance(value, list) and isinstance(value[0], dict)):
-                    if key in self.state_core.core.keys():
-                        data[key] = value
+                    data[key] = value
 
-            # valueをDBに
-            sql = f"INSERT INTO STATE_CORE ({",".join(data.keys())}) VALUES ({",".join(["?"] * len(data))})"
-            self.db.execute(sql, tuple(data.values()))
+            match toml_dict.get("type", None):
+                case "select":
+                    item = XUStateSelect(**data)
+                case "select_item":
+                    item = XUStateSelectItem(**data)
+                case _:
+                    item = XUStateCore(**data)
 
-            # 次にchildren
-            parent = self.id_count  # 親の更新
+            self.session.add(item)
+            self.session.commit()
+            parent = cast(int, item.id)
+
+            # 子を処理する
             for key,value in toml_dict.items():
                 if isinstance(value, dict):
                     __rec_import_toml(key, value, parent)
@@ -120,4 +111,4 @@ class TOMLUI():
                     for v in value:
                         __rec_import_toml(key, v, parent)
 
-        __rec_import_toml("root", toml.load(path))
+        return  __rec_import_toml("root", toml.load(path))

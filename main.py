@@ -1,17 +1,14 @@
 #from samples.DQ import bootstrap
 #from samples.FF import bootstrap
 #from samples.FE import bootstrap
-from tomlui import core
 
+from tomlui.core import TOMLUI,XUStateCore,XUStateSelect,XUStateSelectItem
 
-from tomlui.ext import orm
-from tomlui.ext.orm import XUEStateCore,XUEORM
+toml_ui = TOMLUI()
+print(toml_ui.inspector.get_table_names())
 
-orm = orm.XUEORM()
-session = XUEStateCore.create_session_from_toml(orm, "samples/DQ/assets/ui/title.toml")
+toml_ui.load_toml("samples/DQ/assets/ui/title.toml")
+print(toml_ui)
 
-# for result in orm.execute(session, "SELECT * FROM STATE_CORE"):
-    # print(result)
-
-for result in session.query(XUEStateCore).all():
-    print(result.__dict__)
+for item in toml_ui.session.query(XUStateSelectItem).all():
+    print(item.__dict__)
