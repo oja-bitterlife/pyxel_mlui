@@ -2,42 +2,35 @@
 [game_title]
 
     [game_title.game_start]
-    type = "select"
     abs_x = 100
     abs_y = 128
     item_h = 16
     use_event = "listener"
 
         [[game_title.game_start.menu_item]]
-        type = "select_item"
         action = "start"
         text = "START"
 
         [[game_title.game_start.menu_item]]
-        type = "select_item"
         action = "continue"
         value = "工事中"
         text = "CONTINUE"
 
     [game_title.game_speed]
-    type = "select"
     abs_x = 48
     abs_y = 200
     item_w = 64
     use_event = "listener"
 
         [[game_title.game_speed.menu_item]]
-        type = "select_item"
         action = "slow"
         text = "SLOW"
 
         [[game_title.game_speed.menu_item]]
-        type = "select_item"
         action = "normal"
         selected = true
         text = "NORMAL"
 
         [[game_title.game_speed.menu_item]]
-        type = "select_item"
         action = "fast"
         text = "FAST"

@@ -2,13 +2,19 @@
 #from samples.FF import bootstrap
 #from samples.FE import bootstrap
 
-from tomlui.core import TOMLUI,XUStateCore,XUStateSelect,XUStateSelectItem
+from tomlui.core import TOMLUI,XUStateCore,XUStatePos,XUSelectBase
 
 toml_ui = TOMLUI()
-print(toml_ui.inspector.get_table_names())
+tables = toml_ui.inspector.get_table_names()
 
-toml_ui.load_toml("samples/DQ/assets/ui/title.toml")
-print(toml_ui)
+for table in tables:
+    columns = toml_ui.inspector.get_columns(table)
+    print(table, [col["name"] for col in columns])
 
-for item in toml_ui.session.query(XUStateSelectItem).all():
-    print(item.__dict__)
+toml_ui.session.add(XUStateCore(tag="test", pos=XUStatePos(x=12, y=34)))
+toml_ui.session.add(XUSelectBase(base=XUStateCore(tag="test", pos=XUStatePos(x=12, y=34))))
+
+#print( toml_ui.session.query(XUStateCore).one().__dict__ )
+print( toml_ui.session.query(XUSelectBase).one().base.pos.__dict__ )
+
+
