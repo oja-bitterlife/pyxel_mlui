@@ -15,9 +15,8 @@ for table in tables:
 toml_ui.session.add(XUStateCore(tag="test", pos=XUStatePos(x=12, y=34)))
 toml_ui.session.add(XUSelectBase(base=XUStateCore(tag="test", pos=XUStatePos(x=56, y=78))))
 
-stmt = select(XUStateCore)
-print( toml_ui.session.execute(stmt).all() )
-stmt = select(XUSelectBase)
-print( toml_ui.session.execute(stmt).all() )
-
-
+# XUStatePosテーブルからデータを取得
+# select() を使ってクエリを作成
+stmt = select(XUStatePos)
+for result in toml_ui.session.scalars(stmt):
+    print(result.__dict__)
