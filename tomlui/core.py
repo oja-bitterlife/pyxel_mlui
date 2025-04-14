@@ -43,6 +43,22 @@ class XUStatePos(ORMBase):
     w = Column(Integer, default=256)  # elementの幅
     h = Column(Integer, default=256)  # elementの高さ
 
+    base = relationship("XUStateCore", back_populates="pos", uselist=False)
+
+class XUSelectBase(ORMBase):
+    __tablename__ = "STATE_SELECT"
+    id = Column(Integer, ForeignKey('STATE_CORE.id'), primary_key=True)  # 1to1で
+
+    selected = Column(Integer)  # 選択アイテムの選択状態
+    item_w = Column(Integer, default=0)  # 選択item配置間隔x
+    item_h = Column(Integer, default=0)  # 選択item配置間隔y
+
+    listen = Column(String)  # eventの検知方法, listener or absorber
+    enable = Column(Boolean, default=True)  # イベント有効フラグ(表示は使う側でどうするか決める)
+
+    base = relationship("XUStateCore", back_populates="select", uselist=False)
+
+
 class XUStateCore(ORMBase):
     __tablename__ = "STATE_CORE"
 
@@ -53,35 +69,13 @@ class XUStateCore(ORMBase):
     update_count = Column(Integer, default=0)  # updateが行われた回数
     removed = Column(Boolean, default=False)  # 内部管理用削除済みフラグ
 
-    pos = relationship(XUStatePos, uselist=False)
-
-class XUStateEvent(ORMBase):
-    __tablename__ = "STATE_EVENT"
-    id = Column(Integer, ForeignKey('STATE_CORE.id'), primary_key=True)  # 1to1で
-
-    use_event = Column(String)  # eventの検知方法, listener or absorber
-    enable = Column(Boolean, default=True)  # イベント有効フラグ(表示は使う側でどうするか決める)
-
-    base = relationship(XUStateCore, uselist=False)
-
-class XUSelectBase(ORMBase):
-    __tablename__ = "STATE_SELECT"
-    id = Column(Integer, ForeignKey('STATE_CORE.id'), primary_key=True)  # 1to1で
-
-    selected = Column(Integer)  # 選択アイテムの選択状態
-    item_w = Column(Integer, default=0)  # 選択item配置間隔x
-    item_h = Column(Integer, default=0)  # 選択item配置間隔y
-
-    base = relationship(XUStateCore, uselist=False)
+    pos = relationship(XUStatePos, uselist=False,  back_populates="base")
+    select = relationship(XUSelectBase, uselist=False,  back_populates="base")
 
 class XUSelectItem(ORMBase):
     __tablename__ = "STATE_SELECT_ITEM"
     id = Column(Integer, ForeignKey('STATE_CORE.id'), primary_key=True)  # 1to1で
-
-    base = relationship(XUStateCore, uselist=False)
     action = Column(String)  # 押された用
-
-
 
 
 class TOMLUI():

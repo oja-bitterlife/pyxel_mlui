@@ -2,6 +2,7 @@
 #from samples.FF import bootstrap
 #from samples.FE import bootstrap
 
+from sqlalchemy import select
 from tomlui.core import TOMLUI,XUStateCore,XUStatePos,XUSelectBase
 
 toml_ui = TOMLUI()
@@ -12,9 +13,11 @@ for table in tables:
     print(table, [col["name"] for col in columns])
 
 toml_ui.session.add(XUStateCore(tag="test", pos=XUStatePos(x=12, y=34)))
-toml_ui.session.add(XUSelectBase(base=XUStateCore(tag="test", pos=XUStatePos(x=12, y=34))))
+toml_ui.session.add(XUSelectBase(base=XUStateCore(tag="test", pos=XUStatePos(x=56, y=78))))
 
-#print( toml_ui.session.query(XUStateCore).one().__dict__ )
-print( toml_ui.session.query(XUSelectBase).one().base.pos.__dict__ )
+stmt = select(XUStateCore)
+print( toml_ui.session.execute(stmt).all() )
+stmt = select(XUSelectBase)
+print( toml_ui.session.execute(stmt).all() )
 
 
